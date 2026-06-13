@@ -1,0 +1,5 @@
+node_modules/
+*.vsix
+coverage/
+.DS_Store
+*.log

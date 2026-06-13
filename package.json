@@ -1,0 +1,69 @@
+{
+  "name": "codex-local-groups",
+  "displayName": "Codex Local Groups",
+  "description": "Local Codex conversation titles, requirement groups, project isolation, and conservative Codex extension patching.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.96.2"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:codexLocalGroups.applyPatches",
+    "onCommand:codexLocalGroups.applyPatchesSilent",
+    "onCommand:codexLocalGroups.openMetadataJson",
+    "onCommand:codexLocalGroups.reloadWindow",
+    "onCommand:codexLocalGroups.resetPendingGroup"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codexLocalGroups.applyPatches",
+        "title": "Apply Patches",
+        "category": "Codex Local Groups"
+      },
+      {
+        "command": "codexLocalGroups.openMetadataJson",
+        "title": "Open Metadata JSON",
+        "category": "Codex Local Groups"
+      },
+      {
+        "command": "codexLocalGroups.reloadWindow",
+        "title": "Reload Window",
+        "category": "Codex Local Groups"
+      },
+      {
+        "command": "codexLocalGroups.resetPendingGroup",
+        "title": "Reset Pending Group",
+        "category": "Codex Local Groups"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Codex Local Groups",
+      "properties": {
+        "codexLocalGroups.nodePath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional Node.js executable used for syntax checks. Empty uses NODE_BIN or the VS Code extension host executable."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node scripts/check-js.js",
+    "lint": "node scripts/lint.js",
+    "test": "node test/run-tests.js",
+    "apply-patches": "node scripts/apply-patches.js",
+    "plan-patches": "node scripts/plan-patches.js",
+    "verify-patched-bundles": "node scripts/verify-patched-bundles.js"
+  },
+  "extensionKind": [
+    "workspace"
+  ]
+}
