@@ -82,7 +82,10 @@ function writeReport(target, report) {
 }
 
 async function showPatchSuccess(report, silent) {
-  if (silent && report.changes.length === 0) {
+  if (silent) {
+    outputChannel.appendLine(report.changes.length === 0
+      ? '静默 patch：补丁已是最新。'
+      : '静默 patch：补丁已应用。');
     return;
   }
   const message = report.changes.length === 0
