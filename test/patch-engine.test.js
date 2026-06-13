@@ -1,15 +1,16 @@
 const assert = require('assert');
+const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { tempDir } = require('./test-utils');
 const { CodexPatchEngine } = require('../src/patchEngine');
 const { resolveNodePath } = require('../scripts/node-path');
 
-const extensionText = 'requestAllThreadList workingDirectoryPath s=xce(codexTitleAliasFor(r)??n) c=codexTitleAliasFor(n.conversationId)??s??e$ r.title=tde(codexTitleAliasFor(i)??s) label:codexTitleAliasFor(i)??s??void 0 r.title=tde(codexTitleAliasFor(i)??l) r.set(String(n.id),(codexTitleAliasFor(n.id)??n.name?.trim())||n.preview) var kce=require("path"),codexTitleAliasesPath="/root/.codex/codex-vscode-conversation-titles.json",codexTitleAliasFs=require("fs");function codexTitleAliasMap(){return{}}function codexTitleAliasFor(e){return null}$t();var xg=1;var nC=class{constructor(e,r){this.#r=e,this.#e=[e.onDidReceiveMessage(n=>{let o=PH(n);o!=null&&this.#a(o.message)}),r(()=>{this.dispose()})]}};';
-const headerText = 'codexRecentTaskCurrentRoot import{f as b}from"./vscode-api-a.js";function Ke(e){return e.kind===`remote`}function codexRecentTaskProjectRows(e,t,n){let r=[],i=new Map;for(let a of e){let o=codexRecentTaskProjectLabel(a),s=i.get(o);s||(s={label:o,items:[]},i.set(o,s),r.push(s)),s.items.push(a)}return r.flatMap((e,r)=>[(0,Q.jsx)(`div`,{className:`px-[var(--padding-row-x)] pt-2 pb-1 text-xs font-medium text-token-input-placeholder-foreground`,children:e.label},`project-${r}-${e.label}`),...e.items.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&t===e.conversation.id,onClose:n},e.key))])}function codexRecentTaskProjectLabel(e){return `No project`}function codexRecentTaskFilter(e,t){return e}function codexRecentConversationFilter(e,t){return e}function codexRecentTaskNormalizePath(e){return e}function codexRecentTaskBasename(e){return e}function codexRecentTaskDateLabel(e){return ``}var qe=';
+const extensionText = 'requestAllThreadList workingDirectoryPath s=xce(codexTitleAliasFor(r)??n) c=codexTitleAliasFor(n.conversationId)??s??e$ r.title=tde(codexTitleAliasFor(i)??s) label:codexTitleAliasFor(i)??s??void 0 r.title=tde(codexTitleAliasFor(i)??l) r.set(String(n.id),(codexTitleAliasFor(n.id)??n.name?.trim())||n.preview) var kce=require("path"),codexTitleAliasesPath="/root/.codex/codex-vscode-conversation-titles.json",codexTitleAliasFs=require("fs");function codexTitleAliasMap(){return{}}function codexTitleAliasFor(e){return null}$t();var xg=1;var nC=class{constructor(e,r){this.#r=e,this.#e=[e.onDidReceiveMessage(n=>{let o=PH(n);o!=null&&this.#a(o.message)}),r(()=>{this.dispose()})]}};var Ll=class{async initializeWebview(e,r,n,o){let s=e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)});this.subscriptions.push(s)}};';
+const headerText = 'codexRecentTaskCurrentRoot import{f as b}from"./vscode-api-a.js";function Ke(e){return e.kind===`remote`}function codexRecentTaskProjectRows(e,t,n){let r=[],i=new Map;for(let a of e){let o=codexRecentTaskProjectLabel(a),s=i.get(o);s||(s={label:o,items:[]},i.set(o,s),r.push(s)),s.items.push(a)}return r.flatMap((e,r)=>[(0,Q.jsx)(`div`,{className:`px-[var(--padding-row-x)] pt-2 pb-1 text-xs font-medium text-token-input-placeholder-foreground`,children:e.label},`project-${r}-${e.label}`),...e.items.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&t===e.conversation.id,onClose:n},e.key))])}function codexRecentTaskProjectLabel(e){return `No project`}function codexRecentTaskFilter(e,t){return e}function codexRecentConversationFilter(e,t){return e}function codexRecentTaskNormalizePath(e){return e}function codexRecentTaskBasename(e){return e}function codexRecentTaskDateLabel(e){return ``}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
 const appMainText = 'P=codexTitleAliasFor(n)?? codexTitleAliasFor(t.conversation.id)?? import{f as gi}from"./vscode-api-a.js";var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}function aE(e){let tt=()=>[{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[]:[{id:`change-connection-color`}]];return tt}';
 const localTitleText = 'var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}var s=1;';
-const headerNeedsBasePatchText = 'import{i as useEnv}from"./use-environment-a.js";import{f as customMessenger}from"./vscode-api-a.js";h=ge(),g;let b=i.filter(y),C=Ve(r.data,i,_),A=[];A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a},e.key));F.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&p===e.conversation.id,onClose:a},e.key));o=r==null?void 0:(0,Q.jsx)(de,{dateString:new Date(r).toISOString()});case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(me,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e};e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.updatedAt).toISOString()});o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r});function Ke(e){return e.kind===`remote`}var qe=';
+const headerNeedsBasePatchText = 'import{i as useEnv}from"./use-environment-a.js";import{f as customMessenger}from"./vscode-api-a.js";h=ge(),g;let b=i.filter(y),C=Ve(r.data,i,_),A=[];A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a},e.key));F.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&p===e.conversation.id,onClose:a},e.key));o=r==null?void 0:(0,Q.jsx)(de,{dateString:new Date(r).toISOString()});case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(me,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e};e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.updatedAt).toISOString()});o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r});function Ke(e){return e.kind===`remote`}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
 
 function createTarget() {
   const dir = tempDir('codex-patch');
@@ -51,19 +52,141 @@ module.exports = {
         const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
-        assert.ok(extension.includes('codexLocalGroupsPatchVersion=4'));
+        assert.ok(extension.includes('codexLocalGroupsPatchVersion=7'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=4'));
+        assert.ok(extension.includes('promptConversationGroup'));
+        assert.ok(extension.includes('showInputBox'));
+        assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(n))return;'));
+        assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
+        assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
+        assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=16'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
+        assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
+        assert.ok(header.includes('codexLocalGroupsLocalTitle'));
+        assert.ok(header.includes('titleOverride:codexLocalGroupsLocalTitle(n)??void 0'));
+        assert.ok(header.includes('e.groups.sort'));
+        assert.ok(header.includes('bg-token-list-hover-background'));
+        assert.ok(header.includes('text-sm font-semibold'));
+        assert.ok(header.includes('inset 3px 0 0 rgba(96,165,250,.85)'));
+        assert.ok(header.includes('#93c5fd'));
+        assert.ok(header.includes('group-body-${r}-${a}-${i.label}`'));
         assert.ok(header.includes('codexLocalGroupsCanUsePendingGroup'));
         assert.ok(header.includes('e.kind!==`local`'));
         assert.ok(header.includes('Date.now()-n<60000'));
         assert.ok(header.includes('startedAtMs'));
-        assert.ok(appMain.includes('codexLocalGroupsWebviewPatchVersion=4'));
+        assert.ok(header.includes('codexLocalGroupsPromptNewGroup'));
+        assert.ok(header.includes('codexLocalGroupsPromptGroup'));
+        assert.ok(header.includes('metadataSaved'));
+        assert.ok(!header.includes('codexLocalGroupsRowActions'));
+        assert.ok(!header.includes('onContextMenu:e=>{e.preventDefault(),e.stopPropagation(),codexLocalGroupsPromptGroup'));
+        assert.ok(header.includes('新建分组并开始会话'));
+        assert.ok(header.includes('+ 在此分组新建会话'));
+        assert.ok(header.includes('设置标题'));
+        assert.ok(header.includes('设置分组'));
+        assert.ok(header.includes('promptConversationTitle'));
+        assert.ok(header.includes('promptConversationGroup'));
+        assert.ok(appMain.includes('codexLocalGroupsWebviewPatchVersion=6'));
         assert.ok(appMain.includes('...O==null||O===`local`?[{id:`codex-local-title`'));
         assert.ok(appMain.includes('id:`codex-local-title`'));
         assert.ok(appMain.includes('id:`codex-local-group`'));
+        const localTitle = fs.readFileSync(target.localTitlePath, 'utf8');
+        assert.ok(localTitle.includes('codexLocalGroupsLocalTitlePatchVersion=6'));
+      },
+    },
+    {
+      name: 'refreshes metadata literals in already patched webview bundles',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const firstPlan = engine.plan(target, { version: 1, conversations: {} });
+        for (const change of firstPlan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+
+        const metadata = {
+          version: 1,
+          updatedAtMs: 200,
+          conversations: {
+            abc: { title: '更新后标题', group: '更新后分组', projectRoot: '/p', updatedAtMs: 200 },
+          },
+        };
+        const plan = engine.plan(target, metadata);
+        assert.deepStrictEqual(plan.errors, []);
+        assert.ok(plan.changes.some((change) => change.path === target.headerPath));
+        assert.ok(plan.changes.some((change) => change.path === target.appMainPath));
+        assert.ok(plan.changes.some((change) => change.path === target.localTitlePath));
+        for (const change of plan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+
+        assert.ok(fs.readFileSync(target.headerPath, 'utf8').includes('更新后标题'));
+        assert.ok(fs.readFileSync(target.appMainPath, 'utf8').includes('更新后标题'));
+        assert.ok(fs.readFileSync(target.localTitlePath, 'utf8').includes('更新后标题'));
+      },
+    },
+    {
+      name: 'routes webview prompt actions to extension host input boxes',
+      async run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        for (const change of plan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
+        const start = extension.indexOf('var kce=require("path"),codexLocalGroupsFs=');
+        const end = extension.indexOf('$t();', start) + '$t();'.length;
+        const script = path.join(target.extensionDir, 'extension-host-helper-smoke.js');
+        fs.writeFileSync(script, extensionHostSmokeScript(extension.slice(start, end)));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      },
+    },
+    {
+      name: 'prefers file metadata when webview localStorage is older',
+      run() {
+        const target = createTarget();
+        const metadata = { version: 1, updatedAtMs: 200, conversations: { abc: { title: '文件标题', group: '文件分组', projectRoot: '/p', updatedAtMs: 200 } } };
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, metadata);
+        for (const change of plan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        const header = fs.readFileSync(target.headerPath, 'utf8');
+        const start = header.indexOf('function Ke(e){return e.kind===`remote`}');
+        const end = header.indexOf('function codexRecentTaskProjectRows', start);
+        const script = path.join(target.extensionDir, 'header-merge-smoke.js');
+        fs.writeFileSync(script, headerMergeSmokeScript(header.slice(start, end)));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      },
+    },
+    {
+      name: 'uses newer conversation metadata per conversation',
+      run() {
+        const target = createTarget();
+        const metadata = {
+          version: 1,
+          updatedAtMs: 200,
+          conversations: {
+            fileNew: { title: '文件新标题', group: '文件新分组', projectRoot: '/p', updatedAtMs: 300 },
+            localNew: { title: '文件旧标题', group: '文件旧分组', projectRoot: '/p', updatedAtMs: 100 },
+          },
+        };
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, metadata);
+        for (const change of plan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        const header = fs.readFileSync(target.headerPath, 'utf8');
+        const start = header.indexOf('function Ke(e){return e.kind===`remote`}');
+        const end = header.indexOf('function codexRecentTaskProjectRows', start);
+        const script = path.join(target.extensionDir, 'header-merge-newer-smoke.js');
+        fs.writeFileSync(script, headerMergeNewerSmokeScript(header.slice(start, end)));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
       },
     },
     {
@@ -145,3 +268,129 @@ module.exports = {
     },
   ],
 };
+
+function extensionHostSmokeScript(helper) {
+  return `
+const assert = require('assert');
+const vm = require('vm');
+
+(async () => {
+  let inputValue = '本地新标题';
+  const files = { '/root/.codex/codex-vscode-conversation-meta.json': '{"version":1,"conversations":{"abc":{"title":"旧标题","group":"旧分组","projectRoot":"/p"}}}' };
+  const posted = [];
+  const commands = [];
+  const fsMock = {
+    readFileSync(file) { if (!Object.prototype.hasOwnProperty.call(files, file)) throw new Error('ENOENT'); return files[file]; },
+    writeFileSync(file, data) { files[file] = String(data); },
+    mkdirSync() {},
+    openSync() { return 1; },
+    fsyncSync() {},
+    closeSync() {},
+    renameSync(from, to) { files[to] = files[from]; delete files[from]; },
+  };
+  const vscodeMock = {
+    window: {
+      showInputBox() { return Promise.resolve(inputValue); },
+      showInformationMessage() { return Promise.resolve(); },
+      showWarningMessage() {},
+    },
+    commands: { executeCommand(command) { commands.push(command); return Promise.resolve(); } },
+  };
+  const context = {
+    require(name) { return name === 'fs' ? fsMock : name === 'vscode' ? vscodeMock : require(name); },
+    console,
+    process: { pid: 123 },
+    setTimeout(callback) { callback(); return 1; },
+    $t() {},
+  };
+  vm.createContext(context);
+  vm.runInContext(${JSON.stringify(helper)}, context);
+  context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationTitle', conversationId: 'abc', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
+  await Promise.resolve();
+  assert.strictEqual(JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']).conversations.abc.title, '本地新标题');
+  assert.strictEqual(posted[0].type, 'codex-local-groups');
+  assert.strictEqual(posted[0].action, 'metadataSaved');
+  assert.strictEqual(posted[0].metadata.conversations.abc.title, '本地新标题');
+  inputValue = '需求B';
+  context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' });
+  await Promise.resolve();
+  assert.strictEqual(JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']).conversations.abc.group, '需求B');
+  inputValue = '需求C';
+  context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptNewGroup', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
+  await Promise.resolve();
+  const metadata = JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']);
+  assert.strictEqual(posted[1].type, 'codex-local-groups');
+  assert.strictEqual(posted[1].action, 'metadataSaved');
+  assert.strictEqual(posted[1].metadata.pendingGroup.projectRoot, '/p');
+  assert.strictEqual(posted[1].metadata.pendingGroup.group, '需求C');
+  assert.strictEqual(posted[1].metadata.pendingGroup.startedAtMs, metadata.pendingGroup.startedAtMs);
+  assert.ok(commands.includes('chatgpt.newChat'));
+})().catch((error) => {
+  console.error(error && error.stack ? error.stack : error);
+  process.exit(1);
+});
+`;
+}
+
+function headerMergeSmokeScript(helper) {
+  return `
+const assert = require('assert');
+const vm = require('vm');
+
+const storage = {
+  'codex-local-groups-meta-v1': JSON.stringify({
+    version: 1,
+    updatedAtMs: 100,
+    conversations: {
+      abc: { title: '本地旧标题', group: '本地旧分组', projectRoot: '/p', updatedAtMs: 100 }
+    }
+  })
+};
+const context = {
+  localStorage: {
+    getItem(key) { return storage[key] || null; },
+    setItem(key, value) { storage[key] = String(value); },
+  },
+  window: { addEventListener() {} },
+  Date,
+};
+vm.createContext(context);
+vm.runInContext(${JSON.stringify(helper)}, context);
+assert.strictEqual(context.codexLocalGroupsReadMeta().conversations.abc.group, '文件分组');
+assert.strictEqual(context.codexLocalGroupsDecoratedItem({ kind: 'local', conversation: { id: 'abc', title: '原始标题' }, key: 'abc' }).conversation.title, '文件标题');
+`;
+}
+
+function headerMergeNewerSmokeScript(helper) {
+  return `
+const assert = require('assert');
+const vm = require('vm');
+
+const storage = {
+  'codex-local-groups-meta-v1': JSON.stringify({
+    version: 1,
+    updatedAtMs: 300,
+    conversations: {
+      fileNew: { title: '本地旧标题', group: '本地旧分组', projectRoot: '/p', updatedAtMs: 100 },
+      localNew: { title: '本地新标题', group: '本地新分组', projectRoot: '/p', updatedAtMs: 300 }
+    }
+  })
+};
+const context = {
+  localStorage: {
+    getItem(key) { return storage[key] || null; },
+    setItem(key, value) { storage[key] = String(value); },
+  },
+  window: { addEventListener() {} },
+  Date,
+};
+vm.createContext(context);
+vm.runInContext(${JSON.stringify(helper)}, context);
+const metadata = context.codexLocalGroupsReadMeta();
+assert.strictEqual(metadata.conversations.fileNew.title, '文件新标题');
+assert.strictEqual(metadata.conversations.fileNew.group, '文件新分组');
+assert.strictEqual(metadata.conversations.localNew.title, '本地新标题');
+assert.strictEqual(metadata.conversations.localNew.group, '本地新分组');
+assert.strictEqual(context.codexLocalGroupsDecoratedItem({ kind: 'local', conversation: { id: 'localNew', title: '原始标题' }, key: 'localNew' }).conversation.title, '本地新标题');
+`;
+}

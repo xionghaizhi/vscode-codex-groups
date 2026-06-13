@@ -48,6 +48,22 @@ module.exports = {
       },
     },
     {
+      name: 'creates metadata and migrates old titles when metadata is missing',
+      run() {
+        const dir = tempDir('codex-meta-missing-migrate');
+        writeJson(path.join(dir, 'titles.json'), { a: ' old title ', b: '' });
+        const store = new ConversationMetadataStore({
+          metadataPath: path.join(dir, 'meta.json'),
+          oldTitlesPath: path.join(dir, 'titles.json'),
+        });
+        const metadata = store.load();
+        assert.deepStrictEqual(metadata.conversations, { a: { title: 'old title' } });
+        assert.deepStrictEqual(metadata.migrations, { oldTitlesImported: true });
+        assert.ok(Number.isFinite(metadata.updatedAtMs));
+        assert.deepStrictEqual(readJson(path.join(dir, 'meta.json')), metadata);
+      },
+    },
+    {
       name: 'does not reimport old titles after title is cleared',
       run() {
         const dir = tempDir('codex-meta-migrate-once');

@@ -9,8 +9,9 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于本地管理 OpenAI Cod
 - 本地会话标题 alias。
 - 按“项目 > 需求分组 > 会话”展示最近会话。
 - 仅显示当前项目相关的本地会话。
-- 本地会话右键设置“本地标题 / 需求分组”。
-- 分组标题右侧 `+` 新建会话，并自动归入该分组。
+- 顶部最近任务列表里，每个本地会话下面有独立的 `设置标题 / 设置分组` 操作，用 VSCode 输入框保存。
+- 项目下 `+ 新建分组并开始会话`，输入分组名后自动打开新会话。
+- 分组标题右侧 `+ 在此分组新建会话`，新会话自动归入该分组。
 - 自动迁移旧标题文件：
   - 旧：`/root/.codex/codex-vscode-conversation-titles.json`
   - 新：`/root/.codex/codex-vscode-conversation-meta.json`
@@ -22,7 +23,7 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于本地管理 OpenAI Cod
 
 ```bash
 cd ~/.vscode-server/extensions
-git clone <内网仓库地址> codex-local-groups-0.0.1
+git clone http://10.168.1.170:9001/open_source_plug_in_library/vscode-codex-local-groups.git codex-local-groups-0.0.1
 ```
 
 如果仓库根目录不是扩展目录，而是包含 `codex-local-groups/` 子目录，请复制该子目录：
@@ -68,16 +69,24 @@ code --install-extension codex-local-groups-0.0.1.vsix
 ### 设置本地标题 / 需求分组
 
 1. 打开 Codex 最近会话列表。
-2. 对本地会话行右键。
-3. 选择：
-   - `设置本地标题`
-   - `设置需求分组`
-4. 输入内容后，列表会刷新并写入 metadata。
+2. 找到本地会话行。
+3. 点击会话下方的 `设置标题` 或 `设置分组`。
+4. 在 VSCode 输入框里输入内容。
+5. 保存后 Reload Window 生效。
+
+这是最直接的分组创建方式：输入一个不存在的分组名，会自动创建该分组并把当前会话放进去。
+
+### 新建分组并开始会话
+
+1. 在最近会话列表找到目标项目。
+2. 点击项目下方的 `+ 新建分组并开始会话`。
+3. 输入新分组名。
+4. Codex 会打开新会话，并在可识别时自动归入该新分组。
 
 ### 在指定分组中新建会话
 
 1. 在最近会话列表找到目标项目和需求分组。
-2. 点击分组标题右侧 `+`。
+2. 点击分组标题右侧 `+ 在此分组新建会话`。
 3. 新会话会打开，并在可识别时自动归入该需求分组。
 
 ### 打开 metadata
@@ -152,6 +161,9 @@ npm run verify-patched-bundles
 
 ---
 
+<details>
+<summary>English README</summary>
+
 # Codex Local Groups (English)
 
 Codex Local Groups is an independent VSCode extension for managing local OpenAI Codex VSCode conversations: local titles, requirement groups, and project isolation. It conservatively patches the installed Codex extension and backs up target files before writing.
@@ -163,8 +175,9 @@ Codex Local Groups is an independent VSCode extension for managing local OpenAI 
 - Local conversation title aliases.
 - “Project > Requirement Group > Conversation” view.
 - Local conversation isolation by current project.
-- Right-click actions for local title and requirement group.
-- `+` button on group headers to start a new conversation in that group.
+- In the top recent-task list, each local conversation has separate `设置标题 / 设置分组` actions below the row, saved through the VSCode input box.
+- `+ New group and start chat` under each project.
+- `+ Start chat in this group` on group headers.
 - Migration from:
   - Old: `/root/.codex/codex-vscode-conversation-titles.json`
   - New: `/root/.codex/codex-vscode-conversation-meta.json`
@@ -176,7 +189,7 @@ Codex Local Groups is an independent VSCode extension for managing local OpenAI 
 
 ```bash
 cd ~/.vscode-server/extensions
-git clone <internal-repo-url> codex-local-groups-0.0.1
+git clone http://10.168.1.170:9001/open_source_plug_in_library/vscode-codex-local-groups.git codex-local-groups-0.0.1
 ```
 
 If the repository root contains a `codex-local-groups/` subdirectory, copy that subdirectory:
@@ -222,16 +235,24 @@ For Remote VSCode Server, install it in the remote window and make sure it runs 
 ### Set local title / requirement group
 
 1. Open the Codex recent conversations list.
-2. Right-click a local conversation row.
-3. Choose:
-   - `设置本地标题` / Set Local Title
-   - `设置需求分组` / Set Requirement Group
-4. Enter the value. The metadata will be saved and the list will refresh.
+2. Find a local conversation row.
+3. Click `设置标题` / Set Title or `设置分组` / Set Group below the row.
+4. Enter the value in the VSCode input box.
+5. Reload Window after saving.
+
+This also creates a group: enter a group name that does not exist, and the current conversation will move into that new group.
+
+### Create a new group and start a chat
+
+1. Find the target project in the recent list.
+2. Click `+ 新建分组并开始会话` / `+ New group and start chat`.
+3. Enter the new group name.
+4. Codex opens a new conversation and assigns it to the new group when identifiable.
 
 ### Start a conversation in a group
 
 1. Find the project and requirement group in the recent list.
-2. Click the `+` button on the group header.
+2. Click `+ 在此分组新建会话` / `+ Start chat in this group` on the group header.
 3. A new conversation opens and will be assigned to the group when identifiable.
 
 ### Open metadata
@@ -303,3 +324,5 @@ npm run verify-patched-bundles
 - Broken after Codex upgrade: run `Apply Patches` again.
 - Patch failed: check the `Codex Local Groups` output channel.
 - Node version is too old: the extension prefers the VSCode Server Node; set `codexLocalGroups.nodePath` if needed.
+
+</details>
