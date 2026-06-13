@@ -44,13 +44,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/codex-local-groups-0.0.1
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.1
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/codex-local-groups-0.0.1
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.1
 ```
 
 然后在 VSCode 中执行：
@@ -61,17 +61,24 @@ cp -r . ~/.vscode-server/extensions/codex-local-groups-0.0.1
 
 ### 方式二：安装 VSIX
 
-可以先打包为 VSIX：
+可以从 GitHub Actions 下载自动打包产物：
+
+1. 打开仓库的 `Actions` 页面。
+2. 选择 `Package VSIX` workflow。
+3. 打开最近一次成功运行，下载 `vscode-codex-groups-vsix` artifact。
+4. 解压后得到 `.vsix` 文件。推送 `v*` 标签时，同一个 VSIX 也会自动上传到 GitHub Release 附件。
+
+也可以本地打包：
 
 ```bash
 cd vscode-codex-groups
 npx @vscode/vsce package
 ```
 
-下载 `.vsix` 后安装：
+下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension codex-local-groups-0.0.1.vsix
+code --install-extension vscode-codex-groups-0.0.1.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -146,7 +153,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/codex-local-groups-0.0.1
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.1
 npm run plan-patches
 npm run apply-patches
 npm run verify-patched-bundles

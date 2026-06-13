@@ -1,5 +1,5 @@
 {
-  "name": "codex-local-groups",
+  "name": "vscode-codex-groups",
   "displayName": "Codex Local Groups",
   "description": "Local Codex conversation titles, requirement groups, project isolation, and conservative Codex extension patching.",
   "version": "0.0.1",

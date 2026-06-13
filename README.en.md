@@ -44,13 +44,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/codex-local-groups-0.0.1
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.1
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/codex-local-groups-0.0.1
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.1
 ```
 
 Then in VSCode:
@@ -61,17 +61,24 @@ Then in VSCode:
 
 ### Option 2: Install a VSIX
 
-Maintainer packaging:
+You can download the packaged VSIX from GitHub Actions:
+
+1. Open the repository `Actions` page.
+2. Select the `Package VSIX` workflow.
+3. Open the latest successful run and download the `vscode-codex-groups-vsix` artifact.
+4. Unzip it to get the `.vsix` file. When a `v*` tag is pushed, the same VSIX is also uploaded to GitHub Release assets.
+
+Maintainers can also package locally:
 
 ```bash
 cd vscode-codex-groups
 npx @vscode/vsce package
 ```
 
-Install the VSIX:
+Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension codex-local-groups-0.0.1.vsix
+code --install-extension vscode-codex-groups-0.0.1.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -146,7 +153,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/codex-local-groups-0.0.1
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.1
 npm run plan-patches
 npm run apply-patches
 npm run verify-patched-bundles
