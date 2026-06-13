@@ -1,0 +1,36 @@
+<svg width="656" height="305" viewBox="0 0 656 305" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Codex Local Groups preview</title>
+  <desc id="desc">A dark VS Code recent tasks panel grouped by project and requirement groups.</desc>
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="656" y2="305" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34383d"/>
+      <stop offset="1" stop-color="#2b2f34"/>
+    </linearGradient>
+  </defs>
+  <rect width="656" height="305" rx="8" fill="url(#panel)"/>
+  <rect x="10" y="11" width="13" height="13" rx="6.5" stroke="#9aa4b2" stroke-width="1.3" opacity="0.75"/>
+  <path d="M20.5 21.5L25 26" stroke="#9aa4b2" stroke-width="1.5" stroke-linecap="round" opacity="0.75"/>
+  <text x="32" y="22" fill="#b8c0cc" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">Search recent tasks</text>
+  <text x="11" y="56" fill="#d7dce4" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700">Project Workspace</text>
+  <rect x="10" y="66" width="622" height="28" rx="7" fill="#30343a" stroke="#454b54"/>
+  <text x="24" y="84" fill="#eef2f7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600">+ New group and start chat</text>
+  <rect x="9" y="104" width="623" height="38" rx="7" fill="#34465d"/>
+  <text x="21" y="128" fill="#a6d3ff" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Finance reconciliation</text>
+  <rect x="501" y="112" width="119" height="22" rx="7" fill="#3a4d65" stroke="#4f647e"/>
+  <text x="511" y="127" fill="#eef2f7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">+ Start chat here</text>
+  <rect x="9" y="143" width="2" height="53" fill="#3d6f9f" opacity="0.8"/>
+  <text x="10" y="164" fill="#eef2f7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Review payment matching flow</text>
+  <text x="601" y="164" fill="#c4cad3" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">19:40</text>
+  <text x="52" y="188" fill="#aab2bd" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">Set title</text>
+  <text x="118" y="188" fill="#aab2bd" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">Set group</text>
+  <rect x="9" y="204" width="623" height="38" rx="7" fill="#34465d"/>
+  <text x="21" y="228" fill="#a6d3ff" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">Group A</text>
+  <rect x="501" y="212" width="119" height="22" rx="7" fill="#3a4d65" stroke="#4f647e"/>
+  <text x="511" y="227" fill="#eef2f7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" font-weight="600">+ Start chat here</text>
+  <rect x="9" y="243" width="2" height="53" fill="#3d6f9f" opacity="0.8"/>
+  <text x="10" y="264" fill="#eef2f7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">Refactor local command handling</text>
+  <text x="601" y="264" fill="#c4cad3" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13">19:37</text>
+  <text x="52" y="288" fill="#aab2bd" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">Set title</text>
+  <text x="118" y="288" fill="#aab2bd" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12">Set group</text>
+  <rect x="644" y="40" width="7" height="146" rx="3.5" fill="#5a6068" opacity="0.75"/>
+</svg>

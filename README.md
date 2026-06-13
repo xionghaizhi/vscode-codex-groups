@@ -5,42 +5,52 @@
 </p>
 
 <p align="center">
-  <img alt="license" src="https://img.shields.io/badge/license-internal-lightgrey">
+  <img alt="license" src="https://img.shields.io/badge/license-project-lightgrey">
   <img alt="release" src="https://img.shields.io/badge/release-v0.0.1-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
 
-Codex Local Groups 是一个独立 VSCode 扩展，用于本地管理 OpenAI Codex VSCode 扩展的会话标题、需求分组和项目隔离。扩展会自动为当前 Codex 扩展打保守补丁，并在补丁前备份目标文件。
+Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode 扩展补充本地会话标题、需求分组和项目隔离能力。扩展会自动发现已安装的 Codex 扩展，保守 patch 目标文件，并在写入前创建备份。
 
-> 当前版本面向内网远程开发环境：`/root/.vscode-server/extensions/openai.chatgpt-*` 和 `/root/.codex/`。
+## 预览
+
+<p align="center">
+  <img src="docs/codex-local-groups-preview.svg" alt="Codex Local Groups grouped recent tasks preview" width="656">
+</p>
 
 ## 功能
 
-- 本地会话标题 alias。
+- 本地会话标题别名。
 - 按“项目 > 需求分组 > 会话”展示最近会话。
 - 仅显示当前项目相关的本地会话。
 - 顶部最近任务列表里，每个本地会话下面有独立的 `设置标题 / 设置分组` 操作，用 VSCode 输入框保存。
 - 项目下 `+ 新建分组并开始会话`，输入分组名后自动打开新会话。
 - 分组标题右侧 `+ 在此分组新建会话`，新会话自动归入该分组。
 - 自动迁移旧标题文件：
-  - 旧：`/root/.codex/codex-vscode-conversation-titles.json`
-  - 新：`/root/.codex/codex-vscode-conversation-meta.json`
+  - 旧：`~/.codex/codex-vscode-conversation-titles.json`
+  - 新：`~/.codex/codex-vscode-conversation-meta.json`
 - Codex 扩展升级后，可一键重新应用补丁。
 
 ## 安装
 
-### 方式一：从内网仓库下载源码
+### 方式一：从源码安装
 
 ```bash
-cd ~/.vscode-server/extensions
-git clone http://10.168.1.170:9001/open_source_plug_in_library/vscode-codex-local-groups.git codex-local-groups-0.0.1
+git clone <repository-url>
+cd vscode-codex-local-groups
 ```
 
-如果仓库根目录不是扩展目录，而是包含 `codex-local-groups/` 子目录，请复制该子目录：
+将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r <仓库目录>/codex-local-groups ~/.vscode-server/extensions/codex-local-groups-0.0.1
+cp -r . ~/.vscode/extensions/codex-local-groups-0.0.1
+```
+
+远程 VSCode Server 场景可复制到远程扩展目录，例如：
+
+```bash
+cp -r . ~/.vscode-server/extensions/codex-local-groups-0.0.1
 ```
 
 然后在 VSCode 中执行：
@@ -51,14 +61,14 @@ cp -r <仓库目录>/codex-local-groups ~/.vscode-server/extensions/codex-local-
 
 ### 方式二：安装 VSIX
 
-维护者可先打包：
+可以先打包为 VSIX：
 
 ```bash
-cd codex-local-groups
+cd vscode-codex-local-groups
 npx @vscode/vsce package
 ```
 
-同事下载 `.vsix` 后安装：
+下载 `.vsix` 后安装：
 
 ```bash
 code --install-extension codex-local-groups-0.0.1.vsix
@@ -83,7 +93,7 @@ code --install-extension codex-local-groups-0.0.1.vsix
 2. 找到本地会话行。
 3. 点击会话下方的 `设置标题` 或 `设置分组`。
 4. 在 VSCode 输入框里输入内容。
-5. 保存后 Reload Window 生效。
+5. 保存后会同步到当前 Codex webview；如当前 webview 仍加载旧补丁，可 Reload Window 一次。
 
 这是最直接的分组创建方式：输入一个不存在的分组名，会自动创建该分组并把当前会话放进去。
 
@@ -108,10 +118,10 @@ code --install-extension codex-local-groups-0.0.1.vsix
 Codex Local Groups: Open Metadata JSON
 ```
 
-metadata 文件路径：
+metadata 文件默认位于 Codex 用户目录：
 
 ```text
-/root/.codex/codex-vscode-conversation-meta.json
+~/.codex/codex-vscode-conversation-meta.json
 ```
 
 ### 重置 pending group
@@ -122,7 +132,7 @@ metadata 文件路径：
 Codex Local Groups: Reset Pending Group
 ```
 
-然后 Reload Window。
+如仍未同步，可执行 Reload Window 重新加载当前 Codex webview。
 
 ## Codex 扩展升级后怎么恢复
 
@@ -145,10 +155,10 @@ npm run verify-patched-bundles
 ## 安全与备份
 
 - patch 前会备份目标文件。
-- 备份目录：
+- 备份目录位于目标 Codex 扩展目录下：
 
 ```text
-/root/.vscode-server/extensions/openai.chatgpt-*/.codex-patches/
+<openai.chatgpt-extension>/.codex-patches/
 ```
 
 - 匹配失败会停止，不会盲目覆盖。
@@ -160,7 +170,7 @@ npm run verify-patched-bundles
 | --- | --- |
 | `Codex Local Groups: Apply Patches` | 手动应用补丁 |
 | `Codex Local Groups: Open Metadata JSON` | 打开 metadata 文件 |
-| `Codex Local Groups: Reload Window` | 重载 VSCode 窗口 |
+| `Codex Local Groups: Reload Window` | 重新加载 VSCode 窗口 |
 | `Codex Local Groups: Reset Pending Group` | 清空待归组状态 |
 
 ## Troubleshooting

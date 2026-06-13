@@ -12,7 +12,7 @@ try {
 
 function main() {
   const target = new CodexExtensionLocator().locate();
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=7');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=8');
   assertContains(target.extensionJsPath, 'showInputBox');
   assertContains(target.extensionJsPath, 'promptConversationTitle');
   assertContains(target.extensionJsPath, 'promptConversationGroup');
@@ -21,7 +21,11 @@ function main() {
   assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(a,e))return;');
   assertContains(target.extensionJsPath, 'metadataSaved');
   assertContains(target.extensionJsPath, 'String.fromCharCode(10)');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=17');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=8');
+  assertContains(target.extensionJsPath, '&&!t)return!1');
+  assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
+  assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=21');
   assertContains(target.headerPath, 'codexLocalGroupsDecoratedItem');
   assertContains(target.headerPath, 'codexLocalGroupsLocalTitle');
   assertContains(target.headerPath, 'titleOverride:codexLocalGroupsLocalTitle(n)??void 0');
@@ -29,6 +33,16 @@ function main() {
   assertContains(target.headerPath, 'bg-token-list-hover-background');
   assertContains(target.headerPath, '#93c5fd');
   assertContains(target.headerPath, 'borderLeftColor:i.label===`未分组`');
+  assertContains(target.headerPath, 'codexLocalGroupsUuidTime');
+  assertContains(target.headerPath, 'codex-local-groups-refresh');
+  assertContains(target.headerPath, 'codexLocalGroupsStoreMeta(r,!0)');
+  assertContains(target.headerPath, 'e.groupMap.has(f.group)');
+  assertContains(target.headerPath, 'Date.now()-n<600000');
+  assertContains(target.headerPath, 'codexLocalGroupsSetBusy');
+  assertContains(target.headerPath, '打开中…');
+  assertContains(target.headerPath, 'max-h-[450px]');
+  assertContains(target.headerPath, 'dispatchHostMessage({type:`navigate-to-route`,path:`/local/');
+  assertContains(target.headerPath, 't.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,`打开中…`),codexLocalGroupsPromptGroup');
   assertNotContains(target.headerPath, 'overflow-hidden rounded-lg');
   assertContains(target.headerPath, 'children:`设置标题`');
   assertContains(target.headerPath, 'children:`设置分组`');

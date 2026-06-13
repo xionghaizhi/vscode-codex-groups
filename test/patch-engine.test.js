@@ -52,7 +52,7 @@ module.exports = {
         const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
-        assert.ok(extension.includes('codexLocalGroupsPatchVersion=7'));
+        assert.ok(extension.includes('codexLocalGroupsPatchVersion=8'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
         assert.ok(extension.includes('promptConversationGroup'));
@@ -61,7 +61,7 @@ module.exports = {
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
         assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=17'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=21'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
         assert.ok(header.includes('codexLocalGroupsLocalTitle'));
@@ -74,7 +74,15 @@ module.exports = {
         assert.ok(!header.includes('overflow-hidden rounded-lg'));
         assert.ok(header.includes('codexLocalGroupsCanUsePendingGroup'));
         assert.ok(header.includes('e.kind!==`local`'));
-        assert.ok(header.includes('Date.now()-n<60000'));
+        assert.ok(header.includes('Date.now()-n<600000'));
+        assert.ok(header.includes('codexLocalGroupsUuidTime'));
+        assert.ok(header.includes('codex-local-groups-refresh'));
+        assert.ok(header.includes('codexLocalGroupsStoreMeta(r,!0)'));
+        assert.ok(header.includes('pendingGroup'));
+        assert.ok(header.includes('codexLocalGroupsSetBusy'));
+        assert.ok(header.includes('打开中…'));
+        assert.ok(header.includes('dispatchHostMessage({type:`navigate-to-route`,path:`/local/'));
+        assert.ok(header.includes('t.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,`打开中…`),codexLocalGroupsPromptGroup'));
         assert.ok(header.includes('startedAtMs'));
         assert.ok(header.includes('codexLocalGroupsPromptNewGroup'));
         assert.ok(header.includes('codexLocalGroupsPromptGroup'));
@@ -312,18 +320,20 @@ const vm = require('vm');
   assert.strictEqual(posted[0].action, 'metadataSaved');
   assert.strictEqual(posted[0].metadata.conversations.abc.title, '本地新标题');
   inputValue = '需求B';
-  context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' });
+  assert.strictEqual(context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }), false);
+  context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
   await Promise.resolve();
   assert.strictEqual(JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']).conversations.abc.group, '需求B');
+  assert.strictEqual(posted[1].metadata.conversations.abc.group, '需求B');
   inputValue = '需求C';
   context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptNewGroup', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
   await Promise.resolve();
   const metadata = JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']);
-  assert.strictEqual(posted[1].type, 'codex-local-groups');
-  assert.strictEqual(posted[1].action, 'metadataSaved');
-  assert.strictEqual(posted[1].metadata.pendingGroup.projectRoot, '/p');
-  assert.strictEqual(posted[1].metadata.pendingGroup.group, '需求C');
-  assert.strictEqual(posted[1].metadata.pendingGroup.startedAtMs, metadata.pendingGroup.startedAtMs);
+  assert.strictEqual(posted[2].type, 'codex-local-groups');
+  assert.strictEqual(posted[2].action, 'metadataSaved');
+  assert.strictEqual(posted[2].metadata.pendingGroup.projectRoot, '/p');
+  assert.strictEqual(posted[2].metadata.pendingGroup.group, '需求C');
+  assert.strictEqual(posted[2].metadata.pendingGroup.startedAtMs, metadata.pendingGroup.startedAtMs);
   assert.ok(commands.includes('chatgpt.newChat'));
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);
@@ -351,13 +361,16 @@ const context = {
     getItem(key) { return storage[key] || null; },
     setItem(key, value) { storage[key] = String(value); },
   },
-  window: { addEventListener() {} },
+  window: { addEventListener() {}, dispatchEvent() {} },
   Date,
 };
 vm.createContext(context);
 vm.runInContext(${JSON.stringify(helper)}, context);
 assert.strictEqual(context.codexLocalGroupsReadMeta().conversations.abc.group, '文件分组');
 assert.strictEqual(context.codexLocalGroupsDecoratedItem({ kind: 'local', conversation: { id: 'abc', title: '原始标题' }, key: 'abc' }).conversation.title, '文件标题');
+Date.now = () => 1781350796000;
+assert.strictEqual(context.codexLocalGroupsItemCreatedAt({ kind: 'local', conversation: { id: '019ec0c8-07f9-7b80-944e-63aa3273a37f' } }), 1781350795257);
+assert.strictEqual(context.codexLocalGroupsCanUsePendingGroup({ kind: 'local', conversation: { id: '019ec0c8-07f9-7b80-944e-63aa3273a37f' } }, { startedAtMs: 1781350789497 }), true);
 `;
 }
 
@@ -381,7 +394,7 @@ const context = {
     getItem(key) { return storage[key] || null; },
     setItem(key, value) { storage[key] = String(value); },
   },
-  window: { addEventListener() {} },
+  window: { addEventListener() {}, dispatchEvent() {} },
   Date,
 };
 vm.createContext(context);

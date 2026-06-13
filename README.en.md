@@ -5,15 +5,19 @@
 </p>
 
 <p align="center">
-  <img alt="license" src="https://img.shields.io/badge/license-internal-lightgrey">
+  <img alt="license" src="https://img.shields.io/badge/license-project-lightgrey">
   <img alt="release" src="https://img.shields.io/badge/release-v0.0.1-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
 
-Codex Local Groups is an independent VSCode extension for managing local OpenAI Codex VSCode conversations: local titles, requirement groups, and project isolation. It conservatively patches the installed Codex extension and backs up target files before writing.
+Codex Local Groups is an independent VSCode extension that adds local conversation titles, requirement groups, and project isolation to the OpenAI Codex VSCode extension. It discovers the installed Codex extension, applies conservative patches, and backs up target files before writing.
 
-> This version targets the internal remote development environment: `/root/.vscode-server/extensions/openai.chatgpt-*` and `/root/.codex/`.
+## Preview
+
+<p align="center">
+  <img src="docs/codex-local-groups-preview.svg" alt="Codex Local Groups grouped recent tasks preview" width="656">
+</p>
 
 ## Features
 
@@ -24,23 +28,29 @@ Codex Local Groups is an independent VSCode extension for managing local OpenAI 
 - `+ New group and start chat` under each project.
 - `+ Start chat in this group` on group headers.
 - Migration from:
-  - Old: `/root/.codex/codex-vscode-conversation-titles.json`
-  - New: `/root/.codex/codex-vscode-conversation-meta.json`
+  - Old: `~/.codex/codex-vscode-conversation-titles.json`
+  - New: `~/.codex/codex-vscode-conversation-meta.json`
 - One-command patch reapply after Codex extension upgrades.
 
 ## Installation
 
-### Option 1: Download from the internal repository
+### Option 1: Install from source
 
 ```bash
-cd ~/.vscode-server/extensions
-git clone http://10.168.1.170:9001/open_source_plug_in_library/vscode-codex-local-groups.git codex-local-groups-0.0.1
+git clone <repository-url>
+cd vscode-codex-local-groups
 ```
 
-If the repository root contains a `codex-local-groups/` subdirectory, copy that subdirectory:
+Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r <repo>/codex-local-groups ~/.vscode-server/extensions/codex-local-groups-0.0.1
+cp -r . ~/.vscode/extensions/codex-local-groups-0.0.1
+```
+
+For Remote VSCode Server, copy it into the remote extensions directory, for example:
+
+```bash
+cp -r . ~/.vscode-server/extensions/codex-local-groups-0.0.1
 ```
 
 Then in VSCode:
@@ -54,7 +64,7 @@ Then in VSCode:
 Maintainer packaging:
 
 ```bash
-cd codex-local-groups
+cd vscode-codex-local-groups
 npx @vscode/vsce package
 ```
 
@@ -83,7 +93,7 @@ For Remote VSCode Server, install it in the remote window and make sure it runs 
 2. Find a local conversation row.
 3. Click `设置标题` / Set Title or `设置分组` / Set Group below the row.
 4. Enter the value in the VSCode input box.
-5. Reload Window after saving.
+5. The current Codex webview is updated after saving. If it is still running an old patch, reload the window once.
 
 This also creates a group: enter a group name that does not exist, and the current conversation will move into that new group.
 
@@ -108,10 +118,10 @@ Run:
 Codex Local Groups: Open Metadata JSON
 ```
 
-Metadata path:
+The metadata file is stored in the Codex user directory by default:
 
 ```text
-/root/.codex/codex-vscode-conversation-meta.json
+~/.codex/codex-vscode-conversation-meta.json
 ```
 
 ### Reset pending group
@@ -122,7 +132,7 @@ If the `+` flow does not assign the new conversation correctly:
 Codex Local Groups: Reset Pending Group
 ```
 
-Then reload the window.
+If the current webview still does not sync, reload the window once.
 
 ## After Codex extension upgrades
 
@@ -145,10 +155,10 @@ npm run verify-patched-bundles
 ## Safety and backups
 
 - Target files are backed up before patching.
-- Backup directory:
+- Backups are written under the target Codex extension directory:
 
 ```text
-/root/.vscode-server/extensions/openai.chatgpt-*/.codex-patches/
+<openai.chatgpt-extension>/.codex-patches/
 ```
 
 - Conservative matching: if anchors do not match, patching stops.
