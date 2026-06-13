@@ -21,14 +21,15 @@ function main() {
   assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(a,e))return;');
   assertContains(target.extensionJsPath, 'metadataSaved');
   assertContains(target.extensionJsPath, 'String.fromCharCode(10)');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=16');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=17');
   assertContains(target.headerPath, 'codexLocalGroupsDecoratedItem');
   assertContains(target.headerPath, 'codexLocalGroupsLocalTitle');
   assertContains(target.headerPath, 'titleOverride:codexLocalGroupsLocalTitle(n)??void 0');
   assertContains(target.headerPath, 'e.groups.sort');
   assertContains(target.headerPath, 'bg-token-list-hover-background');
-  assertContains(target.headerPath, 'inset 3px 0 0 rgba(96,165,250,.85)');
   assertContains(target.headerPath, '#93c5fd');
+  assertContains(target.headerPath, 'borderLeftColor:i.label===`未分组`');
+  assertNotContains(target.headerPath, 'overflow-hidden rounded-lg');
   assertContains(target.headerPath, 'children:`设置标题`');
   assertContains(target.headerPath, 'children:`设置分组`');
   assertContains(target.headerPath, 'promptConversationTitle');
@@ -49,5 +50,11 @@ function main() {
 function assertContains(file, marker) {
   if (!fs.readFileSync(file, 'utf8').includes(marker)) {
     throw new Error(`缺少补丁标记：${file} ${marker}`);
+  }
+}
+
+function assertNotContains(file, marker) {
+  if (fs.readFileSync(file, 'utf8').includes(marker)) {
+    throw new Error(`存在不应出现的补丁标记：${file} ${marker}`);
   }
 }

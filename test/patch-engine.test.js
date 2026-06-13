@@ -61,7 +61,7 @@ module.exports = {
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
         assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=16'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=17'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
         assert.ok(header.includes('codexLocalGroupsLocalTitle'));
@@ -69,9 +69,9 @@ module.exports = {
         assert.ok(header.includes('e.groups.sort'));
         assert.ok(header.includes('bg-token-list-hover-background'));
         assert.ok(header.includes('text-sm font-semibold'));
-        assert.ok(header.includes('inset 3px 0 0 rgba(96,165,250,.85)'));
         assert.ok(header.includes('#93c5fd'));
-        assert.ok(header.includes('group-body-${r}-${a}-${i.label}`'));
+        assert.ok(header.includes('borderLeftColor:i.label===`未分组`'));
+        assert.ok(!header.includes('overflow-hidden rounded-lg'));
         assert.ok(header.includes('codexLocalGroupsCanUsePendingGroup'));
         assert.ok(header.includes('e.kind!==`local`'));
         assert.ok(header.includes('Date.now()-n<60000'));
