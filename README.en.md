@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img alt="license" src="https://img.shields.io/badge/license-project-lightgrey">
+  <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
   <img alt="release" src="https://img.shields.io/badge/release-v0.0.1-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
@@ -16,7 +16,7 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 ## Preview
 
 <p align="center">
-  <img src="docs/codex-local-groups-preview.svg" alt="Codex Local Groups grouped recent tasks preview" width="656">
+  <img src="docs/codex-local-groups-preview.png" alt="Codex Local Groups grouped recent tasks preview" width="656">
 </p>
 
 ## Features
@@ -37,8 +37,8 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 ### Option 1: Install from source
 
 ```bash
-git clone <repository-url>
-cd vscode-codex-local-groups
+git clone https://github.com/xionghaizhi/vscode-codex-groups.git
+cd vscode-codex-groups
 ```
 
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
@@ -64,7 +64,7 @@ Then in VSCode:
 Maintainer packaging:
 
 ```bash
-cd vscode-codex-local-groups
+cd vscode-codex-groups
 npx @vscode/vsce package
 ```
 

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img alt="license" src="https://img.shields.io/badge/license-project-lightgrey">
+  <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
   <img alt="release" src="https://img.shields.io/badge/release-v0.0.1-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
@@ -16,7 +16,7 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 ## 预览
 
 <p align="center">
-  <img src="docs/codex-local-groups-preview.svg" alt="Codex Local Groups grouped recent tasks preview" width="656">
+  <img src="docs/codex-local-groups-preview.png" alt="Codex Local Groups grouped recent tasks preview" width="656">
 </p>
 
 ## 功能
@@ -37,8 +37,8 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 ### 方式一：从源码安装
 
 ```bash
-git clone <repository-url>
-cd vscode-codex-local-groups
+git clone https://github.com/xionghaizhi/vscode-codex-groups.git
+cd vscode-codex-groups
 ```
 
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
@@ -64,7 +64,7 @@ cp -r . ~/.vscode-server/extensions/codex-local-groups-0.0.1
 可以先打包为 VSIX：
 
 ```bash
-cd vscode-codex-local-groups
+cd vscode-codex-groups
 npx @vscode/vsce package
 ```
 

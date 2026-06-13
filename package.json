@@ -4,7 +4,7 @@
   "description": "Local Codex conversation titles, requirement groups, project isolation, and conservative Codex extension patching.",
   "version": "0.0.1",
   "publisher": "local",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.96.2"
   },
@@ -65,5 +65,13 @@
   },
   "extensionKind": [
     "workspace"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xionghaizhi/vscode-codex-groups.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xionghaizhi/vscode-codex-groups/issues"
+  },
+  "homepage": "https://github.com/xionghaizhi/vscode-codex-groups#readme"
 }
