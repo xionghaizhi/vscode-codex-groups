@@ -12,7 +12,7 @@ try {
 
 function main() {
   const target = new CodexExtensionLocator().locate();
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=12');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=13');
   assertContains(target.extensionJsPath, 'showInputBox');
   assertContains(target.extensionJsPath, 'showQuickPick');
   assertContains(target.extensionJsPath, 'codexLocalGroupsExistingGroups');
@@ -24,12 +24,12 @@ function main() {
   assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(a,e))return;');
   assertContains(target.extensionJsPath, 'metadataSaved');
   assertContains(target.extensionJsPath, 'String.fromCharCode(10)');
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=12');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=13');
   assertContains(target.extensionJsPath, '&&!t)return!1');
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
   assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=24');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=26');
   assertContains(target.headerPath, 'codexLocalGroupsDecoratedItem');
   assertContains(target.headerPath, 'codexLocalGroupsLocalTitle');
   assertContains(target.headerPath, 'codexLocalGroupsNormalizeGroupName');
@@ -40,7 +40,7 @@ function main() {
   assertContains(target.headerPath, 'aria-expanded');
   assertContains(target.headerPath, '展开全部');
   assertContains(target.headerPath, '收起到最近 5 条');
-  assertContains(target.headerPath, 'titleOverride:codexLocalGroupsLocalTitle(n)??void 0');
+  assertContains(target.headerPath, 'titleOverride:o?(0,Q.jsx)(Q.Fragment,{children:o}):void 0');
   assertContains(target.headerPath, 'e.groups.sort');
   assertContains(target.headerPath, 'bg-token-list-hover-background');
   assertContains(target.headerPath, '#93c5fd');
@@ -51,6 +51,8 @@ function main() {
   assertContains(target.headerPath, 'e.groupMap.has(f.group)');
   assertContains(target.headerPath, 'Date.now()-n<600000');
   assertContains(target.headerPath, 'codexLocalGroupsSetBusy');
+  assertContains(target.headerPath, 'n.textContent===t&&(n.textContent=r)');
+  assertContains(target.headerPath, 't[20]!==o');
   assertContains(target.headerPath, '打开中…');
   assertContains(target.headerPath, 'max-h-[450px]');
   assertContains(target.headerPath, 'dispatchHostMessage({type:`navigate-to-route`,path:`/local/');

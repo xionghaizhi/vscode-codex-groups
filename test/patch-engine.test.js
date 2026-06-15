@@ -64,7 +64,7 @@ module.exports = {
         const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
-        assert.ok(extension.includes('codexLocalGroupsPatchVersion=12'));
+        assert.ok(extension.includes('codexLocalGroupsPatchVersion=13'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
         assert.ok(extension.includes('codexLocalGroupsReportAutoPatchUnavailable'));
@@ -78,7 +78,7 @@ module.exports = {
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
         assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=24'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=26'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
         assert.ok(header.includes('codexLocalGroupsLocalTitle'));
@@ -92,7 +92,7 @@ module.exports = {
         assert.ok(!header.includes('`aria-expanded`:s'));
         assert.ok(header.includes('展开全部'));
         assert.ok(header.includes('收起到最近 5 条'));
-        assert.ok(header.includes('titleOverride:codexLocalGroupsLocalTitle(n)??void 0'));
+        assert.ok(header.includes('titleOverride:o?(0,Q.jsx)(Q.Fragment,{children:o}):void 0'));
         assert.ok(header.includes('e.groups.sort'));
         assert.ok(header.includes('bg-token-list-hover-background'));
         assert.ok(header.includes('text-sm font-semibold'));
@@ -107,6 +107,8 @@ module.exports = {
         assert.ok(header.includes('codexLocalGroupsStoreMeta(r,!0)'));
         assert.ok(header.includes('pendingGroup'));
         assert.ok(header.includes('codexLocalGroupsSetBusy'));
+        assert.ok(header.includes('n.textContent===t&&(n.textContent=r)'));
+        assert.ok(header.includes('t[20]!==o'));
         assert.ok(header.includes('打开中…'));
         assert.ok(header.includes('dispatchHostMessage({type:`navigate-to-route`,path:`/local/'));
         assert.ok(header.includes('t.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,`打开中…`),codexLocalGroupsPromptGroup'));
@@ -180,6 +182,41 @@ module.exports = {
         assert.strictEqual(groupHeaders.length, 1);
         assert.ok(JSON.stringify(rows).includes('▾ 需求A'));
         assert.ok(!JSON.stringify(rows).includes(' 需求A　'));
+      },
+    },
+    {
+      name: 'restores opening label after React clears event currentTarget',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const start = header.indexOf('function Ke(e){return e.kind===`remote`}');
+        const end = header.indexOf('function codexRecentTaskProjectLabel', start);
+        const script = path.join(target.extensionDir, 'header-busy-smoke.js');
+        fs.writeFileSync(script, headerBusySmokeScript(header.slice(start, end)));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      },
+    },
+    {
+      name: 'refreshes cached local title override without reload',
+      run() {
+        const target = createTarget();
+        const metadata = {
+          version: 1,
+          updatedAtMs: 100,
+          conversations: {
+            abc: { title: '旧标题', group: '需求A', projectRoot: '/p', updatedAtMs: 100 },
+          },
+        };
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, metadata);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const script = path.join(target.extensionDir, 'header-title-refresh-smoke.js');
+        fs.writeFileSync(script, headerTitleRefreshSmokeScript(header));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
       },
     },
     {
@@ -434,7 +471,7 @@ module.exports = {
       },
     },
     {
-      name: 'keeps enhancement active and warns once when silent patch command is unavailable',
+      name: 'keeps enhancement active and does not notify when silent patch command is unavailable',
       run() {
         const target = createTarget();
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
@@ -479,6 +516,8 @@ const vm = require('vm');
   const posted = [];
   const commands = [];
   const inputTitles = [];
+  const infos = [];
+  const warnings = [];
   const fsMock = {
     readFileSync(file) { if (!Object.prototype.hasOwnProperty.call(files, file)) throw new Error('ENOENT'); return files[file]; },
     writeFileSync(file, data) { files[file] = String(data); },
@@ -497,10 +536,16 @@ const vm = require('vm');
         if (quickPickMode === 'clear') return Promise.resolve(items.find((item) => item.action === 'clear'));
         return Promise.resolve(items.find((item) => item.action === 'new'));
       },
-      showInformationMessage() { return Promise.resolve(); },
-      showWarningMessage() {},
+      showInformationMessage(message) { infos.push(message); return Promise.resolve(); },
+      showWarningMessage(message) { warnings.push(message); return Promise.resolve(); },
     },
-    commands: { executeCommand(command) { commands.push(command); return Promise.resolve(); } },
+    commands: {
+      executeCommand(command) {
+        commands.push(command);
+        if (command === 'codexLocalGroups.applyPatchesSilent') return Promise.reject(new Error('missing silent patch'));
+        return Promise.resolve();
+      }
+    },
   };
   const context = {
     require(name) { return name === 'fs' ? fsMock : name === 'vscode' ? vscodeMock : require(name); },
@@ -517,6 +562,10 @@ const vm = require('vm');
   assert.strictEqual(posted[0].type, 'codex-local-groups');
   assert.strictEqual(posted[0].action, 'metadataSaved');
   assert.strictEqual(posted[0].metadata.conversations.abc.title, '本地新标题');
+  await Promise.resolve();
+  assert.ok(infos.includes('Codex Local Groups: 已保存。'));
+  assert.strictEqual(warnings.length, 0);
+  assert.strictEqual(commands.filter((command) => command === 'codexLocalGroups.applyPatchesSilent').length, 0);
   inputValue = '需求B';
   assert.strictEqual(context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }), false);
   context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
@@ -524,6 +573,7 @@ const vm = require('vm');
   await Promise.resolve();
   assert.strictEqual(JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']).conversations.abc.group, '需求B');
   assert.strictEqual(posted[1].metadata.conversations.abc.group, '需求B');
+  assert.strictEqual(commands.filter((command) => command === 'codexLocalGroups.applyPatchesSilent').length, 0);
   assert.ok(quickPickLabels[0].includes('旧分组'));
   assert.strictEqual(quickPickLabels[0].filter((label) => label === '旧分组').length, 1);
   quickPickMode = 'existing';
@@ -578,6 +628,78 @@ console.log(JSON.stringify(rows));
   const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
   assert.strictEqual(result.status, 0, result.stderr);
   return JSON.parse(result.stdout);
+}
+
+function headerBusySmokeScript(helper) {
+  return `
+const assert = require('assert');
+const vm = require('vm');
+
+let scheduled;
+const context = {
+  localStorage: { getItem() { return null; }, setItem() {} },
+  window: { addEventListener() {}, dispatchEvent() {} },
+  Event: function Event(type) { this.type = type; },
+  setTimeout(callback) { scheduled = callback; return 1; },
+};
+vm.createContext(context);
+vm.runInContext(${JSON.stringify(helper)}, context);
+const button = { textContent: '设置标题' };
+const event = { currentTarget: button };
+context.codexLocalGroupsSetBusy(event, '打开中…');
+assert.strictEqual(button.textContent, '打开中…');
+event.currentTarget = null;
+scheduled();
+assert.strictEqual(button.textContent, '设置标题');
+`;
+}
+
+function headerTitleRefreshSmokeScript(header) {
+  const helperStart = header.indexOf('function Ke(e){return e.kind===`remote`}');
+  const helperEnd = header.indexOf('function codexRecentTaskProjectLabel', helperStart);
+  const jeStart = header.indexOf('var qe=Je', helperEnd);
+  const jeEnd = header.indexOf('});', jeStart) + '});'.length;
+  return `
+const assert = require('assert');
+const vm = require('vm');
+
+const storage = {};
+const cache = [];
+function close() {}
+function jsx(type, props, key) { return { type, props, key }; }
+const context = {
+  Q: { jsx, jsxs: jsx },
+  $: { memo(fn) { return fn; } },
+  Z: { c() { return cache; } },
+  J() { return { cancelPendingWorktree() {} }; },
+  pe: 'pe',
+  me: 'me',
+  fe: 'fe',
+  b: { dispatchHostMessage() {} },
+  codexRecentTaskDateLabel() { return '14:30'; },
+  localStorage: {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(storage, key) ? storage[key] : null; },
+    setItem(key, value) { storage[key] = String(value); },
+  },
+  window: { addEventListener() {}, dispatchEvent() {} },
+  Event: function Event(type) { this.type = type; },
+  Date,
+};
+vm.createContext(context);
+vm.runInContext(${JSON.stringify(header.slice(helperStart, helperEnd) + header.slice(jeStart, jeEnd))}, context);
+const item = { kind: 'local', key: 'abc', conversation: { id: 'abc', title: '原始标题', cwd: '/p', updatedAt: 1 } };
+const first = context.Je({ item, isActive: false, onClose: close });
+assert.strictEqual(first.props.titleOverride.props.children, '旧标题');
+context.codexLocalGroupsStoreMeta({
+  version: 1,
+  updatedAtMs: 300,
+  conversations: {
+    abc: { title: '新标题', group: '需求A', projectRoot: '/p', updatedAtMs: 300 }
+  }
+});
+const second = context.Je({ item, isActive: false, onClose: close });
+assert.strictEqual(second.props.titleOverride.props.children, '新标题');
+`;
 }
 
 function headerRowsItems() {
@@ -636,10 +758,7 @@ const vm = require('vm');
   context.codexLocalGroupsHandleWebviewMessage(message);
   await Promise.resolve();
   assert.strictEqual(autoPatchAttempts, 2);
-  assert.strictEqual(warnings.length, 1);
-  assert.ok(warnings[0].includes('自动 patch 暂不可用'));
-  assert.ok(!warnings[0].includes('已自动停用'));
-  assert.ok(warnings[0].includes('不影响 Codex 正常使用'));
+  assert.strictEqual(warnings.length, 0);
   assert.strictEqual(commands.filter((command) => command === 'chatgpt.newChat').length, 2);
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);
