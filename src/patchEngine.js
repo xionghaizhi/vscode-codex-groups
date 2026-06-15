@@ -140,6 +140,8 @@ function patchExtension(text, context) {
   next = patchExtensionMetadataHelper(next, context);
   next = patchExtensionAliasUsages(next, context);
   next = patchExtensionMessageHandler(next, context);
+  next = next.replace(/typeof navigator<"u"&&navigator\?\./g, '!1&&navigator?.');
+  next = next.replace(/typeof navigator<"u"&&navigator\./g, '!1&&navigator.');
   return next;
 }
 

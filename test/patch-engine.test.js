@@ -170,6 +170,19 @@ module.exports = {
       },
     },
     {
+      name: 'removes extension-host navigator checks that break VS Code Node 24',
+      run() {
+        const target = createTarget();
+        fs.appendFileSync(target.extensionJsPath, 'if(typeof navigator<"u"&&navigator?.userAgent?.includes("Cloudflare"))throw new Error("bad");if(typeof navigator<"u"&&navigator.userAgent)throw new Error("bad");');
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const change = plan.changes.find((item) => item.path === target.extensionJsPath);
+        assert.ok(change);
+        assert.ok(!change.nextText.includes('typeof navigator<"u"&&navigator'));
+      },
+    },
+    {
       name: 'refreshes metadata literals in already patched webview bundles',
       run() {
         const target = createTarget();

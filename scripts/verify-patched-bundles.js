@@ -25,6 +25,7 @@ function main() {
   assertContains(target.extensionJsPath, '&&!t)return!1');
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
+  assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
   assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=21');
   assertContains(target.headerPath, 'codexLocalGroupsDecoratedItem');
   assertContains(target.headerPath, 'codexLocalGroupsLocalTitle');
