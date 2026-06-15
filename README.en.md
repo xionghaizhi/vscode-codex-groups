@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.5-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.6-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -27,6 +27,9 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 - In the top recent-task list, each local conversation has separate `设置标题 / 设置分组` actions below the row, saved through the VSCode input box.
 - `+ New group and start chat` under each project.
 - `+ Start chat in this group` on group headers.
+- `Check Status` checks the Codex extension, patch status, metadata, and conversation counts, with Apply / Reload shortcuts.
+- `Search Conversations` uses VSCode QuickPick to search local titles, groups, project paths, or conversation IDs, then opens the selected Codex conversation.
+- `Manage Groups` uses VSCode QuickPick to rename, merge, clear groups, and view conversations in a group.
 - Migration from:
   - Old: `~/.codex/codex-vscode-conversation-titles.json`
   - New: `~/.codex/codex-vscode-conversation-meta.json`
@@ -44,13 +47,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.5
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.6
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.5
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
 ```
 
 Then in VSCode:
@@ -78,7 +81,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.5.vsix
+code --install-extension vscode-codex-groups-0.0.6.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -141,6 +144,43 @@ Codex Local Groups: Reset Pending Group
 
 If the current webview still does not sync, reload the window once.
 
+### Check status
+
+Run:
+
+```text
+Codex Local Groups: Check Status
+```
+
+Status details are written to the `Codex Local Groups` output channel. The message also offers `Apply Patches`, `Reload Window`, and `Show Output` actions.
+
+### Search conversations
+
+Run:
+
+```text
+Codex Local Groups: Search Conversations
+```
+
+Search by local title, group, project path, or conversation ID. Selecting a result opens the local conversation through a Codex deeplink.
+
+### Manage groups
+
+Run:
+
+```text
+Codex Local Groups: Manage Groups
+```
+
+The list shows group name, conversation count, and project path, and it supports searching by group or project path. After selecting a group, you can:
+
+- Rename the group and update all conversations in it; if the new name already exists, the command asks for merge confirmation first, and groups with unknown project paths cannot be merged.
+- Merge it into another group in the same project only, with a second confirmation after choosing the target; groups with unknown project paths cannot be merged.
+- Clear the group and move conversations to Ungrouped, with confirmation; this only removes the group label and does not delete conversations.
+- View conversations in the group and open a selected conversation; view is read-only.
+
+After batch updates, reload the window to sync the Codex recent-conversation UI. If automatic patching fails, the metadata update remains saved; use the `Apply Patches` action to retry, or check Output and handle it manually.
+
 ## After Codex extension upgrades
 
 The Codex extension upgrade may overwrite patched bundles. Run:
@@ -153,7 +193,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.5
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
 npm run plan-patches
 npm run apply-patches
 npm run verify-patched-bundles
@@ -176,9 +216,12 @@ npm run verify-patched-bundles
 | Command | Purpose |
 | --- | --- |
 | `Codex Local Groups: Apply Patches` | Apply patches manually |
+| `Codex Local Groups: Check Status` | Check Codex extension, patch, and metadata status |
+| `Codex Local Groups: Manage Groups` | Rename, merge, clear, and view groups |
 | `Codex Local Groups: Open Metadata JSON` | Open the metadata file |
 | `Codex Local Groups: Reload Window` | Reload the VSCode window |
 | `Codex Local Groups: Reset Pending Group` | Clear pending group state |
+| `Codex Local Groups: Search Conversations` | Search and open local Codex conversations |
 
 ## Troubleshooting
 

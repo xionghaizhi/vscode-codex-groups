@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.5-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.6-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -27,6 +27,9 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 - 顶部最近任务列表里，每个本地会话下面有独立的 `设置标题 / 设置分组` 操作，用 VSCode 输入框保存。
 - 项目下 `+ 新建分组并开始会话`，输入分组名后自动打开新会话。
 - 分组标题右侧 `+ 在此分组新建会话`，新会话自动归入该分组。
+- `Check Status` 检查 Codex 扩展、patch 状态、metadata 和会话数量，并提供 Apply / Reload 快捷操作。
+- `Search Conversations` 用 VSCode QuickPick 搜索本地标题、分组、项目路径或会话 ID，并跳转到选中的 Codex 会话。
+- `Manage Groups` 用 VSCode QuickPick 批量重命名、合并、清空分组，并查看分组下会话。
 - 自动迁移旧标题文件：
   - 旧：`~/.codex/codex-vscode-conversation-titles.json`
   - 新：`~/.codex/codex-vscode-conversation-meta.json`
@@ -44,13 +47,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.5
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.6
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.5
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
 ```
 
 然后在 VSCode 中执行：
@@ -78,7 +81,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.5.vsix
+code --install-extension vscode-codex-groups-0.0.6.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -141,6 +144,43 @@ Codex Local Groups: Reset Pending Group
 
 如仍未同步，可执行 Reload Window 重新加载当前 Codex webview。
 
+### 检查状态
+
+命令面板执行：
+
+```text
+Codex Local Groups: Check Status
+```
+
+状态会写入 `Codex Local Groups` 输出面板，并在弹窗中提供 `Apply Patches`、`Reload Window` 和 `Show Output` 操作。
+
+### 搜索会话
+
+命令面板执行：
+
+```text
+Codex Local Groups: Search Conversations
+```
+
+可按本地标题、分组、项目路径或会话 ID 搜索。选择结果后，会通过 Codex deeplink 打开对应本地会话。
+
+### 管理分组
+
+命令面板执行：
+
+```text
+Codex Local Groups: Manage Groups
+```
+
+列表会显示分组名、会话数和项目路径，并支持按分组名或项目路径搜索。选择一个分组后，可以：
+
+- 重命名分组：批量更新该分组下所有会话；若新名称已存在，会先按合并操作二次确认，项目路径未知时不会合并。
+- 合并到已有分组：只会合并到当前项目内的其他分组，选择目标后需要二次确认；项目路径未知时不会合并。
+- 清空分组，移入未分组：只移除分组标签，不删除会话，并需要二次确认。
+- 查看该分组会话，并打开选中的会话；查看是只读操作。
+
+批量更新后会提示 Reload Window。若自动 patch 失败，metadata 更新仍会保留，可直接点 `Apply Patches` 重试，或查看输出后手动处理。
+
 ## Codex 扩展升级后怎么恢复
 
 OpenAI Codex VSCode 扩展升级后，原 bundle 可能被覆盖。执行：
@@ -153,7 +193,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.5
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
 npm run plan-patches
 npm run apply-patches
 npm run verify-patched-bundles
@@ -176,9 +216,12 @@ npm run verify-patched-bundles
 | 命令 | 用途 |
 | --- | --- |
 | `Codex Local Groups: Apply Patches` | 手动应用补丁 |
+| `Codex Local Groups: Check Status` | 检查 Codex 扩展、patch 和 metadata 状态 |
+| `Codex Local Groups: Manage Groups` | 批量重命名、合并、清空和查看分组 |
 | `Codex Local Groups: Open Metadata JSON` | 打开 metadata 文件 |
 | `Codex Local Groups: Reload Window` | 重新加载 VSCode 窗口 |
 | `Codex Local Groups: Reset Pending Group` | 清空待归组状态 |
+| `Codex Local Groups: Search Conversations` | 搜索并打开本地 Codex 会话 |
 
 ## Troubleshooting
 

@@ -23,5 +23,17 @@ module.exports = {
         assert.ok(commandPalette.some((item) => item.command === 'codexLocalGroups.applyPatchesSilent' && item.when === 'false'));
       },
     },
+    {
+      name: 'contributes status search and manage commands',
+      run() {
+        const commands = new Set(packageJson.contributes.commands.map((item) => item.command));
+        assert.ok(commands.has('codexLocalGroups.checkStatus'));
+        assert.ok(commands.has('codexLocalGroups.searchConversations'));
+        assert.ok(commands.has('codexLocalGroups.manageGroups'));
+        assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.checkStatus'));
+        assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.searchConversations'));
+        assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.manageGroups'));
+      },
+    },
   ],
 };

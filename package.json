@@ -2,7 +2,7 @@
   "name": "vscode-codex-groups",
   "displayName": "Codex Local Groups",
   "description": "Local Codex conversation titles, requirement groups, project isolation, and conservative Codex extension patching.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "local",
   "license": "MIT",
   "engines": {
@@ -15,9 +15,12 @@
     "onStartupFinished",
     "onCommand:codexLocalGroups.applyPatches",
     "onCommand:codexLocalGroups.applyPatchesSilent",
+    "onCommand:codexLocalGroups.checkStatus",
+    "onCommand:codexLocalGroups.manageGroups",
     "onCommand:codexLocalGroups.openMetadataJson",
     "onCommand:codexLocalGroups.reloadWindow",
-    "onCommand:codexLocalGroups.resetPendingGroup"
+    "onCommand:codexLocalGroups.resetPendingGroup",
+    "onCommand:codexLocalGroups.searchConversations"
   ],
   "main": "./src/extension.js",
   "contributes": {
@@ -33,6 +36,16 @@
         "category": "Codex Local Groups"
       },
       {
+        "command": "codexLocalGroups.checkStatus",
+        "title": "Check Status",
+        "category": "Codex Local Groups"
+      },
+      {
+        "command": "codexLocalGroups.manageGroups",
+        "title": "Manage Groups",
+        "category": "Codex Local Groups"
+      },
+      {
         "command": "codexLocalGroups.openMetadataJson",
         "title": "Open Metadata JSON",
         "category": "Codex Local Groups"
@@ -45,6 +58,11 @@
       {
         "command": "codexLocalGroups.resetPendingGroup",
         "title": "Reset Pending Group",
+        "category": "Codex Local Groups"
+      },
+      {
+        "command": "codexLocalGroups.searchConversations",
+        "title": "Search Conversations",
         "category": "Codex Local Groups"
       }
     ],
