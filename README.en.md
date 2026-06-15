@@ -211,17 +211,19 @@ npm run verify-patched-bundles
 - Conservative matching: if anchors do not match, patching stops.
 - Syntax checks and idempotence checks run after patching.
 
-## Commands
+## Command palette features
 
-| Command | Purpose |
-| --- | --- |
-| `Codex Local Groups: Apply Patches` | Apply patches manually |
-| `Codex Local Groups: Check Status` | Check Codex extension, patch, and metadata status |
-| `Codex Local Groups: Manage Groups` | Rename, merge, clear, and view groups |
-| `Codex Local Groups: Open Metadata JSON` | Open the metadata file |
-| `Codex Local Groups: Reload Window` | Reload the VSCode window |
-| `Codex Local Groups: Reset Pending Group` | Clear pending group state |
-| `Codex Local Groups: Search Conversations` | Search and open local Codex conversations |
+Type `Codex Local Groups` in the VSCode command palette to see the extension commands:
+
+| Command | When to use it | What it does |
+| --- | --- | --- |
+| `Codex Local Groups: Manage Groups` | When groups are duplicated, too many, or need batch cleanup | Opens the group management center. You can search by group or project path, see conversation counts, rename groups, merge groups, clear groups, or view conversations in a group. Merge and clear actions require confirmation and only update local metadata; conversations are not deleted. |
+| `Codex Local Groups: Check Status` | When you are not sure whether the extension is active, or after a Codex upgrade | Checks the OpenAI Codex extension location, version, patch status, metadata path, total conversations, grouped count, and ungrouped count. Results are written to the `Codex Local Groups` output channel, with Apply / Reload / Show Output shortcuts. |
+| `Codex Local Groups: Apply Patches` | When the grouped UI disappears after a Codex upgrade, or when a command asks you to reapply patches | Manually patches the OpenAI Codex extension bundles with this extension's enhancements. Target files are backed up first; unsupported bundle anchors stop the patch instead of overwriting blindly. Reload Window is usually needed afterward. |
+| `Codex Local Groups: Open Metadata JSON` | When you need to inspect or manually troubleshoot local titles and group data | Opens `~/.codex/codex-vscode-conversation-meta.json`, which stores local titles, groups, project paths, and pending group state. Back it up before manual edits. |
+| `Codex Local Groups: Reload Window` | After patching, installing a new version, or when the current Codex webview still shows old UI | Runs VSCode `workbench.action.reloadWindow` so the extension host and Codex webview load the latest patches. |
+| `Codex Local Groups: Reset Pending Group` | When `+ New group and start chat` does not assign the new conversation correctly, or pending state is stuck | Clears the `pendingGroup` state, applies patches silently, and prompts Reload Window. It does not delete existing conversations or groups. |
+| `Codex Local Groups: Search Conversations` | When you need to quickly find a local Codex conversation | Uses QuickPick to search local titles, groups, project paths, or conversation IDs. Selecting an item opens the local conversation through a Codex deeplink. |
 
 ## Troubleshooting
 

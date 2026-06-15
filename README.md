@@ -211,17 +211,19 @@ npm run verify-patched-bundles
 - 匹配失败会停止，不会盲目覆盖。
 - patch 后会执行语法检查和幂等检查。
 
-## 常用命令
+## 命令面板功能
 
-| 命令 | 用途 |
-| --- | --- |
-| `Codex Local Groups: Apply Patches` | 手动应用补丁 |
-| `Codex Local Groups: Check Status` | 检查 Codex 扩展、patch 和 metadata 状态 |
-| `Codex Local Groups: Manage Groups` | 批量重命名、合并、清空和查看分组 |
-| `Codex Local Groups: Open Metadata JSON` | 打开 metadata 文件 |
-| `Codex Local Groups: Reload Window` | 重新加载 VSCode 窗口 |
-| `Codex Local Groups: Reset Pending Group` | 清空待归组状态 |
-| `Codex Local Groups: Search Conversations` | 搜索并打开本地 Codex 会话 |
+在 VSCode 命令面板输入 `Codex Local Groups` 可以看到本扩展提供的命令：
+
+| 命令 | 适合什么时候用 | 功能说明 |
+| --- | --- | --- |
+| `Codex Local Groups: Manage Groups` | 分组重复、分组过多、需要批量整理时 | 打开分组管理中心。支持按分组名或项目路径搜索，查看每个分组的会话数量，并可重命名、合并、清空分组或查看分组下会话。合并和清空会二次确认，只修改本地 metadata，不删除会话。 |
+| `Codex Local Groups: Check Status` | 不确定插件是否生效、Codex 升级后想检查状态时 | 检查 OpenAI Codex 扩展位置、版本、patch 状态、metadata 路径、会话数量、已分组 / 未分组数量。结果会写入 `Codex Local Groups` 输出面板，并提供 Apply / Reload / Show Output 快捷操作。 |
+| `Codex Local Groups: Apply Patches` | Codex 升级后分组 UI 消失、命令提示需要重新应用补丁时 | 手动把本扩展的增强逻辑重新 patch 到 OpenAI Codex 扩展 bundle。执行前会备份目标文件，匹配失败会停止，不会盲目覆盖。执行后通常需要 Reload Window。 |
+| `Codex Local Groups: Open Metadata JSON` | 想查看或人工排查本地标题、分组数据时 | 打开 `~/.codex/codex-vscode-conversation-meta.json`。里面保存本地会话标题、分组、项目路径和 pending group 状态。手动编辑前建议先备份。 |
+| `Codex Local Groups: Reload Window` | patch 后、安装新版本后，或当前 Codex webview 仍显示旧 UI 时 | 触发 VSCode `workbench.action.reloadWindow`，让 extension host 和 Codex webview 重新加载最新补丁。 |
+| `Codex Local Groups: Reset Pending Group` | 点击“新建分组并开始会话”后，新会话没有正确归组或 pending 状态卡住时 | 清空待归组状态 `pendingGroup`，再静默应用 patch，并提示 Reload Window。不会删除已有会话或已有分组。 |
+| `Codex Local Groups: Search Conversations` | 想快速找到某个本地 Codex 会话时 | 用 QuickPick 搜索本地标题、分组、项目路径或会话 ID。选择结果后通过 Codex deeplink 打开对应本地会话。 |
 
 ## Troubleshooting
 
