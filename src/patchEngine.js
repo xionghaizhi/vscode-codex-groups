@@ -26,6 +26,9 @@ class CodexPatchEngine {
     if (plan.errors.length) {
       return { ...plan, changed: [], syntax: [], idempotent: false };
     }
+    if (plan.changes.length === 0) {
+      return { ...plan, backups: [], syntax: [], idempotent: true, restored: false };
+    }
     const backups = plan.changes.map((change) => backupFile(change.path));
     try {
       for (const change of plan.changes) {
@@ -110,7 +113,7 @@ function backupDir(file) {
 function checkScript(nodePath, file) {
   assertNodeExists(nodePath);
   const result = childProcess.spawnSync(nodePath, ['--check', file], { encoding: 'utf8' });
-  if (result.error) {
+  if (result.error && result.status == null) {
     throw new Error(`语法检查启动失败：${result.error.message}`);
   }
   if (result.status !== 0) {
@@ -123,7 +126,7 @@ function checkModule(nodePath, file) {
   assertNodeExists(nodePath);
   const input = fs.readFileSync(file);
   const result = childProcess.spawnSync(nodePath, ['--input-type=module', '--check'], { input, encoding: 'utf8' });
-  if (result.error) {
+  if (result.error && result.status == null) {
     throw new Error(`语法检查启动失败：${result.error.message}`);
   }
   if (result.status !== 0) {
@@ -188,15 +191,20 @@ function patchExtensionMessageHandler(text, context) {
 }
 
 function patchExtensionProjectHistory(text, context) {
-  if (text.includes('requestAllThreadList') && text.includes('workingDirectoryPath')) {
-    return text;
-  }
   let next = text;
-  next = replaceOnce(next, extensionProviderOld(), extensionProviderNew(text), context, 'extension project history filter');
-  next = replaceOnce(next, 'async provideChatSessionItems(e,r){return(await this.requestThreadList(e)).data.map(o=>{let i=this.toThreadListSummary(o);return{summary:i,item:this.toChatSessionItem(i)}})}', 'async provideChatSessionItems(e,r){return(await this.requestAllThreadList(e)).data.map(o=>{let i=this.toThreadListSummary(o);return{summary:i,item:this.toChatSessionItem(i)}})}', context, 'extension load all history');
-  next = replaceOnce(next, extensionItemOld(), extensionItemNew(text), context, 'extension chat item cwd metadata');
-  next = replaceOnce(next, 'toThreadListSummary(e){let r=Number(e.createdAt)*1e3,n=Number.isFinite(r)?r:null;return{conversationId:e.id,preview:e.name?.trim()||e.preview,createdAtMs:n,modelProvider:e.modelProvider}}', 'toThreadListSummary(e){let r=Number(e.createdAt)*1e3,n=Number.isFinite(r)?r:null;return{conversationId:e.id,preview:e.name?.trim()||e.preview,createdAtMs:n,modelProvider:e.modelProvider,cwd:e.cwd}}', context, 'extension thread cwd summary');
-  return replaceOnce(next, extensionThreadListOld(), extensionThreadListNew(), context, 'extension paged thread list');
+  if (!next.includes('workspace.workspaceFolders?.map')) {
+    next = replaceOnce(next, extensionProviderOld(), extensionProviderNew(text), context, 'extension project history filter');
+  }
+  if (!next.includes('requestAllThreadList(e)')) {
+    next = replaceOnce(next, 'async provideChatSessionItems(e,r){return(await this.requestThreadList(e)).data.map(o=>{let i=this.toThreadListSummary(o);return{summary:i,item:this.toChatSessionItem(i)}})}', 'async provideChatSessionItems(e,r){return(await this.requestAllThreadList(e)).data.map(o=>{let i=this.toThreadListSummary(o);return{summary:i,item:this.toChatSessionItem(i)}})}', context, 'extension load all history');
+  }
+  if (!next.includes('metadata:c?{workingDirectoryPath:c}')) {
+    next = replaceOnce(next, extensionItemOld(), extensionItemNew(text), context, 'extension chat item cwd metadata');
+  }
+  if (!next.includes('modelProvider:e.modelProvider,cwd:e.cwd')) {
+    next = replaceOnce(next, 'toThreadListSummary(e){let r=Number(e.createdAt)*1e3,n=Number.isFinite(r)?r:null;return{conversationId:e.id,preview:e.name?.trim()||e.preview,createdAtMs:n,modelProvider:e.modelProvider}}', 'toThreadListSummary(e){let r=Number(e.createdAt)*1e3,n=Number.isFinite(r)?r:null;return{conversationId:e.id,preview:e.name?.trim()||e.preview,createdAtMs:n,modelProvider:e.modelProvider,cwd:e.cwd}}', context, 'extension thread cwd summary');
+  }
+  return patchExtensionThreadList(next, text, context);
 }
 
 function extensionProviderOld() {
@@ -221,7 +229,24 @@ function extensionThreadListOld() {
   return 'requestThreadList(e){let r=String(this.nextRequestId++),n=new Promise((o,i)=>{this.requestToCallback.set(r,s=>{if(s.error){i(new Error(s.error.message));return}if(s.result==null){i(new Error("No result in response"));return}o(s.result)})});return this.codexAppServer.sendRequest(wce,r,"thread/list",{limit:50,cursor:null,sortKey:"created_at",modelProviders:e?[IS]:null,archived:!1,sourceKinds:jf}),n}';
 }
 
-function extensionThreadListNew() {
+function patchExtensionThreadList(text, originalText, context) {
+  if (text.includes('c.cwds=s')) {
+    return text;
+  }
+  const next = extensionThreadListNew(originalText);
+  const old = extensionThreadListOld();
+  if (text.includes(old)) {
+    return replaceOnce(text, old, next, context, 'extension paged thread list');
+  }
+  return replaceOnce(text, extensionThreadListWithoutCwds(), next, context, 'extension cwd-filtered thread list');
+}
+
+function extensionThreadListNew(text) {
+  const vscodeName = symbolBefore(text, 'onDidChangeChatSessionItemsEmitter=new ', '.EventEmitter;') || 'wl';
+  return `async requestAllThreadList(e){let r=[],n=null;do{let o=await this.requestThreadList(e,n);r.push(...o.data),n=o.nextCursor??null}while(n);return{data:r}}requestThreadList(e,r){let n=String(this.nextRequestId++),o=new Promise((i,s)=>{this.requestToCallback.set(n,a=>{if(a.error){s(new Error(a.error.message));return}if(a.result==null){s(new Error("No result in response"));return}i(a.result)})}),s=${vscodeName}.workspace.workspaceFolders?.map(a=>a.uri.fsPath).filter(Boolean)??[],c={limit:200,cursor:r,sortKey:"created_at",modelProviders:e?[IS]:null,archived:!1,sourceKinds:jf};s.length>0&&(c.cwds=s);return this.codexAppServer.sendRequest(wce,n,"thread/list",c),o}`;
+}
+
+function extensionThreadListWithoutCwds() {
   return 'async requestAllThreadList(e){let r=[],n=null;do{let o=await this.requestThreadList(e,n);r.push(...o.data),n=o.nextCursor??null}while(n);return{data:r}}requestThreadList(e,r){let n=String(this.nextRequestId++),o=new Promise((i,s)=>{this.requestToCallback.set(n,a=>{if(a.error){s(new Error(a.error.message));return}if(a.result==null){s(new Error("No result in response"));return}i(a.result)})});return this.codexAppServer.sendRequest(wce,n,"thread/list",{limit:200,cursor:r,sortKey:"created_at",modelProviders:e?[IS]:null,archived:!1,sourceKinds:jf}),o}';
 }
 
@@ -368,14 +393,23 @@ function patchAppMainMetadataLiteral(text, context) {
 }
 
 function patchAppMainHelper(text, context) {
-  if (text.includes('codexLocalGroupsWebviewPatchVersion=6')) {
-    return text;
+  let next = text;
+  if (next.includes('codexLocalGroupsWebviewPatchVersion=6')) {
+    return removeLegacyAppMainAliasHelper(next, context);
   }
   const messenger = findVscodeMessengerAlias(text) || 'gi';
   if (text.includes('var codexLocalGroupsInitialMeta=')) {
-    return replaceBlock(text, 'var codexLocalGroupsInitialMeta=', 'function aE(e){', `${webviewHelper(context.metadata, messenger)}function aE(e){`, context, 'app-main metadata helper upgrade');
+    next = replaceBlock(text, 'var codexLocalGroupsInitialMeta=', 'function aE(e){', `${webviewHelper(context.metadata, messenger)}function aE(e){`, context, 'app-main metadata helper upgrade');
+    return removeLegacyAppMainAliasHelper(next, context);
   }
   return replaceBlock(text, 'var codexTitleAliasMap=', 'function aE(e){', `${webviewHelper(context.metadata, messenger)}function aE(e){`, context, 'app-main metadata helper');
+}
+
+function removeLegacyAppMainAliasHelper(text, context) {
+  if (!text.includes('codexLocalGroupsWebviewPatchVersion=6') || !text.includes('var codexTitleAliasMap=')) {
+    return text;
+  }
+  return replaceBlock(text, 'var codexTitleAliasMap=', 'function aE(e){', 'function aE(e){', context, 'legacy app-main alias helper cleanup');
 }
 
 function patchAppMainAliasUsage(text, context) {
@@ -394,9 +428,13 @@ function patchAppMainAliasUsage(text, context) {
 function patchAppMainContextMenu(text, context) {
   const oldText = '{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[]:';
   const oldItems = '{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},{id:`codex-local-title`,message:`设置本地标题`,onSelect:()=>{codexLocalGroupsPromptTitle(n,P,we??``)}},{id:`codex-local-group`,message:`设置需求分组`,onSelect:()=>{codexLocalGroupsPromptGroup(n,we??``)}},...O==null||O===`local`?[]:';
-  const items = '{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[{id:`codex-local-title`,message:`设置本地标题`,onSelect:()=>{codexLocalGroupsPromptTitle(n,P,we??``)}},{id:`codex-local-group`,message:`设置需求分组`,onSelect:()=>{codexLocalGroupsPromptGroup(n,we??``)}}]:[],...O==null||O===`local`?[]:';
+  const previousItems = '{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[{id:`codex-local-title`,message:`设置本地标题`,onSelect:()=>{codexLocalGroupsPromptTitle(n,P,we??``)}},{id:`codex-local-group`,message:`设置需求分组`,onSelect:()=>{codexLocalGroupsPromptGroup(n,we??``)}}]:[],...O==null||O===`local`?[]:';
+  const items = '{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...(O==null||O===`local`?[{id:`codex-local-title`,message:`设置本地标题`,onSelect:()=>{codexLocalGroupsPromptTitle(n,P,we??``)}},{id:`codex-local-group`,message:`设置需求分组`,onSelect:()=>{codexLocalGroupsPromptGroup(n,we??``)}}]:[]),...O==null||O===`local`?[]:';
   if (text.includes(items)) {
     return text;
+  }
+  if (text.includes(previousItems)) {
+    return replaceOnce(text, previousItems, items, context, 'app-main local groups context menu syntax cleanup');
   }
   if (text.includes(oldItems)) {
     return replaceOnce(text, oldItems, items, context, 'app-main local groups context menu upgrade');

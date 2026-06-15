@@ -6,7 +6,19 @@ const { tempDir } = require('./test-utils');
 const { CodexPatchEngine } = require('../src/patchEngine');
 const { resolveNodePath } = require('../scripts/node-path');
 
-const extensionText = 'requestAllThreadList workingDirectoryPath s=xce(codexTitleAliasFor(r)??n) c=codexTitleAliasFor(n.conversationId)??s??e$ r.title=tde(codexTitleAliasFor(i)??s) label:codexTitleAliasFor(i)??s??void 0 r.title=tde(codexTitleAliasFor(i)??l) r.set(String(n.id),(codexTitleAliasFor(n.id)??n.name?.trim())||n.preview) var kce=require("path"),codexTitleAliasesPath="/root/.codex/codex-vscode-conversation-titles.json",codexTitleAliasFs=require("fs");function codexTitleAliasMap(){return{}}function codexTitleAliasFor(e){return null}$t();var xg=1;var nC=class{constructor(e,r){this.#r=e,this.#e=[e.onDidReceiveMessage(n=>{let o=PH(n);o!=null&&this.#a(o.message)}),r(()=>{this.dispose()})]}};var Ll=class{async initializeWebview(e,r,n,o){let s=e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)});this.subscriptions.push(s)}};';
+const extensionText = [
+  'var wl={workspace:{workspaceFolders:[]},EventEmitter:function(){}};',
+  'var IS=1,jf=[],wce=`provider`,e$=`Untitled`;class X{onDidChangeChatSessionItemsEmitter=new wl.EventEmitter;}',
+  'async provideChatSessionItems(e){let r=this.modelProxyManager.isUserUsingCopilotInference();function n(c){return r?c===IS:c!==IS}let o=await this.conversationLoader.provideChatSessionItems(r,e),i=[];for(let{item:c,summary:l}of o)this.pendingConversations.delete(c.id),this.modelProviderByConversationId.set(c.id,l.modelProvider),n(l.modelProvider)&&i.push(c);let s=i.map(c=>this.applyLifecycleToChatSessionItem(c));return Array.from(this.pendingConversations.values()).filter(c=>n(c.modelProvider)).map(c=>this.applyLifecycleToChatSessionItem(c.item)).concat(s)}',
+  'async provideChatSessionItems(e,r){return(await this.requestThreadList(e)).data.map(o=>{let i=this.toThreadListSummary(o);return{summary:i,item:this.toChatSessionItem(i)}})}',
+  'toChatSessionItem(e){let{conversationId:r,preview:n,createdAtMs:o}=e,i=bce(r),s=xce(n),a=o!=null?{startTime:o}:void 0;return{id:String(r),resource:i,label:s,timing:a}}',
+  'toThreadListSummary(e){let r=Number(e.createdAt)*1e3,n=Number.isFinite(r)?r:null;return{conversationId:e.id,preview:e.name?.trim()||e.preview,createdAtMs:n,modelProvider:e.modelProvider}}',
+  'requestThreadList(e){let r=String(this.nextRequestId++),n=new Promise((o,i)=>{this.requestToCallback.set(r,s=>{if(s.error){i(new Error(s.error.message));return}if(s.result==null){i(new Error("No result in response"));return}o(s.result)})});return this.codexAppServer.sendRequest(wce,r,"thread/list",{limit:50,cursor:null,sortKey:"created_at",modelProviders:e?[IS]:null,archived:!1,sourceKinds:jf}),n}',
+  's=xce(codexTitleAliasFor(r)??n) c=codexTitleAliasFor(n.conversationId)??s??e$ r.title=tde(codexTitleAliasFor(i)??s) label:codexTitleAliasFor(i)??s??void 0 r.title=tde(codexTitleAliasFor(i)??l) r.set(String(n.id),(codexTitleAliasFor(n.id)??n.name?.trim())||n.preview)',
+  'var kce=require("path"),codexTitleAliasesPath="/root/.codex/codex-vscode-conversation-titles.json",codexTitleAliasFs=require("fs");function codexTitleAliasMap(){return{}}function codexTitleAliasFor(e){return null}$t();var xg=1;',
+  'var nC=class{constructor(e,r){this.#r=e,this.#e=[e.onDidReceiveMessage(n=>{let o=PH(n);o!=null&&this.#a(o.message)}),r(()=>{this.dispose()})]}};',
+  'var Ll=class{async initializeWebview(e,r,n,o){let s=e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)});this.subscriptions.push(s)}};',
+].join('');
 const headerText = 'codexRecentTaskCurrentRoot import{f as b}from"./vscode-api-a.js";function Ke(e){return e.kind===`remote`}function codexRecentTaskProjectRows(e,t,n){let r=[],i=new Map;for(let a of e){let o=codexRecentTaskProjectLabel(a),s=i.get(o);s||(s={label:o,items:[]},i.set(o,s),r.push(s)),s.items.push(a)}return r.flatMap((e,r)=>[(0,Q.jsx)(`div`,{className:`px-[var(--padding-row-x)] pt-2 pb-1 text-xs font-medium text-token-input-placeholder-foreground`,children:e.label},`project-${r}-${e.label}`),...e.items.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&t===e.conversation.id,onClose:n},e.key))])}function codexRecentTaskProjectLabel(e){return `No project`}function codexRecentTaskFilter(e,t){return e}function codexRecentConversationFilter(e,t){return e}function codexRecentTaskNormalizePath(e){return e}function codexRecentTaskBasename(e){return e}function codexRecentTaskDateLabel(e){return ``}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
 const appMainText = 'P=codexTitleAliasFor(n)?? codexTitleAliasFor(t.conversation.id)?? import{f as gi}from"./vscode-api-a.js";var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}function aE(e){let tt=()=>[{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[]:[{id:`change-connection-color`}]];return tt}';
 const localTitleText = 'var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}var s=1;';
@@ -55,6 +67,7 @@ module.exports = {
         assert.ok(extension.includes('codexLocalGroupsPatchVersion=8'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
+        assert.ok(extension.includes('c.cwds=s'));
         assert.ok(extension.includes('promptConversationGroup'));
         assert.ok(extension.includes('showInputBox'));
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(n))return;'));
@@ -96,11 +109,63 @@ module.exports = {
         assert.ok(header.includes('promptConversationTitle'));
         assert.ok(header.includes('promptConversationGroup'));
         assert.ok(appMain.includes('codexLocalGroupsWebviewPatchVersion=6'));
-        assert.ok(appMain.includes('...O==null||O===`local`?[{id:`codex-local-title`'));
+        assert.ok(appMain.includes('...(O==null||O===`local`?[{id:`codex-local-title`'));
+        assert.ok(!appMain.includes('...O==null||O===`local`?[{id:`codex-local-title`'));
         assert.ok(appMain.includes('id:`codex-local-title`'));
         assert.ok(appMain.includes('id:`codex-local-group`'));
         const localTitle = fs.readFileSync(target.localTitlePath, 'utf8');
         assert.ok(localTitle.includes('codexLocalGroupsLocalTitlePatchVersion=6'));
+      },
+    },
+    {
+      name: 'removes legacy app-main title alias helper after webview helper upgrade',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const firstPlan = engine.plan(target, { version: 1, conversations: {} });
+        for (const change of firstPlan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        const patched = fs.readFileSync(target.appMainPath, 'utf8');
+        const broken = patched.replace(
+          'function aE(e){',
+          'var codexTitleAliasMap={};function codexTitleAliasFor(e){return null}function aE(e){',
+        );
+        fs.writeFileSync(target.appMainPath, broken);
+
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const change = plan.changes.find((item) => item.path === target.appMainPath);
+        assert.ok(change);
+        assert.strictEqual((change.nextText.match(/function codexTitleAliasFor/g) || []).length, 1);
+        assert.ok(!change.nextText.includes('var codexTitleAliasMap={}'));
+      },
+    },
+    {
+      name: 'upgrades existing paged thread list with cwd filters',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.extensionJsPath, extensionText.replace(
+          'requestAllThreadList workingDirectoryPath',
+          'requestAllThreadList',
+        ));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const firstPlan = engine.plan(target, { version: 1, conversations: {} });
+        for (const change of firstPlan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        let extension = fs.readFileSync(target.extensionJsPath, 'utf8');
+        const start = extension.indexOf('async requestAllThreadList(e){');
+        const end = extension.indexOf('s=xce(codexTitleAliasFor(r)??n)', start);
+        const oldThreadList = 'async requestAllThreadList(e){let r=[],n=null;do{let o=await this.requestThreadList(e,n);r.push(...o.data),n=o.nextCursor??null}while(n);return{data:r}}requestThreadList(e,r){let n=String(this.nextRequestId++),o=new Promise((i,s)=>{this.requestToCallback.set(n,a=>{if(a.error){s(new Error(a.error.message));return}if(a.result==null){s(new Error("No result in response"));return}i(a.result)})});return this.codexAppServer.sendRequest(wce,n,"thread/list",{limit:200,cursor:r,sortKey:"created_at",modelProviders:e?[IS]:null,archived:!1,sourceKinds:jf}),o}';
+        extension = extension.slice(0, start) + oldThreadList + extension.slice(end);
+        fs.writeFileSync(target.extensionJsPath, extension);
+
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const change = plan.changes.find((item) => item.path === target.extensionJsPath);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('c.cwds=s'));
       },
     },
     {
@@ -219,6 +284,21 @@ module.exports = {
       },
     },
     {
+      name: 'skips syntax checks when bundles are already patched',
+      run() {
+        const target = createTarget();
+        const first = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        first.apply(target, { version: 1, conversations: {} });
+
+        const engine = new CodexPatchEngine({ nodePath: path.join(target.extensionDir, 'missing-node') });
+        const report = engine.apply(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(report.errors, []);
+        assert.strictEqual(report.changes.length, 0);
+        assert.deepStrictEqual(report.syntax, []);
+        assert.strictEqual(report.idempotent, true);
+      },
+    },
+    {
       name: 'runs syntax checks successfully',
       run() {
         const target = createTarget();
@@ -229,6 +309,24 @@ module.exports = {
         const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
         const syntax = engine.runSyntaxChecks(target);
         assert.strictEqual(syntax.length, 5);
+      },
+    },
+    {
+      name: 'accepts syntax checks that exit zero with a spawn warning',
+      run() {
+        const target = createTarget();
+        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.localTitlePath, target.sidebarPath]) {
+          fs.writeFileSync(file, 'export{};');
+        }
+        fs.writeFileSync(target.extensionJsPath, 'const ok = true;\n');
+        const originalSpawnSync = childProcess.spawnSync;
+        childProcess.spawnSync = () => ({ status: 0, error: new Error('spawnSync node EPERM'), stderr: '' });
+        try {
+          const syntax = new CodexPatchEngine({ nodePath: process.execPath }).runSyntaxChecks(target);
+          assert.strictEqual(syntax.length, 5);
+        } finally {
+          childProcess.spawnSync = originalSpawnSync;
+        }
       },
     },
 
