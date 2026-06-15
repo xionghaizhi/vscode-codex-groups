@@ -1,6 +1,7 @@
 const tests = [
   require('./metadata-store.test'),
   require('./locator.test'),
+  require('./package-json.test'),
   require('./patch-engine.test'),
 ];
 

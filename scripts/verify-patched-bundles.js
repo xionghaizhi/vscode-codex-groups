@@ -12,7 +12,7 @@ try {
 
 function main() {
   const target = new CodexExtensionLocator().locate();
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=8');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=11');
   assertContains(target.extensionJsPath, 'showInputBox');
   assertContains(target.extensionJsPath, 'promptConversationTitle');
   assertContains(target.extensionJsPath, 'promptConversationGroup');
@@ -21,7 +21,7 @@ function main() {
   assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(a,e))return;');
   assertContains(target.extensionJsPath, 'metadataSaved');
   assertContains(target.extensionJsPath, 'String.fromCharCode(10)');
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=8');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=11');
   assertContains(target.extensionJsPath, '&&!t)return!1');
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');

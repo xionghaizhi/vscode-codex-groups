@@ -64,9 +64,10 @@ module.exports = {
         const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
-        assert.ok(extension.includes('codexLocalGroupsPatchVersion=8'));
+        assert.ok(extension.includes('codexLocalGroupsPatchVersion=11'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
+        assert.ok(extension.includes('codexLocalGroupsReportAutoPatchUnavailable'));
         assert.ok(extension.includes('c.cwds=s'));
         assert.ok(extension.includes('promptConversationGroup'));
         assert.ok(extension.includes('showInputBox'));
@@ -356,6 +357,19 @@ module.exports = {
       },
     },
     {
+      name: 'keeps enhancement active and warns once when silent patch command is unavailable',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const change = plan.changes.find((item) => item.path === target.extensionJsPath);
+        const start = change.nextText.indexOf('var kce=require("path"),codexLocalGroupsFs=');
+        const end = change.nextText.indexOf('$t();', start) + '$t();'.length;
+        const script = extensionHostMissingSilentCommandScript(change.nextText.slice(start, end));
+        childProcess.execFileSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+      },
+    },
+    {
       name: 'stops without writing when upstream bundle anchors are unsupported',
       run() {
         const target = createTarget();
@@ -404,7 +418,7 @@ const vm = require('vm');
   };
   const context = {
     require(name) { return name === 'fs' ? fsMock : name === 'vscode' ? vscodeMock : require(name); },
-    console,
+    console: { warn() {}, error: console.error, log: console.log },
     process: { pid: 123 },
     setTimeout(callback) { callback(); return 1; },
     $t() {},
@@ -433,6 +447,66 @@ const vm = require('vm');
   assert.strictEqual(posted[2].metadata.pendingGroup.group, '需求C');
   assert.strictEqual(posted[2].metadata.pendingGroup.startedAtMs, metadata.pendingGroup.startedAtMs);
   assert.ok(commands.includes('chatgpt.newChat'));
+})().catch((error) => {
+  console.error(error && error.stack ? error.stack : error);
+  process.exit(1);
+});
+`;
+}
+
+
+function extensionHostMissingSilentCommandScript(helper) {
+  return `
+const assert = require('assert');
+const vm = require('vm');
+
+(async () => {
+  const files = { '/root/.codex/codex-vscode-conversation-meta.json': '{"version":1,"conversations":{}}' };
+  const warnings = [];
+  const commands = [];
+  let autoPatchAttempts = 0;
+  const fsMock = {
+    readFileSync(file) { if (!Object.prototype.hasOwnProperty.call(files, file)) throw new Error('ENOENT'); return files[file]; },
+    writeFileSync(file, data) { files[file] = String(data); },
+    mkdirSync() {},
+    openSync() { return 1; },
+    fsyncSync() {},
+    closeSync() {},
+    renameSync(from, to) { files[to] = files[from]; delete files[from]; },
+  };
+  const vscodeMock = {
+    window: { showWarningMessage(message) { warnings.push(message); return Promise.resolve(); } },
+    commands: {
+      executeCommand(command) {
+        commands.push(command);
+        if (command === 'codexLocalGroups.applyPatchesSilent') {
+          autoPatchAttempts += 1;
+          return Promise.reject(new Error("command 'codexLocalGroups.applyPatchesSilent' not found"));
+        }
+        return Promise.resolve();
+      },
+    },
+  };
+  const context = {
+    require(name) { return name === 'fs' ? fsMock : name === 'vscode' ? vscodeMock : require(name); },
+    console: { warn() {}, error: console.error, log: console.log },
+    process: { pid: 123 },
+    setTimeout(callback) { callback(); return 0; },
+    $t() {},
+  };
+  vm.createContext(context);
+  vm.runInContext(${JSON.stringify(helper)}, context);
+  const message = { type: 'codex-local-groups', action: 'newConversationInGroup', projectRoot: '/p', group: '需求A' };
+  context.codexLocalGroupsHandleWebviewMessage(message);
+  await Promise.resolve();
+  context.codexLocalGroupsHandleWebviewMessage(message);
+  await Promise.resolve();
+  assert.strictEqual(autoPatchAttempts, 2);
+  assert.strictEqual(warnings.length, 1);
+  assert.ok(warnings[0].includes('自动 patch 暂不可用'));
+  assert.ok(!warnings[0].includes('已自动停用'));
+  assert.ok(warnings[0].includes('不影响 Codex 正常使用'));
+  assert.strictEqual(commands.filter((command) => command === 'chatgpt.newChat').length, 2);
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);
   process.exit(1);

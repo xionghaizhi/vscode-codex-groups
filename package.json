@@ -2,7 +2,7 @@
   "name": "vscode-codex-groups",
   "displayName": "Codex Local Groups",
   "description": "Local Codex conversation titles, requirement groups, project isolation, and conservative Codex extension patching.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "local",
   "license": "MIT",
   "engines": {
@@ -25,6 +25,11 @@
       {
         "command": "codexLocalGroups.applyPatches",
         "title": "Apply Patches",
+        "category": "Codex Local Groups"
+      },
+      {
+        "command": "codexLocalGroups.applyPatchesSilent",
+        "title": "Apply Patches Silent",
         "category": "Codex Local Groups"
       },
       {
@@ -53,6 +58,14 @@
           "description": "Optional Node.js executable used for syntax checks. Empty uses NODE_BIN or the VS Code extension host executable."
         }
       }
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "codexLocalGroups.applyPatchesSilent",
+          "when": "false"
+        }
+      ]
     }
   },
   "scripts": {
