@@ -12,8 +12,11 @@ try {
 
 function main() {
   const target = new CodexExtensionLocator().locate();
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=11');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=12');
   assertContains(target.extensionJsPath, 'showInputBox');
+  assertContains(target.extensionJsPath, 'showQuickPick');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsExistingGroups');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsCleanGroupName');
   assertContains(target.extensionJsPath, 'promptConversationTitle');
   assertContains(target.extensionJsPath, 'promptConversationGroup');
   assertContains(target.extensionJsPath, 'promptNewGroup');
@@ -21,14 +24,22 @@ function main() {
   assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(a,e))return;');
   assertContains(target.extensionJsPath, 'metadataSaved');
   assertContains(target.extensionJsPath, 'String.fromCharCode(10)');
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=11');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=12');
   assertContains(target.extensionJsPath, '&&!t)return!1');
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
   assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=21');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=24');
   assertContains(target.headerPath, 'codexLocalGroupsDecoratedItem');
   assertContains(target.headerPath, 'codexLocalGroupsLocalTitle');
+  assertContains(target.headerPath, 'codexLocalGroupsNormalizeGroupName');
+  assertContains(target.headerPath, 'codexLocalGroupsToggleGroup');
+  assertContains(target.headerPath, 'codexLocalGroupsVisibleItems');
+  assertContains(target.headerPath, 'codex-local-groups-collapsed-v1');
+  assertContains(target.headerPath, 'codex-local-groups-expanded-all-v1');
+  assertContains(target.headerPath, 'aria-expanded');
+  assertContains(target.headerPath, '展开全部');
+  assertContains(target.headerPath, '收起到最近 5 条');
   assertContains(target.headerPath, 'titleOverride:codexLocalGroupsLocalTitle(n)??void 0');
   assertContains(target.headerPath, 'e.groups.sort');
   assertContains(target.headerPath, 'bg-token-list-hover-background');

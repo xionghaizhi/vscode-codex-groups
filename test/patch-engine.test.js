@@ -64,21 +64,34 @@ module.exports = {
         const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
-        assert.ok(extension.includes('codexLocalGroupsPatchVersion=11'));
+        assert.ok(extension.includes('codexLocalGroupsPatchVersion=12'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
         assert.ok(extension.includes('codexLocalGroupsReportAutoPatchUnavailable'));
         assert.ok(extension.includes('c.cwds=s'));
         assert.ok(extension.includes('promptConversationGroup'));
         assert.ok(extension.includes('showInputBox'));
+        assert.ok(extension.includes('showQuickPick'));
+        assert.ok(extension.includes('codexLocalGroupsExistingGroups'));
+        assert.ok(extension.includes('codexLocalGroupsCleanGroupName'));
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(n))return;'));
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
         assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=21'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=24'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
         assert.ok(header.includes('codexLocalGroupsLocalTitle'));
+        assert.ok(header.includes('codexLocalGroupsNormalizeGroupName'));
+        assert.ok(header.includes('codexLocalGroupsToggleGroup'));
+        assert.ok(header.includes('codexLocalGroupsVisibleItems'));
+        assert.ok(header.includes('codex-local-groups-collapsed-v1'));
+        assert.ok(header.includes('codex-local-groups-expanded-all-v1'));
+        assert.ok(header.includes('aria-expanded'));
+        assert.ok(header.includes('"aria-expanded":s'));
+        assert.ok(!header.includes('`aria-expanded`:s'));
+        assert.ok(header.includes('展开全部'));
+        assert.ok(header.includes('收起到最近 5 条'));
         assert.ok(header.includes('titleOverride:codexLocalGroupsLocalTitle(n)??void 0'));
         assert.ok(header.includes('e.groups.sort'));
         assert.ok(header.includes('bg-token-list-hover-background'));
@@ -116,6 +129,57 @@ module.exports = {
         assert.ok(appMain.includes('id:`codex-local-group`'));
         const localTitle = fs.readFileSync(target.localTitlePath, 'utf8');
         assert.ok(localTitle.includes('codexLocalGroupsLocalTitlePatchVersion=6'));
+      },
+    },
+    {
+      name: 'generates parseable group collapse header helper',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const headerChange = plan.changes.find((change) => change.path === target.headerPath);
+        const start = headerChange.nextText.indexOf('function Ke(e){return e.kind===`remote`}');
+        const end = headerChange.nextText.indexOf('function codexRecentTaskProjectLabel', start);
+        assert.ok(start >= 0);
+        assert.ok(end > start);
+        const result = childProcess.spawnSync(resolveNodePath(), ['--input-type=module', '--check'], {
+          input: headerChange.nextText.slice(start, end),
+          encoding: 'utf8',
+        });
+        assert.strictEqual(result.status, 0, result.stderr);
+      },
+    },
+    {
+      name: 'does not show empty expand-all action when active item fills the limit',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const conversations = {};
+        for (let index = 1; index <= 6; index += 1) {
+          conversations[`id${index}`] = { group: '需求A', projectRoot: '/p', updatedAtMs: index };
+        }
+        const plan = engine.plan(target, { version: 1, conversations });
+        const rows = runHeaderRows(plan.changes.find((change) => change.path === target.headerPath).nextText, 'id6');
+        const rendered = JSON.stringify(rows);
+        assert.ok(rendered.includes('id6'));
+        assert.ok(!rendered.includes('还有 0 条'));
+      },
+    },
+    {
+      name: 'merges duplicate-looking group names in header rows',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const conversations = {};
+        for (let index = 1; index <= 6; index += 1) {
+          conversations[`id${index}`] = { group: index % 2 ? '需求A' : ' 需求A　', projectRoot: '/p', updatedAtMs: index };
+        }
+        const plan = engine.plan(target, { version: 1, conversations });
+        const rows = runHeaderRows(plan.changes.find((change) => change.path === target.headerPath).nextText, 'id6');
+        const groupHeaders = rows.filter((row) => String(row.key || '').startsWith('group-0-') && !String(row.key || '').startsWith('group-more'));
+        assert.strictEqual(groupHeaders.length, 1);
+        assert.ok(JSON.stringify(rows).includes('▾ 需求A'));
+        assert.ok(!JSON.stringify(rows).includes(' 需求A　'));
       },
     },
     {
@@ -409,9 +473,12 @@ const vm = require('vm');
 
 (async () => {
   let inputValue = '本地新标题';
-  const files = { '/root/.codex/codex-vscode-conversation-meta.json': '{"version":1,"conversations":{"abc":{"title":"旧标题","group":"旧分组","projectRoot":"/p"}}}' };
+  let quickPickMode = 'new';
+  const quickPickLabels = [];
+  const files = { '/root/.codex/codex-vscode-conversation-meta.json': '{"version":1,"conversations":{"abc":{"title":"旧标题","group":"旧分组","projectRoot":"/p"},"def":{"group":" 旧分组　","projectRoot":"/p"}}}' };
   const posted = [];
   const commands = [];
+  const inputTitles = [];
   const fsMock = {
     readFileSync(file) { if (!Object.prototype.hasOwnProperty.call(files, file)) throw new Error('ENOENT'); return files[file]; },
     writeFileSync(file, data) { files[file] = String(data); },
@@ -423,7 +490,13 @@ const vm = require('vm');
   };
   const vscodeMock = {
     window: {
-      showInputBox() { return Promise.resolve(inputValue); },
+      showInputBox(options) { inputTitles.push(options.title); return Promise.resolve(inputValue); },
+      showQuickPick(items) {
+        quickPickLabels.push(items.map((item) => item.label));
+        if (quickPickMode === 'existing') return Promise.resolve(items.find((item) => item.group === '旧分组'));
+        if (quickPickMode === 'clear') return Promise.resolve(items.find((item) => item.action === 'clear'));
+        return Promise.resolve(items.find((item) => item.action === 'new'));
+      },
       showInformationMessage() { return Promise.resolve(); },
       showWarningMessage() {},
     },
@@ -448,23 +521,71 @@ const vm = require('vm');
   assert.strictEqual(context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }), false);
   context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
   await Promise.resolve();
+  await Promise.resolve();
   assert.strictEqual(JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']).conversations.abc.group, '需求B');
   assert.strictEqual(posted[1].metadata.conversations.abc.group, '需求B');
+  assert.ok(quickPickLabels[0].includes('旧分组'));
+  assert.strictEqual(quickPickLabels[0].filter((label) => label === '旧分组').length, 1);
+  quickPickMode = 'existing';
+  context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
+  await Promise.resolve();
+  assert.strictEqual(JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']).conversations.abc.group, '旧分组');
+  quickPickMode = 'clear';
+  context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
+  await Promise.resolve();
+  assert.strictEqual(JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']).conversations.abc.group, undefined);
   inputValue = '需求C';
   context.codexLocalGroupsHandleWebviewMessage({ type: 'codex-local-groups', action: 'promptNewGroup', projectRoot: '/p' }, { postMessage(message) { posted.push(message); return Promise.resolve(true); } });
   await Promise.resolve();
   const metadata = JSON.parse(files['/root/.codex/codex-vscode-conversation-meta.json']);
-  assert.strictEqual(posted[2].type, 'codex-local-groups');
-  assert.strictEqual(posted[2].action, 'metadataSaved');
-  assert.strictEqual(posted[2].metadata.pendingGroup.projectRoot, '/p');
-  assert.strictEqual(posted[2].metadata.pendingGroup.group, '需求C');
-  assert.strictEqual(posted[2].metadata.pendingGroup.startedAtMs, metadata.pendingGroup.startedAtMs);
+  const lastPost = posted[posted.length - 1];
+  assert.strictEqual(lastPost.type, 'codex-local-groups');
+  assert.strictEqual(lastPost.action, 'metadataSaved');
+  assert.strictEqual(lastPost.metadata.pendingGroup.projectRoot, '/p');
+  assert.strictEqual(lastPost.metadata.pendingGroup.group, '需求C');
+  assert.strictEqual(lastPost.metadata.pendingGroup.startedAtMs, metadata.pendingGroup.startedAtMs);
   assert.ok(commands.includes('chatgpt.newChat'));
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);
   process.exit(1);
 });
 `;
+}
+
+function runHeaderRows(header, activeId) {
+  const start = header.indexOf('function Ke(e){return e.kind===`remote`}');
+  const end = header.indexOf('var qe=Je', start);
+  const script = `
+const vm = require('vm');
+function jsx(type, props, key) { return { type, props, key }; }
+const storage = {};
+const context = {
+  Q: { jsx, jsxs: jsx },
+  Je: 'Je',
+  b: { dispatchMessage() {}, dispatchHostMessage() {} },
+  localStorage: {
+    getItem(key) { return Object.prototype.hasOwnProperty.call(storage, key) ? storage[key] : null; },
+    setItem(key, value) { storage[key] = String(value); },
+  },
+  window: { addEventListener() {}, dispatchEvent() {} },
+  Event: function Event(type) { this.type = type; },
+  setTimeout() {},
+};
+vm.runInNewContext(${JSON.stringify(header.slice(start, end))}, context);
+const rows = context.codexRecentTaskProjectRows(${JSON.stringify(headerRowsItems())}, ${JSON.stringify(activeId)}, () => {});
+console.log(JSON.stringify(rows));
+`;
+  const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+  assert.strictEqual(result.status, 0, result.stderr);
+  return JSON.parse(result.stdout);
+}
+
+function headerRowsItems() {
+  return [1, 2, 3, 4, 5, 6].map((index) => ({
+    kind: 'local',
+    key: `id${index}`,
+    conversation: { id: `id${index}`, cwd: '/p', title: `会话${index}`, createdAt: index, updatedAt: index },
+  }));
 }
 
 
