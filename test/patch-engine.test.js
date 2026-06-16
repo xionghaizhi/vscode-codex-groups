@@ -78,7 +78,7 @@ module.exports = {
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
         assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=26'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=31'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
         assert.ok(header.includes('codexLocalGroupsLocalTitle'));
@@ -110,7 +110,7 @@ module.exports = {
         assert.ok(header.includes('n.textContent===t&&(n.textContent=r)'));
         assert.ok(header.includes('t[20]!==o'));
         assert.ok(header.includes('打开中…'));
-        assert.ok(header.includes('dispatchHostMessage({type:`navigate-to-route`,path:`/local/'));
+        assert.ok(!header.includes('dispatchHostMessage({type:`navigate-to-route`,path:`/local/'));
         assert.ok(header.includes('t.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,`打开中…`),codexLocalGroupsPromptGroup'));
         assert.ok(header.includes('startedAtMs'));
         assert.ok(header.includes('codexLocalGroupsPromptNewGroup'));
@@ -122,6 +122,11 @@ module.exports = {
         assert.ok(header.includes('+ 在此分组新建会话'));
         assert.ok(header.includes('设置标题'));
         assert.ok(header.includes('设置分组'));
+        assert.ok(header.includes('codex-local-groups-conversation-row relative'));
+        assert.ok(header.includes('codex-local-groups-inline-actions absolute top-1'));
+        assert.ok(header.includes('paddingRight:`160px`'));
+        assert.ok(!header.includes('paddingRight:`112px`'));
+        assert.ok(!header.includes('additionalHoverActionCount:2'));
         assert.ok(header.includes('promptConversationTitle'));
         assert.ok(header.includes('promptConversationGroup'));
         assert.ok(appMain.includes('codexLocalGroupsWebviewPatchVersion=6'));
@@ -149,6 +154,28 @@ module.exports = {
           encoding: 'utf8',
         });
         assert.strictEqual(result.status, 0, result.stderr);
+      },
+    },
+    {
+      name: 'upgrades v28 inline action padding to avoid right-side overlap',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const firstPlan = engine.plan(target, { version: 1, conversations: {} });
+        for (const change of firstPlan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        const oldHeader = fs.readFileSync(target.headerPath, 'utf8')
+          .replace(/codexLocalGroupsHeaderPatchVersion=31/g, 'codexLocalGroupsHeaderPatchVersion=28')
+          .replace(/paddingRight:`160px`/g, 'paddingRight:`112px`');
+        fs.writeFileSync(target.headerPath, oldHeader);
+
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const headerChange = plan.changes.find((change) => change.path === target.headerPath);
+        assert.ok(headerChange);
+        assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=31'));
+        assert.ok(headerChange.nextText.includes('paddingRight:`160px`'));
+        assert.ok(!headerChange.nextText.includes('paddingRight:`112px`'));
       },
     },
     {

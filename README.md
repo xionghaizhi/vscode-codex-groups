@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.6-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.7-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -16,7 +16,7 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 ## 预览
 
 <p align="center">
-  <img src="docs/codex-local-groups-preview.png" alt="Codex Local Groups grouped recent tasks preview" width="656">
+  <img src="https://github.com/xionghaizhi/vscode-codex-groups/raw/HEAD/docs/codex-local-groups-preview.png" alt="Codex Local Groups grouped recent tasks preview" width="656">
 </p>
 
 ## 功能
@@ -24,7 +24,7 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 - 本地会话标题别名。
 - 按“项目 > 需求分组 > 会话”展示最近会话。
 - 仅显示当前项目相关的本地会话。
-- 顶部最近任务列表里，每个本地会话下面有独立的 `设置标题 / 设置分组` 操作，用 VSCode 输入框保存。
+- 顶部最近任务列表里，每个本地会话右侧有同一行的 `设置标题 / 设置分组` 操作，用 VSCode 输入框保存，减少列表纵向占用。
 - 项目下 `+ 新建分组并开始会话`，输入分组名后自动打开新会话。
 - 分组标题右侧 `+ 在此分组新建会话`，新会话自动归入该分组。
 - `Check Status` 检查 Codex 扩展、patch 状态、metadata 和会话数量，并提供 Apply / Reload 快捷操作。
@@ -47,13 +47,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.6
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.7
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.7
 ```
 
 然后在 VSCode 中执行：
@@ -81,7 +81,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.6.vsix
+code --install-extension vscode-codex-groups-0.0.7.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -101,7 +101,7 @@ code --install-extension vscode-codex-groups-0.0.6.vsix
 
 1. 打开 Codex 最近会话列表。
 2. 找到本地会话行。
-3. 点击会话下方的 `设置标题` 或 `设置分组`。
+3. 点击会话右侧同一行的 `设置标题` 或 `设置分组`。
 4. 在 VSCode 输入框里输入内容。
 5. 保存后会同步到当前 Codex webview；如当前 webview 仍加载旧补丁，可 Reload Window 一次。
 
@@ -193,7 +193,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.7
 npm run plan-patches
 npm run apply-patches
 npm run verify-patched-bundles

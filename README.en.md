@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.6-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.7-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -24,7 +24,7 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 - Local conversation title aliases.
 - “Project > Requirement Group > Conversation” view.
 - Local conversation isolation by current project.
-- In the top recent-task list, each local conversation has separate `设置标题 / 设置分组` actions below the row, saved through the VSCode input box.
+- In the top recent-task list, each local conversation has same-row `设置标题 / 设置分组` actions on the right, saved through the VSCode input box while using less vertical space.
 - `+ New group and start chat` under each project.
 - `+ Start chat in this group` on group headers.
 - `Check Status` checks the Codex extension, patch status, metadata, and conversation counts, with Apply / Reload shortcuts.
@@ -47,13 +47,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.6
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.7
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.7
 ```
 
 Then in VSCode:
@@ -81,7 +81,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.6.vsix
+code --install-extension vscode-codex-groups-0.0.7.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -101,7 +101,7 @@ For Remote VSCode Server, install it in the remote window and make sure it runs 
 
 1. Open the Codex recent conversations list.
 2. Find a local conversation row.
-3. Click `设置标题` / Set Title or `设置分组` / Set Group below the row.
+3. Click the same-row `设置标题` / Set Title or `设置分组` / Set Group action on the right.
 4. Enter the value in the VSCode input box.
 5. The current Codex webview is updated after saving. If it is still running an old patch, reload the window once.
 
@@ -193,7 +193,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.6
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.7
 npm run plan-patches
 npm run apply-patches
 npm run verify-patched-bundles

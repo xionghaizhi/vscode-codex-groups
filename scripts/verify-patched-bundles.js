@@ -29,7 +29,12 @@ function main() {
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
   assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=26');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=31');
+  assertContains(target.headerPath, 'paddingRight:`160px`');
+  assertNotContains(target.headerPath, 'paddingRight:`112px`');
+  assertContains(target.headerPath, 'codex-local-groups-conversation-row relative');
+  assertContains(target.headerPath, 'codex-local-groups-inline-actions absolute');
+  assertContains(target.headerPath, 'top-1');
   assertContains(target.headerPath, 'codexLocalGroupsDecoratedItem');
   assertContains(target.headerPath, 'codexLocalGroupsLocalTitle');
   assertContains(target.headerPath, 'codexLocalGroupsNormalizeGroupName');
@@ -55,11 +60,13 @@ function main() {
   assertContains(target.headerPath, 't[20]!==o');
   assertContains(target.headerPath, '打开中…');
   assertContains(target.headerPath, 'max-h-[450px]');
-  assertContains(target.headerPath, 'dispatchHostMessage({type:`navigate-to-route`,path:`/local/');
+  assertNotContains(target.headerPath, 'dispatchHostMessage({type:`navigate-to-route`,path:`/local/');
   assertContains(target.headerPath, 't.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,`打开中…`),codexLocalGroupsPromptGroup');
   assertNotContains(target.headerPath, 'overflow-hidden rounded-lg');
   assertContains(target.headerPath, 'children:`设置标题`');
   assertContains(target.headerPath, 'children:`设置分组`');
+  assertNotContains(target.headerPath, '`set-group-`+o.key');
+  assertNotContains(target.headerPath, 'border-l pb-1 pl-8');
   assertContains(target.headerPath, 'promptConversationTitle');
   assertContains(target.headerPath, 'promptConversationGroup');
   assertContains(target.headerPath, 'metadataSaved');
