@@ -17,6 +17,7 @@ class CodexExtensionLocator {
       extensionJsPath: path.join(extensionDir, 'out/extension.js'),
       headerPath: findBundle(assetsDir, 'header-*.js', isHeaderBundle),
       appMainPath: findBundle(assetsDir, 'app-main-*.js', isAppMainBundle),
+      appServerManagerSignalsPath: findBundle(assetsDir, 'app-server-manager-signals-*.js', isAppServerManagerSignalsBundle),
       sidebarPath: findBundle(assetsDir, 'sidebar-signals-*.js', () => true),
       localTitlePath: findBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true),
     };
@@ -95,6 +96,10 @@ function isHeaderBundle(text) {
 
 function isAppMainBundle(text) {
   return text.includes('renameThread') && text.includes('conversation.title');
+}
+
+function isAppServerManagerSignalsBundle(text) {
+  return text.includes('refresh-recent-conversations-for-host') && text.includes('thread/list');
 }
 
 module.exports = { CodexExtensionLocator, DEFAULT_EXTENSIONS_ROOT };

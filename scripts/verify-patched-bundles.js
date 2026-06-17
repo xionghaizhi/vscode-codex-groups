@@ -29,7 +29,7 @@ function main() {
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
   assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=31');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=32');
   assertContains(target.headerPath, 'paddingRight:`160px`');
   assertNotContains(target.headerPath, 'paddingRight:`112px`');
   assertContains(target.headerPath, 'codex-local-groups-conversation-row relative');
@@ -56,6 +56,8 @@ function main() {
   assertContains(target.headerPath, 'e.groupMap.has(f.group)');
   assertContains(target.headerPath, 'Date.now()-n<600000');
   assertContains(target.headerPath, 'codexLocalGroupsSetBusy');
+  assertContains(target.headerPath, 'codexLocalGroupsStoreCurrentRoot');
+  assertContains(target.headerPath, 'codex-local-groups-current-root-v1');
   assertContains(target.headerPath, 'n.textContent===t&&(n.textContent=r)');
   assertContains(target.headerPath, 't[20]!==o');
   assertContains(target.headerPath, '打开中…');
@@ -74,6 +76,10 @@ function main() {
   assertContains(target.appMainPath, 'codexLocalGroupsWebviewPatchVersion=6');
   assertContains(target.appMainPath, 'id:`codex-local-title`');
   assertContains(target.appMainPath, 'id:`codex-local-group`');
+  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=1');
+  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams');
+  assertContains(target.appServerManagerSignalsPath, 'codex-local-groups-current-root-v1');
+  assertContains(target.appServerManagerSignalsPath, 'cwds:t');
   assertContains(target.localTitlePath, 'codexLocalGroupsLocalTitlePatchVersion=6');
   const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
   for (const item of engine.runSyntaxChecks(target)) {

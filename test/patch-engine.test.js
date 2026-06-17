@@ -22,6 +22,7 @@ const extensionText = [
 const headerText = 'codexRecentTaskCurrentRoot import{f as b}from"./vscode-api-a.js";function Ke(e){return e.kind===`remote`}function codexRecentTaskProjectRows(e,t,n){let r=[],i=new Map;for(let a of e){let o=codexRecentTaskProjectLabel(a),s=i.get(o);s||(s={label:o,items:[]},i.set(o,s),r.push(s)),s.items.push(a)}return r.flatMap((e,r)=>[(0,Q.jsx)(`div`,{className:`px-[var(--padding-row-x)] pt-2 pb-1 text-xs font-medium text-token-input-placeholder-foreground`,children:e.label},`project-${r}-${e.label}`),...e.items.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&t===e.conversation.id,onClose:n},e.key))])}function codexRecentTaskProjectLabel(e){return `No project`}function codexRecentTaskFilter(e,t){return e}function codexRecentConversationFilter(e,t){return e}function codexRecentTaskNormalizePath(e){return e}function codexRecentTaskBasename(e){return e}function codexRecentTaskDateLabel(e){return ``}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
 const appMainText = 'P=codexTitleAliasFor(n)?? codexTitleAliasFor(t.conversation.id)?? import{f as gi}from"./vscode-api-a.js";var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}function aE(e){let tt=()=>[{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[]:[{id:`change-connection-color`}]];return tt}';
 const localTitleText = 'var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}var s=1;';
+const appServerManagerSignalsText = 'async function Sg(e,{modelProviders:t,archived:n=!1,sourceKinds:r=te}){let i=[],a=async o=>{let s=await e.sendRequest(`thread/list`,{limit:200,cursor:o,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n});i.push(...s.data),s.nextCursor&&await a(s.nextCursor)};return await a(null),i}class Eg{listRecentThreads({cursor:e,limit:t,useStateDbOnly:n=!1}){return this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:n})}}';
 const headerNeedsBasePatchText = 'import{i as useEnv}from"./use-environment-a.js";import{f as customMessenger}from"./vscode-api-a.js";h=ge(),g;let b=i.filter(y),C=Ve(r.data,i,_),A=[];A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a},e.key));F.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&p===e.conversation.id,onClose:a},e.key));o=r==null?void 0:(0,Q.jsx)(de,{dateString:new Date(r).toISOString()});case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(me,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e};e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.updatedAt).toISOString()});o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r});function Ke(e){return e.kind===`remote`}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
 
 function createTarget() {
@@ -33,6 +34,7 @@ function createTarget() {
   fs.writeFileSync(path.join(assets, 'header-a.js'), headerText);
   fs.writeFileSync(path.join(assets, 'app-main-a.js'), appMainText);
   fs.writeFileSync(path.join(assets, 'local-title-a.js'), localTitleText);
+  fs.writeFileSync(path.join(assets, 'app-server-manager-signals-a.js'), appServerManagerSignalsText);
   return {
     extensionDir: dir,
     extensionJsPath: path.join(dir, 'out/extension.js'),
@@ -40,6 +42,7 @@ function createTarget() {
     appMainPath: path.join(assets, 'app-main-a.js'),
     localTitlePath: path.join(assets, 'local-title-a.js'),
     sidebarPath: path.join(assets, 'sidebar-a.js'),
+    appServerManagerSignalsPath: path.join(assets, 'app-server-manager-signals-a.js'),
   };
 }
 
@@ -54,7 +57,7 @@ module.exports = {
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
         const plan = engine.plan(target, metadata);
         assert.deepStrictEqual(plan.errors, []);
-        assert.strictEqual(plan.changes.length, 4);
+        assert.strictEqual(plan.changes.length, 5);
         for (const change of plan.changes) {
           fs.writeFileSync(change.path, change.nextText);
         }
@@ -64,6 +67,7 @@ module.exports = {
         const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
+        const appServerManagerSignals = fs.readFileSync(target.appServerManagerSignalsPath, 'utf8');
         assert.ok(extension.includes('codexLocalGroupsPatchVersion=13'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
@@ -78,7 +82,7 @@ module.exports = {
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
         assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=31'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=32'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
         assert.ok(header.includes('codexLocalGroupsLocalTitle'));
@@ -107,6 +111,8 @@ module.exports = {
         assert.ok(header.includes('codexLocalGroupsStoreMeta(r,!0)'));
         assert.ok(header.includes('pendingGroup'));
         assert.ok(header.includes('codexLocalGroupsSetBusy'));
+        assert.ok(header.includes('codexLocalGroupsStoreCurrentRoot'));
+        assert.ok(header.includes('codex-local-groups-current-root-v1'));
         assert.ok(header.includes('n.textContent===t&&(n.textContent=r)'));
         assert.ok(header.includes('t[20]!==o'));
         assert.ok(header.includes('打开中…'));
@@ -136,6 +142,34 @@ module.exports = {
         assert.ok(appMain.includes('id:`codex-local-group`'));
         const localTitle = fs.readFileSync(target.localTitlePath, 'utf8');
         assert.ok(localTitle.includes('codexLocalGroupsLocalTitlePatchVersion=6'));
+        assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentPatchVersion=1'));
+        assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentThreadListParams'));
+        assert.ok(appServerManagerSignals.includes('cwds:t'));
+        assert.ok(appServerManagerSignals.includes('e.limit=200'));
+      },
+    },
+    {
+      name: 'filters webview recent thread requests by metadata project roots',
+      run() {
+        const target = createTarget();
+        const metadata = {
+          version: 1,
+          conversations: {
+            a: { group: '需求A', projectRoot: '/home/project/vscode/yuxi' },
+            b: { group: '需求B', projectRoot: '/home/project/vscode/liaochen/' },
+          },
+        };
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, metadata);
+        const change = plan.changes.find((item) => item.path === target.appServerManagerSignalsPath);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('codexLocalGroupsRecentPatchVersion=1'));
+        assert.ok(change.nextText.includes('codexLocalGroupsRecentThreadListParams({limit:t'));
+        assert.ok(change.nextText.includes('codexLocalGroupsRecentThreadListParams({limit:200'));
+        const script = path.join(target.extensionDir, 'app-server-manager-signals-smoke.js');
+        fs.writeFileSync(script, appServerManagerSignalsSmokeScript(change.nextText));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
       },
     },
     {
@@ -166,14 +200,14 @@ module.exports = {
           fs.writeFileSync(change.path, change.nextText);
         }
         const oldHeader = fs.readFileSync(target.headerPath, 'utf8')
-          .replace(/codexLocalGroupsHeaderPatchVersion=31/g, 'codexLocalGroupsHeaderPatchVersion=28')
+          .replace(/codexLocalGroupsHeaderPatchVersion=32/g, 'codexLocalGroupsHeaderPatchVersion=28')
           .replace(/paddingRight:`160px`/g, 'paddingRight:`112px`');
         fs.writeFileSync(target.headerPath, oldHeader);
 
         const plan = engine.plan(target, { version: 1, conversations: {} });
         const headerChange = plan.changes.find((change) => change.path === target.headerPath);
         assert.ok(headerChange);
-        assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=31'));
+        assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=32'));
         assert.ok(headerChange.nextText.includes('paddingRight:`160px`'));
         assert.ok(!headerChange.nextText.includes('paddingRight:`112px`'));
       },
@@ -444,20 +478,20 @@ module.exports = {
       name: 'runs syntax checks successfully',
       run() {
         const target = createTarget();
-        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.localTitlePath, target.sidebarPath]) {
+        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.localTitlePath, target.sidebarPath]) {
           fs.writeFileSync(file, 'export{};');
         }
         fs.writeFileSync(target.extensionJsPath, 'const ok = true;\n');
         const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
         const syntax = engine.runSyntaxChecks(target);
-        assert.strictEqual(syntax.length, 5);
+        assert.strictEqual(syntax.length, 6);
       },
     },
     {
       name: 'accepts syntax checks that exit zero with a spawn warning',
       run() {
         const target = createTarget();
-        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.localTitlePath, target.sidebarPath]) {
+        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.localTitlePath, target.sidebarPath]) {
           fs.writeFileSync(file, 'export{};');
         }
         fs.writeFileSync(target.extensionJsPath, 'const ok = true;\n');
@@ -465,7 +499,7 @@ module.exports = {
         childProcess.spawnSync = () => ({ status: 0, error: new Error('spawnSync node EPERM'), stderr: '' });
         try {
           const syntax = new CodexPatchEngine({ nodePath: process.execPath }).runSyntaxChecks(target);
-          assert.strictEqual(syntax.length, 5);
+          assert.strictEqual(syntax.length, 6);
         } finally {
           childProcess.spawnSync = originalSpawnSync;
         }
@@ -655,6 +689,42 @@ console.log(JSON.stringify(rows));
   const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
   assert.strictEqual(result.status, 0, result.stderr);
   return JSON.parse(result.stdout);
+}
+
+function appServerManagerSignalsSmokeScript(text) {
+  return `
+const assert = require('assert');
+const requests = [];
+const localStorage = {
+  getItem(key) {
+    if (key === 'codex-local-groups-current-root-v1') return '/home/project/vscode/yuxi';
+    return null;
+  },
+};
+const te = [];
+const sendRequest = (method, params) => {
+  requests.push({ method, params });
+  return Promise.resolve({ data: [], nextCursor: null });
+};
+${text}
+(async () => {
+  await Sg({ sendRequest, recentConversationsSortKey: 'updated_at' }, { modelProviders: null });
+  const store = new Eg();
+  store.params = { requestClient: { sendRequest } };
+  store.recentConversationSortKey = 'updated_at';
+  await store.listRecentThreads({ limit: 50, cursor: null });
+  assert.strictEqual(requests.length, 2);
+  for (const request of requests) {
+    assert.strictEqual(request.method, 'thread/list');
+    assert.ok(request.params.cwds.includes('/home/project/vscode/yuxi'));
+    assert.ok(request.params.cwds.includes('/home/project/vscode/liaochen'));
+    assert.strictEqual(request.params.limit, 200);
+  }
+})().catch((error) => {
+  console.error(error && error.stack ? error.stack : error);
+  process.exit(1);
+});
+`;
 }
 
 function headerBusySmokeScript(helper) {
