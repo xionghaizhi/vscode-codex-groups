@@ -4,14 +4,13 @@ const { ConversationMetadataStore, normalizeMetadata } = require('./metadataStor
 const { CodexPatchEngine } = require('./patchEngine');
 
 let outputChannel;
+let patchDisabled = false;
+let incompatibleMessage = '';
 
 function activate(context) {
   outputChannel = vscode.window.createOutputChannel('Codex Local Groups');
   context.subscriptions.push(outputChannel);
   registerCommands(context);
-  setTimeout(() => {
-    applyPatches({ silent: true }).catch((error) => showPatchError(error, true));
-  }, 1000);
 }
 
 function deactivate() {}
@@ -21,6 +20,10 @@ function registerCommands(context) {
     applyPatches({ silent: false }).catch((error) => showPatchError(error, false));
   }));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.applyPatchesSilent', () => {
+    if (patchDisabled) {
+      showIncompatibleNotification();
+      return;
+    }
     applyPatches({ silent: true }).catch((error) => showPatchError(error, true));
   }));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.checkStatus', () => {
@@ -38,14 +41,30 @@ function registerCommands(context) {
 }
 
 async function applyPatches(options = {}) {
+  if (patchDisabled && options.silent === true) {
+    ensureOutputChannel().appendLine(`跳过自动 patch：${incompatibleMessage || '版本不兼容'}`);
+    return { changes: [], errors: [], idempotent: true, skipped: true };
+  }
   const store = new ConversationMetadataStore();
   const metadata = store.load();
-  const target = new CodexExtensionLocator().locate();
+  let target;
+  try {
+    target = new CodexExtensionLocator().locate();
+  } catch (locateError) {
+    if (isVersionMismatchError(locateError)) {
+      disablePatchDueToIncompatibility(locateError, options.silent === true);
+    }
+    throw locateError;
+  }
   const engine = new CodexPatchEngine({ nodePath: configuredNodePath() });
   const report = engine.apply(target, metadata);
   writeReport(target, report);
   if (report.errors.length) {
-    throw new Error(report.errors.join('\n'));
+    const errorText = report.errors.join('\n');
+    if (isVersionMismatchError({ message: errorText })) {
+      disablePatchDueToIncompatibility({ message: errorText }, options.silent === true);
+    }
+    throw new Error(errorText);
   }
   await showPatchSuccess(report, options.silent === true);
   return report;
@@ -68,6 +87,16 @@ async function resetPendingGroup() {
 }
 
 async function checkStatus(options = {}) {
+  if (patchDisabled) {
+    const lines = [
+      '--- Codex Local Groups Status ---',
+      'Patch 状态：已禁用（Codex 扩展版本不兼容）',
+      `不兼容原因：${incompatibleMessage || '未知'}`,
+    ];
+    writeStatusLines(lines);
+    showIncompatibleNotification();
+    return;
+  }
   const store = options.store || new ConversationMetadataStore();
   let metadata = { version: 1, conversations: {} };
   let target = null;
@@ -179,10 +208,66 @@ async function showPatchSuccess(report, silent) {
 
 function showPatchError(error, silent) {
   ensureOutputChannel().appendLine(errorStackOrText(error));
+  if (patchDisabled) {
+    if (!silent) {
+      showIncompatibleNotification();
+    }
+    return;
+  }
   if (!silent) {
     vscode.window.showErrorMessage(`Codex Local Groups patch 失败：${errorText(error)}`);
   } else {
     vscode.window.showWarningMessage('Codex Local Groups patch 失败，详见输出。');
+  }
+}
+
+function isVersionMismatchError(error) {
+  const text = errorText(error);
+  if (text.includes('未找到') && text.includes('扩展目录')) {
+    return true;
+  }
+  if (text.includes('无法唯一定位')) {
+    return true;
+  }
+  if (text.includes('期望 1 处匹配，实际 0 处')) {
+    return true;
+  }
+  if (text.includes('找不到') && text.includes('注入点')) {
+    return true;
+  }
+  if (text.includes('找不到') && text.includes('起始标记')) {
+    return true;
+  }
+  if (text.includes('找不到') && text.includes('结束标记')) {
+    return true;
+  }
+  return false;
+}
+
+function disablePatchDueToIncompatibility(error, silent) {
+  if (patchDisabled) {
+    return;
+  }
+  patchDisabled = true;
+  incompatibleMessage = errorText(error);
+  ensureOutputChannel().appendLine(`Codex Local Groups: 检测到 Codex 扩展版本不兼容，已停止自动 patch。`);
+  ensureOutputChannel().appendLine(`不兼容原因：${incompatibleMessage}`);
+  showIncompatibleNotification();
+}
+
+async function showIncompatibleNotification() {
+  const action = await vscode.window.showWarningMessage(
+    'Codex Local Groups: 当前 Codex 扩展版本不兼容，自动 patch 已停止。Local Groups 功能可能不可用，建议禁用本扩展或等待更新。',
+    '禁用扩展',
+    '查看输出'
+  );
+  if (action === '禁用扩展') {
+    vscode.commands.executeCommand('workbench.view.extensions');
+    setTimeout(() => {
+      vscode.commands.executeCommand('workbench.extensions.search', '@builtin false local.vscode-codex-groups');
+    }, 500);
+  } else if (action === '查看输出') {
+    ensureOutputChannel().show();
   }
 }
 

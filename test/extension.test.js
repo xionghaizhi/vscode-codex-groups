@@ -106,6 +106,26 @@ module.exports = {
   name: 'extension commands',
   tests: [
     {
+      name: 'activates without scheduling startup patch',
+      run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        const timers = [];
+        const originalSetTimeout = global.setTimeout;
+        global.setTimeout = (fn, delay) => {
+          timers.push({ fn, delay });
+          return 1;
+        };
+        try {
+          extension.activate({ subscriptions: [] });
+        } finally {
+          global.setTimeout = originalSetTimeout;
+        }
+        assert.strictEqual(timers.length, 0);
+        assert.ok(vscode.calls.commands.some((item) => item.registered === 'codexLocalGroups.applyPatches'));
+      },
+    },
+    {
       name: 'builds status lines with patch and metadata counts',
       run() {
         const dir = tempDir('codex-status');

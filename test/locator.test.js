@@ -11,8 +11,8 @@ function createExtension(root, name, mtime, version = '1.0.0') {
   fs.writeFileSync(path.join(dir, 'package.json'), `${JSON.stringify({ name: 'chatgpt', version })}\n`);
   fs.writeFileSync(path.join(dir, 'out/extension.js'), 'console.log("extension")\n');
   fs.writeFileSync(path.join(dir, 'webview/assets/header-a.js'), 'recentTasksMenu Search recent tasks');
-  fs.writeFileSync(path.join(dir, 'webview/assets/app-main-a.js'), 'renameThread conversation.title function aE(e){}');
-  fs.writeFileSync(path.join(dir, 'webview/assets/app-server-manager-signals-a.js'), 'refresh-recent-conversations-for-host thread/list');
+  fs.writeFileSync(path.join(dir, 'webview/assets/app-main-a.js'), 'untitledThreadLabel conversation.title function aE(e){}');
+  fs.writeFileSync(path.join(dir, 'webview/assets/thread-context-inputs-a.js'), 'recentConversationsSortKey thread/list');
   fs.writeFileSync(path.join(dir, 'webview/assets/sidebar-signals-a.js'), 'sidebar');
   fs.writeFileSync(path.join(dir, 'webview/assets/local-conversation-title-signals-a.js'), 'title');
   fs.utimesSync(dir, mtime, mtime);

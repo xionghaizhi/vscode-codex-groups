@@ -29,7 +29,7 @@ function main() {
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
   assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=32');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=33');
   assertContains(target.headerPath, 'paddingRight:`160px`');
   assertNotContains(target.headerPath, 'paddingRight:`112px`');
   assertContains(target.headerPath, 'codex-local-groups-conversation-row relative');
@@ -46,6 +46,9 @@ function main() {
   assertContains(target.headerPath, '展开全部');
   assertContains(target.headerPath, '收起到最近 5 条');
   assertContains(target.headerPath, 'titleOverride:o?(0,Q.jsx)(Q.Fragment,{children:o}):void 0');
+  assertContains(target.headerPath, 'function codexRecentTaskProjectRows(e,t,n,codexLocalGroupsRow)');
+  assertContains(target.headerPath, '(0,Q.jsx)(codexLocalGroupsRow,{item:o');
+  assertNotContains(target.headerPath, '(0,Q.jsx)(Je,{item:o');
   assertContains(target.headerPath, 'e.groups.sort');
   assertContains(target.headerPath, 'bg-token-list-hover-background');
   assertContains(target.headerPath, '#93c5fd');
@@ -57,9 +60,15 @@ function main() {
   assertContains(target.headerPath, 'Date.now()-n<600000');
   assertContains(target.headerPath, 'codexLocalGroupsSetBusy');
   assertContains(target.headerPath, 'codexLocalGroupsStoreCurrentRoot');
+  assertContains(target.headerPath, 'codexRecentTaskMenuCurrentRoot');
   assertContains(target.headerPath, 'codex-local-groups-current-root-v1');
   assertContains(target.headerPath, 'n.textContent===t&&(n.textContent=r)');
   assertContains(target.headerPath, 't[20]!==o');
+  assertContains(target.headerPath, 't[33]!==codexLocalGroupsRefresh');
+  assertContains(target.headerPath, 'function rt(e){let t=(0,Z.c)(35)');
+  assertNotContains(target.headerPath, 'codexRecentConversationFilter(r.filter(w),codexRecentTaskCurrentRoot)');
+  assertNotContains(target.headerPath, 't[31]!==codexLocalGroupsRefresh');
+  assertNotContains(target.headerPath, 't[31]=codexLocalGroupsRefresh');
   assertContains(target.headerPath, '打开中…');
   assertContains(target.headerPath, 'max-h-[450px]');
   assertNotContains(target.headerPath, 'dispatchHostMessage({type:`navigate-to-route`,path:`/local/');
@@ -74,8 +83,8 @@ function main() {
   assertContains(target.headerPath, 'metadataSaved');
   assertContains(target.headerPath, '(a.updatedAtMs??0)>(o.updatedAtMs??0)');
   assertContains(target.appMainPath, 'codexLocalGroupsWebviewPatchVersion=6');
-  assertContains(target.appMainPath, 'id:`codex-local-title`');
-  assertContains(target.appMainPath, 'id:`codex-local-group`');
+  assertContains(target.appMainPath, 'promptConversationTitle');
+  assertContains(target.appMainPath, 'codexTitleAliasFor');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=1');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams');
   assertContains(target.appServerManagerSignalsPath, 'codex-local-groups-current-root-v1');

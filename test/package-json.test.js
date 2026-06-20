@@ -24,6 +24,12 @@ module.exports = {
       },
     },
     {
+      name: 'does not activate on startup',
+      run() {
+        assert.ok(!packageJson.activationEvents.includes('onStartupFinished'));
+      },
+    },
+    {
       name: 'contributes status search and manage commands',
       run() {
         const commands = new Set(packageJson.contributes.commands.map((item) => item.command));
