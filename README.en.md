@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.9-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.10-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -33,7 +33,7 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 - Migration from:
   - Old: `~/.codex/codex-vscode-conversation-titles.json`
   - New: `~/.codex/codex-vscode-conversation-meta.json`
-- One-command patch reapply after Codex extension upgrades.
+- One-command patch reapply after Codex extension upgrades; Repair can restore clean bundles before patching if the Codex UI gets stuck.
 
 ## Installation
 
@@ -47,13 +47,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.9
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.10
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.9
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.10
 ```
 
 Then in VSCode:
@@ -81,7 +81,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.9.vsix
+code --install-extension vscode-codex-groups-0.0.10.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -179,7 +179,7 @@ The list shows group name, conversation count, and project path, and it supports
 - Clear the group and move conversations to Ungrouped, with confirmation; this only removes the group label and does not delete conversations.
 - View conversations in the group and open a selected conversation; view is read-only.
 
-After batch updates, reload the window to sync the Codex recent-conversation UI. If automatic patching fails, the metadata update remains saved; use the `Apply Patches` action to retry, or check Output and handle it manually.
+After batch updates, reload the window to sync the Codex recent-conversation UI. The extension no longer rewrites Codex bundles while the Codex UI is running; use `Apply Patches` or `Repair Codex UI` manually if needed.
 
 ## After Codex extension upgrades
 
@@ -193,9 +193,10 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.9
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.10
 npm run plan-patches
 npm run apply-patches
+npm run repair-codex-ui
 npm run verify-patched-bundles
 ```
 
@@ -220,6 +221,7 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 | `Codex Local Groups: Manage Groups` | When groups are duplicated, too many, or need batch cleanup | Opens the group management center. You can search by group or project path, see conversation counts, rename groups, merge groups, clear groups, or view conversations in a group. Merge and clear actions require confirmation and only update local metadata; conversations are not deleted. |
 | `Codex Local Groups: Check Status` | When you are not sure whether the extension is active, or after a Codex upgrade | Checks the OpenAI Codex extension location, version, patch status, metadata path, total conversations, grouped count, and ungrouped count. Results are written to the `Codex Local Groups` output channel, with Apply / Reload / Show Output shortcuts. |
 | `Codex Local Groups: Apply Patches` | When the grouped UI disappears after a Codex upgrade, or when a command asks you to reapply patches | Manually patches the OpenAI Codex extension bundles with this extension's enhancements. Target files are backed up first; unsupported bundle anchors stop the patch instead of overwriting blindly. Reload Window is usually needed afterward. |
+| `Codex Local Groups: Repair Codex UI` | When Codex UI is stuck, blank, or patch state looks broken after an upgrade | Restores clean Codex bundles from `.codex-patches`, then reapplies patches. Reload Window is usually needed afterward. |
 | `Codex Local Groups: Open Metadata JSON` | When you need to inspect or manually troubleshoot local titles and group data | Opens `~/.codex/codex-vscode-conversation-meta.json`, which stores local titles, groups, project paths, and pending group state. Back it up before manual edits. |
 | `Codex Local Groups: Reload Window` | After patching, installing a new version, or when the current Codex webview still shows old UI | Runs VSCode `workbench.action.reloadWindow` so the extension host and Codex webview load the latest patches. |
 | `Codex Local Groups: Reset Pending Group` | When `+ New group and start chat` does not assign the new conversation correctly, or pending state is stuck | Clears the `pendingGroup` state, applies patches silently, and prompts Reload Window. It does not delete existing conversations or groups. |
@@ -229,5 +231,6 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 
 - Group UI is missing: run `Apply Patches`, then Reload Window.
 - Broken after Codex upgrade: run `Apply Patches` again.
+- Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - Patch failed: check the `Codex Local Groups` output channel.
 - Node version is too old: the extension prefers the VSCode Server Node; set `codexLocalGroups.nodePath` if needed.

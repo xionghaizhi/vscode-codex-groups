@@ -70,7 +70,7 @@ module.exports = {
         const appServerManagerSignals = fs.readFileSync(target.appServerManagerSignalsPath, 'utf8');
         assert.ok(extension.includes('codexLocalGroupsPatchVersion=13'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
-        assert.ok(extension.includes('codexLocalGroups.applyPatchesSilent'));
+        assert.ok(!extension.includes('codexLocalGroups.applyPatchesSilent'));
         assert.ok(extension.includes('codexLocalGroupsReportAutoPatchUnavailable'));
         assert.ok(extension.includes('c.cwds=s'));
         assert.ok(extension.includes('function n(c){return r?c===HS:c!==HS}'));
@@ -541,6 +541,23 @@ module.exports = {
       },
     },
     {
+      name: 'restores clean backups even when newer backups are already patched',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        engine.apply(target, { version: 1, conversations: { a: { title: 'A' } } });
+        engine.apply(target, { version: 1, conversations: { a: { title: 'B' } } });
+
+        const restored = engine.restoreCleanBundles(target);
+
+        assert.ok(restored.some((item) => item.path === target.extensionJsPath));
+        for (const item of restored) {
+          assert.strictEqual(fs.readFileSync(item.path, 'utf8').includes('codexLocalGroups'), false, item.path);
+          assert.strictEqual(fs.readFileSync(item.backupPath, 'utf8').includes('codexLocalGroups'), false, item.backupPath);
+        }
+      },
+    },
+    {
       name: 'skips syntax checks when bundles are already patched',
       run() {
         const target = createTarget();
@@ -613,7 +630,7 @@ module.exports = {
       },
     },
     {
-      name: 'keeps enhancement active and does not notify when silent patch command is unavailable',
+      name: 'keeps enhancement active without running silent patch from Codex host',
       run() {
         const target = createTarget();
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
@@ -738,6 +755,7 @@ const vm = require('vm');
   assert.strictEqual(lastPost.metadata.pendingGroup.group, '需求C');
   assert.strictEqual(lastPost.metadata.pendingGroup.startedAtMs, metadata.pendingGroup.startedAtMs);
   assert.ok(commands.includes('chatgpt.newChat'));
+  assert.strictEqual(commands.filter((command) => command === 'codexLocalGroups.applyPatchesSilent').length, 0);
 })().catch((error) => {
   console.error(error && error.stack ? error.stack : error);
   process.exit(1);
@@ -936,7 +954,7 @@ const vm = require('vm');
   await Promise.resolve();
   context.codexLocalGroupsHandleWebviewMessage(message);
   await Promise.resolve();
-  assert.strictEqual(autoPatchAttempts, 2);
+  assert.strictEqual(autoPatchAttempts, 0);
   assert.strictEqual(warnings.length, 0);
   assert.strictEqual(commands.filter((command) => command === 'chatgpt.newChat').length, 2);
 })().catch((error) => {

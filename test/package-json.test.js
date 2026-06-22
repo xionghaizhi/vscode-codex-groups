@@ -36,9 +36,11 @@ module.exports = {
         assert.ok(commands.has('codexLocalGroups.checkStatus'));
         assert.ok(commands.has('codexLocalGroups.searchConversations'));
         assert.ok(commands.has('codexLocalGroups.manageGroups'));
+        assert.ok(commands.has('codexLocalGroups.repairCodexUi'));
         assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.checkStatus'));
         assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.searchConversations'));
         assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.manageGroups'));
+        assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.repairCodexUi'));
       },
     },
   ],

@@ -34,6 +34,9 @@ function registerCommands(context) {
   }));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.openMetadataJson', openMetadataJson));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.reloadWindow', reloadWindow));
+  context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.repairCodexUi', () => {
+    repairCodexUi().catch((error) => showCommandError('修复 Codex UI', error));
+  }));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.resetPendingGroup', resetPendingGroup));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.searchConversations', () => {
     searchConversations().catch((error) => showCommandError('搜索会话', error));
@@ -68,6 +71,30 @@ async function applyPatches(options = {}) {
   }
   await showPatchSuccess(report, options.silent === true);
   return report;
+}
+
+async function repairCodexUi(options = {}) {
+  const target = (options.locator || new CodexExtensionLocator()).locate();
+  const store = options.store || new ConversationMetadataStore();
+  const metadata = store.load();
+  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+  const restored = engine.restoreCleanBundles(target);
+  const report = engine.apply(target, metadata);
+  writeReport(target, report);
+  if (report.errors.length) {
+    throw new Error(report.errors.join('\n'));
+  }
+  const action = await vscode.window.showInformationMessage(
+    `Codex Local Groups: Repair 已完成，已恢复 ${restored.length} 个 clean bundle 并重新应用补丁。`,
+    'Reload Window',
+    'Show Output'
+  );
+  if (action === 'Reload Window') {
+    await reloadWindow();
+  } else if (action === 'Show Output') {
+    ensureOutputChannel().show();
+  }
+  return { restored, report };
 }
 
 async function openMetadataJson() {
@@ -526,16 +553,13 @@ async function writeManagedGroup(store, group, nextGroup, options) {
     return;
   }
   store.write(result.metadata);
-  let patchError = null;
-  try {
-    await patchRunner({ silent: true });
-  } catch (caught) {
-    patchError = caught; ensureOutputChannel().appendLine(errorStackOrText(caught));
-  }
   const context = groupContextText({ ...group, count: result.count });
-  const action = patchError
-    ? await vscode.window.showWarningMessage(`Codex Local Groups: 已更新 ${context}，但自动 patch 失败。可查看输出或 Reload Window 后再手动 Apply Patches。`, 'Apply Patches', 'Reload Window', 'Show Output')
-    : await vscode.window.showInformationMessage(`Codex Local Groups: 已更新 ${context}，Reload Window 后同步 Codex UI。`, 'Reload Window');
+  const action = await vscode.window.showInformationMessage(
+    `Codex Local Groups: 已更新 ${context}。如 Codex UI 未同步，可 Reload Window 或手动 Apply Patches。`,
+    'Apply Patches',
+    'Reload Window',
+    'Show Output'
+  );
   if (action === 'Apply Patches') {
     try { await patchRunner({ silent: false }); } catch (caught) { showPatchError(caught, false); }
   } else if (action === 'Reload Window') {
@@ -627,6 +651,7 @@ module.exports = {
   activate,
   deactivate,
   applyPatches,
+  repairCodexUi,
   checkStatus,
   searchConversations,
   manageGroups,

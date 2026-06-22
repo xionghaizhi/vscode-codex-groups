@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.0.10 - 2026-06-22
+
+### Fixed
+
+- 降低 VSCode/Codex 启动卡死风险：运行中的 Codex webview 保存标题、分组或新建分组时，不再触发 `codexLocalGroups.applyPatchesSilent` 自动改写 Codex bundle。
+- 新增 `Codex Local Groups: Repair Codex UI` 命令和 `npm run repair-codex-ui` 脚本，可先恢复 clean Codex bundle，再重新应用补丁。
+- Repair 会优先选择不含 `codexLocalGroups` 标记的 clean 备份，避免误恢复到旧 patched 备份。
+
+### Verified
+
+- `npm test`
+- `npm run compile`
+- `npm run lint`
+- `npm run repair-codex-ui`
+- `npm run plan-patches`
+- `npm run verify-patched-bundles`
+
 ## v0.0.9 - 2026-06-20
 
 ### Fixed

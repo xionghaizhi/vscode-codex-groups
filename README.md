@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.9-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.10-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -33,7 +33,7 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 - 自动迁移旧标题文件：
   - 旧：`~/.codex/codex-vscode-conversation-titles.json`
   - 新：`~/.codex/codex-vscode-conversation-meta.json`
-- Codex 扩展升级后，可一键重新应用补丁。
+- Codex 扩展升级后，可一键重新应用补丁；Codex UI 异常时可用 Repair 恢复 clean bundle 后重打补丁。
 
 ## 安装
 
@@ -47,13 +47,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.9
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.10
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.9
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.10
 ```
 
 然后在 VSCode 中执行：
@@ -81,7 +81,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.9.vsix
+code --install-extension vscode-codex-groups-0.0.10.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -179,7 +179,7 @@ Codex Local Groups: Manage Groups
 - 清空分组，移入未分组：只移除分组标签，不删除会话，并需要二次确认。
 - 查看该分组会话，并打开选中的会话；查看是只读操作。
 
-批量更新后会提示 Reload Window。若自动 patch 失败，metadata 更新仍会保留，可直接点 `Apply Patches` 重试，或查看输出后手动处理。
+批量更新后会提示 Reload Window，不会在 Codex UI 运行中自动改写 bundle。若 UI 未同步，可手动执行 `Apply Patches` 或 `Repair Codex UI`。
 
 ## Codex 扩展升级后怎么恢复
 
@@ -193,9 +193,10 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.9
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.10
 npm run plan-patches
 npm run apply-patches
+npm run repair-codex-ui
 npm run verify-patched-bundles
 ```
 
@@ -220,6 +221,7 @@ npm run verify-patched-bundles
 | `Codex Local Groups: Manage Groups` | 分组重复、分组过多、需要批量整理时 | 打开分组管理中心。支持按分组名或项目路径搜索，查看每个分组的会话数量，并可重命名、合并、清空分组或查看分组下会话。合并和清空会二次确认，只修改本地 metadata，不删除会话。 |
 | `Codex Local Groups: Check Status` | 不确定插件是否生效、Codex 升级后想检查状态时 | 检查 OpenAI Codex 扩展位置、版本、patch 状态、metadata 路径、会话数量、已分组 / 未分组数量。结果会写入 `Codex Local Groups` 输出面板，并提供 Apply / Reload / Show Output 快捷操作。 |
 | `Codex Local Groups: Apply Patches` | Codex 升级后分组 UI 消失、命令提示需要重新应用补丁时 | 手动把本扩展的增强逻辑重新 patch 到 OpenAI Codex 扩展 bundle。执行前会备份目标文件，匹配失败会停止，不会盲目覆盖。执行后通常需要 Reload Window。 |
+| `Codex Local Groups: Repair Codex UI` | Codex UI 卡住、白屏、升级后 patch 状态异常时 | 从 `.codex-patches` 中选择 clean 备份恢复 Codex bundle，再重新应用补丁。完成后通常需要 Reload Window。 |
 | `Codex Local Groups: Open Metadata JSON` | 想查看或人工排查本地标题、分组数据时 | 打开 `~/.codex/codex-vscode-conversation-meta.json`。里面保存本地会话标题、分组、项目路径和 pending group 状态。手动编辑前建议先备份。 |
 | `Codex Local Groups: Reload Window` | patch 后、安装新版本后，或当前 Codex webview 仍显示旧 UI 时 | 触发 VSCode `workbench.action.reloadWindow`，让 extension host 和 Codex webview 重新加载最新补丁。 |
 | `Codex Local Groups: Reset Pending Group` | 点击“新建分组并开始会话”后，新会话没有正确归组或 pending 状态卡住时 | 清空待归组状态 `pendingGroup`，再静默应用 patch，并提示 Reload Window。不会删除已有会话或已有分组。 |
@@ -229,5 +231,6 @@ npm run verify-patched-bundles
 
 - 看不到分组 UI：执行 `Apply Patches` 后 Reload Window。
 - Codex 升级后失效：重新执行 `Apply Patches`。
+- Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
 - patch 失败：查看 `Codex Local Groups` 输出面板。
 - Node 版本过低：扩展会优先使用 VSCode Server 自带 Node；必要时设置 `codexLocalGroups.nodePath`。

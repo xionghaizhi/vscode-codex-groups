@@ -295,7 +295,7 @@ module.exports = {
         assert.strictEqual(written.conversations.a2.group, '财务归档');
         assert.strictEqual(written.conversations.a3.group, '支付');
         assert.strictEqual(written.conversations.b2.group, '财务');
-        assert.strictEqual(patched, true);
+        assert.strictEqual(patched, false);
         assert.ok(vscode.calls.inputBox.title.includes('/p/a'));
         assert.ok(vscode.calls.inputBox.prompt.includes('2 个会话'));
         assert.ok(vscode.calls.infos[0].message.includes('/p/a'));
@@ -566,13 +566,13 @@ module.exports = {
       },
     },
     {
-      name: 'keeps metadata update when silent patch fails during managed group write',
+      name: 'keeps metadata update without automatic silent patch during managed group write',
       async run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
         let written;
         const patchCalls = [];
-        vscode.calls.nextWarningAction = 'Apply Patches';
+        vscode.calls.nextInfoAction = 'Apply Patches';
         vscode.calls.nextInput = '财务归档';
         vscode.calls.nextQuickPicks = [
           (items) => items.find((item) => item.group === '财务' && item.projectRoot === '/p/a'),
@@ -582,18 +582,39 @@ module.exports = {
           store: { load() { return manageMetadata; }, write(data) { written = data; return data; } },
           applyPatches(options) {
             patchCalls.push(options);
-            if (options.silent) {
-              throw new Error('patch down');
-            }
             return Promise.resolve();
           },
         });
         assert.strictEqual(written.conversations.a1.group, '财务归档');
-        assert.ok(vscode.calls.warnings[0].message.includes('自动 patch 失败'));
-        assert.ok(vscode.calls.warnings[0].message.includes('/p/a'));
-        assert.ok(vscode.calls.warnings[0].actions.includes('Reload Window'));
-        assert.ok(vscode.calls.warnings[0].actions.includes('Apply Patches'));
-        assert.deepStrictEqual(patchCalls.map((item) => item.silent), [true, false]);
+        assert.ok(vscode.calls.infos[0].message.includes('已更新'));
+        assert.ok(vscode.calls.infos[0].message.includes('/p/a'));
+        assert.ok(vscode.calls.infos[0].actions.includes('Reload Window'));
+        assert.ok(vscode.calls.infos[0].actions.includes('Apply Patches'));
+        assert.deepStrictEqual(patchCalls.map((item) => item.silent), [false]);
+      },
+    },
+    {
+      name: 'repairs Codex UI by restoring clean bundles before applying patches',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        const calls = [];
+        const target = { extensionDir: '/codex', packageJsonPath: '/codex/package.json' };
+        const report = { changes: [], errors: [], backups: [], syntax: [], idempotent: true };
+        vscode.calls.nextInfoAction = 'Reload Window';
+        const result = await extension.repairCodexUi({
+          locator: { locate() { calls.push('locate'); return target; } },
+          store: { load() { calls.push('load'); return metadata; } },
+          engine: {
+            restoreCleanBundles(value) { calls.push(`restore:${value.extensionDir}`); return [{ path: '/codex/out/extension.js', backupPath: '/backup/extension.js' }]; },
+            apply(value, data) { calls.push(`apply:${value.extensionDir}:${Object.keys(data.conversations).length}`); return report; },
+          },
+        });
+        assert.deepStrictEqual(calls, ['locate', 'load', 'restore:/codex', 'apply:/codex:3']);
+        assert.strictEqual(result.restored.length, 1);
+        assert.strictEqual(result.report, report);
+        assert.ok(vscode.calls.infos[0].message.includes('Repair 已完成'));
+        assert.ok(vscode.calls.commands.some((item) => item.command === 'workbench.action.reloadWindow'));
       },
     },
     {
