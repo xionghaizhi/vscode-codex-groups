@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.0.12 - 2026-06-22
+
+### Fixed
+- 针对 API key 登录的 VSCode Codex 会话，启动 `app-server` 时禁用 remote plugins，并把 MCP OAuth 凭据存储切到 file，避免反复触发 ChatGPT-only 的 remote plugin bundle sync 与 keyring OAuth 预检。
+- 禁用 webview 内 Statsig/AB SDK 网络流量，避免继续请求 `ab.chatgpt.com/v1/initialize`。
+
+### Risk
+- VSCode Codex 内 remote plugin marketplace / OpenAI-curated plugin 功能会不可用；本地 API key 对话和 Codex Local Groups 功能不受影响。
+- ChatGPT auth/OAuth 登录用户如果依赖 ChatGPT 订阅用量页、remote plugin marketplace、OpenAI-curated plugins 或 AB 实验，不建议应用 v0.0.12 的 API key 兜底补丁。
+- 未写入 `/etc/hosts`：当前环境有代理，hosts 映射不一定拦截代理侧 DNS，且会全局影响 ChatGPT 相关域名。
+
+## v0.0.11 - 2026-06-22
+
+### Fixed
+- 针对 API key 登录场景，禁用 Codex webview 对 `/wham/usage*` 的 ChatGPT 用量请求，避免反复 401/432 拖慢 UI。
+- `account-info` 不再解析 API key token 为 ChatGPT 账号计划，避免重复输出 `Unable to extract account id and plan from auth token.`。
+
+### Risk
+- 使用 API key 登录时，Codex 的 ChatGPT 订阅/用量设置页会显示为空或不可用；本地 API key 对话能力不受影响。
+
 ## v0.0.10 - 2026-06-22
 
 ### Fixed

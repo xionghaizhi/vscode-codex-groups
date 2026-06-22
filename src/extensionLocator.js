@@ -18,6 +18,7 @@ class CodexExtensionLocator {
       headerPath: findBundle(assetsDir, 'header-*.js', isHeaderBundle),
       appMainPath: findBundle(assetsDir, 'app-main-*.js', isAppMainBundle),
       appServerManagerSignalsPath: findBundle(assetsDir, 'thread-context-inputs-*.js', isThreadContextInputsBundle),
+      requestPath: findBundle(assetsDir, 'request-*.js', isRequestBundle),
       sidebarPath: findBundle(assetsDir, 'sidebar-signals-*.js', () => true),
       localTitlePath: findBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true),
     };
@@ -102,8 +103,8 @@ function isThreadContextInputsBundle(text) {
   return text.includes('recentConversationsSortKey') && text.includes('thread/list');
 }
 
-function isAppServerManagerSignalsBundle(text) {
-  return text.includes('refresh-recent-conversations-for-host') && text.includes('thread/list');
+function isRequestBundle(text) {
+  return text.includes('safeGet') && text.includes('makeRequest') && text.includes('OAI-Language');
 }
 
 module.exports = { CodexExtensionLocator, DEFAULT_EXTENSIONS_ROOT };

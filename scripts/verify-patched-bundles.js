@@ -28,6 +28,10 @@ function main() {
   assertContains(target.extensionJsPath, '&&!t)return!1');
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
+  assertContains(target.extensionJsPath, '"account-info":async()=>({accountId:null,userId:null,plan:null,email:null,computeResidency:null})');
+  assertNotContains(target.extensionJsPath, 'Unable to extract account id and plan from auth token.');
+  assertContains(target.extensionJsPath, '"--disable","plugins"');
+  assertContains(target.extensionJsPath, '"mcp_oauth_credentials_store=\\"file\\""');
   assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
   assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=33');
   assertContains(target.headerPath, 'paddingRight:`160px`');
@@ -83,12 +87,16 @@ function main() {
   assertContains(target.headerPath, 'metadataSaved');
   assertContains(target.headerPath, '(a.updatedAtMs??0)>(o.updatedAtMs??0)');
   assertContains(target.appMainPath, 'codexLocalGroupsWebviewPatchVersion=6');
+  assertContains(target.appMainPath, 'preventAllNetworkTraffic:!0');
   assertContains(target.appMainPath, 'promptConversationTitle');
   assertContains(target.appMainPath, 'codexTitleAliasFor');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=1');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams');
   assertContains(target.appServerManagerSignalsPath, 'codex-local-groups-current-root-v1');
   assertContains(target.appServerManagerSignalsPath, 'cwds:t');
+  assertContains(target.requestPath, 'codexLocalGroupsRequestPatchVersion=1');
+  assertContains(target.requestPath, 'codexLocalGroupsIsDisabledUsageRequest');
+  assertContains(target.requestPath, 'if(codexLocalGroupsIsDisabledUsageRequest(s))return null');
   assertContains(target.localTitlePath, 'codexLocalGroupsLocalTitlePatchVersion=6');
   const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
   for (const item of engine.runSyntaxChecks(target)) {

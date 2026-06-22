@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.10-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.12-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -30,10 +30,23 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 - `Check Status` 检查 Codex 扩展、patch 状态、metadata 和会话数量，并提供 Apply / Reload 快捷操作。
 - `Search Conversations` 用 VSCode QuickPick 搜索本地标题、分组、项目路径或会话 ID，并跳转到选中的 Codex 会话。
 - `Manage Groups` 用 VSCode QuickPick 批量重命名、合并、清空分组，并查看分组下会话。
+- API key 登录场景下禁用 Codex 的 ChatGPT `/wham/usage*`、remote plugin/OAuth 预检和 Statsig/AB 请求，减少 401/432 和 loading 卡顿。
 - 自动迁移旧标题文件：
   - 旧：`~/.codex/codex-vscode-conversation-titles.json`
   - 新：`~/.codex/codex-vscode-conversation-meta.json`
 - Codex 扩展升级后，可一键重新应用补丁；Codex UI 异常时可用 Repair 恢复 clean bundle 后重打补丁。
+
+## API key 模式拦截说明
+
+v0.0.12 默认按 API key 登录场景优化，会拦截或禁用这些 ChatGPT auth 专用请求 / 能力：
+
+- `/wham/usage*`：ChatGPT 订阅和用量请求，命中后直接返回 `null`。
+- `account-info`：不再从 auth token 提取 ChatGPT account id、user id 和 plan。
+- `remote plugin bundle sync`：`app-server` 启动时追加 `--disable plugins`，禁用 remote plugin 同步。
+- `failed to read OAuth tokens from keyring`：`app-server` 启动时追加 `-c mcp_oauth_credentials_store="file"`，避免 keyring OAuth 预检。
+- `https://ab.chatgpt.com/v1/initialize`：webview 内 Statsig/AB SDK 设置 `preventAllNetworkTraffic:!0`。
+
+如果你使用 ChatGPT auth/OAuth 登录，并依赖 ChatGPT 订阅用量页、remote plugin marketplace、OpenAI-curated plugins 或 AB 实验，不建议应用 v0.0.12 的 API key 兜底补丁。
 
 ## 安装
 
@@ -47,13 +60,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.10
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.12
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.10
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.12
 ```
 
 然后在 VSCode 中执行：
@@ -81,7 +94,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.10.vsix
+code --install-extension vscode-codex-groups-0.0.12.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -193,7 +206,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.10
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.12
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -232,5 +245,6 @@ npm run verify-patched-bundles
 - 看不到分组 UI：执行 `Apply Patches` 后 Reload Window。
 - Codex 升级后失效：重新执行 `Apply Patches`。
 - Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
+- API key 登录反复报 `/wham/usage`、remote plugin sync、keyring OAuth 或 `ab.chatgpt.com/v1/initialize`：执行 `Apply Patches` 或 `Repair Codex UI` 后 Reload Window。
 - patch 失败：查看 `Codex Local Groups` 输出面板。
 - Node 版本过低：扩展会优先使用 VSCode Server 自带 Node；必要时设置 `codexLocalGroups.nodePath`。

@@ -13,6 +13,7 @@ function createExtension(root, name, mtime, version = '1.0.0') {
   fs.writeFileSync(path.join(dir, 'webview/assets/header-a.js'), 'recentTasksMenu Search recent tasks');
   fs.writeFileSync(path.join(dir, 'webview/assets/app-main-a.js'), 'untitledThreadLabel conversation.title function aE(e){}');
   fs.writeFileSync(path.join(dir, 'webview/assets/thread-context-inputs-a.js'), 'recentConversationsSortKey thread/list');
+  fs.writeFileSync(path.join(dir, 'webview/assets/request-a.js'), 'safeGet safePost makeRequest OAI-Language');
   fs.writeFileSync(path.join(dir, 'webview/assets/sidebar-signals-a.js'), 'sidebar');
   fs.writeFileSync(path.join(dir, 'webview/assets/local-conversation-title-signals-a.js'), 'title');
   fs.utimesSync(dir, mtime, mtime);
@@ -32,6 +33,7 @@ module.exports = {
         assert.strictEqual(target.extensionDir, latest);
         assert.ok(target.headerPath.endsWith('header-a.js'));
         assert.ok(target.appMainPath.endsWith('app-main-a.js'));
+        assert.ok(target.requestPath.endsWith('request-a.js'));
       },
     },
     {

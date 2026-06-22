@@ -18,6 +18,7 @@ class CodexPatchEngine {
     planFile(changes, target.headerPath, (text, file) => patchHeader(text, context, file));
     planFile(changes, target.appMainPath, (text) => patchAppMain(text, context));
     planFile(changes, target.appServerManagerSignalsPath, (text) => patchAppServerManagerSignals(text, context));
+    planFile(changes, target.requestPath, (text) => patchRequest(text, context));
     planFile(changes, target.localTitlePath, (text) => patchLocalTitle(text, context));
     return { changes, errors: context.errors };
   }
@@ -64,6 +65,7 @@ class CodexPatchEngine {
       checkModule(this.nodePath, target.headerPath),
       checkModule(this.nodePath, target.appMainPath),
       target.appServerManagerSignalsPath ? checkModule(this.nodePath, target.appServerManagerSignalsPath) : null,
+      target.requestPath ? checkModule(this.nodePath, target.requestPath) : null,
       checkModule(this.nodePath, target.localTitlePath),
       target.sidebarPath ? checkModule(this.nodePath, target.sidebarPath) : null,
     ].filter(Boolean);
@@ -80,6 +82,7 @@ function targetBundlePaths(target) {
     target.headerPath,
     target.appMainPath,
     target.appServerManagerSignalsPath,
+    target.requestPath,
     target.localTitlePath,
   ].filter(Boolean);
 }
@@ -177,9 +180,35 @@ function patchExtension(text, context) {
   next = patchExtensionMetadataHelper(next, context);
   next = patchExtensionAliasUsages(next, context);
   next = patchExtensionMessageHandler(next, context);
+  next = patchExtensionAccountInfo(next, context);
+  next = patchExtensionAppServerArgs(next, context);
   next = next.replace(/typeof navigator<"u"&&navigator\?\./g, '!1&&navigator?.');
   next = next.replace(/typeof navigator<"u"&&navigator\./g, '!1&&navigator.');
   return next;
+}
+
+function patchExtensionAppServerArgs(text, context) {
+  const oldText = 'kle(this.extensionUri,"app-server",["--analytics-default-enabled"])';
+  const next = 'kle(this.extensionUri,"app-server",["--analytics-default-enabled","--disable","plugins","-c","mcp_oauth_credentials_store=\\"file\\""])';
+  if (text.includes(next) || !text.includes(oldText)) {
+    return text;
+  }
+  return replaceOnce(text, oldText, next, context, 'extension app-server api-key precheck fallback');
+}
+
+function patchExtensionAccountInfo(text, context) {
+  const next = '"account-info":async()=>({accountId:null,userId:null,plan:null,email:null,computeResidency:null})';
+  if (text.includes(next)) {
+    return text;
+  }
+  if (!text.includes('Unable to extract account id and plan from auth token.')) {
+    return text;
+  }
+  return replaceOnce(text, extensionAccountInfoOld(), next, context, 'extension account info api-key fallback');
+}
+
+function extensionAccountInfoOld() {
+  return '"account-info":async()=>{let e=await this.authProvider.getToken({refreshToken:!1});if(!e)return{accountId:null,userId:null,plan:null,email:null,computeResidency:null};try{let r=JSON.parse(Buffer.from(e.split(".")[1],"base64url").toString("utf8")),n=r["https://api.openai.com/auth"]??{},o=r["https://api.openai.com/profile"]??{},i=n?.chatgpt_account_id??null,s=n?.chatgpt_user_id??null,a=n?.chatgpt_plan_type??null,c=n?.chatgpt_compute_residency??null,l=o.email??null;if(i&&s&&a)return{accountId:i,userId:s,plan:a,email:l,computeResidency:c}}catch{X().error("Unable to extract account id and plan from auth token.")}return{accountId:null,userId:null,plan:null,email:null,computeResidency:null}}';
 }
 
 function patchExtensionMetadataHelper(text, context) {
@@ -578,6 +607,7 @@ function patchAppMain(text, context) {
   next = patchAppMainHelper(next, context);
   next = patchAppMainAliasUsage(next, context);
   next = patchAppMainContextMenu(next, context);
+  next = patchAppMainStatsigNetwork(next, context);
   return next;
 }
 
@@ -648,6 +678,15 @@ function patchAppMainContextMenu(text, context) {
   return text;
 }
 
+function patchAppMainStatsigNetwork(text, context) {
+  const oldText = 'tN={networkConfig:{api:YM,logEventUrl:cM,sdkExceptionUrl:XM,networkOverrideFunc:KM}}';
+  const next = 'tN={networkConfig:{api:YM,logEventUrl:cM,sdkExceptionUrl:XM,networkOverrideFunc:KM,preventAllNetworkTraffic:!0}}';
+  if (text.includes(next) || !text.includes(oldText)) {
+    return text;
+  }
+  return replaceOnce(text, oldText, next, context, 'app-main statsig no network');
+}
+
 function patchAppServerManagerSignals(text, context) {
   let next = replaceMetadataLiteral(text, context.metadata, 'var codexLocalGroupsRecentInitialMeta=');
   if (!next.includes('codexLocalGroupsRecentPatchVersion=1')) {
@@ -678,6 +717,19 @@ function patchAppServerManagerSignals(text, context) {
     } else if (next.includes(pageOldV1)) {
       next = replaceOnce(next, pageOldV1, pageNewV1, context, 'app-server-manager paged recent cwd filter legacy');
     }
+  }
+  return next;
+}
+
+function patchRequest(text, context) {
+  let next = text;
+  if (!next.includes('codexLocalGroupsRequestPatchVersion=1')) {
+    next = replaceOnce(next, 'var p=class', 'var codexLocalGroupsRequestPatchVersion=1;function codexLocalGroupsIsDisabledUsageRequest(e){return typeof e==`string`&&e.startsWith(`/wham/usage`)}var p=class', context, 'request usage helper');
+  }
+  const oldText = 'async makeRequest(o,s,c){let{headers:l,url:u}=this.getRequestTarget(s,c);';
+  const newText = 'async makeRequest(o,s,c){if(codexLocalGroupsIsDisabledUsageRequest(s))return null;let{headers:l,url:u}=this.getRequestTarget(s,c);';
+  if (!next.includes(newText)) {
+    next = replaceOnce(next, oldText, newText, context, 'request disable wham usage');
   }
   return next;
 }

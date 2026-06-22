@@ -18,11 +18,14 @@ const extensionText = [
   'var Dle=require("path");W();$t();var $g=1;',
   'var nC=class{constructor(e,r){this.#r=e,this.#e=[e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)}),r(()=>{this.dispose()})]}};',
   'var Ll=class{async initializeWebview(e,r,n,o){let s=e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)});this.subscriptions.push(s)}};',
+  'class CodexProcess{startCodexProcess(){let e=kle(this.extensionUri,"app-server",["--analytics-default-enabled"]);return e}}',
 ].join('');
 const headerText = 'codexRecentTaskCurrentRoot import{f as b}from"./vscode-api-a.js";function Ke(e){return e.kind===`remote`}function codexRecentTaskProjectRows(e,t,n){let r=[],i=new Map;for(let a of e){let o=codexRecentTaskProjectLabel(a),s=i.get(o);s||(s={label:o,items:[]},i.set(o,s),r.push(s)),s.items.push(a)}return r.flatMap((e,r)=>[(0,Q.jsx)(`div`,{className:`px-[var(--padding-row-x)] pt-2 pb-1 text-xs font-medium text-token-input-placeholder-foreground`,children:e.label},`project-${r}-${e.label}`),...e.items.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&t===e.conversation.id,onClose:n},e.key))])}function codexRecentTaskProjectLabel(e){return `No project`}function codexRecentTaskFilter(e,t){return e}function codexRecentConversationFilter(e,t){return e}function codexRecentTaskNormalizePath(e){return e}function codexRecentTaskBasename(e){return e}function codexRecentTaskDateLabel(e){return ``}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
-const appMainText = 'P=codexTitleAliasFor(n)?? codexTitleAliasFor(t.conversation.id)?? import{f as gi}from"./vscode-api-a.js";var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}function aE(e){let tt=()=>[{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[]:[{id:`change-connection-color`}]];return tt}';
+const appMainText = 'P=codexTitleAliasFor(n)?? codexTitleAliasFor(t.conversation.id)?? import{f as gi}from"./vscode-api-a.js";var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}function aE(e){let tt=()=>[{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[]:[{id:`change-connection-color`}]];return tt}var YM=`https://ab.chatgpt.com/v1`,XM=`https://ab.chatgpt.com/v1/sdk_exception`,tN={networkConfig:{api:YM,logEventUrl:cM,sdkExceptionUrl:XM,networkOverrideFunc:KM}};';
 const localTitleText = 'var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}var s=1;';
 const appServerManagerSignalsText = 'async function ug(e,{modelProviders:t,archived:n=!1,sourceKinds:r=D,useStateDbOnly:i=!1}){let a=[],o=async s=>{let c=await e.sendRequest(`thread/list`,{limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i});a.push(...c.data),c.nextCursor&&await o(c.nextCursor)};return await o(null),a}class Eg{listRecentThreads({cursor:e,limit:t,useStateDbOnly:n=!1}){return this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:D,useStateDbOnly:n})}}';
+const requestText = 'var p=class{async makeRequest(o,s,c){let{headers:l,url:u}=this.getRequestTarget(s,c);try{switch(o){case`get`:return(await i.getInstance().get(u,l)).body;case`post`:return(await i.getInstance().post(u,this.getRequestBody(c),l)).body}}catch(i){throw a.warning(`sa_server_request_failed`,{safe:{method:o},sensitive:{error:i,routePattern:s,url:u}}),i}}async safeGet(e,...t){return this.makeRequest(`get`,e,t[0])}async safePost(e,...t){return this.makeRequest(`post`,e,t[0])}};';
+const accountInfoText = '"account-info":async()=>{let e=await this.authProvider.getToken({refreshToken:!1});if(!e)return{accountId:null,userId:null,plan:null,email:null,computeResidency:null};try{let r=JSON.parse(Buffer.from(e.split(".")[1],"base64url").toString("utf8")),n=r["https://api.openai.com/auth"]??{},o=r["https://api.openai.com/profile"]??{},i=n?.chatgpt_account_id??null,s=n?.chatgpt_user_id??null,a=n?.chatgpt_plan_type??null,c=n?.chatgpt_compute_residency??null,l=o.email??null;if(i&&s&&a)return{accountId:i,userId:s,plan:a,email:l,computeResidency:c}}catch{X().error("Unable to extract account id and plan from auth token.")}return{accountId:null,userId:null,plan:null,email:null,computeResidency:null}}';
 const headerNeedsBasePatchText = 'import{i as useEnv}from"./use-environment-a.js";import{f as customMessenger}from"./vscode-api-a.js";h=ge(),g;let b=i.filter(y),C=Ve(r.data,i,_),A=[];A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a},e.key));F.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&p===e.conversation.id,onClose:a},e.key));o=r==null?void 0:(0,Q.jsx)(de,{dateString:new Date(r).toISOString()});case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(me,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e};e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.updatedAt).toISOString()});o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r});function Ke(e){return e.kind===`remote`}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
 
 function createTarget() {
@@ -35,6 +38,7 @@ function createTarget() {
   fs.writeFileSync(path.join(assets, 'app-main-a.js'), appMainText);
   fs.writeFileSync(path.join(assets, 'local-title-a.js'), localTitleText);
   fs.writeFileSync(path.join(assets, 'app-server-manager-signals-a.js'), appServerManagerSignalsText);
+  fs.writeFileSync(path.join(assets, 'request-a.js'), requestText);
   return {
     extensionDir: dir,
     extensionJsPath: path.join(dir, 'out/extension.js'),
@@ -43,6 +47,7 @@ function createTarget() {
     localTitlePath: path.join(assets, 'local-title-a.js'),
     sidebarPath: path.join(assets, 'sidebar-a.js'),
     appServerManagerSignalsPath: path.join(assets, 'app-server-manager-signals-a.js'),
+    requestPath: path.join(assets, 'request-a.js'),
   };
 }
 
@@ -57,7 +62,7 @@ module.exports = {
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
         const plan = engine.plan(target, metadata);
         assert.deepStrictEqual(plan.errors, []);
-        assert.strictEqual(plan.changes.length, 5);
+        assert.strictEqual(plan.changes.length, 6);
         for (const change of plan.changes) {
           fs.writeFileSync(change.path, change.nextText);
         }
@@ -68,6 +73,7 @@ module.exports = {
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
         const appServerManagerSignals = fs.readFileSync(target.appServerManagerSignalsPath, 'utf8');
+        const request = fs.readFileSync(target.requestPath, 'utf8');
         assert.ok(extension.includes('codexLocalGroupsPatchVersion=13'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
         assert.ok(!extension.includes('codexLocalGroups.applyPatchesSilent'));
@@ -80,6 +86,8 @@ module.exports = {
         assert.ok(extension.includes('showQuickPick'));
         assert.ok(extension.includes('codexLocalGroupsExistingGroups'));
         assert.ok(extension.includes('codexLocalGroupsCleanGroupName'));
+        assert.ok(extension.includes('"--disable","plugins"'));
+        assert.ok(extension.includes('"mcp_oauth_credentials_store=\\"file\\""'));
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(n))return;'));
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
@@ -138,6 +146,7 @@ module.exports = {
         assert.ok(header.includes('promptConversationTitle'));
         assert.ok(header.includes('promptConversationGroup'));
         assert.ok(appMain.includes('codexLocalGroupsWebviewPatchVersion=6'));
+        assert.ok(appMain.includes('preventAllNetworkTraffic:!0'));
         assert.ok(appMain.includes('...(O==null||O===`local`?[{id:`codex-local-title`'));
         assert.ok(!appMain.includes('...O==null||O===`local`?[{id:`codex-local-title`'));
         assert.ok(appMain.includes('id:`codex-local-title`'));
@@ -148,6 +157,53 @@ module.exports = {
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentThreadListParams'));
         assert.ok(appServerManagerSignals.includes('cwds:t'));
         assert.ok(appServerManagerSignals.includes('e.limit=200'));
+        assert.ok(request.includes('codexLocalGroupsRequestPatchVersion=1'));
+        assert.ok(request.includes('codexLocalGroupsIsDisabledUsageRequest'));
+        assert.ok(request.includes('return null'));
+      },
+    },
+    {
+      name: 'disables ChatGPT-only prechecks in api-key extension sessions',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const extensionChange = plan.changes.find((item) => item.path === target.extensionJsPath);
+        const appMainChange = plan.changes.find((item) => item.path === target.appMainPath);
+        assert.ok(extensionChange);
+        assert.ok(appMainChange);
+        assert.ok(extensionChange.nextText.includes('"--disable","plugins"'));
+        assert.ok(extensionChange.nextText.includes('"mcp_oauth_credentials_store=\\"file\\""'));
+        assert.ok(appMainChange.nextText.includes('preventAllNetworkTraffic:!0'));
+      },
+    },
+    {
+      name: 'disables ChatGPT usage requests for api-key auth users',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const change = plan.changes.find((item) => item.path === target.requestPath);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('codexLocalGroupsRequestPatchVersion=1'));
+        assert.ok(change.nextText.includes('codexLocalGroupsIsDisabledUsageRequest(s)'));
+        assert.ok(change.nextText.includes('e.startsWith(`/wham/usage`)'));
+        assert.ok(change.nextText.includes('return null'));
+        assert.ok(change.nextText.indexOf('codexLocalGroupsIsDisabledUsageRequest(s)') < change.nextText.indexOf('i.getInstance().get(u,l)'));
+      },
+    },
+    {
+      name: 'returns empty account info without parsing api-key auth token',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.extensionJsPath, `${extensionText}${accountInfoText}`);
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const change = plan.changes.find((item) => item.path === target.extensionJsPath);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('"account-info":async()=>({accountId:null,userId:null,plan:null,email:null,computeResidency:null})'));
+        assert.ok(!change.nextText.includes('Unable to extract account id and plan from auth token'));
+        assert.ok(!change.nextText.includes('Buffer.from(e.split(".")[1]'));
       },
     },
     {
@@ -576,20 +632,20 @@ module.exports = {
       name: 'runs syntax checks successfully',
       run() {
         const target = createTarget();
-        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.localTitlePath, target.sidebarPath]) {
+        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.requestPath, target.localTitlePath, target.sidebarPath]) {
           fs.writeFileSync(file, 'export{};');
         }
         fs.writeFileSync(target.extensionJsPath, 'const ok = true;\n');
         const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
         const syntax = engine.runSyntaxChecks(target);
-        assert.strictEqual(syntax.length, 6);
+        assert.strictEqual(syntax.length, 7);
       },
     },
     {
       name: 'accepts syntax checks that exit zero with a spawn warning',
       run() {
         const target = createTarget();
-        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.localTitlePath, target.sidebarPath]) {
+        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.requestPath, target.localTitlePath, target.sidebarPath]) {
           fs.writeFileSync(file, 'export{};');
         }
         fs.writeFileSync(target.extensionJsPath, 'const ok = true;\n');
@@ -597,7 +653,7 @@ module.exports = {
         childProcess.spawnSync = () => ({ status: 0, error: new Error('spawnSync node EPERM'), stderr: '' });
         try {
           const syntax = new CodexPatchEngine({ nodePath: process.execPath }).runSyntaxChecks(target);
-          assert.strictEqual(syntax.length, 6);
+          assert.strictEqual(syntax.length, 7);
         } finally {
           childProcess.spawnSync = originalSpawnSync;
         }
