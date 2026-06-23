@@ -723,8 +723,17 @@ function patchAppServerManagerSignals(text, context) {
 
 function patchRequest(text, context) {
   let next = text;
-  if (!next.includes('codexLocalGroupsRequestPatchVersion=1')) {
-    next = replaceOnce(next, 'var p=class', 'var codexLocalGroupsRequestPatchVersion=1;function codexLocalGroupsIsDisabledUsageRequest(e){return typeof e==`string`&&e.startsWith(`/wham/usage`)}var p=class', context, 'request usage helper');
+  const v1Helper = 'var codexLocalGroupsRequestPatchVersion=1;function codexLocalGroupsIsDisabledUsageRequest(e){return typeof e==`string`&&e.startsWith(`/wham/usage`)}';
+  const v2Helper = [
+    'var codexLocalGroupsRequestPatchVersion=2;',
+    'function codexLocalGroupsDisabledRequestPath(e){if(typeof e!=`string`)return ``;try{return new URL(e,`https://chatgpt.com`).pathname}catch{return e.split(`?`)[0]}}',
+    'function codexLocalGroupsIsDisabledUsageRequest(e){let t=codexLocalGroupsDisabledRequestPath(e);return t.startsWith(`/wham/usage`)||t.startsWith(`/ces/v1/rgstr`)||t.startsWith(`/backend-api/plugins/featured`)}',
+  ].join('');
+  if (next.includes(v1Helper)) {
+    next = replaceOnce(next, v1Helper, v2Helper, context, 'request usage helper upgrade');
+  }
+  if (!next.includes('codexLocalGroupsRequestPatchVersion=2')) {
+    next = replaceOnce(next, 'var p=class', `${v2Helper}var p=class`, context, 'request usage helper');
   }
   const oldText = 'async makeRequest(o,s,c){let{headers:l,url:u}=this.getRequestTarget(s,c);';
   const newText = 'async makeRequest(o,s,c){if(codexLocalGroupsIsDisabledUsageRequest(s))return null;let{headers:l,url:u}=this.getRequestTarget(s,c);';

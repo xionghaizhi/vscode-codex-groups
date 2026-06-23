@@ -94,8 +94,11 @@ function main() {
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams');
   assertContains(target.appServerManagerSignalsPath, 'codex-local-groups-current-root-v1');
   assertContains(target.appServerManagerSignalsPath, 'cwds:t');
-  assertContains(target.requestPath, 'codexLocalGroupsRequestPatchVersion=1');
+  assertContains(target.requestPath, 'codexLocalGroupsRequestPatchVersion=2');
+  assertContains(target.requestPath, 'codexLocalGroupsDisabledRequestPath');
   assertContains(target.requestPath, 'codexLocalGroupsIsDisabledUsageRequest');
+  assertContains(target.requestPath, 't.startsWith(`/ces/v1/rgstr`)');
+  assertContains(target.requestPath, 't.startsWith(`/backend-api/plugins/featured`)');
   assertContains(target.requestPath, 'if(codexLocalGroupsIsDisabledUsageRequest(s))return null');
   assertContains(target.localTitlePath, 'codexLocalGroupsLocalTitlePatchVersion=6');
   const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });

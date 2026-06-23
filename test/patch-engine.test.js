@@ -157,8 +157,11 @@ module.exports = {
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentThreadListParams'));
         assert.ok(appServerManagerSignals.includes('cwds:t'));
         assert.ok(appServerManagerSignals.includes('e.limit=200'));
-        assert.ok(request.includes('codexLocalGroupsRequestPatchVersion=1'));
+        assert.ok(request.includes('codexLocalGroupsRequestPatchVersion=2'));
         assert.ok(request.includes('codexLocalGroupsIsDisabledUsageRequest'));
+        assert.ok(request.includes('codexLocalGroupsDisabledRequestPath'));
+        assert.ok(request.includes('`/ces/v1/rgstr`'));
+        assert.ok(request.includes('`/backend-api/plugins/featured`'));
         assert.ok(request.includes('return null'));
       },
     },
@@ -185,11 +188,34 @@ module.exports = {
         const plan = engine.plan(target, { version: 1, conversations: {} });
         const change = plan.changes.find((item) => item.path === target.requestPath);
         assert.ok(change);
-        assert.ok(change.nextText.includes('codexLocalGroupsRequestPatchVersion=1'));
+        assert.ok(change.nextText.includes('codexLocalGroupsRequestPatchVersion=2'));
         assert.ok(change.nextText.includes('codexLocalGroupsIsDisabledUsageRequest(s)'));
-        assert.ok(change.nextText.includes('e.startsWith(`/wham/usage`)'));
+        assert.ok(change.nextText.includes('new URL(e,`https://chatgpt.com`).pathname'));
+        assert.ok(change.nextText.includes('t.startsWith(`/wham/usage`)'));
+        assert.ok(change.nextText.includes('t.startsWith(`/ces/v1/rgstr`)'));
+        assert.ok(change.nextText.includes('t.startsWith(`/backend-api/plugins/featured`)'));
         assert.ok(change.nextText.includes('return null'));
         assert.ok(change.nextText.indexOf('codexLocalGroupsIsDisabledUsageRequest(s)') < change.nextText.indexOf('i.getInstance().get(u,l)'));
+      },
+    },
+    {
+      name: 'upgrades existing v1 request precheck helper for api-key fallback',
+      run() {
+        const target = createTarget();
+        const v1Helper = 'var codexLocalGroupsRequestPatchVersion=1;function codexLocalGroupsIsDisabledUsageRequest(e){return typeof e==`string`&&e.startsWith(`/wham/usage`)}';
+        const oldRequestStart = 'async makeRequest(o,s,c){let{headers:l,url:u}=this.getRequestTarget(s,c);';
+        const patchedRequestStart = 'async makeRequest(o,s,c){if(codexLocalGroupsIsDisabledUsageRequest(s))return null;let{headers:l,url:u}=this.getRequestTarget(s,c);';
+        fs.writeFileSync(target.requestPath, requestText.replace('var p=class', `${v1Helper}var p=class`).replace(oldRequestStart, patchedRequestStart));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const change = plan.changes.find((item) => item.path === target.requestPath);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('codexLocalGroupsRequestPatchVersion=2'));
+        assert.ok(change.nextText.includes('codexLocalGroupsDisabledRequestPath'));
+        assert.ok(change.nextText.includes('new URL(e,`https://chatgpt.com`).pathname'));
+        assert.ok(change.nextText.includes('t.startsWith(`/ces/v1/rgstr`)'));
+        assert.ok(change.nextText.includes('t.startsWith(`/backend-api/plugins/featured`)'));
+        assert.ok(!change.nextText.includes('codexLocalGroupsRequestPatchVersion=1'));
       },
     },
     {

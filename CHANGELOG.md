@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.0.13 - 2026-06-23
+
+### Fixed
+- 扩大 API key 模式下 ChatGPT auth 预检请求拦截：`/wham/usage*` 现在同时兼容路径和完整 URL。
+- 追加拦截 `/ces/v1/rgstr*` 与 `/backend-api/plugins/featured*`，减少 API key 登录时无用遥测/插件预检导致的 `fetch failed` 和 loading 卡顿。
+- 已有 v0.0.12 request bundle 会自动升级到 request patch v2。
+
+### Verified
+- `npm test`
+- `npm run compile`
+- `npm run lint`
+- `npm run apply-patches`
+- `npm run plan-patches`
+- `npm run verify-patched-bundles`
+
 ## v0.0.12 - 2026-06-22
 
 ### Fixed
