@@ -11,9 +11,35 @@ function activate(context) {
   outputChannel = vscode.window.createOutputChannel('Codex Local Groups');
   context.subscriptions.push(outputChannel);
   registerCommands(context);
+  scheduleStartupAutoPatch();
 }
 
 function deactivate() {}
+
+function scheduleStartupAutoPatch() {
+  setTimeout(() => {
+    runStartupAutoPatch().catch((error) => showPatchError(error, true));
+  }, 15000);
+}
+
+async function runStartupAutoPatch(options = {}) {
+  const patch = options.applyPatches || applyPatches;
+  const report = await patch({ silent: true });
+  if (!report || !report.changes || report.changes.length === 0) {
+    return report;
+  }
+  const action = await vscode.window.showInformationMessage(
+    'Codex Local Groups: 已自动适配新版 Codex，请 Reload Window 生效。',
+    'Reload Window',
+    'Show Output'
+  );
+  if (action === 'Reload Window') {
+    await reloadWindow();
+  } else if (action === 'Show Output') {
+    ensureOutputChannel().show();
+  }
+  return report;
+}
 
 function registerCommands(context) {
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.applyPatches', () => {
@@ -652,6 +678,7 @@ module.exports = {
   deactivate,
   applyPatches,
   repairCodexUi,
+  runStartupAutoPatch,
   checkStatus,
   searchConversations,
   manageGroups,

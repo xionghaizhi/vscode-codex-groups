@@ -106,7 +106,7 @@ module.exports = {
   name: 'extension commands',
   tests: [
     {
-      name: 'activates without scheduling startup patch',
+      name: 'activates and schedules delayed startup patch',
       run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
@@ -121,8 +121,40 @@ module.exports = {
         } finally {
           global.setTimeout = originalSetTimeout;
         }
-        assert.strictEqual(timers.length, 0);
+        assert.strictEqual(timers.length, 1);
+        assert.strictEqual(timers[0].delay, 15000);
         assert.ok(vscode.calls.commands.some((item) => item.registered === 'codexLocalGroups.applyPatches'));
+      },
+    },
+    {
+      name: 'startup auto patch prompts reload only when it changed bundles',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        extension.activate({ subscriptions: [] });
+        vscode.calls.nextInfoAction = 'Reload Window';
+        const report = await extension.runStartupAutoPatch({
+          applyPatches() {
+            return Promise.resolve({ changes: [{ path: '/codex/out/extension.js' }], errors: [], idempotent: true });
+          },
+        });
+        assert.strictEqual(report.changes.length, 1);
+        assert.ok(vscode.calls.infos[0].message.includes('已自动适配新版 Codex'));
+        assert.ok(vscode.calls.commands.some((item) => item.command === 'workbench.action.reloadWindow'));
+      },
+    },
+    {
+      name: 'startup auto patch stays quiet when bundles are current',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        extension.activate({ subscriptions: [] });
+        await extension.runStartupAutoPatch({
+          applyPatches() {
+            return Promise.resolve({ changes: [], errors: [], idempotent: true });
+          },
+        });
+        assert.strictEqual(vscode.calls.infos.length, 0);
       },
     },
     {

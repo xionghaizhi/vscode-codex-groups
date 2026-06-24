@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.13-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.14-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -34,11 +34,12 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 - Migration from:
   - Old: `~/.codex/codex-vscode-conversation-titles.json`
   - New: `~/.codex/codex-vscode-conversation-meta.json`
-- One-command patch reapply after Codex extension upgrades; Repair can restore clean bundles before patching if the Codex UI gets stuck.
+- After VSCode startup, Codex Local Groups checks delayed and reapplies compatible patches automatically after Codex extension upgrades, then prompts Reload; incompatible versions stop auto patching and show an adaptation warning.
+- Repair can restore clean bundles before patching if the Codex UI gets stuck.
 
 ## API-key mode request blocking
 
-v0.0.13 is optimized for API-key auth and blocks or disables these ChatGPT-auth-only requests / capabilities:
+v0.0.14 is optimized for API-key auth and blocks or disables these ChatGPT-auth-only requests / capabilities:
 
 - `/wham/usage*`: ChatGPT subscription and usage requests return `null` when either a path or a full URL matches.
 - `/ces/v1/rgstr*` and `/backend-api/plugins/featured*`: API-key-mode telemetry/plugin prechecks return `null`.
@@ -47,7 +48,7 @@ v0.0.13 is optimized for API-key auth and blocks or disables these ChatGPT-auth-
 - `failed to read OAuth tokens from keyring`: `app-server` starts with `-c mcp_oauth_credentials_store="file"` to avoid keyring OAuth prechecks.
 - `https://ab.chatgpt.com/v1/initialize`: the webview Statsig/AB SDK uses `preventAllNetworkTraffic:!0`.
 
-If you use ChatGPT auth/OAuth and depend on ChatGPT subscription usage pages, remote plugin marketplace, OpenAI-curated plugins, or AB experiments, do not apply the v0.0.13 API-key fallback patch.
+If you use ChatGPT auth/OAuth and depend on ChatGPT subscription usage pages, remote plugin marketplace, OpenAI-curated plugins, or AB experiments, do not apply the v0.0.14 API-key fallback patch.
 
 ## Installation
 
@@ -61,13 +62,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.13
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.14
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.13
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.14
 ```
 
 Then in VSCode:
@@ -95,7 +96,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.13.vsix
+code --install-extension vscode-codex-groups-0.0.14.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -207,7 +208,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.13
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.14
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -244,7 +245,7 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 ## Troubleshooting
 
 - Group UI is missing: run `Apply Patches`, then Reload Window.
-- Broken after Codex upgrade: run `Apply Patches` again.
+- Broken after Codex upgrade: it normally auto-patches and prompts Reload; you can also run `Apply Patches` manually.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - API-key auth keeps logging `/wham/usage`, `/ces/v1/rgstr`, remote plugin sync, keyring OAuth, or `ab.chatgpt.com/v1/initialize`: run `Apply Patches` or `Repair Codex UI`, then Reload Window.
 - Patch failed: check the `Codex Local Groups` output channel.

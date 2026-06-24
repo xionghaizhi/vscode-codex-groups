@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.0.14 - 2026-06-24
+
+### Added
+- VSCode 启动完成 15 秒后自动检查最新版 Codex bundle；如果现有规则能适配，会自动应用补丁并提示 Reload Window。
+- 自动补丁仅在实际修改 bundle 后提示 Reload；已是最新时保持静默。
+
+### Changed
+- 版本不兼容时保留 fail-closed 行为：停止自动 patch，并提示需要适配，避免盲改导致 Codex UI 崩溃。
+
+### Verified
+- `npm test`
+- `npm run compile`
+- `npm run lint`
+
 ## v0.0.13 - 2026-06-23
 
 ### Fixed
