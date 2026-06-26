@@ -181,6 +181,56 @@ module.exports = {
       },
     },
     {
+      name: 'patches latest app-main tray menu helper anchor',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.appMainPath, [
+          'import{f as gi}from"./vscode-api-a.js";',
+          'function vj({get:e,threadKeys:t,groups:n,projectlessThreadIds:r,projectlessLabel:i,untitledThreadLabel:a}){let o=Mm(n),s=[];for(let n of t){let t=e(dp,n);if(t==null||t.kind===`pending-worktree`)continue;let c=t.kind===`local`?t.conversation.workspaceKind===`projectless`||r?.includes(t.conversation.id)===!0:r?.includes(t.task.id)===!0;s.push({title:(t.kind===`local`?t.conversation.title?.trim():t.task.title?.trim())||a,path:Wu(n),projectLabel:c?i:o.get(n)??(t.kind===`local`?Ba(t.conversation.cwd??``):t.task.task_status_display?.environment_label??``),isProjectless:c})}return s}',
+          'qC={networkConfig:{api:HC,logEventUrl:ZS,sdkExceptionUrl:UC,networkOverrideFunc:zC}}',
+        ].join(''));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: { abc: { title: 'A' } } });
+        const change = plan.changes.find((item) => item.path === target.appMainPath);
+        assert.deepStrictEqual(plan.errors, []);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('codexLocalGroupsWebviewPatchVersion=6'));
+        assert.ok(change.nextText.includes('function vj({get:e,threadKeys:t,groups:n'));
+        assert.ok(change.nextText.includes('codexTitleAliasFor(t.conversation.id)??t.conversation.title?.trim()'));
+        assert.ok(change.nextText.includes('preventAllNetworkTraffic:!0'));
+      },
+    },
+    {
+      name: 'discovers renamed app-main tray menu helper by semantics',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.appMainPath, [
+          'import{f as gi}from"./vscode-api-a.js";',
+          'function Qj({get:e,threadKeys:t,groups:n,projectlessThreadIds:r,projectlessLabel:i,untitledThreadLabel:a}){let o=Mm(n),s=[];for(let n of t){let t=e(dp,n);if(t==null||t.kind===`pending-worktree`)continue;let c=t.kind===`local`?t.conversation.workspaceKind===`projectless`||r?.includes(t.conversation.id)===!0:r?.includes(t.task.id)===!0;s.push({title:(t.kind===`local`?t.conversation.title?.trim():t.task.title?.trim())||a,path:Wu(n),projectLabel:c?i:o.get(n)??(t.kind===`local`?Ba(t.conversation.cwd??``):t.task.task_status_display?.environment_label??``),isProjectless:c})}return s}',
+          'JC={networkConfig:{api:UC,logEventUrl:QS,sdkExceptionUrl:WC,networkOverrideFunc:BC}}',
+        ].join(''));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: { abc: { title: 'A' } } });
+        const change = plan.changes.find((item) => item.path === target.appMainPath);
+        assert.deepStrictEqual(plan.errors, []);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('codexLocalGroupsWebviewPatchVersion=6'));
+        assert.ok(change.nextText.includes('function Qj({get:e,threadKeys:t,groups:n'));
+        assert.ok(change.nextText.includes('codexTitleAliasFor(t.conversation.id)??t.conversation.title?.trim()'));
+      },
+    },
+    {
+      name: 'does not guess app-main helper when semantic anchor is not unique',
+      run() {
+        const target = createTarget();
+        const helper = 'function Qj({get:e,threadKeys:t,groups:n,projectlessThreadIds:r,projectlessLabel:i,untitledThreadLabel:a}){let o=Mm(n),s=[];for(let n of t){let t=e(dp,n);if(t==null||t.kind===`pending-worktree`)continue;let c=t.kind===`local`?t.conversation.workspaceKind===`projectless`||r?.includes(t.conversation.id)===!0:r?.includes(t.task.id)===!0;s.push({title:(t.kind===`local`?t.conversation.title?.trim():t.task.title?.trim())||a,path:Wu(n),projectLabel:c?i:o.get(n)??(t.kind===`local`?Ba(t.conversation.cwd??``):t.task.task_status_display?.environment_label??``),isProjectless:c})}return s}';
+        fs.writeFileSync(target.appMainPath, `import{f as gi}from"./vscode-api-a.js";${helper}${helper.replace('function Qj', 'function Rj')}`);
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('app-main metadata helper: 找不到 function aE(e){ 注入点'));
+      },
+    },
+    {
       name: 'disables ChatGPT usage requests for api-key auth users',
       run() {
         const target = createTarget();
@@ -196,6 +246,22 @@ module.exports = {
         assert.ok(change.nextText.includes('t.startsWith(`/backend-api/plugins/featured`)'));
         assert.ok(change.nextText.includes('return null'));
         assert.ok(change.nextText.indexOf('codexLocalGroupsIsDisabledUsageRequest(s)') < change.nextText.indexOf('i.getInstance().get(u,l)'));
+      },
+    },
+    {
+      name: 'disables latest Statsig network config',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.appMainPath, appMainText.replace(
+          'tN={networkConfig:{api:YM,logEventUrl:cM,sdkExceptionUrl:XM,networkOverrideFunc:KM}}',
+          'JC={networkConfig:{api:UC,logEventUrl:QS,sdkExceptionUrl:WC,networkOverrideFunc:BC}}'
+        ));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const change = plan.changes.find((item) => item.path === target.appMainPath);
+        assert.deepStrictEqual(plan.errors, []);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('JC={networkConfig:{api:UC,logEventUrl:QS,sdkExceptionUrl:WC,networkOverrideFunc:BC,preventAllNetworkTraffic:!0}}'));
       },
     },
     {

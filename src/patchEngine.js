@@ -697,30 +697,46 @@ function patchAppMainHelper(text, context) {
     return removeLegacyAppMainAliasHelper(next, context);
   }
   const messenger = findVscodeMessengerAlias(text) || 'gi';
+  const anchor = appMainHelperAnchor(text);
+  if (!anchor) {
+    context.errors.push('app-main metadata helper: 找不到 function aE(e){ 注入点');
+    return text;
+  }
   if (text.includes('var codexLocalGroupsInitialMeta=')) {
-    const end = text.includes('function aE(e){') ? 'function aE(e){' : 'function aE(){';
-    next = replaceBlock(text, 'var codexLocalGroupsInitialMeta=', end, `${webviewHelper(context.metadata, messenger)}${end}`, context, 'app-main metadata helper upgrade');
+    next = replaceBlock(text, 'var codexLocalGroupsInitialMeta=', anchor, `${webviewHelper(context.metadata, messenger)}${anchor}`, context, 'app-main metadata helper upgrade');
     return removeLegacyAppMainAliasHelper(next, context);
   }
   if (text.includes('var codexTitleAliasMap=')) {
-    const end = text.includes('function aE(e){') ? 'function aE(e){' : 'function aE(){';
-    return replaceBlock(text, 'var codexTitleAliasMap=', end, `${webviewHelper(context.metadata, messenger)}${end}`, context, 'app-main metadata helper');
+    return replaceBlock(text, 'var codexTitleAliasMap=', anchor, `${webviewHelper(context.metadata, messenger)}${anchor}`, context, 'app-main metadata helper');
   }
-  if (text.includes('function aE(e){')) {
-    return replaceOnce(text, 'function aE(e){', `${webviewHelper(context.metadata, messenger)}function aE(e){`, context, 'app-main metadata helper inject');
+  return replaceOnce(text, anchor, `${webviewHelper(context.metadata, messenger)}${anchor}`, context, 'app-main metadata helper inject');
+}
+
+function appMainHelperAnchor(text) {
+  for (const anchor of ['function aE(e){', 'function aE(){']) {
+    if (text.includes(anchor)) {
+      return anchor;
+    }
   }
-  if (text.includes('function aE(){')) {
-    return replaceOnce(text, 'function aE(){', `${webviewHelper(context.metadata, messenger)}function aE(){`, context, 'app-main metadata helper inject latest');
-  }
-  context.errors.push('app-main metadata helper: 找不到 function aE(e){ 注入点');
-  return text;
+  const regex = /function [A-Za-z_$][\w$]*\(\{get:[A-Za-z_$][\w$]*,threadKeys:[A-Za-z_$][\w$]*,groups:[A-Za-z_$][\w$]*,projectlessThreadIds:[A-Za-z_$][\w$]*,projectlessLabel:[A-Za-z_$][\w$]*,untitledThreadLabel:[A-Za-z_$][\w$]*\}\)\{/g;
+  const matches = [...text.matchAll(regex)].filter((match) => {
+    const snippet = text.slice(match.index, match.index + 1000);
+    return snippet.includes('pending-worktree') &&
+      snippet.includes('conversation.title?.trim()') &&
+      snippet.includes('task.title?.trim()') &&
+      snippet.includes('projectLabel');
+  });
+  return matches.length === 1 ? matches[0][0] : '';
 }
 
 function removeLegacyAppMainAliasHelper(text, context) {
   if (!text.includes('codexLocalGroupsWebviewPatchVersion=6') || !text.includes('var codexTitleAliasMap=')) {
     return text;
   }
-  const end = text.includes('function aE(e){') ? 'function aE(e){' : 'function aE(){';
+  const end = appMainHelperAnchor(text);
+  if (!end) {
+    return text;
+  }
   return replaceBlock(text, 'var codexTitleAliasMap=', end, end, context, 'legacy app-main alias helper cleanup');
 }
 
@@ -761,13 +777,17 @@ function patchAppMainContextMenu(text, context) {
 }
 
 function patchAppMainStatsigNetwork(text, context) {
+  if (text.includes('preventAllNetworkTraffic:!0')) {
+    return text;
+  }
   const oldText = 'tN={networkConfig:{api:YM,logEventUrl:cM,sdkExceptionUrl:XM,networkOverrideFunc:KM}}';
   const next = 'tN={networkConfig:{api:YM,logEventUrl:cM,sdkExceptionUrl:XM,networkOverrideFunc:KM,preventAllNetworkTraffic:!0}}';
   if (text.includes(next) || !text.includes(oldText)) {
     const latest = 'qC={networkConfig:{api:HC,logEventUrl:ZS,sdkExceptionUrl:UC,networkOverrideFunc:zC}}';
     const latestNext = 'qC={networkConfig:{api:HC,logEventUrl:ZS,sdkExceptionUrl:UC,networkOverrideFunc:zC,preventAllNetworkTraffic:!0}}';
-    if (text.includes(latestNext) || !text.includes(latest)) {
-      return text;
+    if (!text.includes(latest)) {
+      const current = /([A-Za-z_$][\w$]*)=\{networkConfig:\{api:([A-Za-z_$][\w$]*),logEventUrl:([A-Za-z_$][\w$]*),sdkExceptionUrl:([A-Za-z_$][\w$]*),networkOverrideFunc:([A-Za-z_$][\w$]*)\}\}/;
+      return replaceRegexOnce(text, current, '$1={networkConfig:{api:$2,logEventUrl:$3,sdkExceptionUrl:$4,networkOverrideFunc:$5,preventAllNetworkTraffic:!0}}', context, 'app-main statsig no network current');
     }
     return replaceOnce(text, latest, latestNext, context, 'app-main statsig no network latest');
   }

@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.0.16 - 2026-06-26
+
+### Changed
+- app-main 注入点改为语义唯一查找，兼容 Codex 混淆函数名变化。
+- Statsig network config 改为动态变量匹配，减少新版 Codex 小版本适配成本。
+- 多个语义候选时继续 fail-closed，避免盲注入导致 Codex UI 白屏。
+
+### Verified
+- `npm run compile`
+- `npm run lint`
+- `npm test`
+- `node scripts/plan-patches.js`
+- `node scripts/verify-patched-bundles.js`
+
 ## v0.0.15 - 2026-06-26
 
 ### Added
