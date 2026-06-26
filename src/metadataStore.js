@@ -3,11 +3,14 @@ const path = require('path');
 
 const DEFAULT_METADATA_PATH = '/root/.codex/codex-vscode-conversation-meta.json';
 const DEFAULT_OLD_TITLES_PATH = '/root/.codex/codex-vscode-conversation-titles.json';
+const DEFAULT_SESSION_INDEX_PATH = '/root/.codex/session_index.jsonl';
 
 class ConversationMetadataStore {
   constructor(options = {}) {
     this.metadataPath = options.metadataPath || DEFAULT_METADATA_PATH;
     this.oldTitlesPath = options.oldTitlesPath || DEFAULT_OLD_TITLES_PATH;
+    this.sessionIndexPath = options.sessionIndexPath
+      || (options.metadataPath ? path.join(path.dirname(this.metadataPath), 'session_index.jsonl') : DEFAULT_SESSION_INDEX_PATH);
   }
 
   load() {
@@ -19,6 +22,7 @@ class ConversationMetadataStore {
     }
     const normalized = normalizeMetadata(metadata, this.metadataPath);
     changed = this.migrateOldTitles(normalized) || changed;
+    changed = this.migrateSessionIndexTitles(normalized) || changed;
     if (changed) {
       return this.write(normalized);
     }
@@ -76,6 +80,27 @@ class ConversationMetadataStore {
     return changed;
   }
 
+  migrateSessionIndexTitles(metadata) {
+    metadata.migrations = metadata.migrations || {};
+    if (metadata.migrations.sessionIndexTitlesImported) {
+      return false;
+    }
+    const titles = this.readSessionIndexTitles();
+    let changed = false;
+    for (const [id, current] of Object.entries(metadata.conversations)) {
+      const title = cleanString(titles[id]);
+      if (!current.title && title) {
+        metadata.conversations[id] = { ...current, title };
+        changed = true;
+      }
+    }
+    if (Object.keys(titles).length === 0 && !changed) {
+      return false;
+    }
+    metadata.migrations.sessionIndexTitlesImported = true;
+    return true;
+  }
+
   readOldTitles() {
     if (!fs.existsSync(this.oldTitlesPath)) {
       return {};
@@ -86,6 +111,29 @@ class ConversationMetadataStore {
     } catch (error) {
       return {};
     }
+  }
+
+  readSessionIndexTitles() {
+    if (!fs.existsSync(this.sessionIndexPath)) {
+      return {};
+    }
+    const titles = {};
+    for (const line of fs.readFileSync(this.sessionIndexPath, 'utf8').split(/\r?\n/)) {
+      if (!line.trim()) {
+        continue;
+      }
+      try {
+        const item = JSON.parse(line);
+        const id = cleanString(item.id);
+        const title = cleanString(item.thread_name);
+        if (id && title) {
+          titles[id] = title;
+        }
+      } catch (error) {
+        // session_index.jsonl 可包含半写入行，忽略坏行保留已有元数据。
+      }
+    }
+    return titles;
   }
 }
 
@@ -101,6 +149,9 @@ function normalizeMetadata(data, file) {
     metadata.migrations = {};
     if (data.migrations.oldTitlesImported === true) {
       metadata.migrations.oldTitlesImported = true;
+    }
+    if (data.migrations.sessionIndexTitlesImported === true) {
+      metadata.migrations.sessionIndexTitlesImported = true;
     }
   }
   normalizeConversations(metadata, data.conversations, file);
@@ -178,5 +229,6 @@ module.exports = {
   ConversationMetadataStore,
   DEFAULT_METADATA_PATH,
   DEFAULT_OLD_TITLES_PATH,
+  DEFAULT_SESSION_INDEX_PATH,
   normalizeMetadata,
 };

@@ -12,7 +12,7 @@ try {
 
 function main() {
   const target = new CodexExtensionLocator().locate();
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=13');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=14');
   assertContains(target.extensionJsPath, 'showInputBox');
   assertContains(target.extensionJsPath, 'showQuickPick');
   assertContains(target.extensionJsPath, 'codexLocalGroupsExistingGroups');
@@ -24,7 +24,10 @@ function main() {
   assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(a,e))return;');
   assertContains(target.extensionJsPath, 'metadataSaved');
   assertContains(target.extensionJsPath, 'String.fromCharCode(10)');
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=13');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=14');
+  assertContains(target.extensionJsPath, 'codexLocalGroupsProjectRootFor');
+  assertContains(target.extensionJsPath, 'cwd:e.cwd??codexLocalGroupsProjectRootFor(e.id)');
+  assertNotContains(target.extensionJsPath, 'c.cwds=s');
   assertContains(target.extensionJsPath, '&&!t)return!1');
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
@@ -35,7 +38,7 @@ function main() {
   assertContains(target.extensionJsPath, '"--disable","plugins"');
   assertContains(target.extensionJsPath, '"mcp_oauth_credentials_store=\\"file\\""');
   assertNotContains(target.extensionJsPath, 'typeof navigator<"u"&&navigator');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=33');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=36');
   assertContains(target.headerPath, 'paddingRight:`160px`');
   assertNotContains(target.headerPath, 'paddingRight:`112px`');
   assertContains(target.headerPath, 'codex-local-groups-conversation-row relative');
@@ -72,8 +75,17 @@ function main() {
   assertContains(target.headerPath, 'codexLocalGroupsStoreMeta(r,!0)');
   assertContains(target.headerPath, 'e.groupMap.has(f.group)');
   assertContains(target.headerPath, 'Date.now()-n<600000');
+  assertContains(target.headerPath, 't<1e12?t*1e3:t');
+  assertContains(target.headerPath, 'r||s');
   assertContains(target.headerPath, 'codexLocalGroupsSetBusy');
   assertContains(target.headerPath, 'codexLocalGroupsStoreCurrentRoot');
+  assertContains(target.headerPath, 'codexLocalGroupsConversationProjectRoot');
+  assertContains(target.headerPath, 'codexLocalGroupsMetadataItems');
+  assertContains(target.headerPath, 'codexLocalGroupsMetadataRow');
+  assertContains(target.headerPath, 'codexLocalGroupsMetadataOnly:!0');
+  assertContains(target.headerPath, 'metadata-row-');
+  assertContains(target.headerPath, 'metadata-actions-');
+  assertContains(target.headerPath, 'a.title??o?.title');
   assertContains(target.headerPath, 'codexRecentTaskMenuCurrentRoot');
   assertContains(target.headerPath, 'codex-local-groups-current-root-v1');
   assertContains(target.headerPath, 'n.textContent===t&&(n.textContent=r)');
@@ -83,7 +95,7 @@ function main() {
   assertNotContains(target.headerPath, 't[31]=codexLocalGroupsRefresh');
   assertContains(target.headerPath, '打开中…');
   assertContains(target.headerPath, 'max-h-[450px]');
-  assertNotContains(target.headerPath, 'dispatchHostMessage({type:`navigate-to-route`,path:`/local/');
+  assertNotContains(target.headerPath, 'onClose:()=>{b.dispatchHostMessage({type:`navigate-to-route`,path:`/local/');
   assertContains(target.headerPath, 't.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,`打开中…`),codexLocalGroupsPromptGroup');
   assertNotContains(target.headerPath, 'overflow-hidden rounded-lg');
   assertContains(target.headerPath, 'children:`设置标题`');
@@ -98,10 +110,11 @@ function main() {
   assertContains(target.appMainPath, 'preventAllNetworkTraffic:!0');
   assertContains(target.appMainPath, 'promptConversationTitle');
   assertContains(target.appMainPath, 'codexTitleAliasFor');
-  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=1');
+  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=2');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams');
-  assertContains(target.appServerManagerSignalsPath, 'codex-local-groups-current-root-v1');
-  assertContains(target.appServerManagerSignalsPath, 'cwds:t');
+  assertNotContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentInitialMeta');
+  assertNotContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams({limit:200');
+  assertNotContains(target.appServerManagerSignalsPath, 'cwds:t');
   assertContains(target.requestPath, 'codexLocalGroupsRequestPatchVersion=2');
   assertContains(target.requestPath, 'codexLocalGroupsDisabledRequestPath');
   assertContains(target.requestPath, 'codexLocalGroupsIsDisabledUsageRequest');

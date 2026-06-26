@@ -80,6 +80,38 @@ module.exports = {
       },
     },
     {
+      name: 'imports missing titles from session index for known metadata rows',
+      run() {
+        const dir = tempDir('codex-meta-session-index');
+        const file = path.join(dir, 'meta.json');
+        const sessionIndex = path.join(dir, 'session_index.jsonl');
+        writeJson(file, {
+          version: 1,
+          conversations: {
+            a: { group: 'g', projectRoot: '/p' },
+            b: { title: 'keep', group: 'g', projectRoot: '/p' },
+          },
+        });
+        fs.writeFileSync(sessionIndex, [
+          JSON.stringify({ id: 'a', thread_name: 'from session' }),
+          JSON.stringify({ id: 'b', thread_name: 'ignored' }),
+          '{ bad json',
+        ].join('\n'));
+        const store = new ConversationMetadataStore({
+          metadataPath: file,
+          oldTitlesPath: path.join(dir, 'titles.json'),
+          sessionIndexPath: sessionIndex,
+        });
+        const metadata = store.load();
+        assert.strictEqual(metadata.conversations.a.title, 'from session');
+        assert.strictEqual(metadata.conversations.b.title, 'keep');
+        assert.deepStrictEqual(metadata.migrations, {
+          oldTitlesImported: true,
+          sessionIndexTitlesImported: true,
+        });
+      },
+    },
+    {
       name: 'ignores invalid old titles when metadata is valid',
       run() {
         const dir = tempDir('codex-meta-invalid-old-title');
