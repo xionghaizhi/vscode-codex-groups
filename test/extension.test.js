@@ -106,7 +106,7 @@ module.exports = {
   name: 'extension commands',
   tests: [
     {
-      name: 'activates and schedules delayed startup patch',
+      name: 'activates and schedules quick startup patch',
       run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
@@ -122,7 +122,7 @@ module.exports = {
           global.setTimeout = originalSetTimeout;
         }
         assert.strictEqual(timers.length, 1);
-        assert.strictEqual(timers[0].delay, 15000);
+        assert.strictEqual(timers[0].delay, 1000);
         assert.ok(vscode.calls.commands.some((item) => item.registered === 'codexLocalGroups.applyPatches'));
       },
     },
@@ -646,6 +646,27 @@ module.exports = {
         assert.strictEqual(result.restored.length, 1);
         assert.strictEqual(result.report, report);
         assert.ok(vscode.calls.infos[0].message.includes('Repair 已完成'));
+        assert.ok(vscode.calls.commands.some((item) => item.command === 'workbench.action.reloadWindow'));
+      },
+    },
+    {
+      name: 'restores Codex UI without reapplying local group patches',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        const calls = [];
+        const target = { extensionDir: '/codex', packageJsonPath: '/codex/package.json' };
+        vscode.calls.nextInfoAction = 'Reload Window';
+        const result = await extension.restoreCodexUi({
+          locator: { locate() { calls.push('locate'); return target; } },
+          engine: {
+            restoreCleanBundles(value) { calls.push(`restore:${value.extensionDir}`); return [{ path: '/codex/out/extension.js', backupPath: '/backup/extension.js' }]; },
+            apply() { throw new Error('should not apply patches'); },
+          },
+        });
+        assert.deepStrictEqual(calls, ['locate', 'restore:/codex']);
+        assert.strictEqual(result.restored.length, 1);
+        assert.ok(vscode.calls.infos[0].message.includes('已恢复 1 个 clean bundle'));
         assert.ok(vscode.calls.commands.some((item) => item.command === 'workbench.action.reloadWindow'));
       },
     },

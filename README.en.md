@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.14-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.15-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -36,10 +36,11 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
   - New: `~/.codex/codex-vscode-conversation-meta.json`
 - After VSCode startup, Codex Local Groups checks delayed and reapplies compatible patches automatically after Codex extension upgrades, then prompts Reload; incompatible versions stop auto patching and show an adaptation warning.
 - Repair can restore clean bundles before patching if the Codex UI gets stuck.
+- Restore Original Codex UI can restore clean bundles without reapplying patches when you want to stop using the enhancements.
 
 ## API-key mode request blocking
 
-v0.0.14 is optimized for API-key auth and blocks or disables these ChatGPT-auth-only requests / capabilities:
+v0.0.14+ is optimized for API-key auth and blocks or disables these ChatGPT-auth-only requests / capabilities:
 
 - `/wham/usage*`: ChatGPT subscription and usage requests return `null` when either a path or a full URL matches.
 - `/ces/v1/rgstr*` and `/backend-api/plugins/featured*`: API-key-mode telemetry/plugin prechecks return `null`.
@@ -48,7 +49,7 @@ v0.0.14 is optimized for API-key auth and blocks or disables these ChatGPT-auth-
 - `failed to read OAuth tokens from keyring`: `app-server` starts with `-c mcp_oauth_credentials_store="file"` to avoid keyring OAuth prechecks.
 - `https://ab.chatgpt.com/v1/initialize`: the webview Statsig/AB SDK uses `preventAllNetworkTraffic:!0`.
 
-If you use ChatGPT auth/OAuth and depend on ChatGPT subscription usage pages, remote plugin marketplace, OpenAI-curated plugins, or AB experiments, do not apply the v0.0.14 API-key fallback patch.
+If you use ChatGPT auth/OAuth and depend on ChatGPT subscription usage pages, remote plugin marketplace, OpenAI-curated plugins, or AB experiments, do not apply the v0.0.14+ API-key fallback patch.
 
 ## Installation
 
@@ -62,13 +63,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.14
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.15
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.14
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.15
 ```
 
 Then in VSCode:
@@ -96,7 +97,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.14.vsix
+code --install-extension vscode-codex-groups-0.0.15.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -208,10 +209,11 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.14
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.15
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
+npm run restore-codex-ui
 npm run verify-patched-bundles
 ```
 
@@ -237,6 +239,7 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 | `Codex Local Groups: Check Status` | When you are not sure whether the extension is active, or after a Codex upgrade | Checks the OpenAI Codex extension location, version, patch status, metadata path, total conversations, grouped count, and ungrouped count. Results are written to the `Codex Local Groups` output channel, with Apply / Reload / Show Output shortcuts. |
 | `Codex Local Groups: Apply Patches` | When the grouped UI disappears after a Codex upgrade, or when a command asks you to reapply patches | Manually patches the OpenAI Codex extension bundles with this extension's enhancements. Target files are backed up first; unsupported bundle anchors stop the patch instead of overwriting blindly. Reload Window is usually needed afterward. |
 | `Codex Local Groups: Repair Codex UI` | When Codex UI is stuck, blank, or patch state looks broken after an upgrade | Restores clean Codex bundles from `.codex-patches`, then reapplies patches. Reload Window is usually needed afterward. |
+| `Codex Local Groups: Restore Original Codex UI` | When disabling this extension, or Codex is still broken after disabling it | Restores clean Codex bundles from `.codex-patches` without reapplying patches. Reload Window is needed afterward. |
 | `Codex Local Groups: Open Metadata JSON` | When you need to inspect or manually troubleshoot local titles and group data | Opens `~/.codex/codex-vscode-conversation-meta.json`, which stores local titles, groups, project paths, and pending group state. Back it up before manual edits. |
 | `Codex Local Groups: Reload Window` | After patching, installing a new version, or when the current Codex webview still shows old UI | Runs VSCode `workbench.action.reloadWindow` so the extension host and Codex webview load the latest patches. |
 | `Codex Local Groups: Reset Pending Group` | When `+ New group and start chat` does not assign the new conversation correctly, or pending state is stuck | Clears the `pendingGroup` state, applies patches silently, and prompts Reload Window. It does not delete existing conversations or groups. |
@@ -247,6 +250,7 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 - Group UI is missing: run `Apply Patches`, then Reload Window.
 - Broken after Codex upgrade: it normally auto-patches and prompts Reload; you can also run `Apply Patches` manually.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
+- Codex is still broken after disabling/uninstalling this extension: run `Codex Local Groups: Restore Original Codex UI`, or run `npm run restore-codex-ui`, then Reload Window. Disabling the extension does not automatically revert patched Codex bundles.
 - API-key auth keeps logging `/wham/usage`, `/ces/v1/rgstr`, remote plugin sync, keyring OAuth, or `ab.chatgpt.com/v1/initialize`: run `Apply Patches` or `Repair Codex UI`, then Reload Window.
 - Patch failed: check the `Codex Local Groups` output channel.
 - Node version is too old: the extension prefers the VSCode Server Node; set `codexLocalGroups.nodePath` if needed.

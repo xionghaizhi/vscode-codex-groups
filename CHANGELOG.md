@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.0.15 - 2026-06-26
+
+### Added
+- 新增 `Codex Local Groups: Restore Original Codex UI` 和 `npm run restore-codex-ui`，可只恢复 clean Codex bundle，不重新应用补丁。
+
+### Changed
+- 启动自动 patch 延迟从 15 秒缩短到 1 秒，降低 Codex 先启动旧 app-server 的概率。
+- Restore 会覆盖 sidebar bundle，避免停用增强后残留 sidebar patch。
+
+### Verified
+- `npm run compile`
+- `npm run lint`
+- `npm test`
+- `node scripts/plan-patches.js`
+- `node scripts/verify-patched-bundles.js`
+
 ## v0.0.14 - 2026-06-24
 
 ### Added

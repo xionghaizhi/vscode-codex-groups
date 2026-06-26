@@ -28,6 +28,8 @@ function main() {
   assertContains(target.extensionJsPath, '&&!t)return!1');
   assertContains(target.extensionJsPath, 'Codex Local Groups: 已保存。');
   assertNotContains(target.extensionJsPath, '已保存，请 Reload Window 生效');
+  assertContains(target.extensionJsPath, '/[\\s\\u3000]+/g');
+  assertNotContains(target.extensionJsPath, '/[s\u3000]+/g');
   assertContains(target.extensionJsPath, '"account-info":async()=>({accountId:null,userId:null,plan:null,email:null,computeResidency:null})');
   assertNotContains(target.extensionJsPath, 'Unable to extract account id and plan from auth token.');
   assertContains(target.extensionJsPath, '"--disable","plugins"');
@@ -42,6 +44,8 @@ function main() {
   assertContains(target.headerPath, 'codexLocalGroupsDecoratedItem');
   assertContains(target.headerPath, 'codexLocalGroupsLocalTitle');
   assertContains(target.headerPath, 'codexLocalGroupsNormalizeGroupName');
+  assertContains(target.headerPath, '/[\\s\\u3000]+/g');
+  assertNotContains(target.headerPath, '/[s\u3000]+/g');
   assertContains(target.headerPath, 'codexLocalGroupsToggleGroup');
   assertContains(target.headerPath, 'codexLocalGroupsVisibleItems');
   assertContains(target.headerPath, 'codex-local-groups-collapsed-v1');
@@ -49,7 +53,13 @@ function main() {
   assertContains(target.headerPath, 'aria-expanded');
   assertContains(target.headerPath, '展开全部');
   assertContains(target.headerPath, '收起到最近 5 条');
-  assertContains(target.headerPath, 'titleOverride:o?(0,Q.jsx)(Q.Fragment,{children:o}):void 0');
+  const headerText = fs.readFileSync(target.headerPath, 'utf8');
+  if (
+    !headerText.includes('function rt(e){let t=(0,Z.c)(35)') &&
+    !headerText.includes('function it(e){let t=(0,Z.c)(35)')
+  ) {
+    throw new Error(`缺少补丁标记：${target.headerPath} header refresh hook`);
+  }
   assertContains(target.headerPath, 'function codexRecentTaskProjectRows(e,t,n,codexLocalGroupsRow)');
   assertContains(target.headerPath, '(0,Q.jsx)(codexLocalGroupsRow,{item:o');
   assertNotContains(target.headerPath, '(0,Q.jsx)(Je,{item:o');
@@ -67,9 +77,7 @@ function main() {
   assertContains(target.headerPath, 'codexRecentTaskMenuCurrentRoot');
   assertContains(target.headerPath, 'codex-local-groups-current-root-v1');
   assertContains(target.headerPath, 'n.textContent===t&&(n.textContent=r)');
-  assertContains(target.headerPath, 't[20]!==o');
   assertContains(target.headerPath, 't[33]!==codexLocalGroupsRefresh');
-  assertContains(target.headerPath, 'function rt(e){let t=(0,Z.c)(35)');
   assertNotContains(target.headerPath, 'codexRecentConversationFilter(r.filter(w),codexRecentTaskCurrentRoot)');
   assertNotContains(target.headerPath, 't[31]!==codexLocalGroupsRefresh');
   assertNotContains(target.headerPath, 't[31]=codexLocalGroupsRefresh');

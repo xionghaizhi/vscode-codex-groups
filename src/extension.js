@@ -19,7 +19,7 @@ function deactivate() {}
 function scheduleStartupAutoPatch() {
   setTimeout(() => {
     runStartupAutoPatch().catch((error) => showPatchError(error, true));
-  }, 15000);
+  }, 1000);
 }
 
 async function runStartupAutoPatch(options = {}) {
@@ -62,6 +62,9 @@ function registerCommands(context) {
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.reloadWindow', reloadWindow));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.repairCodexUi', () => {
     repairCodexUi().catch((error) => showCommandError('修复 Codex UI', error));
+  }));
+  context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.restoreCodexUi', () => {
+    restoreCodexUi().catch((error) => showCommandError('恢复 Codex UI', error));
   }));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.resetPendingGroup', resetPendingGroup));
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.searchConversations', () => {
@@ -121,6 +124,28 @@ async function repairCodexUi(options = {}) {
     ensureOutputChannel().show();
   }
   return { restored, report };
+}
+
+async function restoreCodexUi(options = {}) {
+  const target = (options.locator || new CodexExtensionLocator()).locate();
+  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+  const restored = engine.restoreCleanBundles(target);
+  const channel = ensureOutputChannel();
+  channel.appendLine(`OpenAI Codex 扩展：${target.extensionDir}`);
+  for (const item of restored) {
+    channel.appendLine(`恢复 clean bundle：${item.path}`);
+  }
+  const action = await vscode.window.showInformationMessage(
+    `Codex Local Groups: 已恢复 ${restored.length} 个 clean bundle，不再重新应用补丁。`,
+    'Reload Window',
+    'Show Output'
+  );
+  if (action === 'Reload Window') {
+    await reloadWindow();
+  } else if (action === 'Show Output') {
+    ensureOutputChannel().show();
+  }
+  return { restored };
 }
 
 async function openMetadataJson() {
@@ -678,6 +703,7 @@ module.exports = {
   deactivate,
   applyPatches,
   repairCodexUi,
+  restoreCodexUi,
   runStartupAutoPatch,
   checkStatus,
   searchConversations,

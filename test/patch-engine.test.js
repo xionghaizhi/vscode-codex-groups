@@ -626,13 +626,18 @@ module.exports = {
       name: 'restores clean backups even when newer backups are already patched',
       run() {
         const target = createTarget();
+        fs.writeFileSync(target.sidebarPath, 'b=t(x,({get:e})=>e(d)??s),');
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
         engine.apply(target, { version: 1, conversations: { a: { title: 'A' } } });
         engine.apply(target, { version: 1, conversations: { a: { title: 'B' } } });
+        assert.ok(fs.readFileSync(target.sidebarPath, 'utf8').includes('t===`recent`?s:t'));
 
         const restored = engine.restoreCleanBundles(target);
 
         assert.ok(restored.some((item) => item.path === target.extensionJsPath));
+        assert.ok(restored.some((item) => item.path === target.sidebarPath));
+        assert.ok(fs.readFileSync(target.sidebarPath, 'utf8').includes('e(d)??s'));
+        assert.ok(!fs.readFileSync(target.sidebarPath, 'utf8').includes('t===`recent`?s:t'));
         for (const item of restored) {
           assert.strictEqual(fs.readFileSync(item.path, 'utf8').includes('codexLocalGroups'), false, item.path);
           assert.strictEqual(fs.readFileSync(item.backupPath, 'utf8').includes('codexLocalGroups'), false, item.backupPath);

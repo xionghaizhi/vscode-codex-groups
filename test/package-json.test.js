@@ -37,10 +37,18 @@ module.exports = {
         assert.ok(commands.has('codexLocalGroups.searchConversations'));
         assert.ok(commands.has('codexLocalGroups.manageGroups'));
         assert.ok(commands.has('codexLocalGroups.repairCodexUi'));
+        assert.ok(commands.has('codexLocalGroups.restoreCodexUi'));
         assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.checkStatus'));
         assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.searchConversations'));
         assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.manageGroups'));
         assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.repairCodexUi'));
+        assert.ok(packageJson.activationEvents.includes('onCommand:codexLocalGroups.restoreCodexUi'));
+      },
+    },
+    {
+      name: 'contributes restore script for disabled-extension recovery',
+      run() {
+        assert.strictEqual(packageJson.scripts['restore-codex-ui'], 'node scripts/restore-codex-ui.js');
       },
     },
   ],

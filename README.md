@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.14-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.15-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -36,10 +36,11 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
   - 新：`~/.codex/codex-vscode-conversation-meta.json`
 - Codex 扩展升级后，VSCode 启动完成会延迟自动检查；能兼容就自动重打补丁并提示 Reload，不兼容则停止自动 patch 并提示适配。
 - Codex UI 异常时可用 Repair 恢复 clean bundle 后重打补丁。
+- 想停用本扩展增强时，可用 Restore Original Codex UI 只恢复 clean bundle，不重新打补丁。
 
 ## API key 模式拦截说明
 
-v0.0.14 默认按 API key 登录场景优化，会拦截或禁用这些 ChatGPT auth 专用请求 / 能力：
+v0.0.14 起默认按 API key 登录场景优化，会拦截或禁用这些 ChatGPT auth 专用请求 / 能力：
 
 - `/wham/usage*`：ChatGPT 订阅和用量请求，路径或完整 URL 命中后直接返回 `null`。
 - `/ces/v1/rgstr*`、`/backend-api/plugins/featured*`：API key 模式下无用的遥测/插件预检请求，命中后直接返回 `null`。
@@ -48,7 +49,7 @@ v0.0.14 默认按 API key 登录场景优化，会拦截或禁用这些 ChatGPT 
 - `failed to read OAuth tokens from keyring`：`app-server` 启动时追加 `-c mcp_oauth_credentials_store="file"`，避免 keyring OAuth 预检。
 - `https://ab.chatgpt.com/v1/initialize`：webview 内 Statsig/AB SDK 设置 `preventAllNetworkTraffic:!0`。
 
-如果你使用 ChatGPT auth/OAuth 登录，并依赖 ChatGPT 订阅用量页、remote plugin marketplace、OpenAI-curated plugins 或 AB 实验，不建议应用 v0.0.14 的 API key 兜底补丁。
+如果你使用 ChatGPT auth/OAuth 登录，并依赖 ChatGPT 订阅用量页、remote plugin marketplace、OpenAI-curated plugins 或 AB 实验，不建议应用 v0.0.14+ 的 API key 兜底补丁。
 
 ## 安装
 
@@ -62,13 +63,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.14
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.15
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.14
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.15
 ```
 
 然后在 VSCode 中执行：
@@ -96,7 +97,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.14.vsix
+code --install-extension vscode-codex-groups-0.0.15.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -208,10 +209,11 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.14
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.15
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
+npm run restore-codex-ui
 npm run verify-patched-bundles
 ```
 
@@ -237,6 +239,7 @@ npm run verify-patched-bundles
 | `Codex Local Groups: Check Status` | 不确定插件是否生效、Codex 升级后想检查状态时 | 检查 OpenAI Codex 扩展位置、版本、patch 状态、metadata 路径、会话数量、已分组 / 未分组数量。结果会写入 `Codex Local Groups` 输出面板，并提供 Apply / Reload / Show Output 快捷操作。 |
 | `Codex Local Groups: Apply Patches` | Codex 升级后分组 UI 消失、命令提示需要重新应用补丁时 | 手动把本扩展的增强逻辑重新 patch 到 OpenAI Codex 扩展 bundle。执行前会备份目标文件，匹配失败会停止，不会盲目覆盖。执行后通常需要 Reload Window。 |
 | `Codex Local Groups: Repair Codex UI` | Codex UI 卡住、白屏、升级后 patch 状态异常时 | 从 `.codex-patches` 中选择 clean 备份恢复 Codex bundle，再重新应用补丁。完成后通常需要 Reload Window。 |
+| `Codex Local Groups: Restore Original Codex UI` | 想停用本扩展增强、或禁用扩展后 Codex 仍异常时 | 从 `.codex-patches` 中选择 clean 备份恢复 Codex bundle，不重新应用补丁。完成后需要 Reload Window。 |
 | `Codex Local Groups: Open Metadata JSON` | 想查看或人工排查本地标题、分组数据时 | 打开 `~/.codex/codex-vscode-conversation-meta.json`。里面保存本地会话标题、分组、项目路径和 pending group 状态。手动编辑前建议先备份。 |
 | `Codex Local Groups: Reload Window` | patch 后、安装新版本后，或当前 Codex webview 仍显示旧 UI 时 | 触发 VSCode `workbench.action.reloadWindow`，让 extension host 和 Codex webview 重新加载最新补丁。 |
 | `Codex Local Groups: Reset Pending Group` | 点击“新建分组并开始会话”后，新会话没有正确归组或 pending 状态卡住时 | 清空待归组状态 `pendingGroup`，再静默应用 patch，并提示 Reload Window。不会删除已有会话或已有分组。 |
@@ -247,6 +250,7 @@ npm run verify-patched-bundles
 - 看不到分组 UI：执行 `Apply Patches` 后 Reload Window。
 - Codex 升级后失效：正常会自动补丁并提示 Reload；也可手动执行 `Apply Patches`。
 - Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
+- 禁用/卸载本扩展后 Codex 仍异常：先执行 `Codex Local Groups: Restore Original Codex UI`，或终端运行 `npm run restore-codex-ui`，再 Reload Window。禁用扩展不会自动还原已 patch 的 Codex bundle。
 - API key 登录反复报 `/wham/usage`、`/ces/v1/rgstr`、remote plugin sync、keyring OAuth 或 `ab.chatgpt.com/v1/initialize`：执行 `Apply Patches` 或 `Repair Codex UI` 后 Reload Window。
 - patch 失败：查看 `Codex Local Groups` 输出面板。
 - Node 版本过低：扩展会优先使用 VSCode Server 自带 Node；必要时设置 `codexLocalGroups.nodePath`。

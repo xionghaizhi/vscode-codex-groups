@@ -2,8 +2,8 @@
   "name": "vscode-codex-groups",
   "displayName": "Codex Local Groups",
   "description": "Local Codex conversation titles, requirement groups, project isolation, and conservative Codex extension patching.",
-  "version": "0.0.14",
-  "publisher": "local",
+  "version": "0.0.15",
+  "publisher": "xinghezhiyuan",
   "license": "MIT",
   "engines": {
     "vscode": "^1.96.2"
@@ -19,6 +19,7 @@
     "onCommand:codexLocalGroups.manageGroups",
     "onCommand:codexLocalGroups.openMetadataJson",
     "onCommand:codexLocalGroups.repairCodexUi",
+    "onCommand:codexLocalGroups.restoreCodexUi",
     "onCommand:codexLocalGroups.reloadWindow",
     "onCommand:codexLocalGroups.resetPendingGroup",
     "onCommand:codexLocalGroups.searchConversations"
@@ -54,6 +55,11 @@
       {
         "command": "codexLocalGroups.repairCodexUi",
         "title": "Repair Codex UI",
+        "category": "Codex Local Groups"
+      },
+      {
+        "command": "codexLocalGroups.restoreCodexUi",
+        "title": "Restore Original Codex UI",
         "category": "Codex Local Groups"
       },
       {
@@ -99,7 +105,8 @@
     "apply-patches": "node scripts/apply-patches.js",
     "plan-patches": "node scripts/plan-patches.js",
     "verify-patched-bundles": "node scripts/verify-patched-bundles.js",
-    "repair-codex-ui": "node scripts/repair-codex-ui.js"
+    "repair-codex-ui": "node scripts/repair-codex-ui.js",
+    "restore-codex-ui": "node scripts/restore-codex-ui.js"
   },
   "extensionKind": [
     "workspace"
