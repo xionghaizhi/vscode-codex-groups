@@ -24,9 +24,9 @@ module.exports = {
       },
     },
     {
-      name: 'activates after startup for safe auto patch',
+      name: 'does not activate on startup',
       run() {
-        assert.ok(packageJson.activationEvents.includes('onStartupFinished'));
+        assert.ok(!packageJson.activationEvents.includes('onStartupFinished'));
       },
     },
     {

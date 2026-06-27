@@ -11,7 +11,6 @@ function activate(context) {
   outputChannel = vscode.window.createOutputChannel('Codex Local Groups');
   context.subscriptions.push(outputChannel);
   registerCommands(context);
-  scheduleStartupAutoPatch();
 }
 
 function deactivate() {}
@@ -88,7 +87,7 @@ async function applyPatches(options = {}) {
     }
     throw locateError;
   }
-  const engine = new CodexPatchEngine({ nodePath: configuredNodePath() });
+  const engine = new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
   const report = engine.apply(target, metadata);
   writeReport(target, report);
   if (report.errors.length) {
@@ -106,7 +105,7 @@ async function repairCodexUi(options = {}) {
   const target = (options.locator || new CodexExtensionLocator()).locate();
   const store = options.store || new ConversationMetadataStore();
   const metadata = store.load();
-  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
   const restored = engine.restoreCleanBundles(target);
   const report = engine.apply(target, metadata);
   writeReport(target, report);
@@ -183,7 +182,7 @@ async function checkStatus(options = {}) {
   try {
     metadata = readMetadataOnly(store);
     target = (options.locator || new CodexExtensionLocator()).locate();
-    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
     plan = engine.plan(target, metadata);
   } catch (caught) {
     error = caught;

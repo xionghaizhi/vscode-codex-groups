@@ -106,7 +106,7 @@ module.exports = {
   name: 'extension commands',
   tests: [
     {
-      name: 'activates and schedules quick startup patch',
+      name: 'activates without scheduling startup patch',
       run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
@@ -121,8 +121,7 @@ module.exports = {
         } finally {
           global.setTimeout = originalSetTimeout;
         }
-        assert.strictEqual(timers.length, 1);
-        assert.strictEqual(timers[0].delay, 1000);
+        assert.strictEqual(timers.length, 0);
         assert.ok(vscode.calls.commands.some((item) => item.registered === 'codexLocalGroups.applyPatches'));
       },
     },
@@ -131,7 +130,13 @@ module.exports = {
       async run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
-        extension.activate({ subscriptions: [] });
+        const originalSetTimeout = global.setTimeout;
+        global.setTimeout = () => 1;
+        try {
+          extension.activate({ subscriptions: [] });
+        } finally {
+          global.setTimeout = originalSetTimeout;
+        }
         vscode.calls.nextInfoAction = 'Reload Window';
         const report = await extension.runStartupAutoPatch({
           applyPatches() {
@@ -148,7 +153,13 @@ module.exports = {
       async run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
-        extension.activate({ subscriptions: [] });
+        const originalSetTimeout = global.setTimeout;
+        global.setTimeout = () => 1;
+        try {
+          extension.activate({ subscriptions: [] });
+        } finally {
+          global.setTimeout = originalSetTimeout;
+        }
         await extension.runStartupAutoPatch({
           applyPatches() {
             return Promise.resolve({ changes: [], errors: [], idempotent: true });

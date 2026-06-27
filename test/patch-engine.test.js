@@ -55,6 +55,63 @@ module.exports = {
   name: 'patch engine',
   tests: [
     {
+      name: 'safe mode restores grouped UI actions and skips risky bundles',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: { abc: { title: '本地标题', group: '需求A', projectRoot: '/p' } } });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [
+          target.extensionJsPath,
+          target.appServerManagerSignalsPath,
+          target.headerPath,
+        ]);
+
+        const extension = plan.changes[0].nextText;
+        const appServerManagerSignals = plan.changes[1].nextText;
+        const header = plan.changes[2].nextText;
+        assert.ok(extension.includes('codexLocalGroupsPatchVersion=14'));
+        assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(n))return;'));
+        assert.ok(!extension.includes('"--disable","plugins"'));
+        assert.ok(!extension.includes('requestAllThreadList(e)'));
+        assert.ok(extension.includes('c.cwds=s'));
+        assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentPatchVersion=3'));
+        assert.ok(appServerManagerSignals.includes('cwds:t'));
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=3'));
+        assert.ok(header.includes('codexRecentTaskProjectRows'));
+        assert.ok(header.includes('需求A'));
+        assert.ok(header.includes('codexLocalGroupsPromptGroup'));
+        assert.ok(header.includes('codexLocalGroupsStartConversationInGroup'));
+        assert.ok(header.includes('var codexLocalGroupsMessenger=b;'));
+        assert.ok(header.includes('codexLocalGroupsMessenger.dispatchMessage'));
+        assert.ok(header.includes('codex-local-groups-conversation-row relative'));
+        assert.ok(header.includes('codexLocalGroupsHistoryLimit=120'));
+        assert.ok(header.includes('codexLocalGroupsHistoryRecovered'));
+        assert.ok(!header.includes('codexLocalGroupsMetadataOnly'));
+        assert.ok(!header.includes('codexLocalGroupsMetadataItems'));
+        assert.ok(!header.includes('codexLocalGroupsMetadataRow'));
+        for (const change of plan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        assert.strictEqual(engine.plan(target, { version: 1, conversations: { abc: { title: '本地标题', group: '需求A', projectRoot: '/p' } } }).changes.length, 0);
+      },
+    },
+    {
+      name: 'safe header uses stable messenger reference when alias collides',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.headerPath, headerText.replace('f as b', 'f as a'));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: { abc: { title: '本地标题', group: '需求A', projectRoot: '/p' } } });
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        assert.ok(header.includes('var codexLocalGroupsMessenger=a;'));
+        assert.ok(header.includes('codexLocalGroupsMessenger.dispatchHostMessage'));
+        assert.ok(header.includes('codexLocalGroupsMessenger.dispatchMessage'));
+        assert.ok(!header.includes('try{a.dispatchHostMessage'));
+        assert.ok(!header.includes('try{a.dispatchMessage(`codex-local-groups`'));
+      },
+    },
+    {
       name: 'plans local group patches and is idempotent after applying text changes',
       run() {
         const target = createTarget();
@@ -80,7 +137,8 @@ module.exports = {
         assert.ok(extension.includes('codexLocalGroupsReportAutoPatchUnavailable'));
         assert.ok(extension.includes('codexLocalGroupsProjectRootFor'));
         assert.ok(extension.includes('cwd:e.cwd??codexLocalGroupsProjectRootFor(e.id)'));
-        assert.ok(!extension.includes('c.cwds=s'));
+        assert.ok(extension.includes('c.cwds=s'));
+        assert.ok(!extension.includes('requestAllThreadList(e)'));
         assert.ok(extension.includes('function n(c){return r?c===HS:c!==HS}'));
         assert.ok(!extension.includes('function n(c){return r?c===IS:c!==IS}'));
         assert.ok(extension.includes('promptConversationGroup'));
@@ -97,7 +155,10 @@ module.exports = {
         assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=36'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsConversationProjectRoot'));
-        assert.ok(header.includes('codexLocalGroupsMetadataItems'));
+        assert.ok(header.includes('codexLocalGroupsHistoryLimit=120'));
+        assert.ok(!header.includes('codexLocalGroupsMetadataItems'));
+        assert.ok(!header.includes('codexLocalGroupsMetadataOnly'));
+        assert.ok(!header.includes('codexLocalGroupsMetadataRow'));
         assert.ok(header.includes('codexLocalGroupsDecoratedItem'));
         assert.ok(header.includes('codexLocalGroupsLocalTitle'));
         assert.ok(header.includes('codexLocalGroupsNormalizeGroupName'));
@@ -159,10 +220,10 @@ module.exports = {
         assert.ok(appMain.includes('id:`codex-local-group`'));
         const localTitle = fs.readFileSync(target.localTitlePath, 'utf8');
         assert.ok(localTitle.includes('codexLocalGroupsLocalTitlePatchVersion=6'));
-        assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentPatchVersion=2'));
+        assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentPatchVersion=3'));
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentThreadListParams'));
         assert.ok(!appServerManagerSignals.includes('codexLocalGroupsRecentInitialMeta'));
-        assert.ok(!appServerManagerSignals.includes('cwds:t'));
+        assert.ok(appServerManagerSignals.includes('cwds:t'));
         assert.ok(appServerManagerSignals.includes('{...e,limit:200}'));
         assert.ok(request.includes('codexLocalGroupsRequestPatchVersion=2'));
         assert.ok(request.includes('codexLocalGroupsIsDisabledUsageRequest'));
@@ -306,7 +367,7 @@ module.exports = {
       },
     },
     {
-      name: 'keeps webview recent thread requests unfiltered by server cwd',
+      name: 'filters webview recent thread requests by the stored current root',
       run() {
         const target = createTarget();
         const metadata = {
@@ -320,10 +381,10 @@ module.exports = {
         const plan = engine.plan(target, metadata);
         const change = plan.changes.find((item) => item.path === target.appServerManagerSignalsPath);
         assert.ok(change);
-        assert.ok(change.nextText.includes('codexLocalGroupsRecentPatchVersion=2'));
+        assert.ok(change.nextText.includes('codexLocalGroupsRecentPatchVersion=3'));
         assert.ok(change.nextText.includes('codexLocalGroupsRecentThreadListParams({limit:t'));
-        assert.ok(!change.nextText.includes('codexLocalGroupsRecentThreadListParams({limit:200'));
-        assert.ok(!change.nextText.includes('cwds:t'));
+        assert.ok(change.nextText.includes('codexLocalGroupsRecentThreadListParams({limit:200'));
+        assert.ok(change.nextText.includes('cwds:t'));
         const script = path.join(target.extensionDir, 'app-server-manager-signals-smoke.js');
         fs.writeFileSync(script, appServerManagerSignalsSmokeScript(change.nextText));
         const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
@@ -542,7 +603,7 @@ module.exports = {
       },
     },
     {
-      name: 'removes existing paged thread list server cwd filters',
+      name: 'keeps paged thread list filtered by workspace cwd',
       run() {
         const target = createTarget();
         fs.writeFileSync(target.extensionJsPath, extensionText.replace(
@@ -565,7 +626,7 @@ module.exports = {
         assert.deepStrictEqual(plan.errors, []);
         const change = plan.changes.find((item) => item.path === target.extensionJsPath);
         assert.ok(change);
-        assert.ok(!change.nextText.includes('c.cwds=s'));
+        assert.ok(change.nextText.includes('c.cwds=s'));
       },
     },
     {
@@ -598,17 +659,19 @@ module.exports = {
       },
     },
     {
-      name: 'fills missing grouped rows from metadata when recent data omits old conversations',
+      name: 'recovers current project history rows from metadata with a hard limit',
       run() {
         const target = createTarget();
         const metadata = {
           version: 1,
-          conversations: {
-            old1: { title: '旧会话1', group: '需求A', projectRoot: '/p', updatedAtMs: 100 },
-            old2: { title: '旧会话2', group: '需求A', projectRoot: '/p', updatedAtMs: 200 },
-            other: { title: '其它会话', group: '其它', projectRoot: '/other', updatedAtMs: 300 },
-          },
+          conversations: {},
         };
+        metadata.conversations.old1 = { title: '旧会话1', group: '需求A', projectRoot: '/p', updatedAtMs: 100 };
+        metadata.conversations.old2 = { title: '旧会话2', group: '需求A', projectRoot: '/p', updatedAtMs: 200 };
+        metadata.conversations.other = { title: '其它会话', group: '其它', projectRoot: '/other', updatedAtMs: 300 };
+        for (let index = 0; index < 130; index += 1) {
+          metadata.conversations[`extra${index}`] = { title: `额外${index}`, group: '额外', projectRoot: '/p', updatedAtMs: index };
+        }
         const items = [{
           kind: 'local',
           key: 'old2',
@@ -620,11 +683,14 @@ module.exports = {
         const probe = runHeaderRows(header, 'old2', { items, currentRoot: '/p' });
         const rendered = JSON.stringify(probe.rows);
         assert.deepStrictEqual(probe.conversationIds, ['old2']);
-        assert.ok(rendered.includes('old1'));
         assert.ok(rendered.includes('old2'));
-        assert.ok(rendered.includes('metadata-row-old1'));
-        assert.ok(rendered.includes('metadata-actions-old1'));
+        assert.ok(rendered.includes('old1'));
+        assert.ok(rendered.includes('history-row-old1'));
+        assert.ok(rendered.includes('history-actions-old1'));
         assert.ok(!rendered.includes('other'));
+        assert.ok(!probe.filteredItemIds.includes('extra0'));
+        assert.ok(probe.filteredItemIds.includes('extra129'));
+        assert.strictEqual(probe.filteredItemIds.length, 121);
       },
     },
     {
@@ -883,7 +949,8 @@ module.exports = {
         assert.deepStrictEqual(plan.errors, []);
         const headerChange = plan.changes.find((change) => change.path === target.headerPath);
         assert.ok(headerChange.nextText.includes('./use-webview-execution-target-newhash.js'));
-        assert.ok(headerChange.nextText.includes('customMessenger.dispatchMessage'));
+        assert.ok(headerChange.nextText.includes('var codexLocalGroupsMessenger=customMessenger;'));
+        assert.ok(headerChange.nextText.includes('codexLocalGroupsMessenger.dispatchMessage'));
       },
     },
     {
@@ -1047,7 +1114,12 @@ const currentRoot = ${JSON.stringify(currentRoot)};
 const filteredItems = currentRoot == null ? sourceItems : context.codexRecentTaskFilter(sourceItems, currentRoot);
 const filteredConversations = currentRoot == null ? null : context.codexRecentConversationFilter(sourceItems.map((item) => item.conversation), currentRoot);
 const rows = context.codexRecentTaskProjectRows(filteredItems, ${JSON.stringify(activeId)}, () => {});
-console.log(JSON.stringify({ rows, storage, conversationIds: filteredConversations == null ? null : filteredConversations.map((item) => item.id) }));
+  console.log(JSON.stringify({
+    rows,
+    storage,
+    filteredItemIds: filteredItems.map((item) => item.conversation.id),
+    conversationIds: filteredConversations == null ? null : filteredConversations.map((item) => item.id),
+  }));
 `;
   const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
   assert.strictEqual(result.status, 0, result.stderr);
@@ -1084,7 +1156,7 @@ ${text}
   assert.strictEqual(requests.length, 2);
   for (const request of requests) {
     assert.strictEqual(request.method, 'thread/list');
-    assert.ok(!Object.prototype.hasOwnProperty.call(request.params, 'cwds'));
+    assert.deepStrictEqual(request.params.cwds, ['/home/project/vscode/yuxi']);
     assert.strictEqual(request.params.limit, 200);
   }
 })().catch((error) => {
@@ -1101,6 +1173,7 @@ const vm = require('vm');
 
 let scheduled;
 const context = {
+  b: { dispatchMessage() {}, dispatchHostMessage() {} },
   localStorage: { getItem() { return null; }, setItem() {} },
   window: { addEventListener() {}, dispatchEvent() {} },
   Event: function Event(type) { this.type = type; },
@@ -1246,6 +1319,7 @@ const storage = {
   })
 };
 const context = {
+  b: { dispatchMessage() {}, dispatchHostMessage() {} },
   localStorage: {
     getItem(key) { return storage[key] || null; },
     setItem(key, value) { storage[key] = String(value); },
@@ -1283,6 +1357,7 @@ const storage = {
   })
 };
 const context = {
+  b: { dispatchMessage() {}, dispatchHostMessage() {} },
   localStorage: {
     getItem(key) { return storage[key] || null; },
     setItem(key, value) { storage[key] = String(value); },
