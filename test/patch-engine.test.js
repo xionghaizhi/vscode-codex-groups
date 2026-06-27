@@ -87,9 +87,14 @@ module.exports = {
         assert.ok(header.includes('codex-local-groups-conversation-row relative'));
         assert.ok(header.includes('codexLocalGroupsHistoryLimit=120'));
         assert.ok(header.includes('codexLocalGroupsHistoryRecovered'));
+        assert.ok(header.includes('role:`button`'));
+        assert.ok(header.includes('tabIndex:0'));
         assert.ok(!header.includes('codexLocalGroupsMetadataOnly'));
         assert.ok(!header.includes('codexLocalGroupsMetadataItems'));
         assert.ok(!header.includes('codexLocalGroupsMetadataRow'));
+        assert.ok(header.includes('codexLocalGroupsHistoryRow'));
+        assert.ok(header.includes('history-row-'));
+        assert.ok(header.includes('flex w-full items-center justify-between'));
         for (const change of plan.changes) {
           fs.writeFileSync(change.path, change.nextText);
         }
@@ -105,10 +110,37 @@ module.exports = {
         const plan = engine.plan(target, { version: 1, conversations: { abc: { title: '本地标题', group: '需求A', projectRoot: '/p' } } });
         const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
         assert.ok(header.includes('var codexLocalGroupsMessenger=a;'));
-        assert.ok(header.includes('codexLocalGroupsMessenger.dispatchHostMessage'));
         assert.ok(header.includes('codexLocalGroupsMessenger.dispatchMessage'));
+        assert.ok(!header.includes('codexLocalGroupsMetadataRow'));
         assert.ok(!header.includes('try{a.dispatchHostMessage'));
         assert.ok(!header.includes('try{a.dispatchMessage(`codex-local-groups`'));
+      },
+    },
+    {
+      name: 'safe header keeps recent menu tall',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.headerPath, headerText.replace('codexRecentTaskCurrentRoot ', 'codexRecentTaskCurrentRoot max-h-[300px] max-h-[450px] '));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        assert.ok(header.includes('max-h-[900px]'));
+        assert.ok(!header.includes('max-h-[300px]'));
+        assert.ok(!header.includes('max-h-[450px]'));
+      },
+    },
+    {
+      name: 'safe header refreshes group state without reopening menu',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.headerPath, 'codexRecentTaskCurrentRoot import{f as b}from"./vscode-api-a.js";function rt(e){let t=(0,Z.c)(33),x=1;let T=codexRecentConversationFilter(r.filter(w),codexRecentTaskCurrentRoot),D=codexRecentTaskFilter($e(n.data,r,ee),codexRecentTaskCurrentRoot),[te,k]=(0,$.useState)(``),j=(0,$.useDeferredValue)(te);t[15]!==y||t[16]!==n||t[17]!==F||t[18]!==M||t[19]!==D.length||t[20]!==i||t[21]!==g?(V=1,t[19]=D.length,t[20]=i,t[21]=g,t[22]=V):V=t[22];return T}function Ke(e){return e.kind===`remote`}function codexRecentTaskProjectRows(e,t,n){return []}var qe=1;');
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        assert.ok(header.includes('codexLocalGroupsRefresh'));
+        assert.ok(header.includes('window.addEventListener(`codex-local-groups-refresh`'));
+        assert.ok(header.includes('t[33]!==codexLocalGroupsRefresh'));
+        assert.ok(header.includes('t[33]=codexLocalGroupsRefresh'));
       },
     },
     {
@@ -685,8 +717,10 @@ module.exports = {
         assert.deepStrictEqual(probe.conversationIds, ['old2']);
         assert.ok(rendered.includes('old2'));
         assert.ok(rendered.includes('old1'));
+        assert.ok(rendered.includes('"type":"CodexRow"'));
         assert.ok(rendered.includes('history-row-old1'));
         assert.ok(rendered.includes('history-actions-old1'));
+        assert.ok(rendered.includes('flex w-full items-center justify-between'));
         assert.ok(!rendered.includes('other'));
         assert.ok(!probe.filteredItemIds.includes('extra0'));
         assert.ok(probe.filteredItemIds.includes('extra129'));
@@ -1094,7 +1128,8 @@ function runHeaderRows(header, activeId, options = {}) {
   const currentRoot = Object.prototype.hasOwnProperty.call(options, 'currentRoot') ? options.currentRoot : null;
   const script = `
 const vm = require('vm');
-function jsx(type, props, key) { return { type, props, key }; }
+function CodexRow() {}
+function jsx(type, props, key) { return { type: type === CodexRow ? 'CodexRow' : type, props, key }; }
 const storage = {};
 const context = {
   Q: { jsx, jsxs: jsx },
@@ -1113,7 +1148,7 @@ const sourceItems = ${JSON.stringify(items)};
 const currentRoot = ${JSON.stringify(currentRoot)};
 const filteredItems = currentRoot == null ? sourceItems : context.codexRecentTaskFilter(sourceItems, currentRoot);
 const filteredConversations = currentRoot == null ? null : context.codexRecentConversationFilter(sourceItems.map((item) => item.conversation), currentRoot);
-const rows = context.codexRecentTaskProjectRows(filteredItems, ${JSON.stringify(activeId)}, () => {});
+const rows = context.codexRecentTaskProjectRows(filteredItems, ${JSON.stringify(activeId)}, () => {}, CodexRow);
   console.log(JSON.stringify({
     rows,
     storage,
