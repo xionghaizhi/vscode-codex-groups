@@ -11,6 +11,7 @@ function activate(context) {
   outputChannel = vscode.window.createOutputChannel('Codex Local Groups');
   context.subscriptions.push(outputChannel);
   registerCommands(context);
+  scheduleStartupAutoPatch();
 }
 
 function deactivate() {}
@@ -392,7 +393,7 @@ function groupQuickPickItems(metadata) {
     current.updatedAtMs = Math.max(current.updatedAtMs, Number(item.updatedAtMs) || 0);
     groups.set(key, current);
   }
-  return Array.from(groups.values()).sort(compareGroupItems).map(groupQuickPickItem);
+  return Array.from(groups.values()).filter((item) => !groupIsArchived(metadata, item)).sort(compareGroupItems).map(groupQuickPickItem);
 }
 
 function metadataStats(metadata) {
@@ -495,6 +496,7 @@ function manageGroupActions(group) {
   return [
     { label: '重命名分组', action: 'rename', description: `更新 ${group.count} 个会话标签` },
     { label: '合并到已有分组', action: 'merge', description: '仅当前同项目内', detail: '选择目标后需要再次确认' },
+    { label: '归档分组', action: 'archive', description: `隐藏 ${group.count} 个会话的本地分组`, detail: '不归档 Codex 会话，不修改会话标签' },
     { label: '清空分组，移入未分组', action: 'clear', description: `影响 ${group.count} 个会话`, detail: '只移除分组标签，不删除会话' },
     { label: '查看该分组会话', action: 'view', description: `${group.count} 个会话`, detail: '只读，不修改 metadata' },
   ];
@@ -505,10 +507,20 @@ async function runManageGroupAction(action, store, metadata, group, options) {
     await renameManagedGroup(store, metadata, group, options);
   } else if (action === 'merge') {
     await mergeManagedGroup(store, metadata, group, options);
+  } else if (action === 'archive') {
+    await archiveManagedGroup(store, group, options);
   } else if (action === 'clear') {
     await clearManagedGroup(store, group, options);
   } else if (action === 'view') {
     await viewManagedGroup(metadata, group);
+  }
+}
+
+async function archiveManagedGroup(store, group, options) {
+  const message = `确认归档本地分组“${group.group}”？项目：${groupProjectText(group)}。只隐藏本地分组，不归档 Codex 会话，不修改会话分组标签；此操作没有撤销。`;
+  const action = await vscode.window.showWarningMessage(message, '归档分组');
+  if (action === '归档分组') {
+    await writeArchivedGroup(store, group, options);
   }
 }
 
@@ -619,6 +631,31 @@ async function writeManagedGroup(store, group, nextGroup, options) {
   }
 }
 
+async function writeArchivedGroup(store, group, options) {
+  const patchRunner = options.applyPatches || applyPatches;
+  const metadata = store.load();
+  metadata.archivedGroups = { ...(metadata.archivedGroups || {}) };
+  metadata.archivedGroups[archivedGroupKey(group)] = {
+    projectRoot: group.projectRoot,
+    group: group.group,
+    archivedAtMs: Date.now(),
+  };
+  store.write(metadata);
+  const action = await vscode.window.showInformationMessage(
+    `Codex Local Groups: 已归档本地分组 ${groupContextText(group)}。不会归档 Codex 会话。如 Codex UI 未同步，可 Reload Window 或手动 Apply Patches。`,
+    'Apply Patches',
+    'Reload Window',
+    'Show Output'
+  );
+  if (action === 'Apply Patches') {
+    try { await patchRunner({ silent: false }); } catch (caught) { showPatchError(caught, false); }
+  } else if (action === 'Reload Window') {
+    await reloadWindow();
+  } else if (action === 'Show Output') {
+    ensureOutputChannel().show();
+  }
+}
+
 function updateManagedGroup(metadata, group, nextGroup) {
   const updated = JSON.parse(JSON.stringify(metadata));
   let count = 0;
@@ -652,6 +689,14 @@ function managedGroupExists(metadata, group, nextGroup) {
     return false;
   }
   return groupQuickPickItems(metadata).some((item) => item.projectRoot === group.projectRoot && item.group === nextGroup);
+}
+
+function groupIsArchived(metadata, group) {
+  return Boolean(metadata.archivedGroups && metadata.archivedGroups[archivedGroupKey(group)]);
+}
+
+function archivedGroupKey(group) {
+  return JSON.stringify([cleanProjectRoot(group.projectRoot), cleanGroupName(group.group)]);
 }
 
 function compareGroupItems(left, right) {

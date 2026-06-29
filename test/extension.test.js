@@ -106,7 +106,7 @@ module.exports = {
   name: 'extension commands',
   tests: [
     {
-      name: 'activates without scheduling startup patch',
+      name: 'activates and schedules startup patch',
       run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
@@ -121,7 +121,8 @@ module.exports = {
         } finally {
           global.setTimeout = originalSetTimeout;
         }
-        assert.strictEqual(timers.length, 0);
+        assert.strictEqual(timers.length, 1);
+        assert.strictEqual(timers[0].delay, 1000);
         assert.ok(vscode.calls.commands.some((item) => item.registered === 'codexLocalGroups.applyPatches'));
       },
     },
@@ -487,6 +488,36 @@ module.exports = {
         assert.strictEqual(written.conversations.b1.projectRoot, '/p/b');
         assert.strictEqual(Object.keys(written.conversations).length, Object.keys(manageMetadata.conversations).length);
         assert.strictEqual(written.conversations.a1.group, '财务');
+      },
+    },
+    {
+      name: 'archives selected group without archiving conversations',
+      async run() {
+        const dir = tempDir('codex-manage-archive');
+        const metadataPath = path.join(dir, 'meta.json');
+        writeJson(metadataPath, manageMetadata);
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        vscode.calls.nextWarningAction = '归档分组';
+        vscode.calls.nextQuickPicks = [
+          (items) => items.find((item) => item.group === '财务' && item.projectRoot === '/p/a'),
+          (items) => items.find((item) => item.action === 'archive'),
+        ];
+        await extension.manageGroups({
+          store: new ConversationMetadataStore({
+            metadataPath,
+            oldTitlesPath: path.join(dir, 'old-titles.json'),
+          }),
+          applyPatches() { throw new Error('should not patch'); },
+        });
+        const written = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+        const key = JSON.stringify(['/p/a', '财务']);
+        assert.ok(written.archivedGroups[key].archivedAtMs > 0);
+        assert.strictEqual(written.conversations.a1.group, '财务');
+        assert.strictEqual(written.conversations.a2.group, '财务');
+        assert.ok(!extension.groupQuickPickItems(written).some((item) => item.group === '财务' && item.projectRoot === '/p/a'));
+        assert.ok(extension.groupQuickPickItems(written).some((item) => item.group === '财务' && item.projectRoot === '/p/b'));
+        assert.ok(vscode.calls.warnings[0].message.includes('不归档 Codex 会话'));
       },
     },
     {

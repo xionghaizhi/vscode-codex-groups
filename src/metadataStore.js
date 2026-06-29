@@ -154,9 +154,38 @@ function normalizeMetadata(data, file) {
       metadata.migrations.sessionIndexTitlesImported = true;
     }
   }
+  normalizeArchivedGroups(metadata, data.archivedGroups, file);
   normalizeConversations(metadata, data.conversations, file);
   normalizePendingGroup(metadata, data.pendingGroup, file);
   return metadata;
+}
+
+function normalizeArchivedGroups(metadata, archivedGroups, file) {
+  if (archivedGroups == null) {
+    return;
+  }
+  if (typeof archivedGroups !== 'object' || Array.isArray(archivedGroups)) {
+    throw new Error(`metadata.archivedGroups 必须是对象：${file}`);
+  }
+  const next = {};
+  for (const value of Object.values(archivedGroups)) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      continue;
+    }
+    const projectRoot = cleanString(value.projectRoot).replace(/\\/g, '/').replace(/\/+$/, '');
+    const group = cleanString(value.group);
+    if (!projectRoot || !group) {
+      continue;
+    }
+    const item = { projectRoot, group };
+    if (Number.isFinite(value.archivedAtMs)) {
+      item.archivedAtMs = value.archivedAtMs;
+    }
+    next[JSON.stringify([projectRoot, group])] = item;
+  }
+  if (Object.keys(next).length) {
+    metadata.archivedGroups = next;
+  }
 }
 
 function normalizeConversations(metadata, conversations, file) {

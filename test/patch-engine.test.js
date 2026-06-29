@@ -728,6 +728,32 @@ module.exports = {
       },
     },
     {
+      name: 'shows archived local group conversations as ungrouped in header rows',
+      run() {
+        const target = createTarget();
+        const key = JSON.stringify(['/p', '归档组']);
+        const metadata = {
+          version: 1,
+          archivedGroups: { [key]: { projectRoot: '/p', group: '归档组', archivedAtMs: 1000 } },
+          conversations: {
+            old1: { title: '旧会话1', group: '归档组', projectRoot: '/p', updatedAtMs: 100 },
+          },
+        };
+        const items = [{
+          kind: 'local',
+          key: 'old1',
+          conversation: { id: 'old1', title: '旧会话1', cwd: '/p', createdAt: 1, updatedAt: 1 },
+        }];
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, metadata);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const probe = runHeaderRows(header, 'old1', { items, currentRoot: '/p' });
+        const rendered = JSON.stringify(probe.rows);
+        assert.ok(rendered.includes('未分组'));
+        assert.ok(!rendered.includes('归档组'));
+      },
+    },
+    {
       name: 'assigns pending group to new conversation from child or missing project root',
       run() {
         const startedAtMs = Date.now() - 1000;
