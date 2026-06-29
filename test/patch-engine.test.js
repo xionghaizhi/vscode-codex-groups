@@ -239,7 +239,7 @@ module.exports = {
         assert.ok(header.includes('设置分组'));
         assert.ok(header.includes('codex-local-groups-conversation-row relative'));
         assert.ok(header.includes('codex-local-groups-inline-actions absolute top-1'));
-        assert.ok(header.includes('paddingRight:`160px`'));
+        assert.ok(header.includes('paddingRight:`240px`'));
         assert.ok(!header.includes('paddingRight:`112px`'));
         assert.ok(!header.includes('additionalHoverActionCount:2'));
         assert.ok(header.includes('promptConversationTitle'));
@@ -452,14 +452,14 @@ module.exports = {
         }
         const oldHeader = fs.readFileSync(target.headerPath, 'utf8')
           .replace(/codexLocalGroupsHeaderPatchVersion=36/g, 'codexLocalGroupsHeaderPatchVersion=28')
-          .replace(/paddingRight:`160px`/g, 'paddingRight:`112px`');
+          .replace(/paddingRight:`240px`/g, 'paddingRight:`112px`');
         fs.writeFileSync(target.headerPath, oldHeader);
 
         const plan = engine.plan(target, { version: 1, conversations: {} });
         const headerChange = plan.changes.find((change) => change.path === target.headerPath);
         assert.ok(headerChange);
         assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=36'));
-        assert.ok(headerChange.nextText.includes('paddingRight:`160px`'));
+        assert.ok(headerChange.nextText.includes('paddingRight:`240px`'));
         assert.ok(!headerChange.nextText.includes('paddingRight:`112px`'));
       },
     },

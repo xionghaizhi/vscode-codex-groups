@@ -370,7 +370,7 @@ function buildStatusLines({ target, plan, metadata, metadataPath, error }) {
 }
 
 function conversationQuickPickItems(metadata) {
-  return Object.entries(metadata.conversations || {}).map(([id, item]) => {
+  return Object.entries(metadata.conversations || {}).filter(([id]) => !conversationIsArchived(metadata, id)).map(([id, item]) => {
     const title = cleanText(item.title) || `会话 ${id}`;
     const group = cleanText(item.group) || '未分组';
     const projectRoot = cleanText(item.projectRoot) || '未知项目';
@@ -693,6 +693,10 @@ function managedGroupExists(metadata, group, nextGroup) {
 
 function groupIsArchived(metadata, group) {
   return Boolean(metadata.archivedGroups && metadata.archivedGroups[archivedGroupKey(group)]);
+}
+
+function conversationIsArchived(metadata, id) {
+  return Boolean(metadata.archivedConversations && metadata.archivedConversations[String(id)]);
 }
 
 function archivedGroupKey(group) {

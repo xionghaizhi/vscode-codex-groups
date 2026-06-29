@@ -155,6 +155,7 @@ function normalizeMetadata(data, file) {
     }
   }
   normalizeArchivedGroups(metadata, data.archivedGroups, file);
+  normalizeArchivedConversations(metadata, data.archivedConversations, file);
   normalizeConversations(metadata, data.conversations, file);
   normalizePendingGroup(metadata, data.pendingGroup, file);
   return metadata;
@@ -185,6 +186,26 @@ function normalizeArchivedGroups(metadata, archivedGroups, file) {
   }
   if (Object.keys(next).length) {
     metadata.archivedGroups = next;
+  }
+}
+
+function normalizeArchivedConversations(metadata, archivedConversations, file) {
+  if (archivedConversations == null) {
+    return;
+  }
+  if (typeof archivedConversations !== 'object' || Array.isArray(archivedConversations)) {
+    throw new Error(`metadata.archivedConversations 必须是对象：${file}`);
+  }
+  const next = {};
+  for (const [id, value] of Object.entries(archivedConversations)) {
+    if (!id) {
+      continue;
+    }
+    const archivedAtMs = value && typeof value === 'object' ? value.archivedAtMs : undefined;
+    next[String(id)] = Number.isFinite(archivedAtMs) ? { archivedAtMs } : {};
+  }
+  if (Object.keys(next).length) {
+    metadata.archivedConversations = next;
   }
 }
 
