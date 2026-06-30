@@ -905,6 +905,9 @@ function patchAppServerManagerSignals(text, context) {
   if (next.includes('codexLocalGroupsRecentPatchVersion=1')) {
     next = next.replace(/var codexLocalGroupsRecentInitialMeta=[\s\S]*?function codexLocalGroupsRecentThreadListParams\(e\)\{let t=codexLocalGroupsRecentProjectRoots\(\);return t\.length\?\(e=\{\.\.\.e,cwds:t\},typeof e\.limit===`number`&&e\.limit<200&&\(e\.limit=200\),e\):e\}/g, appServerManagerSignalsHelper());
   }
+  if (next.includes('codexLocalGroupsRecentPatchVersion=3') && !next.includes('function codexLocalGroupsMarkArchivedConversation')) {
+    next = next.replace('var codexLocalGroupsRecentPatchVersion=3;', appServerManagerArchiveHelper());
+  }
   if (!next.includes('codexLocalGroupsRecentPatchVersion=3')) {
     if (text.includes('async function ug(')) {
       next = replaceOnce(next, 'async function ug(', `${appServerManagerSignalsHelper()}async function ug(`, context, 'app-server-manager recent helper');
@@ -926,6 +929,11 @@ function patchAppServerManagerSignals(text, context) {
   const pageNewV2 = 'this.params.requestClient.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:D,useStateDbOnly:n}))';
   const pageOldV1 = 'this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:n})';
   const pageNewV1 = 'this.params.requestClient.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:n}))';
+  const archiveOld = 'e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})';
+  const archiveNew = 'codexLocalGroupsMarkArchivedConversation(t),e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})';
+  if (!next.includes(archiveNew) && next.includes(archiveOld)) {
+    next = replaceOnce(next, archiveOld, archiveNew, context, 'app-server-manager local archive tombstone');
+  }
   if (!next.includes(pageNewV2) && !next.includes(pageNewV1)) {
     if (next.includes(pageOldV2)) {
       next = replaceOnce(next, pageOldV2, pageNewV2, context, 'app-server-manager paged recent limit');
@@ -1171,7 +1179,11 @@ function webviewHelper(metadata, messenger) {
 }
 
 function appServerManagerSignalsHelper() {
-  return `var codexLocalGroupsRecentPatchVersion=3;function codexLocalGroupsRecentCleanRoot(e){return String(e??\`\`).replace(/\\\\/g,\`/\`).replace(/\\/+$/,\`\`).trim()}function codexLocalGroupsRecentProjectRoots(){try{let e=codexLocalGroupsRecentCleanRoot(localStorage.getItem(\`codex-local-groups-current-root-v1\`));return e?[e]:[]}catch{return[]}}function codexLocalGroupsRecentThreadListParams(e){let t=codexLocalGroupsRecentProjectRoots(),n=typeof e.limit===\`number\`&&e.limit<200?{...e,limit:200}:e;return t.length?{...n,cwds:t}:n}`;
+  return `${appServerManagerArchiveHelper()}function codexLocalGroupsRecentCleanRoot(e){return String(e??\`\`).replace(/\\\\/g,\`/\`).replace(/\\/+$/,\`\`).trim()}function codexLocalGroupsRecentProjectRoots(){try{let e=codexLocalGroupsRecentCleanRoot(localStorage.getItem(\`codex-local-groups-current-root-v1\`));return e?[e]:[]}catch{return[]}}function codexLocalGroupsRecentThreadListParams(e){let t=codexLocalGroupsRecentProjectRoots(),n=typeof e.limit===\`number\`&&e.limit<200?{...e,limit:200}:e;return t.length?{...n,cwds:t}:n}`;
+}
+
+function appServerManagerArchiveHelper() {
+  return `var codexLocalGroupsRecentPatchVersion=3;function codexLocalGroupsMarkArchivedConversation(e){try{let t=String(e??\`\`);if(!t)return;let n=JSON.parse(localStorage.getItem(\`codex-local-groups-meta-v1\`)??\`{}\`);n&&typeof n==\`object\`&&!Array.isArray(n)||(n={version:1,conversations:{}}),n.version=1,n.conversations&&delete n.conversations[t],n.archivedConversations||(n.archivedConversations={}),n.archivedConversations[t]={archivedAtMs:Date.now()},n.updatedAtMs=Date.now(),localStorage.setItem(\`codex-local-groups-meta-v1\`,JSON.stringify(n)),window.dispatchEvent(new Event(\`codex-local-groups-refresh\`))}catch{}}`;
 }
 
 function localTitleHelper(metadata) {

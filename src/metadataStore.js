@@ -4,6 +4,7 @@ const path = require('path');
 const DEFAULT_METADATA_PATH = '/root/.codex/codex-vscode-conversation-meta.json';
 const DEFAULT_OLD_TITLES_PATH = '/root/.codex/codex-vscode-conversation-titles.json';
 const DEFAULT_SESSION_INDEX_PATH = '/root/.codex/session_index.jsonl';
+const DEFAULT_ARCHIVED_SESSIONS_DIR = '/root/.codex/archived_sessions';
 
 class ConversationMetadataStore {
   constructor(options = {}) {
@@ -11,6 +12,8 @@ class ConversationMetadataStore {
     this.oldTitlesPath = options.oldTitlesPath || DEFAULT_OLD_TITLES_PATH;
     this.sessionIndexPath = options.sessionIndexPath
       || (options.metadataPath ? path.join(path.dirname(this.metadataPath), 'session_index.jsonl') : DEFAULT_SESSION_INDEX_PATH);
+    this.archivedSessionsDir = options.archivedSessionsDir
+      || (options.metadataPath ? path.join(path.dirname(this.metadataPath), 'archived_sessions') : DEFAULT_ARCHIVED_SESSIONS_DIR);
   }
 
   load() {
@@ -23,6 +26,7 @@ class ConversationMetadataStore {
     const normalized = normalizeMetadata(metadata, this.metadataPath);
     changed = this.migrateOldTitles(normalized) || changed;
     changed = this.migrateSessionIndexTitles(normalized) || changed;
+    changed = this.syncArchivedSessions(normalized) || changed;
     if (changed) {
       return this.write(normalized);
     }
@@ -113,6 +117,24 @@ class ConversationMetadataStore {
     }
   }
 
+  syncArchivedSessions(metadata) {
+    if (!fs.existsSync(this.archivedSessionsDir)) {
+      return false;
+    }
+    const archivedIds = new Set(fs.readdirSync(this.archivedSessionsDir).map(archivedSessionId).filter(Boolean));
+    let changed = false;
+    for (const id of Object.keys(metadata.conversations)) {
+      if (!archivedIds.has(id)) {
+        continue;
+      }
+      metadata.archivedConversations = metadata.archivedConversations || {};
+      metadata.archivedConversations[id] = metadata.archivedConversations[id] || { archivedAtMs: Date.now() };
+      delete metadata.conversations[id];
+      changed = true;
+    }
+    return changed;
+  }
+
   readSessionIndexTitles() {
     if (!fs.existsSync(this.sessionIndexPath)) {
       return {};
@@ -135,6 +157,11 @@ class ConversationMetadataStore {
     }
     return titles;
   }
+}
+
+function archivedSessionId(fileName) {
+  const match = String(fileName).match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$/i);
+  return match ? match[1] : '';
 }
 
 function normalizeMetadata(data, file) {
@@ -280,5 +307,6 @@ module.exports = {
   DEFAULT_METADATA_PATH,
   DEFAULT_OLD_TITLES_PATH,
   DEFAULT_SESSION_INDEX_PATH,
+  DEFAULT_ARCHIVED_SESSIONS_DIR,
   normalizeMetadata,
 };

@@ -112,6 +112,32 @@ module.exports = {
       },
     },
     {
+      name: 'tombstones conversations archived by Codex',
+      run() {
+        const dir = tempDir('codex-meta-archived-sessions');
+        const file = path.join(dir, 'meta.json');
+        const archivedDir = path.join(dir, 'archived_sessions');
+        fs.mkdirSync(archivedDir);
+        writeJson(file, {
+          version: 1,
+          conversations: {
+            '019f12ab-5e79-7db0-90ae-5777afcff38c': { group: '需求A', projectRoot: '/p' },
+            live: { group: '需求A', projectRoot: '/p' },
+          },
+        });
+        fs.writeFileSync(path.join(archivedDir, 'rollout-2026-06-29T17-17-28-019f12ab-5e79-7db0-90ae-5777afcff38c.jsonl'), '');
+        const store = new ConversationMetadataStore({
+          metadataPath: file,
+          oldTitlesPath: path.join(dir, 'titles.json'),
+          archivedSessionsDir: archivedDir,
+        });
+        const metadata = store.load();
+        assert.strictEqual(metadata.conversations['019f12ab-5e79-7db0-90ae-5777afcff38c'], undefined);
+        assert.deepStrictEqual(metadata.conversations.live, { group: '需求A', projectRoot: '/p' });
+        assert.ok(metadata.archivedConversations['019f12ab-5e79-7db0-90ae-5777afcff38c']);
+      },
+    },
+    {
       name: 'ignores invalid old titles when metadata is valid',
       run() {
         const dir = tempDir('codex-meta-invalid-old-title');
