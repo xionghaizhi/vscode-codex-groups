@@ -4,6 +4,7 @@ const tests = [
   require('./package-json.test'),
   require('./extension.test'),
   require('./patch-engine.test'),
+  require('./scripts.test'),
   require('./run-tests-runner.test'),
 ];
 const grepText = grepArgument(process.argv.slice(2));

@@ -265,6 +265,10 @@ function patchExtensionMetadataHelper(text, context) {
   if (text.includes('var Xle=require("path");U();Nt();')) {
     return replaceOnce(text, 'var Xle=require("path");U();Nt();', extensionHostHelper('Xle', 'typeof U=="function"&&U(),typeof Nt=="function"&&Nt();'), context, 'extension metadata helper latest');
   }
+  const latestPathAlias = symbolAfter(text, 'var ', '=require("path");U();Nt();');
+  if (latestPathAlias) {
+    return replaceOnce(text, `var ${latestPathAlias}=require("path");U();Nt();`, extensionHostHelper(latestPathAlias, 'typeof U=="function"&&U(),typeof Nt=="function"&&Nt();'), context, 'extension metadata helper latest alias');
+  }
   return replaceOnce(text, 'var kce=require("path");$t();', extensionHostHelper('kce', 'typeof $t=="function"&&$t();'), context, 'extension metadata helper legacy');
 }
 

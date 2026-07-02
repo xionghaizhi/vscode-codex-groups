@@ -14,7 +14,7 @@ function main() {
   const store = new ConversationMetadataStore();
   const metadata = store.load();
   const target = new CodexExtensionLocator().locate();
-  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true });
+  const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
   const report = engine.apply(target, metadata);
 
   console.log(`最新扩展目录：${target.extensionDir}`);

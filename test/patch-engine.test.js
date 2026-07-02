@@ -104,6 +104,22 @@ module.exports = {
       },
     },
     {
+      name: 'patches extension metadata helper when path alias changes',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.extensionJsPath, extensionText.replace(
+          'var Dle=require("path");W();$t();',
+          'var tue=require("path");U();Nt();',
+        ));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(extension.includes('var tue=require("path"),codexLocalGroupsFs=require("fs"),codexLocalGroupsPatchVersion=14'));
+        assert.ok(extension.includes('typeof U=="function"&&U(),typeof Nt=="function"&&Nt();'));
+      },
+    },
+    {
       name: 'safe header uses stable messenger reference when alias collides',
       run() {
         const target = createTarget();
