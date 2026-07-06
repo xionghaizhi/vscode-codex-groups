@@ -24,6 +24,7 @@ class CodexPatchEngine {
     }
     planFile(changes, target.extensionJsPath, (text) => patchExtension(text, context));
     planFile(changes, target.sidebarPath, (text) => patchSidebar(text, context));
+    planFile(changes, target.sidebarProjectGroupSignalsPath, (text) => patchSidebarProjectGroupSignals(text, context));
     planFile(changes, target.headerPath, (text, file) => patchHeader(text, context, file));
     planFile(changes, target.appMainPath, (text) => patchAppMain(text, context));
     planFile(changes, target.appServerManagerSignalsPath, (text) => patchAppServerManagerSignals(text, context));
@@ -79,6 +80,7 @@ class CodexPatchEngine {
       target.requestPath ? checkModule(this.nodePath, target.requestPath) : null,
       checkModule(this.nodePath, target.localTitlePath),
       target.sidebarPath ? checkModule(this.nodePath, target.sidebarPath) : null,
+      target.sidebarProjectGroupSignalsPath ? checkModule(this.nodePath, target.sidebarProjectGroupSignalsPath) : null,
     ].filter(Boolean);
   }
 
@@ -96,6 +98,7 @@ function targetBundlePaths(target) {
     target.requestPath,
     target.localTitlePath,
     target.sidebarPath,
+    target.sidebarProjectGroupSignalsPath,
   ].filter(Boolean);
 }
 
@@ -430,6 +433,25 @@ function patchSidebar(text, context) {
     return text;
   }
   return replaceRegexOnce(text, /b=t\(([^,]+),\(\{get:e\}\)=>e\(d\)\?\?s\),/, 'b=t($1,({get:e})=>{let t=e(d)??s;return t===`recent`?s:t}),', context, 'sidebar organize mode');
+}
+
+function patchSidebarProjectGroupSignals(text, context) {
+  if (text.includes('codexLocalGroupsSidebarProjectStatusPatchVersion=1')) {
+    return text;
+  }
+  const oldText = 'function ze({hasInProgressSideChat:e,isResponseInProgress:t,latestTurnHasSystemError:n,resumeState:r,threadRuntimeStatus:i}){return e?`loading`:i?.type===`systemError`?`error`:i?.type===`active`?`loading`:r===`needs_resume`?`idle`:n?`error`:t===!0?`loading`:`idle`}';
+  const newText = 'var codexLocalGroupsSidebarProjectStatusPatchVersion=1;function ze({hasInProgressSideChat:e,isResponseInProgress:t,latestTurnHasSystemError:n,resumeState:r,threadRuntimeStatus:i}){return e?`loading`:i?.type===`systemError`?`error`:i?.type===`active`?`loading`:i?.type===`idle`||i?.type===`notLoaded`?`idle`:r===`needs_resume`?`idle`:n?`error`:t===!0?`loading`:`idle`}';
+  if (text.includes(oldText)) {
+    return replaceOnce(text, oldText, newText, context, 'sidebar project group stale loading status');
+  }
+  const current = /function ([A-Za-z_$][\w$]*)\(\{hasInProgressSideChat:e,isResponseInProgress:t,latestTurnHasSystemError:n,resumeState:r,threadRuntimeStatus:i\}\)\{return e\?`loading`:i\?\.type===`systemError`\?`error`:i\?\.type===`active`\?`loading`:r===`needs_resume`\?`idle`:n\?`error`:t===!0\?`loading`:`idle`\}/;
+  if (current.test(text)) {
+    return replaceRegexOnce(text, current, 'var codexLocalGroupsSidebarProjectStatusPatchVersion=1;function $1({hasInProgressSideChat:e,isResponseInProgress:t,latestTurnHasSystemError:n,resumeState:r,threadRuntimeStatus:i}){return e?`loading`:i?.type===`systemError`?`error`:i?.type===`active`?`loading`:i?.type===`idle`||i?.type===`notLoaded`?`idle`:r===`needs_resume`?`idle`:n?`error`:t===!0?`loading`:`idle`}', context, 'sidebar project group stale loading status current');
+  }
+  if (text.includes('hasInProgressSideChat') && text.includes('isResponseInProgress') && text.includes('threadRuntimeStatus')) {
+    context.errors.push('sidebar project group status: 找不到 loading 状态判定插入点');
+  }
+  return text;
 }
 
 function patchHeader(text, context, file) {
@@ -928,11 +950,16 @@ function patchAppServerManagerSignals(text, context) {
   const allNewV2 = 'e.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i}))';
   const allOldV1 = 'e.sendRequest(`thread/list`,{limit:200,cursor:o,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n})';
   const allNewV1 = 'e.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:200,cursor:o,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n}))';
+  const allOldCurrent = 'let c={limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i},l=await e.sendRequest(`thread/list`,c);';
+  const allNewCurrent = 'let c=codexLocalGroupsRecentThreadListParams({limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i}),l=await e.sendRequest(`thread/list`,c);';
   next = next.replace(allOldV2, allNewV2).replace(allOldV1, allNewV1);
+  next = next.replace(allOldCurrent, allNewCurrent);
   const pageOldV2 = 'this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:D,useStateDbOnly:n})';
   const pageNewV2 = 'this.params.requestClient.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:D,useStateDbOnly:n}))';
   const pageOldV1 = 'this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:n})';
   const pageNewV1 = 'this.params.requestClient.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:n}))';
+  const pageOldCurrent = 'let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:c,useStateDbOnly:n};return this.params.requestClient.sendRequest(`thread/list`,r)';
+  const pageNewCurrent = 'let r=codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:c,useStateDbOnly:n});return this.params.requestClient.sendRequest(`thread/list`,r)';
   const archiveOld = 'e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})';
   const archiveNew = 'codexLocalGroupsMarkArchivedConversation(t),e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})';
   if (!next.includes(archiveNew) && next.includes(archiveOld)) {
@@ -943,6 +970,8 @@ function patchAppServerManagerSignals(text, context) {
       next = replaceOnce(next, pageOldV2, pageNewV2, context, 'app-server-manager paged recent limit');
     } else if (next.includes(pageOldV1)) {
       next = replaceOnce(next, pageOldV1, pageNewV1, context, 'app-server-manager paged recent limit legacy');
+    } else if (next.includes(pageOldCurrent)) {
+      next = replaceOnce(next, pageOldCurrent, pageNewCurrent, context, 'app-server-manager paged recent limit current');
     }
   }
   return next;

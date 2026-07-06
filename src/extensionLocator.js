@@ -20,6 +20,7 @@ class CodexExtensionLocator {
       appServerManagerSignalsPath: findBundle(assetsDir, 'thread-context-inputs-*.js', isThreadContextInputsBundle),
       requestPath: findBundle(assetsDir, 'request-*.js', isRequestBundle),
       sidebarPath: findBundle(assetsDir, 'sidebar-signals-*.js', () => true),
+      sidebarProjectGroupSignalsPath: findOptionalBundle(assetsDir, 'sidebar-project-group-signals-*.js', () => true),
       localTitlePath: findBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true),
     };
   }
@@ -89,6 +90,19 @@ function findBundle(dir, pattern, predicate) {
     throw new Error(`无法唯一定位 ${prefix}*.js，候选数量：${matches.length}`);
   }
   return matches[0];
+}
+
+function findOptionalBundle(dir, pattern, predicate) {
+  const prefix = pattern.split('*')[0];
+  const suffix = pattern.split('*')[1];
+  const matches = fs.readdirSync(dir)
+    .filter((name) => name.startsWith(prefix) && name.endsWith(suffix))
+    .map((name) => path.join(dir, name))
+    .filter((file) => predicate(fs.readFileSync(file, 'utf8')));
+  if (matches.length > 1) {
+    throw new Error(`无法唯一定位 ${prefix}*.js，候选数量：${matches.length}`);
+  }
+  return matches[0] || null;
 }
 
 function isHeaderBundle(text) {

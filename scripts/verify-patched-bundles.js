@@ -23,8 +23,13 @@ function main() {
   assertContains(target.appMainPath, 'preventAllNetworkTraffic:!0');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=3');
   assertContains(target.appServerManagerSignalsPath, 'cwds:t');
+  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams({limit:200');
+  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams({limit:t');
   assertContains(target.requestPath, 'codexLocalGroupsRequestPatchVersion=2');
   assertContains(target.requestPath, 't.startsWith(`/wham/usage`)');
+  if (target.sidebarProjectGroupSignalsPath) {
+    assertContains(target.sidebarProjectGroupSignalsPath, 'codexLocalGroupsSidebarProjectStatusPatchVersion=1');
+  }
   assertContains(target.localTitlePath, 'codexLocalGroupsLocalTitlePatchVersion=6');
   for (const file of bundlePaths(target)) {
     assertNotContains(file, 'requestAllThreadList(e)');
@@ -47,6 +52,7 @@ function bundlePaths(target) {
     target.appMainPath,
     target.requestPath,
     target.localTitlePath,
+    target.sidebarProjectGroupSignalsPath,
   ].filter(Boolean);
 }
 

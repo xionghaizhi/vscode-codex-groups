@@ -24,6 +24,7 @@ const headerText = 'codexRecentTaskCurrentRoot import{f as b}from"./vscode-api-a
 const appMainText = 'P=codexTitleAliasFor(n)?? codexTitleAliasFor(t.conversation.id)?? import{f as gi}from"./vscode-api-a.js";var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}function aE(e){let tt=()=>[{id:`rename-thread`,message:i_.renameThread,onSelect:Ye},...O==null||O===`local`?[]:[{id:`change-connection-color`}]];return tt}var YM=`https://ab.chatgpt.com/v1`,XM=`https://ab.chatgpt.com/v1/sdk_exception`,tN={networkConfig:{api:YM,logEventUrl:cM,sdkExceptionUrl:XM,networkOverrideFunc:KM}};';
 const localTitleText = 'var codexTitleAliasMap={};function codexTitleAliasFor(e){let t=codexTitleAliasMap[String(e)];return typeof t==`string`&&t.trim().length>0?t.trim():null}var s=1;';
 const appServerManagerSignalsText = 'async function ug(e,{modelProviders:t,archived:n=!1,sourceKinds:r=D,useStateDbOnly:i=!1}){let a=[],o=async s=>{let c=await e.sendRequest(`thread/list`,{limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i});a.push(...c.data),c.nextCursor&&await o(c.nextCursor)};return await o(null),a}async function fg(e,t,n){e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})}class Eg{listRecentThreads({cursor:e,limit:t,useStateDbOnly:n=!1}){return this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:D,useStateDbOnly:n})}}';
+const sidebarProjectGroupSignalsText = 'function ze({hasInProgressSideChat:e,isResponseInProgress:t,latestTurnHasSystemError:n,resumeState:r,threadRuntimeStatus:i}){return e?`loading`:i?.type===`systemError`?`error`:i?.type===`active`?`loading`:r===`needs_resume`?`idle`:n?`error`:t===!0?`loading`:`idle`}';
 const requestText = 'var p=class{async makeRequest(o,s,c){let{headers:l,url:u}=this.getRequestTarget(s,c);try{switch(o){case`get`:return(await i.getInstance().get(u,l)).body;case`post`:return(await i.getInstance().post(u,this.getRequestBody(c),l)).body}}catch(i){throw a.warning(`sa_server_request_failed`,{safe:{method:o},sensitive:{error:i,routePattern:s,url:u}}),i}}async safeGet(e,...t){return this.makeRequest(`get`,e,t[0])}async safePost(e,...t){return this.makeRequest(`post`,e,t[0])}};';
 const accountInfoText = '"account-info":async()=>{let e=await this.authProvider.getToken({refreshToken:!1});if(!e)return{accountId:null,userId:null,plan:null,email:null,computeResidency:null};try{let r=JSON.parse(Buffer.from(e.split(".")[1],"base64url").toString("utf8")),n=r["https://api.openai.com/auth"]??{},o=r["https://api.openai.com/profile"]??{},i=n?.chatgpt_account_id??null,s=n?.chatgpt_user_id??null,a=n?.chatgpt_plan_type??null,c=n?.chatgpt_compute_residency??null,l=o.email??null;if(i&&s&&a)return{accountId:i,userId:s,plan:a,email:l,computeResidency:c}}catch{X().error("Unable to extract account id and plan from auth token.")}return{accountId:null,userId:null,plan:null,email:null,computeResidency:null}}';
 const headerNeedsBasePatchText = 'import{i as useEnv}from"./use-environment-a.js";import{f as customMessenger}from"./vscode-api-a.js";h=ge(),g;let b=i.filter(y),C=Ve(r.data,i,_),A=[];A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a},e.key));F.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&p===e.conversation.id,onClose:a},e.key));o=r==null?void 0:(0,Q.jsx)(de,{dateString:new Date(r).toISOString()});case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(me,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e};e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.updatedAt).toISOString()});o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r});function Ke(e){return e.kind===`remote`}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
@@ -38,6 +39,7 @@ function createTarget() {
   fs.writeFileSync(path.join(assets, 'app-main-a.js'), appMainText);
   fs.writeFileSync(path.join(assets, 'local-title-a.js'), localTitleText);
   fs.writeFileSync(path.join(assets, 'app-server-manager-signals-a.js'), appServerManagerSignalsText);
+  fs.writeFileSync(path.join(assets, 'sidebar-project-group-signals-a.js'), sidebarProjectGroupSignalsText);
   fs.writeFileSync(path.join(assets, 'request-a.js'), requestText);
   return {
     extensionDir: dir,
@@ -46,6 +48,7 @@ function createTarget() {
     appMainPath: path.join(assets, 'app-main-a.js'),
     localTitlePath: path.join(assets, 'local-title-a.js'),
     sidebarPath: path.join(assets, 'sidebar-a.js'),
+    sidebarProjectGroupSignalsPath: path.join(assets, 'sidebar-project-group-signals-a.js'),
     appServerManagerSignalsPath: path.join(assets, 'app-server-manager-signals-a.js'),
     requestPath: path.join(assets, 'request-a.js'),
   };
@@ -169,7 +172,7 @@ module.exports = {
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
         const plan = engine.plan(target, metadata);
         assert.deepStrictEqual(plan.errors, []);
-        assert.strictEqual(plan.changes.length, 6);
+        assert.strictEqual(plan.changes.length, 7);
         for (const change of plan.changes) {
           fs.writeFileSync(change.path, change.nextText);
         }
@@ -180,6 +183,7 @@ module.exports = {
         const header = fs.readFileSync(target.headerPath, 'utf8');
         const appMain = fs.readFileSync(target.appMainPath, 'utf8');
         const appServerManagerSignals = fs.readFileSync(target.appServerManagerSignalsPath, 'utf8');
+        const sidebarProjectGroupSignals = fs.readFileSync(target.sidebarProjectGroupSignalsPath, 'utf8');
         const request = fs.readFileSync(target.requestPath, 'utf8');
         assert.ok(extension.includes('codexLocalGroupsPatchVersion=14'));
         assert.ok(extension.includes('codexLocalGroupsSchedulePatch'));
@@ -273,6 +277,8 @@ module.exports = {
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentPatchVersion=3'));
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsMarkArchivedConversation'));
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsRecentThreadListParams'));
+        assert.ok(sidebarProjectGroupSignals.includes('codexLocalGroupsSidebarProjectStatusPatchVersion=1'));
+        assert.ok(sidebarProjectGroupSignals.includes('i?.type===`idle`||i?.type===`notLoaded`?`idle`'));
         assert.ok(!appServerManagerSignals.includes('codexLocalGroupsRecentInitialMeta'));
         assert.ok(appServerManagerSignals.includes('cwds:t'));
         assert.ok(appServerManagerSignals.includes('{...e,limit:200}'));
@@ -438,6 +444,37 @@ module.exports = {
         assert.ok(change.nextText.includes('cwds:t'));
         const script = path.join(target.extensionDir, 'app-server-manager-signals-smoke.js');
         fs.writeFileSync(script, appServerManagerSignalsSmokeScript(change.nextText));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      },
+    },
+    {
+      name: 'filters current webview recent thread request shape',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.appServerManagerSignalsPath, appServerManagerSignalsCurrentText());
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const change = plan.changes.find((item) => item.path === target.appServerManagerSignalsPath);
+        assert.ok(change);
+        assert.ok(change.nextText.includes('let c=codexLocalGroupsRecentThreadListParams({limit:200'));
+        assert.ok(change.nextText.includes('let r=codexLocalGroupsRecentThreadListParams({limit:t'));
+        const script = path.join(target.extensionDir, 'current-app-server-manager-signals-smoke.js');
+        fs.writeFileSync(script, currentAppServerManagerSignalsSmokeScript(change.nextText));
+        const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      },
+    },
+    {
+      name: 'keeps completed rows idle when latest turn status is stale',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const change = plan.changes.find((item) => item.path === target.sidebarProjectGroupSignalsPath);
+        assert.ok(change);
+        const script = path.join(target.extensionDir, 'sidebar-project-status-smoke.js');
+        fs.writeFileSync(script, sidebarProjectStatusSmokeScript(change.nextText));
         const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
         assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
       },
@@ -978,20 +1015,20 @@ module.exports = {
       name: 'runs syntax checks successfully',
       run() {
         const target = createTarget();
-        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.requestPath, target.localTitlePath, target.sidebarPath]) {
+        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.requestPath, target.localTitlePath, target.sidebarPath, target.sidebarProjectGroupSignalsPath]) {
           fs.writeFileSync(file, 'export{};');
         }
         fs.writeFileSync(target.extensionJsPath, 'const ok = true;\n');
         const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
         const syntax = engine.runSyntaxChecks(target);
-        assert.strictEqual(syntax.length, 7);
+        assert.strictEqual(syntax.length, 8);
       },
     },
     {
       name: 'accepts syntax checks that exit zero with a spawn warning',
       run() {
         const target = createTarget();
-        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.requestPath, target.localTitlePath, target.sidebarPath]) {
+        for (const file of [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath, target.requestPath, target.localTitlePath, target.sidebarPath, target.sidebarProjectGroupSignalsPath]) {
           fs.writeFileSync(file, 'export{};');
         }
         fs.writeFileSync(target.extensionJsPath, 'const ok = true;\n');
@@ -999,7 +1036,7 @@ module.exports = {
         childProcess.spawnSync = () => ({ status: 0, error: new Error('spawnSync node EPERM'), stderr: '' });
         try {
           const syntax = new CodexPatchEngine({ nodePath: process.execPath }).runSyntaxChecks(target);
-          assert.strictEqual(syntax.length, 7);
+          assert.strictEqual(syntax.length, 8);
         } finally {
           childProcess.spawnSync = originalSpawnSync;
         }
@@ -1243,6 +1280,73 @@ ${text}
   console.error(error && error.stack ? error.stack : error);
   process.exit(1);
 });
+`;
+}
+
+function appServerManagerSignalsCurrentText() {
+  return 'async function bb(e,{modelProviders:t,archived:n=!1,sourceKinds:r=c,useStateDbOnly:i=!1}){let a=[],o=async s=>{let c={limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i},l=await e.sendRequest(`thread/list`,c);a.push(...l.data),l.nextCursor&&await o(l.nextCursor)};return await o(null),a}class Eg{async listRecentThreads({cursor:e,limit:t,useStateDbOnly:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:c,useStateDbOnly:n};return this.params.requestClient.sendRequest(`thread/list`,r)}}';
+}
+
+function currentAppServerManagerSignalsSmokeScript(text) {
+  return `
+const assert = require('assert');
+const requests = [];
+const localStorage = {
+  getItem(key) {
+    if (key === 'codex-local-groups-current-root-v1') return '/home/project/vscode/yuxi';
+    return null;
+  },
+};
+const c = [];
+const sendRequest = (method, params) => {
+  requests.push({ method, params });
+  return Promise.resolve({ data: [], nextCursor: null });
+};
+${text}
+(async () => {
+  await bb({ sendRequest, recentConversationsSortKey: 'updated_at' }, { modelProviders: null });
+  const store = new Eg();
+  store.params = { requestClient: { sendRequest, getCompatibleThreadSortKey: (sortKey) => sortKey } };
+  store.recentConversationSortKey = 'updated_at';
+  await store.listRecentThreads({ limit: 50, cursor: null });
+  assert.strictEqual(requests.length, 2);
+  for (const request of requests) {
+    assert.strictEqual(request.method, 'thread/list');
+    assert.deepStrictEqual(request.params.cwds, ['/home/project/vscode/yuxi']);
+    assert.strictEqual(request.params.limit, 200);
+  }
+})().catch((error) => {
+  console.error(error && error.stack ? error.stack : error);
+  process.exit(1);
+});
+`;
+}
+
+function sidebarProjectStatusSmokeScript(text) {
+  return `
+const assert = require('assert');
+${text}
+assert.strictEqual(ze({
+  hasInProgressSideChat: false,
+  isResponseInProgress: true,
+  latestTurnHasSystemError: false,
+  resumeState: 'resumed',
+  threadRuntimeStatus: { type: 'idle' },
+}), 'idle');
+assert.strictEqual(ze({
+  hasInProgressSideChat: false,
+  isResponseInProgress: true,
+  latestTurnHasSystemError: false,
+  resumeState: 'resumed',
+  threadRuntimeStatus: null,
+}), 'loading');
+assert.strictEqual(ze({
+  hasInProgressSideChat: false,
+  isResponseInProgress: false,
+  latestTurnHasSystemError: false,
+  resumeState: 'resumed',
+  threadRuntimeStatus: { type: 'active' },
+}), 'loading');
 `;
 }
 

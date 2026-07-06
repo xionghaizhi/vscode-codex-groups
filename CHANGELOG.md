@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.0.24 - 2026-07-06
+
+### Fixed
+- 修复最近会话已完成后仍显示 loading 的状态判定：当 Codex 回传 `threadRuntimeStatus` 已是 `idle/notLoaded` 时，不再被旧的 `isResponseInProgress` 覆盖成 loading。
+- 适配新版 Codex `thread/list` 请求结构，确保最近会话项目过滤参数继续生效。
+
+### Verified
+- `npm run compile`
+- `npm run lint`
+- `npm test`
+- `npm run apply-patches`
+- `npm run verify-patched-bundles`
+- `node scripts/plan-patches.js`
+
 ## v0.0.16 - 2026-06-26
 
 ### Changed
