@@ -17,7 +17,7 @@ class CodexExtensionLocator {
       extensionJsPath: path.join(extensionDir, 'out/extension.js'),
       headerPath: findBundle(assetsDir, 'header-*.js', isHeaderBundle),
       appMainPath: findBundle(assetsDir, 'app-main-*.js', isAppMainBundle),
-      appServerManagerSignalsPath: findBundle(assetsDir, 'thread-context-inputs-*.js', isThreadContextInputsBundle),
+      appServerManagerSignalsPath: findBundle(assetsDir, '*.js', isAppServerManagerSignalsBundle),
       requestPath: findBundle(assetsDir, 'request-*.js', isRequestBundle),
       sidebarPath: findBundle(assetsDir, 'sidebar-signals-*.js', () => true),
       sidebarProjectGroupSignalsPath: findOptionalBundle(assetsDir, 'sidebar-project-group-signals-*.js', () => true),
@@ -113,7 +113,7 @@ function isAppMainBundle(text) {
   return text.includes('untitledThreadLabel') && text.includes('conversation.title');
 }
 
-function isThreadContextInputsBundle(text) {
+function isAppServerManagerSignalsBundle(text) {
   return text.includes('recentConversationsSortKey') && text.includes('thread/list');
 }
 

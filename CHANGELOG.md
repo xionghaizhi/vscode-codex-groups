@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.0.25 - 2026-07-10
+
+### Fixed
+- 适配 OpenAI Codex `26.707.31428`：支持 `app-server-manager-signals-*` bundle、最新版 extension host、recent tasks header、request class 和 tray menu 语义锚点。
+- 修复最新版 pending worktree 改为 `kind: local + conversation: null` 后，分组 helper 访问空 conversation 导致 Codex UI 白屏的问题。
+- 修复最新版 header 不再导入 VSCode messenger 时补丁注入未定义变量的问题。
+- 兼容最新版 `thread/list` 首屏 limit 从 200 调整为 100，并保留 workspace `cwds` 过滤和运行时下限提升。
+
+### Verified
+- `npm run compile`
+- `npm run lint`
+- `npm test`（104 tests）
+- `npm run apply-patches`
+- `npm run verify-patched-bundles`
+- `npm run plan-patches`（待修改文件数 0）
+
 ## v0.0.24 - 2026-07-06
 
 ### Fixed

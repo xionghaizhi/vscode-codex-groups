@@ -123,6 +123,25 @@ module.exports = {
       },
     },
     {
+      name: 'patches Codex 26.707 extension host anchors',
+      run() {
+        const target = createTarget();
+        const currentAccount = accountInfoText.replace('X().error', 'Y().error');
+        const currentExtension = extensionText
+          .replace('var Dle=require("path");W();$t();var $g=1;', 'var Ide=require("path");B();Mt();var ay=U(require("vscode"));')
+          .replace('kle(this.extensionUri,"app-server",["--analytics-default-enabled"])', 'Cde(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled"])');
+        fs.writeFileSync(target.extensionJsPath, `${currentExtension}${currentAccount}`);
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(extension.includes('var Ide=require("path"),codexLocalGroupsFs=require("fs")'));
+        assert.ok(extension.includes('typeof B=="function"&&B(),typeof Mt=="function"&&Mt();'));
+        assert.ok(extension.includes('"features.code_mode_host=true","app-server","--analytics-default-enabled","--disable","plugins"'));
+        assert.ok(extension.includes('"account-info":async()=>({accountId:null'));
+      },
+    },
+    {
       name: 'safe header uses stable messenger reference when alias collides',
       run() {
         const target = createTarget();
@@ -162,6 +181,32 @@ module.exports = {
         assert.ok(header.includes('window.addEventListener(`codex-local-groups-refresh`'));
         assert.ok(header.includes('t[33]!==codexLocalGroupsRefresh'));
         assert.ok(header.includes('t[33]=codexLocalGroupsRefresh'));
+      },
+    },
+    {
+      name: 'patches Codex 26.707 recent tasks header',
+      run() {
+        const target = createTarget();
+        const assets = path.dirname(target.headerPath);
+        fs.writeFileSync(path.join(assets, 'use-webview-execution-target-current.js'), 'export{};');
+        fs.writeFileSync(target.headerPath, [
+          'import{i as R}from"./use-environment-current.js";',
+          'import{c as i,la as a}from"./vscode-api-current.js";',
+          'function rt(e){let t=(0,Z.c)(33),l=x(),{authMethod:u}=I(),[d,f]=v(nt),h=c?d:`recent`,g=E(`/local/:conversationId`)?.params?.conversationId??null;let T=r.filter(w),D=$e(n.data,r,C),[O,j]=(0,$.useState)(``),M=(0,$.useDeferredValue)(O),N=M.length>0,P=D.filter(it),F=N?P:P,L=N?T:T,R=N?D:D,z=F.map(e=>(0,Q.jsx)(ve,{task:e.task,onClose:i},e.key)),U;t[15]!==g||t[16]!==n||t[17]!==R||t[18]!==N||t[19]!==D.length||t[20]!==i||t[21]!==h?(U=R.map(e=>(0,Q.jsx)(ot,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&g===e.conversation.id,onClose:i},e.key)),t[15]=g,t[16]=n,t[17]=R,t[18]=N,t[19]=D.length,t[20]=i,t[21]=h,t[22]=U):U=t[22];return U}',
+          'function it(e){return e.kind===`remote`}',
+          'var at=(0,$.memo)(function(e){let t=(0,Z.c)(7),{conversationId:n,updatedAt:r,isActive:i,onClose:a}=e,o=r==null?void 0:(0,Q.jsx)(de,{dateString:new Date(r).toISOString()});return(0,Q.jsx)(ye,{conversationId:n,isActive:i,metaContent:o,onClick:a})}),',
+          'ot=(0,$.memo)(function(e){let t=(0,Z.c)(23),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(ve,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e}case`local`:{if(n.conversation==null){let e=()=>{},r=()=>{},s=(0,Q.jsx)(be,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r});return s}let e=(n.conversation.recencyAt??n.conversation.updatedAt)==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.recencyAt??n.conversation.updatedAt).toISOString()});return(0,Q.jsx)(ye,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i})}}});',
+        ].join(''));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        assert.ok(header.includes('f as codexLocalGroupsMessengerImport'));
+        assert.ok(header.includes('codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot'));
+        assert.ok(header.includes('codexRecentTaskProjectRows(R,g,i,ot)'));
+        assert.ok(header.includes('t[33]!==codexLocalGroupsRefresh'));
+        assert.ok(header.includes('e.pendingWorktree?.clientThreadId'));
+        assert.ok(header.includes('o.conversation==null?p'));
       },
     },
     {
@@ -331,7 +376,7 @@ module.exports = {
         const target = createTarget();
         fs.writeFileSync(target.appMainPath, [
           'import{f as gi}from"./vscode-api-a.js";',
-          'function Qj({get:e,threadKeys:t,groups:n,projectlessThreadIds:r,projectlessLabel:i,untitledThreadLabel:a}){let o=Mm(n),s=[];for(let n of t){let t=e(dp,n);if(t==null||t.kind===`pending-worktree`)continue;let c=t.kind===`local`?t.conversation.workspaceKind===`projectless`||r?.includes(t.conversation.id)===!0:r?.includes(t.task.id)===!0;s.push({title:(t.kind===`local`?t.conversation.title?.trim():t.task.title?.trim())||a,path:Wu(n),projectLabel:c?i:o.get(n)??(t.kind===`local`?Ba(t.conversation.cwd??``):t.task.task_status_display?.environment_label??``),isProjectless:c})}return s}',
+          'function Qj({get:e,threadKeys:t,groups:n,unreadThreadKeys:u,projectlessThreadIds:r,projectlessLabel:i,untitledThreadLabel:a}){let o=Mm(n),s=[];for(let n of t){let t=e(dp,n);if(t==null||t.kind===`local`&&t.conversation==null)continue;let c=t.kind===`local`?t.conversation.workspaceKind===`projectless`||r?.includes(t.conversation.id)===!0:r?.includes(t.task.id)===!0;s.push({title:(t.kind===`local`?t.conversation.title?.trim():t.task.title?.trim())||a,path:Wu(n),projectLabel:c?i:o.get(n)??(t.kind===`local`?Ba(t.conversation.cwd??``):t.task.task_status_display?.environment_label??``),isProjectless:c})}return s}',
           'JC={networkConfig:{api:UC,logEventUrl:QS,sdkExceptionUrl:WC,networkOverrideFunc:BC}}',
         ].join(''));
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
@@ -340,7 +385,7 @@ module.exports = {
         assert.deepStrictEqual(plan.errors, []);
         assert.ok(change);
         assert.ok(change.nextText.includes('codexLocalGroupsWebviewPatchVersion=6'));
-        assert.ok(change.nextText.includes('function Qj({get:e,threadKeys:t,groups:n'));
+        assert.ok(change.nextText.includes('function Qj({get:e,threadKeys:t,groups:n,unreadThreadKeys:u'));
         assert.ok(change.nextText.includes('codexTitleAliasFor(t.conversation.id)??t.conversation.title?.trim()'));
       },
     },
@@ -371,6 +416,20 @@ module.exports = {
         assert.ok(change.nextText.includes('t.startsWith(`/backend-api/plugins/featured`)'));
         assert.ok(change.nextText.includes('return null'));
         assert.ok(change.nextText.indexOf('codexLocalGroupsIsDisabledUsageRequest(s)') < change.nextText.indexOf('i.getInstance().get(u,l)'));
+      },
+    },
+    {
+      name: 'patches renamed request class in Codex 26.707',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.requestPath, requestText.replace('var p=class{', 'var _=class{constructor(e={}){this.defaults=e}'));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const request = plan.changes.find((change) => change.path === target.requestPath).nextText;
+        assert.ok(request.includes('codexLocalGroupsRequestPatchVersion=2'));
+        assert.ok(request.includes('var _=class{constructor(e={}){this.defaults=e}'));
+        assert.ok(request.includes('if(codexLocalGroupsIsDisabledUsageRequest(s))return null;'));
       },
     },
     {
@@ -463,6 +522,25 @@ module.exports = {
         fs.writeFileSync(script, currentAppServerManagerSignalsSmokeScript(change.nextText));
         const result = childProcess.spawnSync(resolveNodePath(), [script], { encoding: 'utf8' });
         assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+      },
+    },
+    {
+      name: 'filters Codex 26.707 recent thread request shape',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.appServerManagerSignalsPath, [
+          'async function YE(e,{modelProviders:t,archived:n=!1,sourceKinds:r=p,useStateDbOnly:i=!1}){let a=[],o=async s=>{let c={limit:100,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i},l=await e.sendRequest(`thread/list`,c,{priority:`background`,source:`thread_list`});a.push(...l.data),l.nextCursor&&await o(l.nextCursor)};return await o(null),a}',
+          'async function fg(e,t,n){e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})}',
+          'class Eg{async listRecentThreads({cursor:e,limit:t,useStateDbOnly:n=!1,background:r=!1}){let i={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:p,useStateDbOnly:n},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return a}}',
+        ].join(''));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const change = plan.changes.find((item) => item.path === target.appServerManagerSignalsPath);
+        assert.ok(change.nextText.includes('codexLocalGroupsRecentPatchVersion=3'));
+        assert.ok(change.nextText.includes('let c=codexLocalGroupsRecentThreadListParams({limit:100'));
+        assert.ok(change.nextText.includes('let i=codexLocalGroupsRecentThreadListParams({limit:t'));
+        assert.ok(change.nextText.includes('{priority:`background`,source:`thread_list`}'));
       },
     },
     {

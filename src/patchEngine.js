@@ -219,6 +219,10 @@ function patchExtensionAppServerArgs(text, context) {
   if (text.includes('"--disable","plugins"')) {
     return text;
   }
+  const current = /([A-Za-z_$][\w$]*)\(this\.extensionUri,\["-c","features\.code_mode_host=true","app-server","--analytics-default-enabled"\]\)/;
+  if (current.test(text)) {
+    return replaceRegexOnce(text, current, '$1(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled","--disable","plugins","-c","mcp_oauth_credentials_store=\\"file\\""])', context, 'extension app-server api-key precheck fallback current');
+  }
   const latest = /([A-Za-z_$][\w$]*)\(this\.extensionUri,"app-server",\["--analytics-default-enabled"\]\)/;
   if (!text.includes(oldText)) {
     return replaceRegexOnce(text, latest, '$1(this.extensionUri,"app-server",["--analytics-default-enabled","--disable","plugins","-c","mcp_oauth_credentials_store=\\"file\\""])', context, 'extension app-server api-key precheck fallback latest');
@@ -233,6 +237,10 @@ function patchExtensionAccountInfo(text, context) {
   }
   if (!text.includes('Unable to extract account id and plan from auth token.')) {
     return text;
+  }
+  const current = /"account-info":async\(\)=>\{let e=await this\.authProvider\.getToken\(\{refreshToken:!1\}\);if\(!e\)return\{accountId:null,userId:null,plan:null,email:null,computeResidency:null\};try\{let r=JSON\.parse\(Buffer\.from\(e\.split\("\."\)\[1\],"base64url"\)\.toString\("utf8"\)\),n=r\["https:\/\/api\.openai\.com\/auth"\]\?\?\{\},o=r\["https:\/\/api\.openai\.com\/profile"\]\?\?\{\},i=n\?\.chatgpt_account_id\?\?null,s=n\?\.chatgpt_user_id\?\?null,a=n\?\.chatgpt_plan_type\?\?null,c=n\?\.chatgpt_compute_residency\?\?null,l=o\.email\?\?null;if\(i&&s&&a\)return\{accountId:i,userId:s,plan:a,email:l,computeResidency:c\}\}catch\{[A-Za-z_$][\w$]*\(\)\.error\("Unable to extract account id and plan from auth token\."\)\}return\{accountId:null,userId:null,plan:null,email:null,computeResidency:null\}\}/;
+  if (current.test(text)) {
+    return replaceRegexOnce(text, current, next, context, 'extension account info api-key fallback current');
   }
   return replaceOnce(text, extensionAccountInfoOld(), next, context, 'extension account info api-key fallback');
 }
@@ -271,6 +279,10 @@ function patchExtensionMetadataHelper(text, context) {
   const latestPathAlias = symbolAfter(text, 'var ', '=require("path");U();Nt();');
   if (latestPathAlias) {
     return replaceOnce(text, `var ${latestPathAlias}=require("path");U();Nt();`, extensionHostHelper(latestPathAlias, 'typeof U=="function"&&U(),typeof Nt=="function"&&Nt();'), context, 'extension metadata helper latest alias');
+  }
+  const current = /var ([A-Za-z_$][\w$]*)=require\("path"\);([A-Za-z_$][\w$]*)\(\);([A-Za-z_$][\w$]*)\(\);var ([A-Za-z_$][\w$]*)=U\(require\("vscode"\)\)/;
+  if (current.test(text)) {
+    return replaceRegexOnce(text, current, (match, pathName, firstInit, secondInit, vscodeName) => `${extensionHostHelper(pathName, `typeof ${firstInit}=="function"&&${firstInit}(),typeof ${secondInit}=="function"&&${secondInit}();`)}var ${vscodeName}=U(require("vscode"))`, context, 'extension metadata helper current');
   }
   return replaceOnce(text, 'var kce=require("path");$t();', extensionHostHelper('kce', 'typeof $t=="function"&&$t();'), context, 'extension metadata helper legacy');
 }
@@ -429,10 +441,14 @@ function patchSidebar(text, context) {
   if (text.includes('t===`recent`?s:t')) {
     return text;
   }
-  if (!text.match(/b=t\(([^,]+),\(\{get:e\}\)=>e\(d\)\?\?s\),/)) {
+  if (text.match(/b=t\(([^,]+),\(\{get:e\}\)=>e\(d\)\?\?s\),/)) {
+    return replaceRegexOnce(text, /b=t\(([^,]+),\(\{get:e\}\)=>e\(d\)\?\?s\),/, 'b=t($1,({get:e})=>{let t=e(d)??s;return t===`recent`?s:t}),', context, 'sidebar organize mode');
+  }
+  const current = /([A-Za-z_$][\w$]*)=t\(([A-Za-z_$][\w$]*),\(\{get:e\}\)=>e\(([A-Za-z_$][\w$]*)\)\?\?s\)/;
+  if (!current.test(text)) {
     return text;
   }
-  return replaceRegexOnce(text, /b=t\(([^,]+),\(\{get:e\}\)=>e\(d\)\?\?s\),/, 'b=t($1,({get:e})=>{let t=e(d)??s;return t===`recent`?s:t}),', context, 'sidebar organize mode');
+  return replaceRegexOnce(text, current, '$1=t($2,({get:e})=>{let t=e($3)??s;return t===`recent`?s:t})', context, 'sidebar organize mode current');
 }
 
 function patchSidebarProjectGroupSignals(text, context) {
@@ -455,7 +471,17 @@ function patchSidebarProjectGroupSignals(text, context) {
 }
 
 function patchHeader(text, context, file) {
-  let next = patchHeaderBase(text, context, file);
+  let next = text;
+  if (!findVscodeMessengerAlias(next)) {
+    const vscodeImport = next.match(/import\{[^}]+\}from"(\.\/vscode-api-[^"]+\.js)";/);
+    if (!vscodeImport) {
+      context.errors.push('header: 找不到 vscode-api import 插入点');
+    } else {
+      const importText = `import{f as codexLocalGroupsMessengerImport}from"${vscodeImport[1]}";`;
+      next = `${next.slice(0, vscodeImport.index + vscodeImport[0].length)}${importText}${next.slice(vscodeImport.index + vscodeImport[0].length)}`;
+    }
+  }
+  next = patchHeaderBase(next, context, file);
   next = next.replace(/max-h-\[(?:300|450)px\]/g, 'max-h-[900px]');
   if (context.safeMode) {
     next = patchHeaderRefreshHook(next, context);
@@ -479,6 +505,7 @@ function patchHeaderRefreshHook(text, context) {
   const stateAnchorV2 = '[te,k]=(0,$.useState)(``),j=(0,$.useDeferredValue)(te)';
   const stateAnchorV1 = '[w,T]=(0,$.useState)(``),D=(0,$.useDeferredValue)(w)';
   const stateAnchorV3 = '[A,j]=(0,$.useState)(``),N=(0,$.useDeferredValue)(A)';
+  const stateAnchorV4 = '[O,j]=(0,$.useState)(``),M=(0,$.useDeferredValue)(O)';
   if (!next.includes('codexLocalGroupsRefresh')) {
     if (next.includes(stateAnchorV2)) {
       next = replaceOnce(next, stateAnchorV2, '[te,k]=(0,$.useState)(``),[codexLocalGroupsRefresh,codexLocalGroupsSetRefresh]=(0,$.useState)(0),codexLocalGroupsRefreshEffect=(0,$.useEffect)(()=>{let e=()=>codexLocalGroupsSetRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),j=(0,$.useDeferredValue)(te)', context, 'header metadata refresh state');
@@ -486,11 +513,14 @@ function patchHeaderRefreshHook(text, context) {
       next = replaceOnce(next, stateAnchorV1, '[w,T]=(0,$.useState)(``),[codexLocalGroupsRefresh,codexLocalGroupsSetRefresh]=(0,$.useState)(0),codexLocalGroupsRefreshEffect=(0,$.useEffect)(()=>{let e=()=>codexLocalGroupsSetRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),D=(0,$.useDeferredValue)(w)', context, 'header metadata refresh state legacy');
     } else if (next.includes(stateAnchorV3)) {
       next = replaceOnce(next, stateAnchorV3, '[A,j]=(0,$.useState)(``),[codexLocalGroupsRefresh,codexLocalGroupsSetRefresh]=(0,$.useState)(0),codexLocalGroupsRefreshEffect=(0,$.useEffect)(()=>{let e=()=>codexLocalGroupsSetRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),N=(0,$.useDeferredValue)(A)', context, 'header metadata refresh state latest');
+    } else if (next.includes(stateAnchorV4)) {
+      next = replaceOnce(next, stateAnchorV4, '[O,j]=(0,$.useState)(``),[codexLocalGroupsRefresh,codexLocalGroupsSetRefresh]=(0,$.useState)(0),codexLocalGroupsRefreshEffect=(0,$.useEffect)(()=>{let e=()=>codexLocalGroupsSetRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),M=(0,$.useDeferredValue)(O)', context, 'header metadata refresh state current');
     }
   }
   const depAnchorV2 = 't[15]!==y||t[16]!==n||t[17]!==F||t[18]!==M||t[19]!==D.length||t[20]!==i||t[21]!==g?';
   const depAnchorV1 = 't[13]!==p||t[14]!==r||t[15]!==u||t[16]!==F||t[17]!==O||t[18]!==C.length||t[19]!==a?';
   const depAnchorV3 = 't[15]!==_||t[16]!==n||t[17]!==I||t[18]!==P||t[19]!==O.length||t[20]!==i||t[21]!==h?';
+  const depAnchorV4 = 't[15]!==g||t[16]!==n||t[17]!==R||t[18]!==N||t[19]!==D.length||t[20]!==i||t[21]!==h?';
   next = next.replace(/t\[31\]!==codexLocalGroupsRefresh/g, 't[33]!==codexLocalGroupsRefresh');
   next = next.replace(/t\[31\]=codexLocalGroupsRefresh/g, 't[33]=codexLocalGroupsRefresh');
   if (!next.includes('t[33]!==codexLocalGroupsRefresh')) {
@@ -503,6 +533,9 @@ function patchHeaderRefreshHook(text, context) {
     } else if (next.includes(depAnchorV3)) {
       next = replaceOnce(next, depAnchorV3, 't[15]!==_||t[16]!==n||t[17]!==I||t[18]!==P||t[19]!==O.length||t[20]!==i||t[21]!==h||t[33]!==codexLocalGroupsRefresh?', context, 'header metadata refresh dependency latest');
       next = replaceOnce(next, 't[20]=i,t[21]=h,t[22]=U)', 't[20]=i,t[21]=h,t[33]=codexLocalGroupsRefresh,t[22]=U)', context, 'header metadata refresh cache latest');
+    } else if (next.includes(depAnchorV4)) {
+      next = replaceOnce(next, depAnchorV4, 't[15]!==g||t[16]!==n||t[17]!==R||t[18]!==N||t[19]!==D.length||t[20]!==i||t[21]!==h||t[33]!==codexLocalGroupsRefresh?', context, 'header metadata refresh dependency current');
+      next = replaceOnce(next, 't[19]=D.length,t[20]=i,t[21]=h,t[22]=U)', 't[19]=D.length,t[20]=i,t[21]=h,t[33]=codexLocalGroupsRefresh,t[22]=U)', context, 'header metadata refresh cache current');
     }
   }
   next = upgradeHeaderHelperRuntime(next);
@@ -535,19 +568,19 @@ function patchHeaderRecentMenuRoot(text, context) {
 }
 
 function upgradeHeaderHelperRuntime(text) {
-  let next = fixInjectedWhitespaceRegex(text);
+  let next = patchHeaderPendingItems(fixInjectedWhitespaceRegex(text));
   next = next.replace(/function codexLocalGroupsStoreMeta\(e\)\{try\{e\.updatedAtMs=Date\.now\(\),localStorage\.setItem\(`codex-local-groups-meta-v1`,JSON\.stringify\(e\)\)\}catch\{\}\}/g, 'function codexLocalGroupsStoreMeta(e){try{e.updatedAtMs=Date.now(),localStorage.setItem(`codex-local-groups-meta-v1`,JSON.stringify(e)),window.dispatchEvent(new Event(`codex-local-groups-refresh`))}catch{}}');
   const rootStoreAnchor = 'function codexLocalGroupsStoreMeta(e,t){try{e.updatedAtMs=Date.now(),localStorage.setItem(`codex-local-groups-meta-v1`,JSON.stringify(e)),t||window.dispatchEvent(new Event(`codex-local-groups-refresh`))}catch{}}function codexLocalGroupsProjectRoot';
   if (!next.includes('codexLocalGroupsStoreCurrentRoot') && next.includes(rootStoreAnchor)) {
     next = next.replace(rootStoreAnchor, 'function codexLocalGroupsStoreMeta(e,t){try{e.updatedAtMs=Date.now(),localStorage.setItem(`codex-local-groups-meta-v1`,JSON.stringify(e)),t||window.dispatchEvent(new Event(`codex-local-groups-refresh`))}catch{}}function codexLocalGroupsStoreCurrentRoot(e){try{e&&localStorage.setItem(`codex-local-groups-current-root-v1`,e)}catch{}}function codexLocalGroupsProjectRoot');
   }
   const oldProjectRoot = 'function codexLocalGroupsProjectRoot(e){return e.kind===`local`?e.conversation.cwd:e.kind===`pending-worktree`?e.pendingWorktree.sourceWorkspaceRoot??e.pendingWorktree.worktreeWorkspaceRoot??e.pendingWorktree.worktreeGitRoot:``}';
-  const newProjectRoot = 'function codexLocalGroupsConversationProjectRoot(e,t){let n=codexRecentTaskNormalizePath(t);if(n)return n;let r=codexLocalGroupsReadMeta().conversations?.[String(e)]?.projectRoot;return codexRecentTaskNormalizePath(r)}function codexLocalGroupsProjectRoot(e){return e.kind===`local`?codexLocalGroupsConversationProjectRoot(e.conversation.id,e.conversation.cwd):e.kind===`pending-worktree`?e.pendingWorktree.sourceWorkspaceRoot??e.pendingWorktree.worktreeWorkspaceRoot??e.pendingWorktree.worktreeGitRoot:``}';
+  const newProjectRoot = 'function codexLocalGroupsConversationProjectRoot(e,t){let n=codexRecentTaskNormalizePath(t);if(n)return n;let r=codexLocalGroupsReadMeta().conversations?.[String(e)]?.projectRoot;return codexRecentTaskNormalizePath(r)}function codexLocalGroupsProjectRoot(e){return e.kind===`local`?e.conversation?codexLocalGroupsConversationProjectRoot(e.conversation.id,e.conversation.cwd):e.pendingWorktree?.sourceWorkspaceRoot??e.pendingWorktree?.worktreeWorkspaceRoot??e.pendingWorktree?.worktreeGitRoot??``:e.kind===`pending-worktree`?e.pendingWorktree.sourceWorkspaceRoot??e.pendingWorktree.worktreeWorkspaceRoot??e.pendingWorktree.worktreeGitRoot:``}';
   if (!next.includes('function codexLocalGroupsConversationProjectRoot')) {
     next = next.replace(oldProjectRoot, newProjectRoot);
   }
   next = next.replace('function codexLocalGroupsProjectMatches(e,t){let n=codexRecentTaskNormalizePath(e),r=codexRecentTaskNormalizePath(t);return!!n&&!!r&&n===r}', 'function codexLocalGroupsProjectMatches(e,t){let n=codexRecentTaskNormalizePath(e),r=codexRecentTaskNormalizePath(t);return!!n&&!!r&&(n===r||n.startsWith(r+`/`)||r.startsWith(n+`/`))}');
-  next = next.replace('function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation.createdAt??0);return Number.isFinite(t)&&t>0?t:codexLocalGroupsUuidTime(e.conversation.id)}', 'function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation.createdAt??0);if(Number.isFinite(t)&&t>0)return t<1e12?t*1e3:t;return codexLocalGroupsUuidTime(e.conversation.id)}');
+  next = next.replace('function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation.createdAt??0);return Number.isFinite(t)&&t>0?t:codexLocalGroupsUuidTime(e.conversation.id)}', 'function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation?.createdAt??e.pendingWorktree?.createdAt??0);if(Number.isFinite(t)&&t>0)return t<1e12?t*1e3:t;return codexLocalGroupsUuidTime(e.conversation?.id??e.pendingWorktree?.clientThreadId??e.pendingWorktree?.id)}');
   if (!next.includes('function codexLocalGroupsArchivedGroupKey')) {
     next = next.replace('function codexLocalGroupsNormalizeGroupName(e){let t=String(e??``);try{t=t.normalize(`NFC`)}catch{}return t.replace(/[\\s\\u3000]+/g,` `).trim()}function codexLocalGroupsGroupLabel', 'function codexLocalGroupsNormalizeGroupName(e){let t=String(e??``);try{t=t.normalize(`NFC`)}catch{}return t.replace(/[\\s\\u3000]+/g,` `).trim()}function codexLocalGroupsArchivedGroupKey(e,t){return JSON.stringify([codexRecentTaskNormalizePath(e),codexLocalGroupsNormalizeGroupName(t)])}function codexLocalGroupsGroupArchived(e,t,n){return!!n.archivedGroups?.[codexLocalGroupsArchivedGroupKey(e,t)]}function codexLocalGroupsGroupLabel');
   }
@@ -568,7 +601,7 @@ function upgradeHeaderHelperRuntime(text) {
   if (next.includes('function codexLocalGroupsMetadataRow') && !next.includes('metadata-actions-')) {
     next = next.replace(/function codexLocalGroupsMetadataRow\(e,t,n\)\{let r=codexLocalGroupsLocalTitle\(e\)\?\?e\.conversation\.title\?\?String\(e\.conversation\.id\)[\s\S]*?\},`metadata-row-`\+e\.key\)\}/, metadataRow);
   }
-  next = next.replace(/function codexLocalGroupsItemCreatedAt\(e\)\{return e\.kind===`local`\?e\.conversation\.createdAt\?\?0:0\}function codexLocalGroupsCanUsePendingGroup\(e,t\)\{let n=Number\(t\.startedAtMs\);if\(!Number\.isFinite\(n\)\|\|e\.kind!==`local`\)return!1;let r=Number\(codexLocalGroupsItemCreatedAt\(e\)\);return Number\.isFinite\(r\)&&r>=n&&Date\.now\(\)-n<60000\}/g, 'function codexLocalGroupsUuidTime(e){let t=String(e??``).replace(/-/g,``).slice(0,12),n=parseInt(t,16);return Number.isFinite(n)&&n>0?n:0}function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation.createdAt??0);if(Number.isFinite(t)&&t>0)return t<1e12?t*1e3:t;return codexLocalGroupsUuidTime(e.conversation.id)}function codexLocalGroupsCanUsePendingGroup(e,t){let n=Number(t.startedAtMs);if(!Number.isFinite(n)||e.kind!==`local`)return!1;let r=Number(codexLocalGroupsItemCreatedAt(e));return Number.isFinite(r)&&r>=n-30000&&r<=n+600000&&Date.now()-n<600000}');
+  next = next.replace(/function codexLocalGroupsItemCreatedAt\(e\)\{return e\.kind===`local`\?e\.conversation\.createdAt\?\?0:0\}function codexLocalGroupsCanUsePendingGroup\(e,t\)\{let n=Number\(t\.startedAtMs\);if\(!Number\.isFinite\(n\)\|\|e\.kind!==`local`\)return!1;let r=Number\(codexLocalGroupsItemCreatedAt\(e\)\);return Number\.isFinite\(r\)&&r>=n&&Date\.now\(\)-n<60000\}/g, 'function codexLocalGroupsUuidTime(e){let t=String(e??``).replace(/-/g,``).slice(0,12),n=parseInt(t,16);return Number.isFinite(n)&&n>0?n:0}function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation?.createdAt??e.pendingWorktree?.createdAt??0);if(Number.isFinite(t)&&t>0)return t<1e12?t*1e3:t;return codexLocalGroupsUuidTime(e.conversation?.id??e.pendingWorktree?.clientThreadId??e.pendingWorktree?.id)}function codexLocalGroupsCanUsePendingGroup(e,t){let n=Number(t.startedAtMs);if(!Number.isFinite(n)||e.kind!==`local`)return!1;let r=Number(codexLocalGroupsItemCreatedAt(e));return Number.isFinite(r)&&r>=n-30000&&r<=n+600000&&Date.now()-n<600000}');
   const staleBusy = 'function codexLocalGroupsSetBusy(e,t){try{let n=String(e.currentTarget.textContent||``);e.currentTarget.textContent=t,setTimeout(()=>{e.currentTarget&&(e.currentTarget.textContent=n)},1200)}catch{}}';
   const fixedBusy = 'function codexLocalGroupsArchiveConversation(e){let t=String(e??``);if(!t)return;let n=codexLocalGroupsReadMeta();n.archivedConversations||(n.archivedConversations={}),n.archivedConversations[t]={archivedAtMs:Date.now()},n.conversations&&delete n.conversations[t],codexLocalGroupsStoreMeta(n);try{codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`archiveConversationMeta`,conversationId:t})}catch{}}function codexLocalGroupsSetBusy(e,t){try{let n=e.currentTarget,r=String(n.textContent||``);n.textContent=t,setTimeout(()=>{n.textContent===t&&(n.textContent=r)},1200)}catch{}}';
   next = next.replace(staleBusy, fixedBusy);
@@ -672,6 +705,8 @@ function patchHeaderBase(text, context, file) {
     next = replaceOnce(next, execTargetInsert, execTargetReplacement, context, 'header execution target state');
   } else if (next.includes('l=v(),{authMethod:u}=D(),')) {
     next = replaceOnce(next, 'l=v(),{authMethod:u}=D(),', 'l=v(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??codexRecentTaskTarget.cwd??null,{authMethod:u}=D(),', context, 'header execution target state latest');
+  } else if (next.includes('l=x(),{authMethod:u}=I(),[d,f]=v(nt),')) {
+    next = replaceOnce(next, 'l=x(),{authMethod:u}=I(),[d,f]=v(nt),', 'l=x(),{authMethod:u}=I(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??codexRecentTaskTarget.cwd??null,[d,f]=v(nt),', context, 'header execution target state current');
   } else {
     next = replaceOnce(next, 'h=ge(),g;', 'h=ge(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??codexRecentTaskTarget.cwd??null,g;', context, 'header execution target state legacy');
   }
@@ -681,6 +716,8 @@ function patchHeaderBase(text, context, file) {
     next = replaceOnce(next, filterInsert, filterReplacement, context, 'header current project filter');
   } else if (next.includes('let E=r.filter(T),O=et(n.data,r,C),')) {
     next = replaceOnce(next, 'let E=r.filter(T),O=et(n.data,r,C),', 'let E=codexRecentConversationFilter(r.filter(T),codexRecentTaskCurrentRoot),O=codexRecentTaskFilter(et(n.data,r,C),codexRecentTaskCurrentRoot),', context, 'header current project filter latest');
+  } else if (next.includes('let T=r.filter(w),D=$e(n.data,r,C),')) {
+    next = replaceOnce(next, 'let T=r.filter(w),D=$e(n.data,r,C),', 'let T=codexRecentConversationFilter(r.filter(w),codexRecentTaskCurrentRoot),D=codexRecentTaskFilter($e(n.data,r,C),codexRecentTaskCurrentRoot),', context, 'header current project filter current');
   } else {
     next = replaceOnce(next, 'let b=i.filter(y),C=Ve(r.data,i,_),', 'let b=codexRecentConversationFilter(i.filter(y),codexRecentTaskCurrentRoot),C=codexRecentTaskFilter(Ve(r.data,i,_),codexRecentTaskCurrentRoot),', context, 'header current project filter legacy');
   }
@@ -690,6 +727,8 @@ function patchHeaderBase(text, context, file) {
     next = replaceOnce(next, cloudTabInsert, cloudTabReplacement, context, 'header cloud tab date');
   } else if (next.includes('F.map(e=>(0,Q.jsx)(_e,{task:e.task,onClose:i},e.key))')) {
     next = replaceOnce(next, 'F.map(e=>(0,Q.jsx)(_e,{task:e.task,onClose:i},e.key))', 'F.map(e=>(0,Q.jsx)(_e,{task:e.task,onClose:i,metaContent:e.at?codexRecentTaskDateLabel(new Date(e.at)):void 0},e.key))', context, 'header cloud tab date latest');
+  } else if (next.includes('F.map(e=>(0,Q.jsx)(ve,{task:e.task,onClose:i},e.key))')) {
+    next = replaceOnce(next, 'F.map(e=>(0,Q.jsx)(ve,{task:e.task,onClose:i},e.key))', 'F.map(e=>(0,Q.jsx)(ve,{task:e.task,onClose:i,metaContent:e.at?codexRecentTaskDateLabel(new Date(e.at)):void 0},e.key))', context, 'header cloud tab date current');
   } else {
     next = replaceOnce(next, 'A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a},e.key))', 'A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a,metaContent:e.at?codexRecentTaskDateLabel(new Date(e.at)):void 0},e.key))', context, 'header cloud tab date legacy');
   }
@@ -699,6 +738,8 @@ function patchHeaderBase(text, context, file) {
     next = replaceOnce(next, projectRowsInsert, projectRowsReplacement, context, 'header project rows');
   } else if (next.includes('I.map(e=>(0,Q.jsx)(st,{item:e,isActive:e.kind===`local`&&_===e.conversation.id,onClose:i},e.key))')) {
     next = replaceOnce(next, 'I.map(e=>(0,Q.jsx)(st,{item:e,isActive:e.kind===`local`&&_===e.conversation.id,onClose:i},e.key))', 'codexRecentTaskProjectRows(I,_,i,st)', context, 'header project rows latest');
+  } else if (next.includes('R.map(e=>(0,Q.jsx)(ot,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&g===e.conversation.id,onClose:i},e.key))')) {
+    next = replaceOnce(next, 'R.map(e=>(0,Q.jsx)(ot,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&g===e.conversation.id,onClose:i},e.key))', 'codexRecentTaskProjectRows(R,g,i,ot)', context, 'header project rows current');
   } else {
     next = replaceOnce(next, 'F.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&p===e.conversation.id,onClose:a},e.key))', 'codexRecentTaskProjectRows(F,p,a,Je)', context, 'header project rows legacy');
   }
@@ -736,6 +777,8 @@ function replaceHeaderDates(text, context) {
     next = replaceOnce(next, 'case`remote`:{let e;return t[0]!==n.task||t[1]!==a?(e=(0,Q.jsx)(ue,{task:n.task,onClose:a}),t[0]=n.task,t[1]=a,t[2]=e):e=t[2],e}', 'case`remote`:return(0,Q.jsx)(ue,{task:n.task,onClose:a,metaContent:n.at?codexRecentTaskDateLabel(new Date(n.at)):void 0});', context, 'header grouped remote date');
   } else if (next.includes('case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(_e,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e}')) {
     next = replaceOnce(next, 'case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(_e,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e}', 'case`remote`:return(0,Q.jsx)(_e,{task:n.task,onClose:i,metaContent:n.at?codexRecentTaskDateLabel(new Date(n.at)):void 0});', context, 'header grouped remote date latest');
+  } else if (next.includes('case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(ve,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e}')) {
+    next = replaceOnce(next, 'case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(ve,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e}', 'case`remote`:return(0,Q.jsx)(ve,{task:n.task,onClose:i,metaContent:n.at?codexRecentTaskDateLabel(new Date(n.at)):void 0});', context, 'header grouped remote date current');
   } else {
     next = replaceOnce(next, 'case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(me,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e}', 'case`remote`:return(0,Q.jsx)(me,{task:n.task,onClose:i,metaContent:n.at?codexRecentTaskDateLabel(new Date(n.at)):void 0});', context, 'header grouped remote date legacy');
   }
@@ -743,6 +786,8 @@ function replaceHeaderDates(text, context) {
     next = replaceOnce(next, 'e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(ce,{dateString:new Date(n.conversation.updatedAt).toISOString()})', 'e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt))', context, 'header grouped local date');
   } else if (next.includes('e=(n.conversation.recencyAt??n.conversation.updatedAt)==null?void 0:(0,Q.jsx)(fe,{dateString:new Date(n.conversation.recencyAt??n.conversation.updatedAt).toISOString()})')) {
     next = replaceOnce(next, 'e=(n.conversation.recencyAt??n.conversation.updatedAt)==null?void 0:(0,Q.jsx)(fe,{dateString:new Date(n.conversation.recencyAt??n.conversation.updatedAt).toISOString()})', 'e=(n.conversation.recencyAt??n.conversation.updatedAt)==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.recencyAt??n.conversation.updatedAt))', context, 'header grouped local date latest');
+  } else if (next.includes('e=(n.conversation.recencyAt??n.conversation.updatedAt)==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.recencyAt??n.conversation.updatedAt).toISOString()})')) {
+    next = replaceOnce(next, 'e=(n.conversation.recencyAt??n.conversation.updatedAt)==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.recencyAt??n.conversation.updatedAt).toISOString()})', 'e=(n.conversation.recencyAt??n.conversation.updatedAt)==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.recencyAt??n.conversation.updatedAt))', context, 'header grouped local date current');
   } else {
     next = replaceOnce(next, 'e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.updatedAt).toISOString()})', 'e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt))', context, 'header grouped local date legacy');
   }
@@ -750,6 +795,8 @@ function replaceHeaderDates(text, context) {
     next = replaceOnce(next, 's=(0,Q.jsx)(le,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r})', 's=(0,Q.jsx)(le,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r,metaContent:codexRecentTaskDateLabel(new Date(n.pendingWorktree.createdAt))})', context, 'header pending worktree date');
   } else if (next.includes('s=(0,Q.jsx)(ge,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r})')) {
     next = replaceOnce(next, 's=(0,Q.jsx)(ge,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r})', 's=(0,Q.jsx)(ge,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r,metaContent:codexRecentTaskDateLabel(new Date(n.pendingWorktree.createdAt))})', context, 'header pending worktree date latest');
+  } else if (next.includes('s=(0,Q.jsx)(be,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r})')) {
+    next = replaceOnce(next, 's=(0,Q.jsx)(be,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r})', 's=(0,Q.jsx)(be,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r,metaContent:codexRecentTaskDateLabel(new Date(n.pendingWorktree.createdAt))})', context, 'header pending worktree date current');
   } else {
     next = replaceOnce(next, 'o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r})', 'o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r,metaContent:codexRecentTaskDateLabel(new Date(n.pendingWorktree.createdAt))})', context, 'header pending worktree date legacy');
   }
@@ -764,7 +811,7 @@ function patchHeaderGroupHelper(text, context) {
   const messenger = findVscodeMessengerAlias(text) || 'b';
   const helper = (kindFnName) => addBoundedHeaderHistoryRows(stripHeaderMetadataRows(context.safeMode
     ? safeHeaderHelper(context.metadata, messenger, kindFnName)
-    : headerHelper(context.metadata, messenger, kindFnName)), messenger);
+    : patchHeaderPendingItems(headerHelper(context.metadata, messenger, kindFnName))), messenger);
   const currentStartV2 = 'function it(e){return e.kind===`remote`}var codexLocalGroupsInitialMeta=';
   const previousStartV2 = 'function it(e){return e.kind===`remote`}function codexRecentTaskProjectRows';
   const currentStartV1 = 'function Ke(e){return e.kind===`remote`}var codexLocalGroupsInitialMeta=';
@@ -848,10 +895,16 @@ function appMainHelperAnchor(text) {
       return anchor;
     }
   }
-  const regex = /function [A-Za-z_$][\w$]*\(\{get:[A-Za-z_$][\w$]*,threadKeys:[A-Za-z_$][\w$]*,groups:[A-Za-z_$][\w$]*,projectlessThreadIds:[A-Za-z_$][\w$]*,projectlessLabel:[A-Za-z_$][\w$]*,untitledThreadLabel:[A-Za-z_$][\w$]*\}\)\{/g;
+  const regex = /function [A-Za-z_$][\w$]*\(\{[^{}]{0,400}\}\)\{/g;
   const matches = [...text.matchAll(regex)].filter((match) => {
     const snippet = text.slice(match.index, match.index + 1000);
-    return snippet.includes('pending-worktree') &&
+    return match[0].includes('get:') &&
+      match[0].includes('threadKeys:') &&
+      match[0].includes('groups:') &&
+      match[0].includes('projectlessThreadIds:') &&
+      match[0].includes('projectlessLabel:') &&
+      match[0].includes('untitledThreadLabel:') &&
+      (snippet.includes('pending-worktree') || snippet.includes('conversation==null')) &&
       snippet.includes('conversation.title?.trim()') &&
       snippet.includes('task.title?.trim()') &&
       snippet.includes('projectLabel');
@@ -942,8 +995,12 @@ function patchAppServerManagerSignals(text, context) {
     } else if (text.includes('async function bb(')) {
       next = replaceOnce(next, 'async function bb(', `${appServerManagerSignalsHelper()}async function bb(`, context, 'app-server-manager recent helper current');
     } else {
-      context.errors.push('app-server-manager recent helper: 找不到注入点');
-      return text;
+      const current = /async function ([A-Za-z_$][\w$]*)\(e,\{modelProviders:t,archived:n=!1,sourceKinds:r=[A-Za-z_$][\w$]*,useStateDbOnly:i=!1\}\)\{let a=\[\],o=async s=>/;
+      if (!current.test(text)) {
+        context.errors.push('app-server-manager recent helper: 找不到注入点');
+        return text;
+      }
+      next = replaceRegexOnce(next, current, (match) => `${appServerManagerSignalsHelper()}${match}`, context, 'app-server-manager recent helper latest');
     }
   }
   const allOldV2 = 'e.sendRequest(`thread/list`,{limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i})';
@@ -952,14 +1009,19 @@ function patchAppServerManagerSignals(text, context) {
   const allNewV1 = 'e.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:200,cursor:o,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n}))';
   const allOldCurrent = 'let c={limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i},l=await e.sendRequest(`thread/list`,c);';
   const allNewCurrent = 'let c=codexLocalGroupsRecentThreadListParams({limit:200,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i}),l=await e.sendRequest(`thread/list`,c);';
+  const allOldLatest = 'let c={limit:100,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i},l=await e.sendRequest(`thread/list`,c,{priority:`background`,source:`thread_list`});';
+  const allNewLatest = 'let c=codexLocalGroupsRecentThreadListParams({limit:100,cursor:s,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:i}),l=await e.sendRequest(`thread/list`,c,{priority:`background`,source:`thread_list`});';
   next = next.replace(allOldV2, allNewV2).replace(allOldV1, allNewV1);
   next = next.replace(allOldCurrent, allNewCurrent);
+  next = next.replace(allOldLatest, allNewLatest);
   const pageOldV2 = 'this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:D,useStateDbOnly:n})';
   const pageNewV2 = 'this.params.requestClient.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:D,useStateDbOnly:n}))';
   const pageOldV1 = 'this.params.requestClient.sendRequest(`thread/list`,{limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:n})';
   const pageNewV1 = 'this.params.requestClient.sendRequest(`thread/list`,codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.recentConversationSortKey,modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:n}))';
   const pageOldCurrent = 'let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:c,useStateDbOnly:n};return this.params.requestClient.sendRequest(`thread/list`,r)';
   const pageNewCurrent = 'let r=codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:c,useStateDbOnly:n});return this.params.requestClient.sendRequest(`thread/list`,r)';
+  const pageOldLatest = 'let i={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:p,useStateDbOnly:n},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});';
+  const pageNewLatest = 'let i=codexLocalGroupsRecentThreadListParams({limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:p,useStateDbOnly:n}),a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});';
   const archiveOld = 'e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})';
   const archiveNew = 'codexLocalGroupsMarkArchivedConversation(t),e.removeConversationFromCache(t),e.dispatchMessageFromView(`thread-archived`,{hostId:e.hostId,conversationId:t,cwd:n})';
   if (!next.includes(archiveNew) && next.includes(archiveOld)) {
@@ -972,6 +1034,8 @@ function patchAppServerManagerSignals(text, context) {
       next = replaceOnce(next, pageOldV1, pageNewV1, context, 'app-server-manager paged recent limit legacy');
     } else if (next.includes(pageOldCurrent)) {
       next = replaceOnce(next, pageOldCurrent, pageNewCurrent, context, 'app-server-manager paged recent limit current');
+    } else if (next.includes(pageOldLatest)) {
+      next = replaceOnce(next, pageOldLatest, pageNewLatest, context, 'app-server-manager paged recent limit latest');
     }
   }
   return next;
@@ -990,7 +1054,11 @@ function patchRequest(text, context) {
     next = replaceOnce(next, v1Helper, v2Helper, context, 'request usage helper upgrade');
   }
   if (!next.includes('codexLocalGroupsRequestPatchVersion=2')) {
-    next = replaceOnce(next, 'var p=class', `${v2Helper}var p=class`, context, 'request usage helper');
+    if (next.includes('var p=class')) {
+      next = replaceOnce(next, 'var p=class', `${v2Helper}var p=class`, context, 'request usage helper');
+    } else {
+      next = replaceRegexOnce(next, /var ([A-Za-z_$][\w$]*)=class\{/, `${v2Helper}var $1=class{`, context, 'request usage helper current');
+    }
   }
   const oldText = 'async makeRequest(o,s,c){let{headers:l,url:u}=this.getRequestTarget(s,c);';
   const newText = 'async makeRequest(o,s,c){if(codexLocalGroupsIsDisabledUsageRequest(s))return null;let{headers:l,url:u}=this.getRequestTarget(s,c);';
@@ -1166,12 +1234,14 @@ function findAsset(dir, prefix, suffix, context) {
 }
 
 function findVscodeMessengerAlias(text) {
-  const match = text.match(/import\{([^}]+)\}from"\.\/vscode-api-[^"]+\.js";/);
-  if (!match) {
-    return null;
+  const imports = text.matchAll(/import\{([^}]+)\}from"\.\/vscode-api-[^"]+\.js";/g);
+  for (const match of imports) {
+    const alias = match[1].match(/(?:^|,)f as ([A-Za-z_$][\w$]*)/);
+    if (alias) {
+      return alias[1];
+    }
   }
-  const alias = match[1].match(/(?:^|,)f as ([A-Za-z_$][\w$]*)/);
-  return alias ? alias[1] : null;
+  return null;
 }
 
 function escapeRegex(value) {
@@ -1224,8 +1294,18 @@ function localTitleHelper(metadata) {
 }
 
 function safeHeaderHelper(metadata, messenger, kindFnName) {
-  return headerHelper(metadata, messenger, kindFnName)
+  return patchHeaderPendingItems(headerHelper(metadata, messenger, kindFnName))
     .replace('var codexLocalGroupsHeaderPatchVersion=36;', 'var codexLocalGroupsHeaderSafePatchVersion=3;');
+}
+
+function patchHeaderPendingItems(text) {
+  let next = text.replace('function codexLocalGroupsProjectRoot(e){return e.kind===`local`?codexLocalGroupsConversationProjectRoot(e.conversation.id,e.conversation.cwd):e.kind===`pending-worktree`?e.pendingWorktree.sourceWorkspaceRoot??e.pendingWorktree.worktreeWorkspaceRoot??e.pendingWorktree.worktreeGitRoot:``}', 'function codexLocalGroupsProjectRoot(e){return e.kind===`local`?e.conversation?codexLocalGroupsConversationProjectRoot(e.conversation.id,e.conversation.cwd):e.pendingWorktree?.sourceWorkspaceRoot??e.pendingWorktree?.worktreeWorkspaceRoot??e.pendingWorktree?.worktreeGitRoot??``:e.kind===`pending-worktree`?e.pendingWorktree.sourceWorkspaceRoot??e.pendingWorktree.worktreeWorkspaceRoot??e.pendingWorktree.worktreeGitRoot:``}');
+  next = next.replace('function codexLocalGroupsConversationId(e){return e.kind===`local`?e.conversation.id:e.kind===`remote`?e.task.id:e.pendingWorktree.id}', 'function codexLocalGroupsConversationId(e){return e.kind===`local`?e.conversation?.id??e.pendingWorktree?.clientThreadId??e.pendingWorktree?.id:e.kind===`remote`?e.task.id:e.pendingWorktree.id}');
+  next = next.replace('function codexLocalGroupsLocalTitle(e){if(e.kind!==`local`)return null;', 'function codexLocalGroupsLocalTitle(e){if(e.kind!==`local`||!e.conversation)return null;');
+  next = next.replace('function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation.createdAt??0);if(Number.isFinite(t)&&t>0)return t<1e12?t*1e3:t;return codexLocalGroupsUuidTime(e.conversation.id)}', 'function codexLocalGroupsItemCreatedAt(e){if(e.kind!==`local`)return 0;let t=Number(e.conversation?.createdAt??e.pendingWorktree?.createdAt??0);if(Number.isFinite(t)&&t>0)return t<1e12?t*1e3:t;return codexLocalGroupsUuidTime(e.conversation?.id??e.pendingWorktree?.clientThreadId??e.pendingWorktree?.id)}');
+  next = next.replace('function codexLocalGroupsItemIsActive(e,t){return e.kind===`local`&&t===e.conversation.id}', 'function codexLocalGroupsItemIsActive(e,t){return e.kind===`local`&&e.conversation!=null&&t===e.conversation.id}');
+  next = next.replace('isActive:o.kind===`local`&&t===o.conversation.id', 'isActive:o.kind===`local`&&o.conversation!=null&&t===o.conversation.id');
+  return next.replace('return o.kind!==`local`?p:', 'return o.kind!==`local`||o.conversation==null?p:');
 }
 
 function stripHeaderMetadataRows(text) {

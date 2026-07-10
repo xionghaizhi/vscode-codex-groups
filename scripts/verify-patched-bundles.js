@@ -23,7 +23,7 @@ function main() {
   assertContains(target.appMainPath, 'preventAllNetworkTraffic:!0');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=3');
   assertContains(target.appServerManagerSignalsPath, 'cwds:t');
-  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams({limit:200');
+  assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams({limit:');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams({limit:t');
   assertContains(target.requestPath, 'codexLocalGroupsRequestPatchVersion=2');
   assertContains(target.requestPath, 't.startsWith(`/wham/usage`)');
