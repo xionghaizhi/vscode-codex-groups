@@ -24,9 +24,10 @@ module.exports = {
       },
     },
     {
-      name: 'activates eagerly',
+      name: 'does not patch Codex during VS Code startup',
       run() {
-        assert.ok(packageJson.activationEvents.includes('*'));
+        assert.ok(!packageJson.activationEvents.includes('*'));
+        assert.ok(!packageJson.activationEvents.includes('onStartupFinished'));
       },
     },
     {

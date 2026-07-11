@@ -15,7 +15,7 @@ function createExtension(root, name, mtime, version = '1.0.0') {
   fs.writeFileSync(path.join(dir, 'webview/assets/app-server-manager-signals-a.js'), 'recentConversationsSortKey thread/list');
   fs.writeFileSync(path.join(dir, 'webview/assets/request-a.js'), 'safeGet safePost makeRequest OAI-Language');
   fs.writeFileSync(path.join(dir, 'webview/assets/sidebar-signals-a.js'), 'sidebar');
-  fs.writeFileSync(path.join(dir, 'webview/assets/sidebar-project-group-signals-a.js'), 'sidebar project group');
+  fs.writeFileSync(path.join(dir, 'webview/assets/open-project-setup-dialog-a.js'), 'function rn({hasInProgressSideChat:a,isResponseInProgress:b,latestTurnHasSystemError:c,resumeState:d,threadRuntimeStatus:f}){return a?`loading`:f?.type===`systemError`?`error`:f?.type===`active`?`loading`:d===`needs_resume`?`idle`:c?`error`:b===!0?`loading`:`idle`}');
   fs.writeFileSync(path.join(dir, 'webview/assets/local-conversation-title-signals-a.js'), 'title');
   fs.utimesSync(dir, mtime, mtime);
   return dir;
@@ -36,7 +36,7 @@ module.exports = {
         assert.ok(target.appMainPath.endsWith('app-main-a.js'));
         assert.ok(target.appServerManagerSignalsPath.endsWith('app-server-manager-signals-a.js'));
         assert.ok(target.requestPath.endsWith('request-a.js'));
-        assert.ok(target.sidebarProjectGroupSignalsPath.endsWith('sidebar-project-group-signals-a.js'));
+        assert.ok(target.sidebarProjectGroupSignalsPath.endsWith('open-project-setup-dialog-a.js'));
       },
     },
     {

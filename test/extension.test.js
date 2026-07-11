@@ -23,7 +23,7 @@ function loadExtension(vscode) {
 }
 
 function vscodeMock() {
-  const calls = { infos: [], quickPicks: [], warnings: [], opened: [], commands: [], output: [] };
+  const calls = { infos: [], quickPicks: [], warnings: [], opened: [], commands: [], output: [], registeredCommands: {} };
   return {
     calls,
     window: {
@@ -60,8 +60,9 @@ function vscodeMock() {
         calls.commands.push({ command, args });
         return Promise.resolve();
       },
-      registerCommand(command) {
+      registerCommand(command, callback) {
         calls.commands.push({ registered: command });
+        calls.registeredCommands[command] = callback;
         return { dispose() {} };
       },
     },
@@ -106,7 +107,7 @@ module.exports = {
   name: 'extension commands',
   tests: [
     {
-      name: 'activates and schedules startup patch',
+      name: 'activates commands without scheduling startup patch',
       run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
@@ -121,52 +122,32 @@ module.exports = {
         } finally {
           global.setTimeout = originalSetTimeout;
         }
-        assert.strictEqual(timers.length, 1);
-        assert.strictEqual(timers[0].delay, 1000);
+        assert.strictEqual(timers.length, 0);
         assert.ok(vscode.calls.commands.some((item) => item.registered === 'codexLocalGroups.applyPatches'));
       },
     },
     {
-      name: 'startup auto patch prompts reload only when it changed bundles',
+      name: 'resets pending group without patching Codex bundles',
       async run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
-        const originalSetTimeout = global.setTimeout;
-        global.setTimeout = () => 1;
+        extension.activate({ subscriptions: [] });
+        const resetCommand = vscode.calls.registeredCommands['codexLocalGroups.resetPendingGroup'];
+        const originalReset = ConversationMetadataStore.prototype.resetPendingGroup;
+        const originalLoad = ConversationMetadataStore.prototype.load;
+        let resetCalls = 0;
+        let loadCalls = 0;
+        ConversationMetadataStore.prototype.resetPendingGroup = () => { resetCalls += 1; };
+        ConversationMetadataStore.prototype.load = () => { loadCalls += 1; throw new Error('reset must not patch'); };
         try {
-          extension.activate({ subscriptions: [] });
+          await resetCommand();
         } finally {
-          global.setTimeout = originalSetTimeout;
+          ConversationMetadataStore.prototype.resetPendingGroup = originalReset;
+          ConversationMetadataStore.prototype.load = originalLoad;
         }
-        vscode.calls.nextInfoAction = 'Reload Window';
-        const report = await extension.runStartupAutoPatch({
-          applyPatches() {
-            return Promise.resolve({ changes: [{ path: '/codex/out/extension.js' }], errors: [], idempotent: true });
-          },
-        });
-        assert.strictEqual(report.changes.length, 1);
-        assert.ok(vscode.calls.infos[0].message.includes('已自动适配新版 Codex'));
-        assert.ok(vscode.calls.commands.some((item) => item.command === 'workbench.action.reloadWindow'));
-      },
-    },
-    {
-      name: 'startup auto patch stays quiet when bundles are current',
-      async run() {
-        const vscode = vscodeMock();
-        const extension = loadExtension(vscode);
-        const originalSetTimeout = global.setTimeout;
-        global.setTimeout = () => 1;
-        try {
-          extension.activate({ subscriptions: [] });
-        } finally {
-          global.setTimeout = originalSetTimeout;
-        }
-        await extension.runStartupAutoPatch({
-          applyPatches() {
-            return Promise.resolve({ changes: [], errors: [], idempotent: true });
-          },
-        });
-        assert.strictEqual(vscode.calls.infos.length, 0);
+        assert.strictEqual(resetCalls, 1);
+        assert.strictEqual(loadCalls, 0);
+        assert.ok(vscode.calls.infos[0].message.includes('pending group 已清空'));
       },
     },
     {
@@ -640,13 +621,13 @@ module.exports = {
       },
     },
     {
-      name: 'keeps metadata update without automatic silent patch during managed group write',
+      name: 'keeps managed group updates from patching Codex bundles',
       async run() {
         const vscode = vscodeMock();
         const extension = loadExtension(vscode);
         let written;
         const patchCalls = [];
-        vscode.calls.nextInfoAction = 'Apply Patches';
+        vscode.calls.nextInfoAction = 'Reload Window';
         vscode.calls.nextInput = '财务归档';
         vscode.calls.nextQuickPicks = [
           (items) => items.find((item) => item.group === '财务' && item.projectRoot === '/p/a'),
@@ -663,8 +644,9 @@ module.exports = {
         assert.ok(vscode.calls.infos[0].message.includes('已更新'));
         assert.ok(vscode.calls.infos[0].message.includes('/p/a'));
         assert.ok(vscode.calls.infos[0].actions.includes('Reload Window'));
-        assert.ok(vscode.calls.infos[0].actions.includes('Apply Patches'));
-        assert.deepStrictEqual(patchCalls.map((item) => item.silent), [false]);
+        assert.ok(!vscode.calls.infos[0].actions.includes('Apply Patches'));
+        assert.deepStrictEqual(patchCalls, []);
+        assert.ok(vscode.calls.commands.some((item) => item.command === 'workbench.action.reloadWindow'));
       },
     },
     {

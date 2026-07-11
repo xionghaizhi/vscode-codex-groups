@@ -14,6 +14,7 @@ module.exports = {
         const verify = fs.readFileSync('scripts/verify-patched-bundles.js', 'utf8');
         assert.ok(verify.includes('codexLocalGroupsRequestPatchVersion=2'));
         assert.ok(verify.includes('preventAllNetworkTraffic:!0'));
+        assert.ok(verify.includes('var codexLocalGroupsInitialMeta='));
         assert.ok(!verify.includes('yuxiMetadataSummary'));
       },
     },

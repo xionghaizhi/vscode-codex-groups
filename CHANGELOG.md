@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.0.27 - 2026-07-11
+
+### Fixed
+- 修复多窗口启动时 Codex 偶发白屏：取消 VSCode 启动阶段自动改写 Codex bundle，避免多个 extension host 与 Codex webview 并发读写同一组文件。
+- 本地标题和分组 metadata 改为由 Codex extension host 在 webview 启动后同步，不再把易变 metadata 写入 hashed webview bundle。
+- `Reset Pending Group`、批量分组更新和分组归档只修改 metadata，不再隐式或误导用户运行 bundle patch。
+- 适配 Codex `26.707` 状态函数迁移到 `open-project-setup-dialog-*`，且不依赖 minifier 局部别名，避免已完成会话被旧 `isResponseInProgress` 持续显示为 loading。
+- v14-v16→v17 runtime metadata 同步升级改为精确校验完整 `metadataSaved` 分支并 fail-closed，注入点漂移时不再只升级 marker 后误报成功。
+- 修复最新版 Codex 的 `$g` minifier 变量与 VSCode API 引用冲突，恢复会话“设置标题 / 设置分组”和新建分组输入框。
+- 标题输入框和分组选择框启用 `ignoreFocusOut`，避免 Codex 下拉菜单关闭并回焦 webview 时让弹框瞬间取消。
+
+### Changed
+- Codex 扩展升级后需要手动执行一次 `Codex Local Groups: Apply Patches`，再 Reload Window。
+
+### Verified
+- `npm run compile`
+- `npm run lint`
+- `npm test`（105 tests）
+- `npm run apply-patches`
+- `npm run verify-patched-bundles`
+- `npm run plan-patches`（待修改文件数 0）
+- metadata 仅在内存中变化时，实机 patch plan 仍为 0 个文件。
+
+## v0.0.26 - 2026-07-10
+
+### Fixed
+- 修复在编辑器面板中点击“在此分组新建会话”无响应：保存 pending group 后，直接向当前 Codex webview 派发原生 `new-chat`，不再依赖只控制 sidebar 的 `chatgpt.newChat` 命令。
+
+### Verified
+- `npm run compile`
+- `npm run lint`
+- `npm test`
+- `npm run apply-patches`
+- `npm run verify-patched-bundles`
+- `npm run plan-patches`（待修改文件数 0）
+
 ## v0.0.25 - 2026-07-10
 
 ### Fixed

@@ -11,35 +11,9 @@ function activate(context) {
   outputChannel = vscode.window.createOutputChannel('Codex Local Groups');
   context.subscriptions.push(outputChannel);
   registerCommands(context);
-  scheduleStartupAutoPatch();
 }
 
 function deactivate() {}
-
-function scheduleStartupAutoPatch() {
-  setTimeout(() => {
-    runStartupAutoPatch().catch((error) => showPatchError(error, true));
-  }, 1000);
-}
-
-async function runStartupAutoPatch(options = {}) {
-  const patch = options.applyPatches || applyPatches;
-  const report = await patch({ silent: true });
-  if (!report || !report.changes || report.changes.length === 0) {
-    return report;
-  }
-  const action = await vscode.window.showInformationMessage(
-    'Codex Local Groups: 已自动适配新版 Codex，请 Reload Window 生效。',
-    'Reload Window',
-    'Show Output'
-  );
-  if (action === 'Reload Window') {
-    await reloadWindow();
-  } else if (action === 'Show Output') {
-    ensureOutputChannel().show();
-  }
-  return report;
-}
 
 function registerCommands(context) {
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.applyPatches', () => {
@@ -74,7 +48,7 @@ function registerCommands(context) {
 
 async function applyPatches(options = {}) {
   if (patchDisabled && options.silent === true) {
-    ensureOutputChannel().appendLine(`跳过自动 patch：${incompatibleMessage || '版本不兼容'}`);
+    ensureOutputChannel().appendLine(`跳过静默 patch：${incompatibleMessage || '版本不兼容'}`);
     return { changes: [], errors: [], idempotent: true, skipped: true };
   }
   const store = new ConversationMetadataStore();
@@ -84,7 +58,7 @@ async function applyPatches(options = {}) {
     target = new CodexExtensionLocator().locate();
   } catch (locateError) {
     if (isVersionMismatchError(locateError)) {
-      disablePatchDueToIncompatibility(locateError, options.silent === true);
+      disablePatchDueToIncompatibility(locateError);
     }
     throw locateError;
   }
@@ -94,7 +68,7 @@ async function applyPatches(options = {}) {
   if (report.errors.length) {
     const errorText = report.errors.join('\n');
     if (isVersionMismatchError({ message: errorText })) {
-      disablePatchDueToIncompatibility({ message: errorText }, options.silent === true);
+      disablePatchDueToIncompatibility({ message: errorText });
     }
     throw new Error(errorText);
   }
@@ -157,7 +131,6 @@ async function openMetadataJson() {
 
 async function resetPendingGroup() {
   new ConversationMetadataStore().resetPendingGroup();
-  await applyPatches({ silent: true });
   const action = await vscode.window.showInformationMessage('Codex Local Groups: pending group 已清空，请 Reload Window 同步当前 Codex UI。', 'Reload Window');
   if (action === 'Reload Window') {
     await reloadWindow();
@@ -240,7 +213,7 @@ async function manageGroups(options = {}) {
   if (!action) {
     return;
   }
-  await runManageGroupAction(action.action, store, metadata, group, options);
+  await runManageGroupAction(action.action, store, metadata, group);
 }
 
 async function reloadWindow() {
@@ -322,20 +295,20 @@ function isVersionMismatchError(error) {
   return false;
 }
 
-function disablePatchDueToIncompatibility(error, silent) {
+function disablePatchDueToIncompatibility(error) {
   if (patchDisabled) {
     return;
   }
   patchDisabled = true;
   incompatibleMessage = errorText(error);
-  ensureOutputChannel().appendLine(`Codex Local Groups: 检测到 Codex 扩展版本不兼容，已停止自动 patch。`);
+  ensureOutputChannel().appendLine('Codex Local Groups: 检测到 Codex 扩展版本不兼容，本次 patch 未应用。');
   ensureOutputChannel().appendLine(`不兼容原因：${incompatibleMessage}`);
   showIncompatibleNotification();
 }
 
 async function showIncompatibleNotification() {
   const action = await vscode.window.showWarningMessage(
-    'Codex Local Groups: 当前 Codex 扩展版本不兼容，自动 patch 已停止。Local Groups 功能可能不可用，建议禁用本扩展或等待更新。',
+    'Codex Local Groups: 当前 Codex 扩展版本不兼容，补丁未应用。Local Groups 功能可能不可用，建议禁用本扩展或等待更新。',
     '禁用扩展',
     '查看输出'
   );
@@ -502,29 +475,29 @@ function manageGroupActions(group) {
   ];
 }
 
-async function runManageGroupAction(action, store, metadata, group, options) {
+async function runManageGroupAction(action, store, metadata, group) {
   if (action === 'rename') {
-    await renameManagedGroup(store, metadata, group, options);
+    await renameManagedGroup(store, metadata, group);
   } else if (action === 'merge') {
-    await mergeManagedGroup(store, metadata, group, options);
+    await mergeManagedGroup(store, metadata, group);
   } else if (action === 'archive') {
-    await archiveManagedGroup(store, group, options);
+    await archiveManagedGroup(store, group);
   } else if (action === 'clear') {
-    await clearManagedGroup(store, group, options);
+    await clearManagedGroup(store, group);
   } else if (action === 'view') {
     await viewManagedGroup(metadata, group);
   }
 }
 
-async function archiveManagedGroup(store, group, options) {
+async function archiveManagedGroup(store, group) {
   const message = `确认归档本地分组“${group.group}”？项目：${groupProjectText(group)}。只隐藏本地分组，不归档 Codex 会话，不修改会话分组标签；此操作没有撤销。`;
   const action = await vscode.window.showWarningMessage(message, '归档分组');
   if (action === '归档分组') {
-    await writeArchivedGroup(store, group, options);
+    await writeArchivedGroup(store, group);
   }
 }
 
-async function renameManagedGroup(store, metadata, group, options) {
+async function renameManagedGroup(store, metadata, group) {
   const input = await vscode.window.showInputBox({
     title: `重命名分组：${groupContextText(group)}`,
     prompt: `输入新的分组名称；将更新 ${group.count} 个会话。`,
@@ -547,10 +520,10 @@ async function renameManagedGroup(store, metadata, group, options) {
       return;
     }
   }
-  await writeManagedGroup(store, group, nextGroup, options);
+  await writeManagedGroup(store, group, nextGroup);
 }
 
-async function mergeManagedGroup(store, metadata, group, options) {
+async function mergeManagedGroup(store, metadata, group) {
   if (!group.projectRoot) {
     await vscode.window.showInformationMessage('Codex Local Groups: 项目路径未知，无法确认同项目，不能合并。');
     return;
@@ -568,16 +541,16 @@ async function mergeManagedGroup(store, metadata, group, options) {
   if (target) {
     const confirmed = await confirmMergeGroup(group, target.group);
     if (confirmed) {
-      await writeManagedGroup(store, group, target.group, options);
+      await writeManagedGroup(store, group, target.group);
     }
   }
 }
 
-async function clearManagedGroup(store, group, options) {
+async function clearManagedGroup(store, group) {
   const message = `确认将“${group.group}”下 ${group.count} 个会话移入未分组？项目：${groupProjectText(group)}。只移除分组标签，不删除会话；此操作没有撤销。`;
   const action = await vscode.window.showWarningMessage(message, '清空分组');
   if (action === '清空分组') {
-    await writeManagedGroup(store, group, '', options);
+    await writeManagedGroup(store, group, '');
   }
 }
 
@@ -606,8 +579,7 @@ async function viewManagedGroup(metadata, group) {
   }
 }
 
-async function writeManagedGroup(store, group, nextGroup, options) {
-  const patchRunner = options.applyPatches || applyPatches;
+async function writeManagedGroup(store, group, nextGroup) {
   const metadata = store.load();
   const result = updateManagedGroup(metadata, group, nextGroup);
   if (result.count === 0) {
@@ -617,22 +589,18 @@ async function writeManagedGroup(store, group, nextGroup, options) {
   store.write(result.metadata);
   const context = groupContextText({ ...group, count: result.count });
   const action = await vscode.window.showInformationMessage(
-    `Codex Local Groups: 已更新 ${context}。如 Codex UI 未同步，可 Reload Window 或手动 Apply Patches。`,
-    'Apply Patches',
+    `Codex Local Groups: 已更新 ${context}。如 Codex UI 未同步，请 Reload Window。`,
     'Reload Window',
     'Show Output'
   );
-  if (action === 'Apply Patches') {
-    try { await patchRunner({ silent: false }); } catch (caught) { showPatchError(caught, false); }
-  } else if (action === 'Reload Window') {
+  if (action === 'Reload Window') {
     await reloadWindow();
   } else if (action === 'Show Output') {
     ensureOutputChannel().show();
   }
 }
 
-async function writeArchivedGroup(store, group, options) {
-  const patchRunner = options.applyPatches || applyPatches;
+async function writeArchivedGroup(store, group) {
   const metadata = store.load();
   metadata.archivedGroups = { ...(metadata.archivedGroups || {}) };
   metadata.archivedGroups[archivedGroupKey(group)] = {
@@ -642,14 +610,11 @@ async function writeArchivedGroup(store, group, options) {
   };
   store.write(metadata);
   const action = await vscode.window.showInformationMessage(
-    `Codex Local Groups: 已归档本地分组 ${groupContextText(group)}。不会归档 Codex 会话。如 Codex UI 未同步，可 Reload Window 或手动 Apply Patches。`,
-    'Apply Patches',
+    `Codex Local Groups: 已归档本地分组 ${groupContextText(group)}。不会归档 Codex 会话。如 Codex UI 未同步，请 Reload Window。`,
     'Reload Window',
     'Show Output'
   );
-  if (action === 'Apply Patches') {
-    try { await patchRunner({ silent: false }); } catch (caught) { showPatchError(caught, false); }
-  } else if (action === 'Reload Window') {
+  if (action === 'Reload Window') {
     await reloadWindow();
   } else if (action === 'Show Output') {
     ensureOutputChannel().show();
@@ -752,7 +717,6 @@ module.exports = {
   applyPatches,
   repairCodexUi,
   restoreCodexUi,
-  runStartupAutoPatch,
   checkStatus,
   searchConversations,
   manageGroups,

@@ -12,15 +12,25 @@ try {
 
 function main() {
   const target = new CodexExtensionLocator().locate();
-  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=14');
+  const emptyMetadata = 'var codexLocalGroupsInitialMeta={"version":1,"conversations":{}}';
+  assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=17');
+  assertNotContains(target.extensionJsPath, 'typeof $g!="undefined"?$g:require("vscode")');
+  assertContains(target.extensionJsPath, 'showInputBox({title:e,prompt:e,value:t??"",ignoreFocusOut:!0})');
+  assertContains(target.extensionJsPath, 'placeHolder:"选择已有分组，或新建分组",ignoreFocusOut:!0');
+  assertContains(target.extensionJsPath, 'e.action==="getMetadata"');
   assertContains(target.extensionJsPath, 'c.cwds=s');
   assertContains(target.extensionJsPath, '"--disable","plugins"');
   assertContains(target.extensionJsPath, '"account-info":async()=>({accountId:null');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=36');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=38');
+  assertContains(target.headerPath, 'action:`getMetadata`');
+  assertContains(target.headerPath, 'dispatchHostMessage({type:`new-chat`})');
   assertContains(target.headerPath, 'codexLocalGroupsHistoryLimit=120');
   assertContains(target.headerPath, 'codexLocalGroupsHistoryRecovered');
-  assertContains(target.appMainPath, 'codexLocalGroupsWebviewPatchVersion=6');
+  assertContains(target.headerPath, emptyMetadata);
+  assertContains(target.appMainPath, 'codexLocalGroupsWebviewPatchVersion=7');
+  assertContains(target.appMainPath, 'action:`getMetadata`');
   assertContains(target.appMainPath, 'preventAllNetworkTraffic:!0');
+  assertContains(target.appMainPath, emptyMetadata);
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentPatchVersion=3');
   assertContains(target.appServerManagerSignalsPath, 'cwds:t');
   assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsRecentThreadListParams({limit:');
@@ -31,6 +41,7 @@ function main() {
     assertContains(target.sidebarProjectGroupSignalsPath, 'codexLocalGroupsSidebarProjectStatusPatchVersion=1');
   }
   assertContains(target.localTitlePath, 'codexLocalGroupsLocalTitlePatchVersion=6');
+  assertContains(target.localTitlePath, emptyMetadata);
   for (const file of bundlePaths(target)) {
     assertNotContains(file, 'requestAllThreadList(e)');
     assertNotContains(file, 'codexLocalGroupsMetadataOnly');

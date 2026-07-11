@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_EXTENSIONS_ROOT = '/root/.vscode-server/extensions';
+const STALE_PROJECT_STATUS = /function ([A-Za-z_$][\w$]*)\(\{hasInProgressSideChat:([A-Za-z_$][\w$]*),isResponseInProgress:([A-Za-z_$][\w$]*),latestTurnHasSystemError:([A-Za-z_$][\w$]*),resumeState:([A-Za-z_$][\w$]*),threadRuntimeStatus:([A-Za-z_$][\w$]*)\}\)\{return \2\?`loading`:\6\?\.type===`systemError`\?`error`:\6\?\.type===`active`\?`loading`:\5===`needs_resume`\?`idle`:\4\?`error`:\3===!0\?`loading`:`idle`\}/;
 
 class CodexExtensionLocator {
   constructor(options = {}) {
@@ -20,7 +21,7 @@ class CodexExtensionLocator {
       appServerManagerSignalsPath: findBundle(assetsDir, '*.js', isAppServerManagerSignalsBundle),
       requestPath: findBundle(assetsDir, 'request-*.js', isRequestBundle),
       sidebarPath: findBundle(assetsDir, 'sidebar-signals-*.js', () => true),
-      sidebarProjectGroupSignalsPath: findOptionalBundle(assetsDir, 'sidebar-project-group-signals-*.js', () => true),
+      sidebarProjectGroupSignalsPath: findOptionalBundle(assetsDir, '*.js', isSidebarProjectStatusBundle),
       localTitlePath: findBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true),
     };
   }
@@ -121,4 +122,8 @@ function isRequestBundle(text) {
   return text.includes('safeGet') && text.includes('makeRequest') && text.includes('OAI-Language');
 }
 
-module.exports = { CodexExtensionLocator, DEFAULT_EXTENSIONS_ROOT };
+function isSidebarProjectStatusBundle(text) {
+  return text.includes('codexLocalGroupsSidebarProjectStatusPatchVersion=1') || STALE_PROJECT_STATUS.test(text);
+}
+
+module.exports = { CodexExtensionLocator, DEFAULT_EXTENSIONS_ROOT, STALE_PROJECT_STATUS };
