@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.0.28 - 2026-07-14
+
+### Fixed
+- 适配 OpenAI Codex `26.707.71524`：兼容 extension host 中新版 VSCode API 包装函数，恢复补丁规划、Local Groups UI 和 metadata 同步。
+
+### Verified
+- `npm run compile`
+- `npm run lint`
+- `npm test`
+- `npm run plan-patches`
+- `npm run apply-patches`
+- `npm run verify-patched-bundles`
+
 ## v0.0.27 - 2026-07-11
 
 ### Fixed

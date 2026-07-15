@@ -285,9 +285,9 @@ function patchExtensionMetadataHelper(text, context) {
   if (latestPathAlias) {
     return replaceOnce(text, `var ${latestPathAlias}=require("path");U();Nt();`, buildExtensionHostHelper(context, latestPathAlias, 'typeof U=="function"&&U(),typeof Nt=="function"&&Nt();'), context, 'extension metadata helper latest alias');
   }
-  const current = /var ([A-Za-z_$][\w$]*)=require\("path"\);([A-Za-z_$][\w$]*)\(\);([A-Za-z_$][\w$]*)\(\);var ([A-Za-z_$][\w$]*)=U\(require\("vscode"\)\)/;
+  const current = /var ([A-Za-z_$][\w$]*)=require\("path"\);([A-Za-z_$][\w$]*)\(\);([A-Za-z_$][\w$]*)\(\);var ([A-Za-z_$][\w$]*)=([A-Za-z_$][\w$]*)\(require\("vscode"\)\)/;
   if (current.test(text)) {
-    return replaceRegexOnce(text, current, (match, pathName, firstInit, secondInit, vscodeName) => `${buildExtensionHostHelper(context, pathName, `typeof ${firstInit}=="function"&&${firstInit}(),typeof ${secondInit}=="function"&&${secondInit}();`)}var ${vscodeName}=U(require("vscode"))`, context, 'extension metadata helper current');
+    return replaceRegexOnce(text, current, (match, pathName, firstInit, secondInit, vscodeName, vscodeFactory) => `${buildExtensionHostHelper(context, pathName, `typeof ${firstInit}=="function"&&${firstInit}(),typeof ${secondInit}=="function"&&${secondInit}();`)}var ${vscodeName}=${vscodeFactory}(require("vscode"))`, context, 'extension metadata helper current');
   }
   return replaceOnce(text, 'var kce=require("path");$t();', buildExtensionHostHelper(context, 'kce', 'typeof $t=="function"&&$t();'), context, 'extension metadata helper legacy');
 }

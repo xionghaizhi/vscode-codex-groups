@@ -153,15 +153,16 @@ module.exports = {
         const target = createTarget();
         const currentAccount = accountInfoText.replace('X().error', 'Y().error');
         const currentExtension = extensionText
-          .replace('var Dle=require("path");W();$t();var $g=1;', 'var Ide=require("path");B();Mt();var ay=U(require("vscode"));')
+          .replace('var Dle=require("path");W();$t();var $g=1;', 'var $de=require("path");U();Mt();var cy=B(require("vscode"));')
           .replace('kle(this.extensionUri,"app-server",["--analytics-default-enabled"])', 'Cde(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled"])');
         fs.writeFileSync(target.extensionJsPath, `${currentExtension}${currentAccount}`);
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
         const plan = engine.plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(plan.errors, []);
         const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
-        assert.ok(extension.includes('var Ide=require("path"),codexLocalGroupsFs=require("fs")'));
-        assert.ok(extension.includes('typeof B=="function"&&B(),typeof Mt=="function"&&Mt();'));
+        assert.ok(extension.includes('var $de=require("path"),codexLocalGroupsFs=require("fs")'));
+        assert.ok(extension.includes('typeof U=="function"&&U(),typeof Mt=="function"&&Mt();'));
+        assert.ok(extension.includes('var cy=B(require("vscode"))'));
         assert.ok(extension.includes('"features.code_mode_host=true","app-server","--analytics-default-enabled","--disable","plugins"'));
         assert.ok(extension.includes('"account-info":async()=>({accountId:null'));
       },
