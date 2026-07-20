@@ -21,7 +21,8 @@ function main() {
   assertContains(target.extensionJsPath, 'c.cwds=s');
   assertContains(target.extensionJsPath, '"--disable","plugins"');
   assertContains(target.extensionJsPath, '"account-info":async()=>({accountId:null');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=38');
+  assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=39');
+  assertNotContains(target.headerPath, 'max-h-[900px]');
   assertContains(target.headerPath, 'action:`getMetadata`');
   assertContains(target.headerPath, 'dispatchHostMessage({type:`new-chat`})');
   assertContains(target.headerPath, 'codexLocalGroupsHistoryLimit=120');

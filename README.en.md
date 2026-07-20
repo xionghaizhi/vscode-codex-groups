@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.28-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.29-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -34,7 +34,7 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 - Migration from:
   - Old: `~/.codex/codex-vscode-conversation-titles.json`
   - New: `~/.codex/codex-vscode-conversation-meta.json`
-- To avoid startup-time blank views, Codex Local Groups does not rewrite Codex bundles during VSCode startup. After a Codex extension upgrade, run `Apply Patches` once, then Reload Window.
+- To avoid startup-time blank views, Codex Local Groups only performs a read-only bundle check during VSCode startup. If an upgrade replaced compatible patches, it offers one-click repair and Reload.
 - Repair can restore clean bundles before patching if the Codex UI gets stuck.
 - Restore Original Codex UI can restore clean bundles without reapplying patches when you want to stop using the enhancements.
 
@@ -63,20 +63,19 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.28
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.29
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.28
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.29
 ```
 
 Then in VSCode:
 
 1. Run `Developer: Reload Window`.
-2. Run `Codex Local Groups: Apply Patches`.
-3. Run `Developer: Reload Window` again.
+2. Choose `修复并 Reload` in the startup notice. If no notice appears, run `Codex Local Groups: Apply Patches`, then Reload Window.
 
 ### Option 2: Install a VSIX
 
@@ -97,7 +96,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.28.vsix
+code --install-extension vscode-codex-groups-0.0.29.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -108,8 +107,8 @@ For Remote VSCode Server, install it in the remote window and make sure it runs 
 
 1. Make sure the OpenAI Codex VSCode extension is installed.
 2. Install this extension.
-3. Run `Codex Local Groups: Apply Patches`.
-4. Run `Codex Local Groups: Reload Window`.
+3. Reload Window, then choose `修复并 Reload` in the startup notice.
+4. If no notice appears, run `Codex Local Groups: Apply Patches`, then Reload Window.
 
 ### Set local title / requirement group
 
@@ -207,7 +206,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.28
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.29
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -246,7 +245,7 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 ## Troubleshooting
 
 - Group UI is missing: run `Apply Patches`, then Reload Window.
-- Broken after a Codex upgrade: run `Apply Patches` once, then Reload Window. Bundles are not rewritten automatically during startup.
+- Broken after a Codex upgrade: startup detection offers one-click repair and Reload. You can also run `Apply Patches`, then Reload Window.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - Codex is still broken after disabling/uninstalling this extension: run `Codex Local Groups: Restore Original Codex UI`, or run `npm run restore-codex-ui`, then Reload Window. Disabling the extension does not automatically revert patched Codex bundles.
 - API-key auth keeps logging `/wham/usage`, `/ces/v1/rgstr`, remote plugin sync, keyring OAuth, or `ab.chatgpt.com/v1/initialize`: run `Apply Patches` or `Repair Codex UI`, then Reload Window.

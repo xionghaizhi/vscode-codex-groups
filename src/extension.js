@@ -11,9 +11,49 @@ function activate(context) {
   outputChannel = vscode.window.createOutputChannel('Codex Local Groups');
   context.subscriptions.push(outputChannel);
   registerCommands(context);
+  scheduleStartupPatchCheck();
 }
 
 function deactivate() {}
+
+function scheduleStartupPatchCheck() {
+  if (!vscode.extensions.getExtension('openai.chatgpt')) {
+    return;
+  }
+  // 启动阶段只规划，不直接写 bundle，避免多窗口并发导致 Codex 白屏。
+  setTimeout(() => {
+    runStartupPatchCheck().catch((error) => ensureOutputChannel().appendLine(errorStackOrText(error)));
+  }, 1000);
+}
+
+async function runStartupPatchCheck(options = {}) {
+  const store = options.store || new ConversationMetadataStore();
+  let plan;
+  try {
+    const metadata = readMetadataOnly(store);
+    const target = (options.locator || new CodexExtensionLocator()).locate();
+    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+    plan = engine.plan(target, metadata);
+  } catch (error) {
+    if (isVersionMismatchError(error)) disablePatchDueToIncompatibility(error);
+    else throw error;
+    return { changes: [], errors: [errorText(error)] };
+  }
+  if (plan.errors.length) {
+    const error = new Error(plan.errors.map(errorText).join('\n'));
+    if (isVersionMismatchError(error)) disablePatchDueToIncompatibility(error);
+    return plan;
+  }
+  if (plan.changes.length === 0) return plan;
+  const action = await vscode.window.showInformationMessage('Codex Local Groups: 检测到 Codex 更新覆盖了本地补丁。可一键修复，完成后将 Reload Window。', '修复并 Reload', 'Show Output');
+  if (action === '修复并 Reload') {
+    await (options.applyPatches || applyPatches)({ silent: true });
+    await (options.reloadWindow || reloadWindow)();
+  } else if (action === 'Show Output') {
+    ensureOutputChannel().show();
+  }
+  return plan;
+}
 
 function registerCommands(context) {
   context.subscriptions.push(vscode.commands.registerCommand('codexLocalGroups.applyPatches', () => {
@@ -717,6 +757,7 @@ module.exports = {
   applyPatches,
   repairCodexUi,
   restoreCodexUi,
+  runStartupPatchCheck,
   checkStatus,
   searchConversations,
   manageGroups,

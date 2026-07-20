@@ -76,6 +76,9 @@ function vscodeMock() {
       parse(value) { return { toString: () => value }; },
       file(value) { return { fsPath: value }; },
     },
+    extensions: {
+      getExtension() { return calls.codexInstalled ? { id: 'openai.chatgpt' } : undefined; },
+    },
     workspace: {
       getConfiguration() { return { get() { return ''; } }; },
       openTextDocument() { return Promise.resolve({}); },
@@ -107,9 +110,10 @@ module.exports = {
   name: 'extension commands',
   tests: [
     {
-      name: 'activates commands without scheduling startup patch',
+      name: 'activates startup detection without patching Codex bundles',
       run() {
         const vscode = vscodeMock();
+        vscode.calls.codexInstalled = true;
         const extension = loadExtension(vscode);
         const timers = [];
         const originalSetTimeout = global.setTimeout;
@@ -122,8 +126,73 @@ module.exports = {
         } finally {
           global.setTimeout = originalSetTimeout;
         }
-        assert.strictEqual(timers.length, 0);
+        assert.strictEqual(timers.length, 1);
+        assert.strictEqual(timers[0].delay, 1000);
         assert.ok(vscode.calls.commands.some((item) => item.registered === 'codexLocalGroups.applyPatches'));
+      },
+    },
+    {
+      name: 'keeps startup detection silent when patches are current',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        let applied = false;
+        const plan = await extension.runStartupPatchCheck({
+          store: { readMetadataFile() { return metadata; } },
+          locator: { locate() { return { extensionDir: '/codex' }; } },
+          engine: { plan() { return { changes: [], errors: [] }; } },
+          applyPatches() { applied = true; },
+        });
+        assert.deepStrictEqual(plan, { changes: [], errors: [] });
+        assert.strictEqual(applied, false);
+        assert.strictEqual(vscode.calls.infos.length, 0);
+      },
+    },
+    {
+      name: 'offers one-click startup repair and reloads after applying patches',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        const calls = [];
+        vscode.calls.nextInfoAction = '修复并 Reload';
+        await extension.runStartupPatchCheck({
+          store: { readMetadataFile() { return metadata; } },
+          locator: { locate() { return { extensionDir: '/codex' }; } },
+          engine: { plan() { return { changes: [{ path: '/codex/out/extension.js' }], errors: [] }; } },
+          applyPatches(options) { calls.push(['apply', options]); return Promise.resolve({ changes: [] }); },
+          reloadWindow() { calls.push(['reload']); return Promise.resolve(); },
+        });
+        assert.deepStrictEqual(calls, [['apply', { silent: true }], ['reload']]);
+        assert.ok(vscode.calls.infos[0].message.includes('检测到 Codex 更新覆盖'));
+      },
+    },
+    {
+      name: 'fails closed when startup detection finds incompatible bundles',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        let applied = false;
+        await extension.runStartupPatchCheck({
+          store: { readMetadataFile() { return metadata; } },
+          locator: { locate() { return { extensionDir: '/codex' }; } },
+          engine: { plan() { return { changes: [], errors: ['无法唯一定位 header bundle'] }; } },
+          applyPatches() { applied = true; },
+        });
+        assert.strictEqual(applied, false);
+        assert.ok(vscode.calls.warnings[0].message.includes('版本不兼容'));
+      },
+    },
+    {
+      name: 'fails closed when startup detection cannot locate compatible bundles',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        const plan = await extension.runStartupPatchCheck({
+          store: { readMetadataFile() { return metadata; } },
+          locator: { locate() { throw new Error('无法唯一定位 header bundle'); } },
+        });
+        assert.deepStrictEqual(plan, { changes: [], errors: ['无法唯一定位 header bundle'] });
+        assert.ok(vscode.calls.warnings[0].message.includes('版本不兼容'));
       },
     },
     {

@@ -28,6 +28,12 @@ const sidebarProjectGroupSignalsText = 'function ze({hasInProgressSideChat:a,isR
 const requestText = 'var p=class{async makeRequest(o,s,c){let{headers:l,url:u}=this.getRequestTarget(s,c);try{switch(o){case`get`:return(await i.getInstance().get(u,l)).body;case`post`:return(await i.getInstance().post(u,this.getRequestBody(c),l)).body}}catch(i){throw a.warning(`sa_server_request_failed`,{safe:{method:o},sensitive:{error:i,routePattern:s,url:u}}),i}}async safeGet(e,...t){return this.makeRequest(`get`,e,t[0])}async safePost(e,...t){return this.makeRequest(`post`,e,t[0])}};';
 const accountInfoText = '"account-info":async()=>{let e=await this.authProvider.getToken({refreshToken:!1});if(!e)return{accountId:null,userId:null,plan:null,email:null,computeResidency:null};try{let r=JSON.parse(Buffer.from(e.split(".")[1],"base64url").toString("utf8")),n=r["https://api.openai.com/auth"]??{},o=r["https://api.openai.com/profile"]??{},i=n?.chatgpt_account_id??null,s=n?.chatgpt_user_id??null,a=n?.chatgpt_plan_type??null,c=n?.chatgpt_compute_residency??null,l=o.email??null;if(i&&s&&a)return{accountId:i,userId:s,plan:a,email:l,computeResidency:c}}catch{X().error("Unable to extract account id and plan from auth token.")}return{accountId:null,userId:null,plan:null,email:null,computeResidency:null}}';
 const headerNeedsBasePatchText = 'import{i as useEnv}from"./use-environment-a.js";import{f as customMessenger}from"./vscode-api-a.js";h=ge(),g;let b=i.filter(y),C=Ve(r.data,i,_),A=[];A.map(e=>(0,Q.jsx)(me,{task:e.task,onClose:a},e.key));F.map(e=>(0,Q.jsx)(Je,{item:e,isActive:e.kind===`local`&&p===e.conversation.id,onClose:a},e.key));o=r==null?void 0:(0,Q.jsx)(de,{dateString:new Date(r).toISOString()});case`remote`:{let e;return t[0]!==n.task||t[1]!==i?(e=(0,Q.jsx)(me,{task:n.task,onClose:i}),t[0]=n.task,t[1]=i,t[2]=e):e=t[2],e};e=n.conversation.updatedAt==null?void 0:(0,Q.jsx)(de,{dateString:new Date(n.conversation.updatedAt).toISOString()});o=(0,Q.jsx)(fe,{task:n.pendingWorktree,hasAttention:n.pendingWorktree.needsAttention,onClick:e,onArchive:r});function Ke(e){return e.kind===`remote`}var qe=Je=(0,$.memo)(function(e){let t=(0,Z.c)(20),{item:n,isActive:r,onClose:i}=e;switch(n.kind){case`local`:{let e;t[3]===n.conversation.updatedAt?e=t[4]:(e=n.conversation.updatedAt==null?void 0:codexRecentTaskDateLabel(new Date(n.conversation.updatedAt)),t[3]=n.conversation.updatedAt,t[4]=e);let a;return t[5]!==r||t[6]!==n.conversation.id||t[7]!==i||t[8]!==e?(a=(0,Q.jsx)(pe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i}),t[5]=r,t[6]=n.conversation.id,t[7]=i,t[8]=e,t[9]=a):a=t[9],a}}});';
+const header26715Text = [
+  'import{i as ee}from"./use-environment-current.js";import{c as i,ga as a}from"./vscode-api-current.js";',
+  'function it(e){let t=(0,Z.c)(34),{cloudtasksQuery:n,localConversations:r,onClose:i,autoFocusSearch:a,showFilters:o}=e,s=a===void 0?!1:a,c=o===void 0?!0:o,l=x(),u=he(),{authMethod:f}=L(),[p,m]=v(rt),[h]=v(He),g=c?p:`recent`,_=E(`/local/:conversationId`)?.params?.conversationId??null,{data:y}=te(),S=me(),C;t[0]!==h||t[1]!==c||t[2]!==y?(C=null,t[0]=h,t[1]=c,t[2]=y,t[3]=C):C=t[3];let w=C,T=e=>e;let D=r.filter(T),O=et(n.data,r,w),[k,M]=(0,$.useState)(``),N=(0,$.useDeferredValue)(k).trim().toLowerCase(),P=N.length>0,F=O.filter(at),I=P?F:F,R=P?D:D,ee=P?O:O,U;t[15]!==_||t[16]!==n||t[17]!==ee||t[18]!==P||t[19]!==O.length||t[20]!==i||t[21]!==g||t[22]!==u?(U=g===`recent`&&ee.map(e=>(0,Q.jsx)(st,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&_===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key)),t[15]=_,t[16]=n,t[17]=ee,t[18]=P,t[19]=O.length,t[20]=i,t[21]=g,t[22]=u,t[23]=U):U=t[23];return U}',
+  'var messages={search:{id:`codex.recentTasksMenu.search`,defaultMessage:`Search recent chats`}};',
+  'function at(e){return e.kind===`remote`}var ot=(0,$.memo)(function(){});',
+].join('');
 
 function createTarget() {
   const dir = tempDir('codex-patch');
@@ -82,7 +88,7 @@ module.exports = {
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsMarkArchivedConversation'));
         assert.ok(appServerManagerSignals.includes('codexLocalGroupsMarkArchivedConversation(t),e.removeConversationFromCache(t)'));
         assert.ok(appServerManagerSignals.includes('cwds:t'));
-        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=3'));
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=4'));
         assert.ok(header.includes('codexRecentTaskProjectRows'));
         assert.ok(!header.includes('需求A'));
         assert.ok(header.includes('action:`getMetadata`'));
@@ -168,6 +174,19 @@ module.exports = {
       },
     },
     {
+      name: 'patches Codex 26.715 extension host thread list shape',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.extensionJsPath, extensionText.replace('sourceKinds:Yf})', 'sourceKinds:Yf,useStateDbOnly:!0})'));
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(extension.includes('sourceKinds:Yf,useStateDbOnly:!0'));
+        assert.ok(extension.includes('c.cwds=s'));
+      },
+    },
+    {
       name: 'safe header uses stable messenger reference when alias collides',
       run() {
         const target = createTarget();
@@ -183,16 +202,37 @@ module.exports = {
       },
     },
     {
-      name: 'safe header keeps recent menu tall',
+      name: 'safe header preserves upstream recent menu height limits',
       run() {
         const target = createTarget();
         fs.writeFileSync(target.headerPath, headerText.replace('codexRecentTaskCurrentRoot ', 'codexRecentTaskCurrentRoot max-h-[300px] max-h-[450px] '));
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
         const plan = engine.plan(target, { version: 1, conversations: {} });
         const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
-        assert.ok(header.includes('max-h-[900px]'));
-        assert.ok(!header.includes('max-h-[300px]'));
-        assert.ok(!header.includes('max-h-[450px]'));
+        assert.ok(header.includes('max-h-[300px]'));
+        assert.ok(header.includes('max-h-[450px]'));
+        assert.ok(!header.includes('max-h-[900px]'));
+      },
+    },
+    {
+      name: 'downgrades legacy 900px recent menu height',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const firstPlan = engine.plan(target, { version: 1, conversations: {} });
+        for (const change of firstPlan.changes) {
+          fs.writeFileSync(change.path, change.nextText);
+        }
+        const staleHeader = fs.readFileSync(target.headerPath, 'utf8')
+          .replace('codexLocalGroupsHeaderPatchVersion=39', 'codexLocalGroupsHeaderPatchVersion=38')
+          .replace('codexRecentTaskCurrentRoot ', 'codexRecentTaskCurrentRoot className:`flex max-h-[900px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1` ');
+        fs.writeFileSync(target.headerPath, staleHeader);
+
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=39'));
+        assert.ok(header.includes('max-h-[300px]'));
+        assert.ok(!header.includes('max-h-[900px]'));
       },
     },
     {
@@ -233,6 +273,38 @@ module.exports = {
         assert.ok(header.includes('t[33]!==codexLocalGroupsRefresh'));
         assert.ok(header.includes('e.pendingWorktree?.clientThreadId'));
         assert.ok(header.includes('o.conversation==null?p'));
+      },
+    },
+    {
+      name: 'patches Codex 26.715 recent chats header',
+      run() {
+        const target = createTarget();
+        const assets = path.dirname(target.headerPath);
+        fs.writeFileSync(path.join(assets, 'use-webview-execution-target-current.js'), 'export{};');
+        fs.writeFileSync(target.headerPath, header26715Text);
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=39'));
+        assert.ok(header.includes('codexUseExecutionTarget'));
+        assert.ok(header.includes('codexRecentTaskProjectRows(ee,_,i,st,u)'));
+        assert.ok(header.includes('t[34]!==codexLocalGroupsRefresh'));
+        assert.ok(header.includes('onActiveArchiveStart:codexLocalGroupsArchiveStart'));
+      },
+    },
+    {
+      name: 'patches Codex 26.715 recent thread requests',
+      run() {
+        const target = createTarget();
+        fs.writeFileSync(target.appServerManagerSignalsPath, 'async function Gk(e,{modelProviders:t,archived:n=!1,sourceKinds:r=h}){let i=[],a=async o=>{let s={limit:100,cursor:o,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:!0},c=await e.sendRequest(`thread/list`,s,{priority:`background`,source:`thread_list`});i.push(...c.data),c.nextCursor&&await a(c.nextCursor)};return await a(null),i}class X{async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:h,useStateDbOnly:!0},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return i}}');
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const appServer = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        assert.ok(appServer.includes('codexLocalGroupsRecentPatchVersion=3'));
+        assert.ok(appServer.includes('let s=codexLocalGroupsRecentThreadListParams'));
+        assert.ok(appServer.includes('let r=codexLocalGroupsRecentThreadListParams'));
       },
     },
     {
@@ -278,7 +350,7 @@ module.exports = {
         assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(a,e))return;'));
         assert.ok(!extension.includes('JSON.stringify(e,null,2)+"\n"'));
         assert.ok(extension.includes('JSON.stringify(e,null,2)+String.fromCharCode(10)'));
-        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=38'));
+        assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=39'));
         assert.ok(header.includes('codexLocalGroupsProjectKey'));
         assert.ok(header.includes('codexLocalGroupsConversationProjectRoot'));
         assert.ok(header.includes('codexLocalGroupsHistoryLimit=120'));
@@ -617,14 +689,14 @@ module.exports = {
           fs.writeFileSync(change.path, change.nextText);
         }
         const oldHeader = fs.readFileSync(target.headerPath, 'utf8')
-          .replace(/codexLocalGroupsHeaderPatchVersion=38/g, 'codexLocalGroupsHeaderPatchVersion=28')
+          .replace(/codexLocalGroupsHeaderPatchVersion=39/g, 'codexLocalGroupsHeaderPatchVersion=28')
           .replace(/paddingRight:`240px`/g, 'paddingRight:`112px`');
         fs.writeFileSync(target.headerPath, oldHeader);
 
         const plan = engine.plan(target, { version: 1, conversations: {} });
         const headerChange = plan.changes.find((change) => change.path === target.headerPath);
         assert.ok(headerChange);
-        assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=38'));
+        assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=39'));
         assert.ok(headerChange.nextText.includes('paddingRight:`240px`'));
         assert.ok(!headerChange.nextText.includes('paddingRight:`112px`'));
       },
@@ -639,14 +711,14 @@ module.exports = {
           fs.writeFileSync(change.path, change.nextText);
         }
         const staleHeader = fs.readFileSync(target.headerPath, 'utf8')
-          .replace(/codexLocalGroupsHeaderPatchVersion=38/g, 'codexLocalGroupsHeaderPatchVersion=36')
+          .replace(/codexLocalGroupsHeaderPatchVersion=39/g, 'codexLocalGroupsHeaderPatchVersion=36')
           .replace('codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`setPendingGroup`,projectRoot:e,group:t,startedAtMs:n.pendingGroup.startedAtMs}),codexLocalGroupsMessenger.dispatchHostMessage({type:`new-chat`})', 'codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`newConversationInGroup`,projectRoot:e,group:t,startedAtMs:n.pendingGroup.startedAtMs})');
         fs.writeFileSync(target.headerPath, staleHeader);
 
         const plan = engine.plan(target, { version: 1, conversations: {} });
         const headerChange = plan.changes.find((change) => change.path === target.headerPath);
         assert.ok(headerChange);
-        assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=38'));
+        assert.ok(headerChange.nextText.includes('codexLocalGroupsHeaderPatchVersion=39'));
         assert.ok(headerChange.nextText.includes('action:`setPendingGroup`'));
         assert.ok(headerChange.nextText.includes('dispatchHostMessage({type:`new-chat`})'));
         assert.ok(!headerChange.nextText.includes('action:`newConversationInGroup`'));
@@ -662,7 +734,7 @@ module.exports = {
           fs.writeFileSync(change.path, change.nextText);
         }
         const staleHeader = fs.readFileSync(target.headerPath, 'utf8')
-          .replace(/codexLocalGroupsHeaderPatchVersion=38/g, 'codexLocalGroupsHeaderPatchVersion=32')
+          .replace(/codexLocalGroupsHeaderPatchVersion=39/g, 'codexLocalGroupsHeaderPatchVersion=32')
           .replace(/codexRecentTaskProjectRows\(F,p,a,Je\)/g, 'codexRecentTaskProjectRows(F,y,i)')
           .replace(/codexRecentTaskProjectRows\(F,p,a\)/g, 'codexRecentTaskProjectRows(F,y,i)')
           .replace(/function codexRecentTaskProjectRows\(e,t,n,codexLocalGroupsRow\)\{/g, 'function codexRecentTaskProjectRows(e,t,n){')
@@ -674,7 +746,7 @@ module.exports = {
         const headerChange = plan.changes.find((change) => change.path === target.headerPath);
         assert.ok(headerChange);
         assert.ok(headerChange.nextText.includes('codexRecentTaskProjectRows(F,y,i,ot)'));
-        assert.ok(headerChange.nextText.includes('function codexRecentTaskProjectRows(e,t,n,codexLocalGroupsRow)'));
+        assert.ok(headerChange.nextText.includes('function codexRecentTaskProjectRows(e,t,n,codexLocalGroupsRow,codexLocalGroupsArchiveStart)'));
         assert.ok(headerChange.nextText.includes('(0,Q.jsx)(codexLocalGroupsRow,{item:o'));
         assert.ok(!headerChange.nextText.includes('(0,Q.jsx)(Je,{item:o'));
       },

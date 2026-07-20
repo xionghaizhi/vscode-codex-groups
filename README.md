@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.28-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.29-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -34,7 +34,7 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 - 自动迁移旧标题文件：
   - 旧：`~/.codex/codex-vscode-conversation-titles.json`
   - 新：`~/.codex/codex-vscode-conversation-meta.json`
-- 为避免启动阶段白屏，VSCode 启动时不会自动改写 Codex bundle；Codex 扩展升级后，手动执行一次 `Apply Patches`，再 Reload Window。
+- 为避免启动阶段白屏，VSCode 启动时只读检查 Codex bundle，不会后台自动改写；检测到升级覆盖补丁时，可一键“修复并 Reload”。
 - Codex UI 异常时可用 Repair 恢复 clean bundle 后重打补丁。
 - 想停用本扩展增强时，可用 Restore Original Codex UI 只恢复 clean bundle，不重新打补丁。
 
@@ -63,20 +63,19 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.28
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.29
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.28
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.29
 ```
 
 然后在 VSCode 中执行：
 
 1. `Developer: Reload Window`
-2. 打开命令面板，执行 `Codex Local Groups: Apply Patches`
-3. 再执行一次 `Developer: Reload Window`
+2. 按启动提示选择“修复并 Reload”。若未出现提示，手动执行 `Codex Local Groups: Apply Patches` 后 Reload Window。
 
 ### 方式二：安装 VSIX
 
@@ -97,7 +96,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.28.vsix
+code --install-extension vscode-codex-groups-0.0.29.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -108,8 +107,8 @@ code --install-extension vscode-codex-groups-0.0.28.vsix
 
 1. 确认已安装 OpenAI Codex VSCode 扩展。
 2. 安装本扩展。
-3. 执行 `Codex Local Groups: Apply Patches`。
-4. 执行 `Codex Local Groups: Reload Window`。
+3. Reload Window 后按启动提示选择“修复并 Reload”。
+4. 若未出现提示，手动执行 `Codex Local Groups: Apply Patches` 后 Reload Window。
 
 ### 设置本地标题 / 需求分组
 
@@ -207,7 +206,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.28
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.29
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -246,7 +245,7 @@ npm run verify-patched-bundles
 ## Troubleshooting
 
 - 看不到分组 UI：执行 `Apply Patches` 后 Reload Window。
-- Codex 升级后失效：手动执行一次 `Apply Patches`，再 Reload Window；启动时不会自动改写 bundle。
+- Codex 升级后失效：启动自检会提示一键“修复并 Reload”；也可手动执行 `Apply Patches` 后 Reload Window。
 - Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
 - 禁用/卸载本扩展后 Codex 仍异常：先执行 `Codex Local Groups: Restore Original Codex UI`，或终端运行 `npm run restore-codex-ui`，再 Reload Window。禁用扩展不会自动还原已 patch 的 Codex bundle。
 - API key 登录反复报 `/wham/usage`、`/ces/v1/rgstr`、remote plugin sync、keyring OAuth 或 `ab.chatgpt.com/v1/initialize`：执行 `Apply Patches` 或 `Repair Codex UI` 后 Reload Window。

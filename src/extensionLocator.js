@@ -18,10 +18,11 @@ class CodexExtensionLocator {
       extensionJsPath: path.join(extensionDir, 'out/extension.js'),
       headerPath: findBundle(assetsDir, 'header-*.js', isHeaderBundle),
       appMainPath: findBundle(assetsDir, 'app-main-*.js', isAppMainBundle),
-      appServerManagerSignalsPath: findBundle(assetsDir, '*.js', isAppServerManagerSignalsBundle),
+      appServerManagerSignalsPath: findBundle(assetsDir, 'app-server-manager-signals-*.js', isAppServerManagerSignalsBundle),
       requestPath: findBundle(assetsDir, 'request-*.js', isRequestBundle),
       sidebarPath: findBundle(assetsDir, 'sidebar-signals-*.js', () => true),
-      sidebarProjectGroupSignalsPath: findOptionalBundle(assetsDir, '*.js', isSidebarProjectStatusBundle),
+      sidebarProjectGroupSignalsPath: findOptionalBundle(assetsDir, 'sidebar-project-group-signals-*.js', isSidebarProjectStatusBundle) ||
+        findOptionalBundle(assetsDir, 'open-project-setup-dialog-*.js', isSidebarProjectStatusBundle),
       localTitlePath: findBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true),
     };
   }
@@ -107,7 +108,8 @@ function findOptionalBundle(dir, pattern, predicate) {
 }
 
 function isHeaderBundle(text) {
-  return text.includes('recentTasksMenu') && text.includes('Search recent tasks');
+  return text.includes('recentTasksMenu') &&
+    (text.includes('Search recent tasks') || text.includes('Search recent chats'));
 }
 
 function isAppMainBundle(text) {

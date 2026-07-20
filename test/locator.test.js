@@ -50,6 +50,23 @@ module.exports = {
       },
     },
     {
+      name: 'locates Codex 26.715 bundles without scanning unrelated assets',
+      run() {
+        const root = tempDir('codex-locator-26715');
+        const dir = createExtension(root, 'openai.chatgpt-1-linux-x64', new Date(), '26.715.31925');
+        const assets = path.join(dir, 'webview/assets');
+        fs.writeFileSync(path.join(assets, 'header-a.js'), 'recentTasksMenu Search recent chats');
+        fs.writeFileSync(path.join(assets, 'header-icon.js'), 'export{};');
+        fs.writeFileSync(path.join(assets, 'sidebar-project-group-signals-a.js'), 'project groups only');
+        fs.unlinkSync(path.join(assets, 'open-project-setup-dialog-a.js'));
+
+        const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
+        assert.ok(target.headerPath.endsWith('header-a.js'));
+        assert.ok(target.appServerManagerSignalsPath.endsWith('app-server-manager-signals-a.js'));
+        assert.strictEqual(target.sidebarProjectGroupSignalsPath, null);
+      },
+    },
+    {
       name: 'fails when header bundle cannot be uniquely identified',
       run() {
         const root = tempDir('codex-locator-missing');

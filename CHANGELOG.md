@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.0.29 - 2026-07-19
+
+### Fixed
+- 适配 OpenAI Codex `26.715.31925` 的新版 header、extension host 和 thread list bundle 结构。
+- bundle 定位改为按文件名前缀读取，避免同步扫描数千个 webview 资源阻塞 VS Code Extension Host。
+- 适配 OpenAI Codex `26.707.91948`：更新后重新应用完整 Local Groups 补丁并验证 8 个 bundle。
+- 修复系统 `node v12.16.3` 下补丁脚本因 `String.prototype.replaceAll` 不存在而失败的问题。
+- 修复最近会话弹层被强制放大到 `900px` 后触发 ResizeObserver 布局循环，导致 Codex 无法打开和 VS Code 窗口未响应的问题。
+
+### Changed
+- 恢复安全的启动自检：只读检查 Codex 更新是否覆盖补丁，不在启动阶段自动改写 bundle。
+- 检测到兼容且缺失的补丁时，提供一键“修复并 Reload”；检测到不兼容结构时 fail-closed，不写入文件。
+
 ## v0.0.28 - 2026-07-14
 
 ### Fixed

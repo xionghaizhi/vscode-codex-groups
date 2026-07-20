@@ -24,10 +24,10 @@ module.exports = {
       },
     },
     {
-      name: 'does not patch Codex during VS Code startup',
+      name: 'activates read-only startup detection without wildcard activation',
       run() {
         assert.ok(!packageJson.activationEvents.includes('*'));
-        assert.ok(!packageJson.activationEvents.includes('onStartupFinished'));
+        assert.ok(packageJson.activationEvents.includes('onStartupFinished'));
       },
     },
     {
