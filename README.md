@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.29-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.30-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -63,13 +63,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.29
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.30
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.29
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.30
 ```
 
 然后在 VSCode 中执行：
@@ -96,7 +96,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.29.vsix
+code --install-extension vscode-codex-groups-0.0.30.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -206,7 +206,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.29
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.30
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui

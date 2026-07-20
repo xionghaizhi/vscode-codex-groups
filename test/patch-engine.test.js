@@ -31,6 +31,7 @@ const headerNeedsBasePatchText = 'import{i as useEnv}from"./use-environment-a.js
 const header26715Text = [
   'import{i as ee}from"./use-environment-current.js";import{c as i,ga as a}from"./vscode-api-current.js";',
   'function it(e){let t=(0,Z.c)(34),{cloudtasksQuery:n,localConversations:r,onClose:i,autoFocusSearch:a,showFilters:o}=e,s=a===void 0?!1:a,c=o===void 0?!0:o,l=x(),u=he(),{authMethod:f}=L(),[p,m]=v(rt),[h]=v(He),g=c?p:`recent`,_=E(`/local/:conversationId`)?.params?.conversationId??null,{data:y}=te(),S=me(),C;t[0]!==h||t[1]!==c||t[2]!==y?(C=null,t[0]=h,t[1]=c,t[2]=y,t[3]=C):C=t[3];let w=C,T=e=>e;let D=r.filter(T),O=et(n.data,r,w),[k,M]=(0,$.useState)(``),N=(0,$.useDeferredValue)(k).trim().toLowerCase(),P=N.length>0,F=O.filter(at),I=P?F:F,R=P?D:D,ee=P?O:O,U;t[15]!==_||t[16]!==n||t[17]!==ee||t[18]!==P||t[19]!==O.length||t[20]!==i||t[21]!==g||t[22]!==u?(U=g===`recent`&&ee.map(e=>(0,Q.jsx)(st,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&_===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key)),t[15]=_,t[16]=n,t[17]=ee,t[18]=P,t[19]=O.length,t[20]=i,t[21]=g,t[22]=u,t[23]=U):U=t[23];return U}',
+  'const recentMenuHeight={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
   'var messages={search:{id:`codex.recentTasksMenu.search`,defaultMessage:`Search recent chats`}};',
   'function at(e){return e.kind===`remote`}var ot=(0,$.memo)(function(){});',
 ].join('');
@@ -215,7 +216,7 @@ module.exports = {
       },
     },
     {
-      name: 'downgrades legacy 900px recent menu height',
+      name: 'limits recent menu height without returning to 900px',
       run() {
         const target = createTarget();
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true });
@@ -231,7 +232,7 @@ module.exports = {
         const plan = engine.plan(target, { version: 1, conversations: {} });
         const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
         assert.ok(header.includes('codexLocalGroupsHeaderPatchVersion=39'));
-        assert.ok(header.includes('max-h-[300px]'));
+        assert.ok(header.includes('max-h-[60vh]'));
         assert.ok(!header.includes('max-h-[900px]'));
       },
     },
@@ -291,6 +292,8 @@ module.exports = {
         assert.ok(header.includes('codexRecentTaskProjectRows(ee,_,i,st,u)'));
         assert.ok(header.includes('t[34]!==codexLocalGroupsRefresh'));
         assert.ok(header.includes('onActiveArchiveStart:codexLocalGroupsArchiveStart'));
+        assert.ok(header.includes('className:`flex max-h-[60vh] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`'));
+        assert.ok(!header.includes('className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`'));
       },
     },
     {

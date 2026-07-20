@@ -23,6 +23,8 @@ function main() {
   assertContains(target.extensionJsPath, '"account-info":async()=>({accountId:null');
   assertContains(target.headerPath, 'codexLocalGroupsHeaderPatchVersion=39');
   assertNotContains(target.headerPath, 'max-h-[900px]');
+  assertNotContains(target.headerPath, 'className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`');
+  assertContains(target.headerPath, 'className:`flex max-h-[60vh] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`');
   assertContains(target.headerPath, 'action:`getMetadata`');
   assertContains(target.headerPath, 'dispatchHostMessage({type:`new-chat`})');
   assertContains(target.headerPath, 'codexLocalGroupsHistoryLimit=120');
