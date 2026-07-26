@@ -32,7 +32,7 @@ async function runStartupPatchCheck(options = {}) {
   try {
     const metadata = readMetadataOnly(store);
     const target = (options.locator || new CodexExtensionLocator()).locate();
-    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
     plan = engine.plan(target, metadata);
   } catch (error) {
     if (isVersionMismatchError(error)) disablePatchDueToIncompatibility(error);
@@ -44,8 +44,8 @@ async function runStartupPatchCheck(options = {}) {
     if (isVersionMismatchError(error)) disablePatchDueToIncompatibility(error);
     return plan;
   }
-  if (plan.changes.length === 0) return plan;
-  const action = await vscode.window.showInformationMessage('Codex Local Groups: 检测到 Codex 更新覆盖了本地补丁。可一键修复，完成后将 Reload Window。', '修复并 Reload', 'Show Output');
+  if (plan.changes.length === 0 && !(plan.unsafeBundles || []).length) return plan;
+  const action = await vscode.window.showInformationMessage('Codex Local Groups: 检测到补丁缺失或旧版高风险补丁。可一键恢复 clean bundle 并应用安全补丁。', '修复并 Reload', 'Show Output');
   if (action === '修复并 Reload') {
     await (options.applyPatches || applyPatches)({ silent: true });
     await (options.reloadWindow || reloadWindow)();
@@ -102,7 +102,7 @@ async function applyPatches(options = {}) {
     }
     throw locateError;
   }
-  const engine = new CodexPatchEngine({ nodePath: configuredNodePath() });
+  const engine = new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
   const report = engine.apply(target, metadata);
   writeReport(target, report);
   if (report.errors.length) {
@@ -120,7 +120,7 @@ async function repairCodexUi(options = {}) {
   const target = (options.locator || new CodexExtensionLocator()).locate();
   const store = options.store || new ConversationMetadataStore();
   const metadata = store.load();
-  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
   const restored = engine.restoreCleanBundles(target);
   const report = engine.apply(target, metadata);
   writeReport(target, report);
@@ -196,7 +196,7 @@ async function checkStatus(options = {}) {
   try {
     metadata = readMetadataOnly(store);
     target = (options.locator || new CodexExtensionLocator()).locate();
-    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath() });
+    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
     plan = engine.plan(target, metadata);
   } catch (caught) {
     error = caught;
@@ -270,6 +270,9 @@ function writeReport(target, report) {
   for (const change of report.changes) {
     ensureOutputChannel().appendLine(`修改：${change.path}`);
   }
+  for (const item of report.cleanRestored || []) {
+    ensureOutputChannel().appendLine(`恢复旧补丁：${item.path} <- ${item.backupPath}`);
+  }
   for (const backup of report.backups || []) {
     ensureOutputChannel().appendLine(`备份：${backup}`);
   }
@@ -320,6 +323,9 @@ function isVersionMismatchError(error) {
   if (text.includes('无法唯一定位')) {
     return true;
   }
+  if (text.includes('不支持的 Codex 扩展版本')) {
+    return true;
+  }
   if (text.includes('期望 1 处匹配，实际 0 处')) {
     return true;
   }
@@ -368,6 +374,7 @@ function buildStatusLines({ target, plan, metadata, metadataPath, error }) {
     `OpenAI Codex 扩展：${target ? target.extensionDir : '未定位'}`,
     `Codex 版本：${codexPackageVersion(target && target.packageJsonPath)}`,
     `Patch 状态：${patchStatusText(plan, error)}`,
+    `待恢复旧补丁：${plan && plan.unsafeBundles ? plan.unsafeBundles.length : 0}`,
     `会话数量：${stats.total}`,
     `已分组：${stats.grouped}`,
     `未分组：${stats.ungrouped}`,
@@ -433,6 +440,9 @@ function patchStatusText(plan, error) {
   if (plan && plan.changes && plan.changes.length) {
     return `需要应用补丁（${plan.changes.length} 个文件）`;
   }
+  if (plan && plan.unsafeBundles && plan.unsafeBundles.length) {
+    return `需要恢复旧补丁（${plan.unsafeBundles.length} 个文件）`;
+  }
   return '已是最新';
 }
 
@@ -440,7 +450,7 @@ function statusMessage(plan, error) {
   if (error || (plan && plan.errors && plan.errors.length)) {
     return 'Codex Local Groups: 状态检查失败，详见输出。';
   }
-  return plan && plan.changes && plan.changes.length
+  return plan && ((plan.changes && plan.changes.length) || (plan.unsafeBundles && plan.unsafeBundles.length))
     ? 'Codex Local Groups: 需要应用补丁。'
     : 'Codex Local Groups: 状态正常，补丁已是最新。';
 }

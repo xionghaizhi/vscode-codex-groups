@@ -11,19 +11,33 @@ class CodexExtensionLocator {
 
   locate() {
     const extensionDir = this.latestExtensionDir();
+    const version = packageVersion(extensionDir);
     const assetsDir = path.join(extensionDir, 'webview/assets');
+    const appMainPath = findOptionalBundle(assetsDir, 'app-main-*.js', isAppMainBundle) ||
+      findBundle(assetsDir, 'app-initial-*.js', isAppMainBundle);
+    const appServerManagerSignalsPath = findOptionalBundle(assetsDir, 'app-server-manager-signals-*.js', isAppServerManagerSignalsBundle) ||
+      findBundle(assetsDir, 'app-initial-*.js', isAppServerManagerSignalsBundle);
+    const requestPath = findOptionalBundle(assetsDir, 'request-*.js', isRequestBundle) ||
+      findBundle(assetsDir, 'app-initial-*.js', isRequestBundle);
+    const localTitlePath = findOptionalBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true) ||
+      findOptionalBundle(assetsDir, 'app-initial-*.js', isLocalTitleBundle);
+    const appStatsigPath = findOptionalBundle(assetsDir, 'app-main-*.js', isStatsigConfigBundle) ||
+      findOptionalBundle(assetsDir, 'app-initial-*.js', isStatsigConfigBundle) ||
+      appMainPath;
     return {
       extensionDir,
+      version,
       packageJsonPath: path.join(extensionDir, 'package.json'),
       extensionJsPath: path.join(extensionDir, 'out/extension.js'),
       headerPath: findBundle(assetsDir, 'header-*.js', isHeaderBundle),
-      appMainPath: findBundle(assetsDir, 'app-main-*.js', isAppMainBundle),
-      appServerManagerSignalsPath: findBundle(assetsDir, 'app-server-manager-signals-*.js', isAppServerManagerSignalsBundle),
-      requestPath: findBundle(assetsDir, 'request-*.js', isRequestBundle),
-      sidebarPath: findBundle(assetsDir, 'sidebar-signals-*.js', () => true),
+      appMainPath,
+      appStatsigPath,
+      appServerManagerSignalsPath,
+      requestPath,
+      sidebarPath: findOptionalBundle(assetsDir, 'sidebar-signals-*.js', () => true),
       sidebarProjectGroupSignalsPath: findOptionalBundle(assetsDir, 'sidebar-project-group-signals-*.js', isSidebarProjectStatusBundle) ||
         findOptionalBundle(assetsDir, 'open-project-setup-dialog-*.js', isSidebarProjectStatusBundle),
-      localTitlePath: findBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true),
+      localTitlePath,
     };
   }
 
@@ -116,12 +130,20 @@ function isAppMainBundle(text) {
   return text.includes('untitledThreadLabel') && text.includes('conversation.title');
 }
 
+function isStatsigConfigBundle(text) {
+  return text.includes('networkConfig:{api:') && text.includes('sdkExceptionUrl:');
+}
+
 function isAppServerManagerSignalsBundle(text) {
   return text.includes('recentConversationsSortKey') && text.includes('thread/list');
 }
 
 function isRequestBundle(text) {
   return text.includes('safeGet') && text.includes('makeRequest') && text.includes('OAI-Language');
+}
+
+function isLocalTitleBundle(text) {
+  return (text.includes('title:t(') || text.includes('title:codexTitleAliasFor(e)??t(')) && text.includes('turns:t(');
 }
 
 function isSidebarProjectStatusBundle(text) {

@@ -13,12 +13,16 @@ try {
 function main() {
   const metadata = new ConversationMetadataStore().load();
   const target = new CodexExtensionLocator().locate();
-  const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
+  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true });
   const plan = engine.plan(target, metadata);
   console.log(`最新扩展目录：${target.extensionDir}`);
   console.log(`待修改文件数：${plan.changes.length}`);
+  console.log(`待恢复旧补丁文件数：${(plan.unsafeBundles || []).length}`);
   for (const change of plan.changes) {
     console.log(`待修改：${change.path}`);
+  }
+  for (const file of plan.unsafeBundles || []) {
+    console.log(`待恢复旧补丁：${file}`);
   }
   for (const error of plan.errors) {
     console.error(`错误：${error}`);

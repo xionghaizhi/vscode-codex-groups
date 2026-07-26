@@ -1,5 +1,191 @@
 # Changelog
 
+## v0.0.46 - 2026-07-26
+
+### Fixed
+- 修正长列表控制层级：最近会话不再按整个项目共享 5 条预算，每个需求分组独立从 5 条开始。
+- 每个分组的“展开更多”每次增加 10 条；展示上限超过 15 条时，同时提供收起到 15 条和 5 条。
+- 分组展示数使用 `codex-local-groups-visible-counts-v1` 独立记忆，当前打开会话仍保留，“还有 N 条”只统计实际隐藏行。
+
+### Compatibility
+- Safe Header marker 升级到 v12，支持 live v11 原地升级，并对每组独立状态、+10、15/5 收起、active 保留和即时刷新执行 fail-closed 校验。
+
+### Documentation
+- 新增 `docs/codex-upgrade-playbook.md`，汇总 v0.0.29-v0.0.46 及前序线程的最终适配契约、禁止恢复的旧方案、升级步骤、验证门禁和回滚流程。
+
+## v0.0.45 - 2026-07-26
+
+### Fixed
+- 修复项目历史订阅假定所有代理 manager 都实现归档、取消归档和删除监听，导致 Header 挂载后进入 Oops 错误页。
+- 修复 webview 代理 manager 没有 worker 专用 `listProjectConversations()` 时项目历史查询失败、下拉列表为空；改为复用其原生 `listAllThreads()` 并在本地严格过滤当前项目。
+- 项目历史 marker 升级到 v4，支持 live v1-v3 原地升级；补充空 registry、缺少可选监听和代理分页查询回归。
+
+### Compatibility
+- 扩展与 live bundle 同步升级，避免旧版扩展把新 marker 误判为“不兼容，补丁未应用”。
+
+## v0.0.44 - 2026-07-26
+
+### Fixed
+- 修复 Codex UI 启动时 App Server manager 尚未注册，项目历史 hook 直接读取空 manager 的 `getHostId()`，导致统一 Oops 错误页。
+- 默认 host 未就绪时使用 `local` 作为禁用查询的稳定 key；manager 注册后继续由现有 registry 订阅触发刷新，不改变分页、项目过滤或共享最近会话链路。
+- 项目历史 marker 升级到 v2，支持 live v1 原地升级，并增加启动窗口回归测试。
+
+## v0.0.43 - 2026-07-26
+
+### Fixed
+- 修复当前窗口的一个项目里出现其他项目分组：Header 只使用该窗口的 `activeWorkspaceRoot`，严格保留项目根目录及其子目录会话。
+- 子目录会话统一归入工作区根项目，不再生成第二个项目标题；缺少真实 cwd 的会话不再用 metadata 伪造归属。
+- 当前项目历史使用独立分页查询，不扩大共享最近会话 store；即使当前项目会话不在全局前 50 条内，也能进入当前窗口列表。
+- 工作区根目录加载中或项目历史查询失败时 fail closed，不用其他项目或不完整的共享列表兜底。
+
+### Data safety
+- 不修改 SQLite、session、rollout 或会话 metadata；项目历史查询不传 `cwd` / `cwds`，避免 Codex 精确 cwd 过滤漏掉子目录。
+- 归档、取消归档、删除和会话 metadata 变化会刷新独立项目历史；共享最近会话链路保持原生前 50 条行为。
+
+### Compatibility
+- Safe Header marker 升级到 v11；Codex 26.721 项目历史 marker 为 v1，支持 safe-v5 至 safe-v10 原地升级并执行完整后置条件校验。
+
+## v0.0.42 - 2026-07-26
+
+### Fixed
+- 修正 Safe Header 长列表限制层级：每个项目默认合计渲染最近 5 条，不再对项目内每个需求分组各渲染 5 条；当前打开会话在第 5 条之后时仍额外保留。
+- “还有 N 条，展开全部 / 收起到最近 5 条”改为项目级状态，不读取旧分组级展开状态。
+- 项目标题在最近会话列表内粘性置顶，避免滚动后项目标题离开视口、会话行看起来像属于下一个项目。
+
+### Codex compatibility
+- 当前 Marketplace 稳定包仍为 `26.721.41059`，重新下载的 clean bundle 与本地 clean backup 哈希一致，无新的上游 bundle 需要猜测适配。
+- Safe Header marker 升级到 v10，支持 live v9 原地升级，并对原生历史、600px 布局、项目级 5 条预算、当前会话保留、项目级展开和粘性标题做 fail-closed 校验。
+
+### Data safety
+- 不修改 `thread/list`、SQLite、session、rollout 或会话 metadata；只修正 Header 的项目内渲染预算和滚动标题。
+
+### Verified
+- `npm run compile`、`npm run lint`、`npm test`（160 tests）和 `git diff --check` 通过；26.721 VM 覆盖多需求分组共享 5 条预算、active 第 2000 条保留、即时展开/收起 2000 条、WMS/yuxi 分离和 v9 -> v10。
+- clean `26.721.41059` 安全应用 4 个预期变更，7 个语法检查、幂等和二次 plan 0 通过；已安装 v0.0.42 并应用 live Header v9 -> v10，`plan-patches` 为 0，`verify-patched-bundles` 通过。
+- 代码 Review 发现的 active 谓词 fail-closed 缺口已修复，增量复审及 Spec、QA、VSCode/UI Review 最终均为 Critical 0、Important 0、Minor 0。
+
+## v0.0.41 - 2026-07-26
+
+### Fixed
+- 恢复 Safe Header 的长分组控制：全量保留 Codex 上游会话输入，但每组默认只渲染最近 5 条；当前打开会话位于第 5 条之后时仍额外保留。
+- 恢复“还有 N 条，展开全部 / 收起到最近 5 条”；独立分组视图组件负责即时刷新，不改写上游 `zn()` 的 React compiler cache。
+- 展开状态改用 `codex-local-groups-expanded-all-v2`，忽略旧 v1 残留的全展开状态，避免升级后立即构造超长列表。
+
+### Codex compatibility
+- 核对当前安装与最新稳定 Codex UI `26.721.41059`；Header、600px 高度、Max/Ultra 持久化和子 agent 链路的真实 bundle 锚点仍匹配。
+- Header 不再硬编码 `app-initial-DZH_C2c-*` 文件名；改为从实际 `app-initial-*.js` import 中按 `qQ` messenger / execution-target Hook 导出唯一定位，Vite hash 变化时仍可验证匹配。
+- Safe Header marker 升级到 v9，支持 live v8 原地升级，并对原生历史、600px 布局、5 条限制、更多按钮和即时刷新做 fail-closed 校验。
+
+### Data safety
+- 不修改 `thread/list`、SQLite、session、rollout 或会话 metadata；WMS / yuxi 仍按原生 cwd 分组，不做工作区后置过滤。
+
+### Verified
+- `npm run compile`、`npm run lint`、`npm test`（158 tests）和 `git diff --check` 通过；当前 26.721 `Bn/Z/Gn` VM 验证单组 2000 条默认 5 条、active 最多额外 1 条、即时展开 2000 条并可收起，WMS / yuxi 不串组。
+- 重新下载的官方稳定 Codex `26.721.41059` clean bundle 安全应用 4 个预期变更，7 个 Node 24 语法检查、幂等和二次零变更计划均通过；两轮代码、QA、VSCode/UI 子 agent Review 均为 Critical 0、Important 0、Minor 0。
+
+## v0.0.40 - 2026-07-26
+
+### Fixed
+- 修复 Reload 后当前项目只剩极少会话：Safe Header 不再把 Codex 原生有限最近列表按 `activeWorkspaceRoot` 二次过滤，恢复上游已返回的全部会话，并继续按真实 cwd 分组。
+- 修复 `maxHeight:600px` 只限制上限、没有实际增高的问题：Radix 菜单改为实际 `600px` 高度，矮窗口仍受原生可用高度限制，列表区域独立滚动。
+- Safe Header marker 升级到 v8，支持 live v7 原地升级，并对原生列表表达式、菜单高度、滚动区域和旧过滤残留做 fail-closed 校验。
+
+### Data safety
+- 未修改 `thread/list`、SQLite、session、rollout 或 metadata；本机 WMS 会话记录和 rollout 文件均仍存在。
+
+### Verified
+- `npm run compile`、`npm run lint`、`npm test`（148 tests）、`git diff --check` 和真实 Header v8 nextText 的 Node 24 module syntax 检查通过。
+- v0.0.40 已安装并应用；真实 `plan-patches` 为 0，`verify-patched-bundles` 通过。代码、QA、VSCode/UI 三路子 agent Review 均为 Critical 0、Important 0、Minor 0。
+
+## v0.0.39 - 2026-07-26
+
+### Changed
+- 将 Codex 26.721 最近会话下拉外层最大高度从固定 `300px` 提高一倍到 inline `600px`；真实 CSS bundle 没有 `max-h-[600px]` selector，避免只改 class 但界面无变化。
+- 保留内部原生 `60vh` 滚动区域，不使用曾带来布局循环风险的外层 `60vh` 或 `900px` 方案。
+- Safe Header marker 升级到 v7，支持 live v6 原地升级并校验唯一高度锚点。
+
+### Verified
+- `npm run compile`、`npm run lint`、`npm test`（148 tests）、`git diff --check` 和真实 Header nextText Node 24 module syntax 通过。
+- v0.0.39 已安装并应用；`plan-patches` 为 0，`verify-patched-bundles` 通过。代码与 QA/UI 子 agent Review 的 Critical、Important、Minor 均为 0。
+
+## v0.0.38 - 2026-07-26
+
+### Fixed
+- 修复 5.6 Sol 选择 `Ultra` 后约一秒回退到 `Light`：Codex 的写入层会把默认目标的 `ultra` 改写为主机旧配置，读取层又会丢弃 `ultra`，模型校验层还会按缺少 Max/Ultra 的服务端列表回退默认档位。
+- 仅对 `gpt-5.6-sol` 保留用户选择和回读的 `Max`、`Ultra`；其他模型继续使用 Codex 原生兼容逻辑，普通档位不变。
+- Codex UI marker 升级到 v2，支持 live v1 原地升级；持久化作用域缺失时 fail-closed。
+
+### Verified
+- 回归测试执行真实写入、配置回读和模型校验代码形态：修复前 Sol Max/Ultra 均为 `low`，修复后分别保持 `max`/`ultra`；Sol High 与 Terra Max/Ultra 保持原行为。
+- `npm run compile`、`npm run lint`、`npm test`（146 tests）和真实 DZH nextText 的 Node 24 module syntax 检查通过。
+- 已安装 v0.0.38 并应用真实 bundle；`plan-patches` 为 0，`verify-patched-bundles` 通过。代码、QA、VSCode/Codex 子 agent Review 的 Critical、Important、Minor 均为 0。
+
+## v0.0.37 - 2026-07-26
+
+### Fixed
+- 修复 5.6 Sol 实际 `Reasoning` 菜单仍只有 Light、Medium、High、Extra High：此前只修改了 Power Picker 的 `KNt/XNt` 链路，截图中的菜单实际由 `g$t -> XZ(models, model)` 使用后端 `supportedReasoningEfforts` 生成。
+- `XZ` 现仅为 `gpt-5.6-sol` 补齐缺少的 `Max`、`Ultra`，其他模型及 Terra fallback 不变。
+- Power/Subagent marker 升级到 v2，并支持从 live v1 原地升级；结构或 postcondition 不完整时继续 fail-closed。
+
+### Verified
+- `npm run compile`、`npm run lint`、`npm test`（143 tests）和真实 Codex `26.721.41059` BKh nextText 的 Node 24 语法检查通过。
+- 真实 `XZ` VM 输出 `low / medium / high / xhigh / max / ultra`；Sol 已有档位不重复，missing-Sol fallback 补 Ultra，Terra/custom 不变。
+- 修复后代码、QA、VSCode/Codex 子 agent Review 的 Critical、Important、Minor 均为 0。
+
+## v0.0.36 - 2026-07-26
+
+### Fixed
+- 修复 WMS 窗口展示并打开 yuxi 会话：Header 改用当前窗口的 `activeWorkspaceRoot`，只保留当前根目录、子目录和缺少 cwd 的原生项，不向 `thread/list` 注入精确 cwd。
+- Safe Header 升级到 v6；继续保留原生高度和 React cache，不使用跨窗口共享的项目路径决定当前窗口。
+- Codex 26.721 强制启用原生子 agent 活动发现和面板。
+- 5.6 Sol 本地推理档位补齐并保留 `Max`、`Ultra`；功能开关 `1221508807` 在对应 UI 链路固定启用。
+
+### Verified
+- `/etc/mihomo/config.yaml` 已存在 `DOMAIN,ab.chatgpt.com,FALLBACK`，本轮未重复修改系统代理配置。
+- `npm run compile`、`npm run lint`、`npm test`（140 tests）和真实 Codex `26.721.41059` 三个目标 bundle 的 Node 24 语法检查通过。
+- 两轮代码、QA、VSCode/Codex 子 agent Review 后，Critical、Important、Minor 均为 0。
+
+## v0.0.35 - 2026-07-25
+
+### Fixed
+- 修复 `thread/list` 被共享 `localStorage` 中的项目路径强制加上精确 `cwd` 后，只返回根目录会话、隐藏子项目和缺少 cwd 的原生历史会话。
+- 默认改为 native-history safe patch：不再改写 extension host / app-server 的 `thread/list` 请求，不再用当前项目过滤 Codex 已返回的列表。
+- 分组只重排 Codex 原生返回项；默认展开并展示全部，不再用 metadata 合成历史行，也不再默认折叠或截断到 5 条。
+- 保留 Codex 原生最近会话高度和 React cache 状态，避免下拉布局循环和 cache slot 改写引发报错或窗口卡顿。
+- Safe Apply、Repair 和 Restore 会先预查全部 clean backup，再用同目录原子替换移除已修改 bundle；缺少任一备份时零写入并 fail-closed。
+- 多 bundle 恢复中途失败时回滚先前已恢复文件，避免留下半恢复状态；旧版独立 Statsig 网络补丁也纳入恢复检测。
+- 写入 26.721 Header 前校验 `app-initial` 确实导出 `qQ` messenger，导出结构漂移时停止写入，避免下拉打开时报未定义导入。
+- 修复 extension host 会话过滤代码生成后的转义错误，避免生成无法解析的 JavaScript。
+
+### Verified
+- `npm test`：134 tests（含 root、子项目、缺少 cwd、pending row、26.721 原生状态/高度、导出校验及旧补丁事务恢复回归）。
+
+## v0.0.34 - 2026-07-25
+
+### Fixed
+- 适配 OpenAI Codex `26.721.41059` 的新版 `app-initial-*` split bundle。
+- 修复 Header 错误导入未导出的 `Rle`，以及误把模块初始化函数当作 execution target Hook，避免启动和打开最近会话列表时白屏。
+- 按 Codex `26.721` 新协议将 `thread/list` 项目过滤参数从已失效的 `cwds` 改为 `cwd`；WMS 的 VSCode 主会话由错误过滤后的 1 条恢复为服务端可返回的 25 条。
+- 保留 Codex `26.715` 及更早版本的 `cwds` 参数，避免旧版协议兼容回退。
+- 未验证的未来 Codex 协议版本停止写入补丁，避免猜测 `thread/list` 参数。
+
+## v0.0.33 - 2026-07-23
+
+### Fixed
+- 验证并适配 OpenAI Codex `26.715.61943`，现有 `26.715` patch anchor 可直接识别新版 bundle。
+- 保留 Codex `26.715` 最近会话下拉固定 `480px` 高度；窗口未响应与该 UI 高度无直接证据关联。
+- 恢复 Codex 原生 `thread/list` 请求量：扩展会话列表保持 `50` 条，Webview 分页保持调用方的 `100` 或动态 limit，不再统一强提到 `200`；继续保留当前项目 `cwds` 过滤和分页全量历史。
+
+## v0.0.32 - 2026-07-21
+
+### Fixed
+- 恢复 Codex `26.715` 最近会话下拉原生 `300px` 高度，并清理旧补丁写入的 `900px`、`60vh`、`480px`，避免 Radix 弹层反复重算触发 ResizeObserver 布局循环和窗口未响应。
+
+## v0.0.31 - 2026-07-20
+
+### Fixed
+- 将 Codex `26.715` 最近会话下拉高度调为固定 `480px`，比原生 `300px` 更高，同时避开曾导致 ResizeObserver 布局循环的 `60vh` 和 `900px`。
+
 ## v0.0.30 - 2026-07-20
 
 ### Changed

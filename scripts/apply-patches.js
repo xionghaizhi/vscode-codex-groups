@@ -14,12 +14,15 @@ function main() {
   const store = new ConversationMetadataStore();
   const metadata = store.load();
   const target = new CodexExtensionLocator().locate();
-  const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
+  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true });
   const report = engine.apply(target, metadata);
 
   console.log(`最新扩展目录：${target.extensionDir}`);
   for (const change of report.changes) {
     console.log(`已修改：${change.path}`);
+  }
+  for (const item of report.cleanRestored || []) {
+    console.log(`已恢复旧补丁：${item.path} <- ${item.backupPath}`);
   }
   for (const backup of report.backups || []) {
     console.log(`已备份：${backup}`);

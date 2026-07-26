@@ -13,7 +13,7 @@ try {
 function main() {
   const target = new CodexExtensionLocator().locate();
   const metadata = new ConversationMetadataStore().load();
-  const engine = new CodexPatchEngine({ nodePath: resolveNodePath() });
+  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true });
   const restored = engine.restoreCleanBundles(target);
   const report = engine.apply(target, metadata);
   console.log(`最新扩展目录：${target.extensionDir}`);

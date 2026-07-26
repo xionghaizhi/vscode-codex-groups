@@ -32,6 +32,7 @@ module.exports = {
         const latest = createExtension(root, 'openai.chatgpt-1-linux-x64', new Date('2026-01-01T00:00:00Z'), '26.2.0');
         const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
         assert.strictEqual(target.extensionDir, latest);
+        assert.strictEqual(target.version, '26.2.0');
         assert.ok(target.headerPath.endsWith('header-a.js'));
         assert.ok(target.appMainPath.endsWith('app-main-a.js'));
         assert.ok(target.appServerManagerSignalsPath.endsWith('app-server-manager-signals-a.js'));
@@ -64,6 +65,28 @@ module.exports = {
         assert.ok(target.headerPath.endsWith('header-a.js'));
         assert.ok(target.appServerManagerSignalsPath.endsWith('app-server-manager-signals-a.js'));
         assert.strictEqual(target.sidebarProjectGroupSignalsPath, null);
+      },
+    },
+    {
+      name: 'locates split Codex 26.721 app-initial bundles',
+      run() {
+        const root = tempDir('codex-locator-26721');
+        const dir = createExtension(root, 'openai.chatgpt-1-linux-x64', new Date(), '26.721.41059');
+        const assets = path.join(dir, 'webview/assets');
+        for (const name of ['app-main-a.js', 'app-server-manager-signals-a.js', 'request-a.js', 'sidebar-signals-a.js', 'local-conversation-title-signals-a.js']) {
+          fs.unlinkSync(path.join(assets, name));
+        }
+        fs.writeFileSync(path.join(assets, 'app-main-shell.js'), 'entry only');
+        fs.writeFileSync(path.join(assets, 'app-initial-view.js'), 'untitledThreadLabel conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)');
+        fs.writeFileSync(path.join(assets, 'app-initial-server.js'), 'recentConversationsSortKey thread/list networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}');
+
+        const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
+        assert.ok(target.appMainPath.endsWith('app-initial-view.js'));
+        assert.ok(target.requestPath.endsWith('app-initial-view.js'));
+        assert.ok(target.localTitlePath.endsWith('app-initial-view.js'));
+        assert.ok(target.appServerManagerSignalsPath.endsWith('app-initial-server.js'));
+        assert.ok(target.appStatsigPath.endsWith('app-initial-server.js'));
+        assert.strictEqual(target.sidebarPath, null);
       },
     },
     {

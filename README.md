@@ -6,12 +6,12 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.30-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.46-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
 
-Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode 扩展补充本地会话标题、需求分组和项目隔离能力。扩展会自动发现已安装的 Codex 扩展，保守 patch 目标文件，并在写入前创建备份。
+Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode 扩展补充本地会话标题和需求分组能力。扩展会自动发现已安装的 Codex 扩展，保守 patch 目标文件，并在写入前创建备份。
 
 ## 预览
 
@@ -23,14 +23,15 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 
 - 本地会话标题别名。
 - 按“项目 > 需求分组 > 会话”展示最近会话。
-- 仅显示当前项目相关的本地会话。
+- 最近会话只显示当前窗口工作区；项目根目录和子目录会话归入同一项目，其他项目不会混入。
+- 每个需求分组独立默认渲染最近 5 条；“展开更多”每次增加 10 条，展示上限超过 15 条时可收起到 15 条或 5 条。各分组状态互不影响，当前打开会话位于上限之后时仍保留。
 - 顶部最近任务列表里，每个本地会话右侧有同一行的 `设置标题 / 设置分组` 操作，用 VSCode 输入框保存，减少列表纵向占用。
 - 项目下 `+ 新建分组并开始会话`，输入分组名后自动打开新会话。
 - 分组标题右侧 `+ 在此分组新建会话`，新会话自动归入该分组。
 - `Check Status` 检查 Codex 扩展、patch 状态、metadata 和会话数量，并提供 Apply / Reload 快捷操作。
 - `Search Conversations` 用 VSCode QuickPick 搜索本地标题、分组、项目路径或会话 ID，并跳转到选中的 Codex 会话。
 - `Manage Groups` 用 VSCode QuickPick 批量重命名、合并、清空分组，并查看分组下会话。
-- API key 登录场景下禁用 Codex 的 ChatGPT `/wham/usage*`、remote plugin/OAuth 预检和 Statsig/AB 请求，减少 401/432 和 loading 卡顿。
+- 默认只 patch metadata 消息桥、最近会话分组渲染、Codex 26.721 独立项目历史查询及下拉固定高度，不改写共享最近会话 store、认证、插件或会话数据。
 - 自动迁移旧标题文件：
   - 旧：`~/.codex/codex-vscode-conversation-titles.json`
   - 新：`~/.codex/codex-vscode-conversation-meta.json`
@@ -38,18 +39,18 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 - Codex UI 异常时可用 Repair 恢复 clean bundle 后重打补丁。
 - 想停用本扩展增强时，可用 Restore Original Codex UI 只恢复 clean bundle，不重新打补丁。
 
-## API key 模式拦截说明
+## 安全模式边界
 
-v0.0.14 起默认按 API key 登录场景优化，会拦截或禁用这些 ChatGPT auth 专用请求 / 能力：
+v0.0.36 起，扩展入口统一使用 native-history safe patch：
 
-- `/wham/usage*`：ChatGPT 订阅和用量请求，路径或完整 URL 命中后直接返回 `null`。
-- `/ces/v1/rgstr*`、`/backend-api/plugins/featured*`：API key 模式下无用的遥测/插件预检请求，命中后直接返回 `null`。
-- `account-info`：不再从 auth token 提取 ChatGPT account id、user id 和 plan。
-- `remote plugin bundle sync`：`app-server` 启动时追加 `--disable plugins`，禁用 remote plugin 同步。
-- `failed to read OAuth tokens from keyring`：`app-server` 启动时追加 `-c mcp_oauth_credentials_store="file"`，避免 keyring OAuth 预检。
-- `https://ab.chatgpt.com/v1/initialize`：webview 内 Statsig/AB SDK 设置 `preventAllNetworkTraffic:!0`。
-
-如果你使用 ChatGPT auth/OAuth 登录，并依赖 ChatGPT 订阅用量页、remote plugin marketplace、OpenAI-curated plugins 或 AB 实验，不建议应用 v0.0.14+ 的 API key 兜底补丁。
+- 不给共享最近会话请求添加 `cwd` / `cwds`，避免跨窗口状态污染和精确 cwd 过滤漏掉子目录。
+- Codex 26.721 为当前窗口单独分页读取历史，再按 `activeWorkspaceRoot` 严格保留根目录及子目录会话；工作区根目录尚未就绪时列表保持空白，不展示其他项目兜底数据。
+- 缺少真实 cwd 的项不会用 metadata 伪造项目归属；会话数据、SQLite、session 文件均不写入。
+- Header 保留 Codex 上游返回的全部输入，但每个需求分组首屏只构造最近 5 个会话行；每组展示数状态使用独立 UI localStorage，不改会话 metadata。
+- 不用 metadata 合成可点击的伪历史行；metadata 只提供标题和分组信息。
+- Codex 26.721 最近会话菜单实际高度设为 `600px`，矮窗口继续由 Radix 原生可用高度限制，列表区域独立滚动。其他版本保持原高度，不修改 React compiler cache、认证、插件或网络请求。
+- Codex 26.721 额外启用原生子 agent 活动面板，并在 5.6 Sol 本地推理档位中保留 `Max`、`Ultra`。
+- 若发现旧版高风险补丁，Apply 会先恢复 clean backup；无法恢复则停止，不混合新旧补丁。
 
 ## 安装
 
@@ -63,13 +64,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.30
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.46
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.30
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.46
 ```
 
 然后在 VSCode 中执行：
@@ -96,7 +97,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.30.vsix
+code --install-extension vscode-codex-groups-0.0.46.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -116,7 +117,7 @@ code --install-extension vscode-codex-groups-0.0.30.vsix
 2. 找到本地会话行。
 3. 点击会话右侧同一行的 `设置标题` 或 `设置分组`。
 4. 在 VSCode 输入框里输入内容。
-5. 保存后会同步到当前 Codex webview；如当前 webview 仍加载旧补丁，可 Reload Window 一次。
+5. 保存后关闭并重新打开最近会话列表即可看到新标题或分组；如当前 webview 仍加载旧补丁，可 Reload Window 一次。
 
 这是最直接的分组创建方式：输入一个不存在的分组名，会自动创建该分组并把当前会话放进去。
 
@@ -196,6 +197,8 @@ Codex Local Groups: Manage Groups
 
 ## Codex 扩展升级后怎么恢复
 
+维护者在适配新 Codex 版本前，先按 [OpenAI Codex 升级适配手册](docs/codex-upgrade-playbook.md) 核对 bundle、目标契约、禁止项、测试门禁和回滚步骤。
+
 OpenAI Codex VSCode 扩展升级后，原 bundle 可能被覆盖。执行：
 
 ```text
@@ -206,7 +209,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.30
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.46
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -248,6 +251,7 @@ npm run verify-patched-bundles
 - Codex 升级后失效：启动自检会提示一键“修复并 Reload”；也可手动执行 `Apply Patches` 后 Reload Window。
 - Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
 - 禁用/卸载本扩展后 Codex 仍异常：先执行 `Codex Local Groups: Restore Original Codex UI`，或终端运行 `npm run restore-codex-ui`，再 Reload Window。禁用扩展不会自动还原已 patch 的 Codex bundle。
-- API key 登录反复报 `/wham/usage`、`/ces/v1/rgstr`、remote plugin sync、keyring OAuth 或 `ab.chatgpt.com/v1/initialize`：执行 `Apply Patches` 或 `Repair Codex UI` 后 Reload Window。
+- 当前项目混入其他项目分组：升级到 v0.0.46，执行 `Apply Patches` 后 Reload Window；该版本按当前窗口 `activeWorkspaceRoot` 隔离项目，并把子目录会话归入根项目。
+- 单个需求分组一次展示太多会话：升级到 v0.0.46 并 Reload Window；每个分组默认独立渲染最近 5 条，展开更多每次增加 10 条，可收起到 15 条或 5 条。
 - patch 失败：查看 `Codex Local Groups` 输出面板。
 - Node 版本过低：扩展会优先使用 VSCode Server 自带 Node；必要时设置 `codexLocalGroups.nodePath`。

@@ -1,8 +1,8 @@
 {
   "name": "vscode-codex-groups",
   "displayName": "Codex Local Groups",
-  "description": "Local Codex conversation titles, requirement groups, project isolation, and conservative Codex extension patching.",
-  "version": "0.0.30",
+  "description": "Local Codex conversation titles and requirement groups with native-history-safe patching.",
+  "version": "0.0.46",
   "publisher": "xinghezhiyuan",
   "license": "MIT",
   "engines": {

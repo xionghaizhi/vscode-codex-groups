@@ -5,15 +5,25 @@ module.exports = {
   name: 'scripts',
   tests: [
     {
-      name: 'patch scripts default to api-key compatible full mode',
+      name: 'patch scripts default to native-history safe mode',
       run() {
         for (const file of ['scripts/plan-patches.js', 'scripts/apply-patches.js', 'scripts/repair-codex-ui.js', 'scripts/verify-patched-bundles.js', 'src/extension.js']) {
           const text = fs.readFileSync(file, 'utf8');
-          assert.ok(!text.includes('safeMode: true'), file);
+          assert.ok(text.includes('safeMode: true'), file);
         }
         const verify = fs.readFileSync('scripts/verify-patched-bundles.js', 'utf8');
-        assert.ok(verify.includes('codexLocalGroupsRequestPatchVersion=2'));
-        assert.ok(verify.includes('preventAllNetworkTraffic:!0'));
+        assert.ok(verify.includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(verify.includes('codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null'));
+        assert.ok(verify.includes('codexLocalGroupsProjectHistoryPatchVersion=4'));
+        assert.ok(verify.includes('codexLocalGroupsGroupLimit'));
+        assert.ok(verify.includes('codex-local-groups-visible-counts-v1'));
+        assert.ok(verify.includes('group-more-'));
+        assert.ok(verify.includes('收起到最近 15 条'));
+        assert.ok(verify.includes('展开更多'));
+        assert.ok(verify.includes('sticky top-0 z-10 bg-token-dropdown-background'));
+        assert.ok(verify.includes('codexLocalGroupsProjectRowsView'));
+        assert.ok(verify.includes('contentStyle:{height:`600px`,overflow:`hidden`}'));
+        assert.ok(verify.includes('codexLocalGroupsPowerAndSubagentsPatchVersion=2'));
         assert.ok(verify.includes('var codexLocalGroupsInitialMeta='));
         assert.ok(!verify.includes('yuxiMetadataSummary'));
       },

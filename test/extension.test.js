@@ -163,7 +163,25 @@ module.exports = {
           reloadWindow() { calls.push(['reload']); return Promise.resolve(); },
         });
         assert.deepStrictEqual(calls, [['apply', { silent: true }], ['reload']]);
-        assert.ok(vscode.calls.infos[0].message.includes('检测到 Codex 更新覆盖'));
+        assert.ok(vscode.calls.infos[0].message.includes('补丁缺失或旧版高风险补丁'));
+      },
+    },
+    {
+      name: 'offers safe recovery when only legacy bundle markers remain',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        let applied = false;
+        vscode.calls.nextInfoAction = '修复并 Reload';
+        await extension.runStartupPatchCheck({
+          store: { readMetadataFile() { return metadata; } },
+          locator: { locate() { return { extensionDir: '/codex' }; } },
+          engine: { plan() { return { changes: [], errors: [], unsafeBundles: ['/codex/out/extension.js'] }; } },
+          applyPatches() { applied = true; return Promise.resolve(); },
+          reloadWindow() { return Promise.resolve(); },
+        });
+        assert.strictEqual(applied, true);
+        assert.ok(vscode.calls.infos[0].message.includes('clean bundle'));
       },
     },
     {
@@ -179,6 +197,19 @@ module.exports = {
           applyPatches() { applied = true; },
         });
         assert.strictEqual(applied, false);
+        assert.ok(vscode.calls.warnings[0].message.includes('版本不兼容'));
+      },
+    },
+    {
+      name: 'fails closed for a Codex version with a confirmed UI crash',
+      async run() {
+        const vscode = vscodeMock();
+        const extension = loadExtension(vscode);
+        await extension.runStartupPatchCheck({
+          store: { readMetadataFile() { return metadata; } },
+          locator: { locate() { return { extensionDir: '/codex' }; } },
+          engine: { plan() { return { changes: [], errors: ['不支持的 Codex 扩展版本：26.721.41059'] }; } },
+        });
         assert.ok(vscode.calls.warnings[0].message.includes('版本不兼容'));
       },
     },
