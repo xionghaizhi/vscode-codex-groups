@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const { CodexExtensionLocator } = require('./extensionLocator');
 const { ConversationMetadataStore, normalizeMetadata } = require('./metadataStore');
 const { CodexPatchEngine } = require('./patchEngine');
+const { configuredCustomModelProviderId } = require('./codexConfig');
 
 let outputChannel;
 let patchDisabled = false;
@@ -32,7 +33,7 @@ async function runStartupPatchCheck(options = {}) {
   try {
     const metadata = readMetadataOnly(store);
     const target = (options.locator || new CodexExtensionLocator()).locate();
-    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
+    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true, responsesWebsocketFallbackProvider: configuredCustomModelProviderId() });
     plan = engine.plan(target, metadata);
   } catch (error) {
     if (isVersionMismatchError(error)) disablePatchDueToIncompatibility(error);
@@ -102,7 +103,7 @@ async function applyPatches(options = {}) {
     }
     throw locateError;
   }
-  const engine = new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
+  const engine = new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true, responsesWebsocketFallbackProvider: configuredCustomModelProviderId() });
   const report = engine.apply(target, metadata);
   writeReport(target, report);
   if (report.errors.length) {
@@ -120,7 +121,7 @@ async function repairCodexUi(options = {}) {
   const target = (options.locator || new CodexExtensionLocator()).locate();
   const store = options.store || new ConversationMetadataStore();
   const metadata = store.load();
-  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
+  const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true, responsesWebsocketFallbackProvider: configuredCustomModelProviderId() });
   const restored = engine.restoreCleanBundles(target);
   const report = engine.apply(target, metadata);
   writeReport(target, report);
@@ -196,7 +197,7 @@ async function checkStatus(options = {}) {
   try {
     metadata = readMetadataOnly(store);
     target = (options.locator || new CodexExtensionLocator()).locate();
-    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true });
+    const engine = options.engine || new CodexPatchEngine({ nodePath: configuredNodePath(), safeMode: true, responsesWebsocketFallbackProvider: configuredCustomModelProviderId() });
     plan = engine.plan(target, metadata);
   } catch (caught) {
     error = caught;

@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.46-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.49-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -31,7 +31,7 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 - `Check Status` checks the Codex extension, patch status, metadata, and conversation counts, with Apply / Reload shortcuts.
 - `Search Conversations` uses VSCode QuickPick to search local titles, groups, project paths, or conversation IDs, then opens the selected Codex conversation.
 - `Manage Groups` uses VSCode QuickPick to rename, merge, clear groups, and view conversations in a group.
-- By default, patches only the metadata bridge, grouped recent-list rendering, an isolated Codex 26.721 project-history query, and the fixed menu height; it does not expand the shared recent store or write conversation data.
+- By default, patches only the metadata bridge, grouped recent-list rendering, an isolated Codex 26.721/26.727 project-history query, and the fixed menu height; it does not expand the shared recent store or write conversation data.
 - Migration from:
   - Old: `~/.codex/codex-vscode-conversation-titles.json`
   - New: `~/.codex/codex-vscode-conversation-meta.json`
@@ -44,12 +44,12 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 Starting in v0.0.36, every extension and CLI entry point uses native-history safe patching:
 
 - It never adds `cwd` / `cwds` to the shared recent-list request, avoiding cross-window state leaks and exact-cwd filtering that drops child directories.
-- On Codex 26.721, it pages an isolated project-history query and strictly keeps the active `activeWorkspaceRoot` plus descendants. While the workspace root is loading, it fails closed with an empty list instead of showing another project.
+- On Codex 26.721/26.727, it pages an isolated project-history query and strictly keeps the active `activeWorkspaceRoot` plus descendants. While the workspace root is loading, it fails closed with an empty list instead of showing another project.
 - Items without a real cwd are not assigned to a project from metadata. SQLite, session files, and conversation data are never written.
 - The Header keeps every upstream item but initially constructs five conversation rows per requirement group. Each group's row limit uses UI-only localStorage and never changes conversation metadata.
 - It does not synthesize clickable history rows from metadata; metadata supplies titles and groups only.
-- On Codex 26.721, the recent menu gets an actual `600px` height, remains clamped by Radix on short windows, and scrolls inside the list region. Other versions keep their original height; React compiler cache state, authentication, plugins, and network requests remain unchanged.
-- On Codex 26.721 it also enables the native subagent activity panel and keeps `Max` and `Ultra` in the local 5.6 Sol reasoning selector.
+- On Codex 26.721/26.727, the recent menu gets an actual `600px` height, remains clamped by Radix on short windows, and scrolls inside the list region. Other versions keep their original height; React compiler cache state, authentication, plugins, and network requests remain unchanged.
+- On Codex 26.721/26.727 it preserves or enables the native subagent activity panel and keeps `Max` and `Ultra` in the local 5.6 Sol reasoning selector.
 - If a legacy high-risk patch is detected, Apply restores clean backups first and fails closed if restoration is impossible.
 
 ## Installation
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.46
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.49
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.46
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.49
 ```
 
 Then in VSCode:
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.46.vsix
+code --install-extension vscode-codex-groups-0.0.49.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -209,7 +209,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.46
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.49
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -251,7 +251,9 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 - Broken after a Codex upgrade: startup detection offers one-click repair and Reload. You can also run `Apply Patches`, then Reload Window.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - Codex is still broken after disabling/uninstalling this extension: run `Codex Local Groups: Restore Original Codex UI`, or run `npm run restore-codex-ui`, then Reload Window. Disabling the extension does not automatically revert patched Codex bundles.
-- If the current project shows groups from other projects, upgrade to v0.0.46, run `Apply Patches`, then Reload Window. The project history is isolated by the current window's `activeWorkspaceRoot`, while child directories are merged into the root project.
-- If one requirement group renders too many conversations at once, upgrade to v0.0.46 and Reload Window. Each group independently starts at five rows, `Show more` adds ten, and collapse controls return it to fifteen or five.
+- If the current project shows groups from other projects, upgrade to v0.0.49, run `Apply Patches`, then Reload Window. The project history is isolated by the current window's `activeWorkspaceRoot`, while child directories are merged into the root project.
+- If one requirement group renders too many conversations at once, upgrade to v0.0.49 and Reload Window. Each group independently starts at five rows, `Show more` adds ten, and collapse controls return it to fifteen or five.
+- If a local title still shows the original text after saving, upgrade to v0.0.49, run `Apply Patches`, then Reload Window. Later title saves refresh the current dropdown row immediately.
+- If a resumed conversation has no terminal tools, upgrade to v0.0.49, run `Apply Patches`, then Reload Window. For `26.721.41059` with a resolvable custom provider, app-server falls back to HTTP POST without editing `config.toml`.
 - Patch failed: check the `Codex Local Groups` output channel.
 - Node version is too old: the extension prefers the VSCode Server Node; set `codexLocalGroups.nodePath` if needed.

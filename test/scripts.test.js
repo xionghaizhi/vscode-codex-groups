@@ -12,7 +12,8 @@ module.exports = {
           assert.ok(text.includes('safeMode: true'), file);
         }
         const verify = fs.readFileSync('scripts/verify-patched-bundles.js', 'utf8');
-        assert.ok(verify.includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(verify.includes('codexLocalGroupsHeaderSafePatchVersion=14'));
+        assert.ok(verify.includes('codexLocalGroupsHeaderSafePatchVersion=15'));
         assert.ok(verify.includes('codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null'));
         assert.ok(verify.includes('codexLocalGroupsProjectHistoryPatchVersion=4'));
         assert.ok(verify.includes('codexLocalGroupsGroupLimit'));
@@ -24,6 +25,10 @@ module.exports = {
         assert.ok(verify.includes('codexLocalGroupsProjectRowsView'));
         assert.ok(verify.includes('contentStyle:{height:`600px`,overflow:`hidden`}'));
         assert.ok(verify.includes('codexLocalGroupsPowerAndSubagentsPatchVersion=2'));
+        assert.ok(verify.includes('codexLocalGroupsProjectHistory26727PatchVersion=5'));
+        assert.ok(verify.includes('codexLocalGroupsCodexUi26727PatchVersion=3'));
+        assert.ok(verify.includes('codexLocalGroupsPower26727PatchVersion=3'));
+        assert.ok(verify.includes('CODEX_EXTENSIONS_ROOT'));
         assert.ok(verify.includes('var codexLocalGroupsInitialMeta='));
         assert.ok(!verify.includes('yuxiMetadataSummary'));
       },

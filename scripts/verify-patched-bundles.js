@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { CodexExtensionLocator } = require('../src/extensionLocator');
 const { CodexPatchEngine } = require('../src/patchEngine');
+const { configuredCustomModelProviderId } = require('../src/codexConfig');
 const { resolveNodePath } = require('./node-path');
 
 try {
@@ -11,7 +12,9 @@ try {
 }
 
 function main() {
-  const target = new CodexExtensionLocator().locate();
+  const locatorOptions = process.env.CODEX_EXTENSIONS_ROOT ? { extensionsRoot: process.env.CODEX_EXTENSIONS_ROOT } : {};
+  const target = new CodexExtensionLocator(locatorOptions).locate();
+  const is26727 = String(target.version).startsWith('26.727.');
   const emptyMetadata = 'var codexLocalGroupsInitialMeta={"version":1,"conversations":{}}';
   assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=17');
   assertNotContains(target.extensionJsPath, 'typeof $g!="undefined"?$g:require("vscode")');
@@ -23,7 +26,19 @@ function main() {
   assertNotContains(target.extensionJsPath, 'workspace.workspaceFolders?.map(a=>a.uri.fsPath).filter(Boolean)??[]');
   assertNotContains(target.extensionJsPath, 'workspace.workspaceFolders?.map(c=>c.uri.fsPath)??[]');
   assertNotContains(target.extensionJsPath, '"--disable","plugins"');
-  assertContains(target.headerPath, 'codexLocalGroupsHeaderSafePatchVersion=12');
+  const provider = configuredCustomModelProviderId();
+  const fallbacks = fs.readFileSync(target.extensionJsPath, 'utf8').match(/,"-c","model_providers\.[A-Za-z0-9_-]+\.supports_websockets=false"/g) || [];
+  if (target.version === '26.721.41059' && provider) {
+    const expected = `,"-c","model_providers.${provider}.supports_websockets=false"`;
+    if (fallbacks.length !== 1 || fallbacks[0] !== expected) throw new Error(`Responses WebSocket fallback 不匹配：${target.extensionJsPath}`);
+  } else if (fallbacks.length) {
+    throw new Error(`存在过期 Responses WebSocket fallback：${target.extensionJsPath}`);
+  }
+  assertContains(target.headerPath, is26727 ? 'codexLocalGroupsHeaderSafePatchVersion=15' : 'codexLocalGroupsHeaderSafePatchVersion=14');
+  assertContains(target.headerPath, is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),');
+  assertContains(target.headerPath, 't[23]!==n.conversation.title');
+  assertContains(target.headerPath, 't[23]=n.conversation.title');
+  assertContains(target.headerPath, 'titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0');
   assertContains(target.headerPath, 'contentStyle:{height:`600px`,overflow:`hidden`}');
   assertContains(target.headerPath, 'className:`flex h-full min-h-0 w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`');
   assertContains(target.headerPath, 'vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1');
@@ -36,7 +51,7 @@ function main() {
   assertContains(target.headerPath, 'dispatchHostMessage({type:`new-chat`})');
   assertContains(target.headerPath, 'codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null');
   assertContains(target.headerPath, 'codexRecentTaskRootReady?codexRecentConversationFilter');
-  assertContains(target.headerPath, '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)');
+  assertContains(target.headerPath, is26727 ? '{data:f}=v(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)');
   assertContains(target.headerPath, 'function codexRecentTaskFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
   assertContains(target.headerPath, 'function codexRecentConversationFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
   assertContains(target.headerPath, 'function codexLocalGroupsScopeProjectRoot(e)');
@@ -61,8 +76,9 @@ function main() {
   assertContains(target.headerPath, '收起到最近 15 条');
   assertContains(target.headerPath, '收起到最近 5 条');
   assertContains(target.headerPath, '展开更多');
-  assertContains(target.headerPath, 'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,Gn.useState)(0);return(0,Gn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}');
-  assertContains(target.headerPath, '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F');
+  const projectRowsViewRuntime = is26727 ? 'Wn' : 'Gn';
+  assertContains(target.headerPath, `function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,${projectRowsViewRuntime}.useState)(0);return(0,${projectRowsViewRuntime}.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(\`codex-local-groups-refresh\`,e),()=>window.removeEventListener(\`codex-local-groups-refresh\`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}`);
+  assertContains(target.headerPath, is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F');
   assertNotContains(target.headerPath, 'project-more-');
   assertNotContains(target.headerPath, 'codex-local-groups-expanded-projects-v1');
   assertNotContains(target.headerPath, 'codex-local-groups-expanded-all-v2');
@@ -106,13 +122,34 @@ function main() {
     assertContains(target.appStatsigPath, 'u=!0,d;');
     assertNotContains(target.appStatsigPath, '1221508807');
   }
+  if (is26727) {
+    assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsProjectHistory26727PatchVersion=5');
+    assertContains(target.appServerManagerSignalsPath, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations26727(this,e)}');
+    assertContains(target.appServerManagerSignalsPath, 'typeof e.addThreadArchivedListener===`function`');
+    assertContains(target.appServerManagerSignalsPath, 'typeof e.listAllThreads!==`function`');
+    assertNotContains(target.appServerManagerSignalsPath, 'Number.MAX_SAFE_INTEGER');
+    assertContains(target.appMainPath, 'codexLocalGroupsCodexUi26727PatchVersion=3');
+    assertContains(target.appMainPath, 'r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)');
+    assertContains(target.appMainPath, 'isBackgroundSubagentsEnabled:o=!0');
+    assertContains(target.appMainPath, 'type:`subagent-activity`');
+    assertContains(target.appStatsigPath, 'codexLocalGroupsPower26727PatchVersion=3');
+    assertContains(target.appStatsigPath, 'gpt-5.6-sol:max');
+    assertContains(target.appStatsigPath, 'gpt-5.6-sol:ultra');
+    assertContains(target.appStatsigPath, 'zUt([...yG,VUt].filter');
+    assertContains(target.appStatsigPath, 'r.some(e=>e.reasoningEffort===`max`)');
+    assertContains(target.appStatsigPath, 'r.some(e=>e.reasoningEffort===`ultra`)');
+    assertContains(target.appStatsigPath, 'isBackgroundSubagentsEnabled:!0');
+    assertContains(target.appStatsigPath, 'subagentsPanel');
+    assertNotContains(target.appMainPath, '1221508807');
+    assertNotContains(target.appStatsigPath, '1221508807');
+  }
   for (const file of bundlePaths(target)) {
     assertNotContains(file, 'requestAllThreadList(e)');
     assertNotContains(file, 'codexLocalGroupsMetadataOnly');
     assertNotContains(file, 'codexLocalGroupsMetadataItems');
     assertNotContains(file, 'codexLocalGroupsMetadataRow');
   }
-  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true });
+  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true, responsesWebsocketFallbackProvider: provider });
   for (const item of engine.runSyntaxChecks(target)) {
     console.log(`语法检查通过：${item.file}`);
   }

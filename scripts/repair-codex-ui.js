@@ -1,6 +1,7 @@
 const { CodexExtensionLocator } = require('../src/extensionLocator');
 const { ConversationMetadataStore } = require('../src/metadataStore');
 const { CodexPatchEngine } = require('../src/patchEngine');
+const { configuredCustomModelProviderId } = require('../src/codexConfig');
 const { resolveNodePath } = require('./node-path');
 
 try {
@@ -13,7 +14,7 @@ try {
 function main() {
   const target = new CodexExtensionLocator().locate();
   const metadata = new ConversationMetadataStore().load();
-  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true });
+  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true, responsesWebsocketFallbackProvider: configuredCustomModelProviderId() });
   const restored = engine.restoreCleanBundles(target);
   const report = engine.apply(target, metadata);
   console.log(`最新扩展目录：${target.extensionDir}`);

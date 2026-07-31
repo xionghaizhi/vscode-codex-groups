@@ -1,8 +1,8 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-07-27
-> 当前 Codex：`openai.chatgpt@26.721.41059`
-> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.46`
+> 基线日期：2026-07-31
+> 当前 Codex：`openai.chatgpt@26.727.40816`
+> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.49`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -13,7 +13,7 @@ Codex 升级后，应该恢复成以下状态：
 1. 最近会话只显示当前窗口 `activeWorkspaceRoot` 根目录及其子目录。
 2. 子目录会话归入当前工作区根项目，不产生第二个项目标题。
 3. 不扩大共享 recent store，不给共享 `thread/list` 注入 `cwd` / `cwds`。
-4. Codex `26.721` 通过独立项目历史查询分页读取会话，再在本地严格过滤根目录和子目录。
+4. Codex `26.721` / `26.727` 通过独立项目历史查询分页读取会话，再在本地严格过滤根目录和子目录。
 5. 工作区 root 未就绪、查询失败或项目归属不可确认时 fail closed，不用其他项目数据兜底。
 6. 页面结构为“项目 > 需求分组 > 会话”，项目标题在内层滚动区粘性置顶。
 7. **每个需求分组独立**默认显示最近 5 条，“展开更多”每次 +10，不是整个项目共享 5 条。
@@ -21,8 +21,9 @@ Codex 升级后，应该恢复成以下状态：
 9. 当前 active 会话即使在分组上限之后也必须额外保留；“还有 N 条”只统计实际隐藏行。
 10. 最近会话菜单使用实际 `600px` 高度，列表区独立滚动，矮窗口继续受 Radix 可用高度约束。
 11. 保留本地标题、设置分组、新建分组、在分组中新建会话、搜索会话和 Manage Groups。
-12. Codex `26.721` 保留原生子 agent 活动面板，`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
+12. Codex `26.721` / `26.727` 保留原生子 agent 活动面板，`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
 13. 启动时只读检查，不在多窗口启动阶段后台改写 Codex bundle。
+14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
 
 ## 2. 当前调用链
 
@@ -59,7 +60,7 @@ CLI 入口 `scripts/plan-patches.js` / `apply-patches.js` / `repair-codex-ui.js`
 
 ```text
 Header 读取 activeWorkspaceRoot
-  -> root ready 时调用扩展后的 e6e(root, hostId, enabled)
+  -> root ready 时调用对应版本扩展后的项目历史 Hook（26.721 `e6e` / 26.727 `Xtt`）
   -> App Server manager 独立分页历史查询
   -> 按 root / root 子目录过滤
   -> 合并原生 recent query 已有项
@@ -83,15 +84,15 @@ Header 操作
 
 ## 3. 当前 bundle 与目标契约
 
-下表的 bundle 名只是 `26.721.41059` 快照。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
+下表是 `26.727.40816` 快照。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
 
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
-| `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` | 只注入 metadata 读写和 webview 消息桥；输入框 / QuickPick 保持焦点；不改共享会话请求、认证或插件。 |
-| `header-BHrhiaq6.js` | `recentTasksMenu` + `Search recent chats/tasks` | `codexLocalGroupsHeaderSafePatchVersion=12` | 当前项目严格隔离、原生 row 组件、需求分组、每组 5/+10/15/5、active 保留、粘性项目标题、600px 菜单和独立刷新。 |
-| `app-initial-DZH_C2c-.js` | `untitledThreadLabel` + `conversation.title` | `codexLocalGroupsCodexUiFeatureGatePatchVersion=2` | 强制开启目标子 agent 开关；仅对 `gpt-5.6-sol` 保留 Max/Ultra 的写入、读取和模型校验。 |
-| `app-initial-BKh04BVH.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistoryPatchVersion=4` | 独立项目历史查询；manager 能力检测；代理 manager 通过 `listAllThreads()` 兼容分支返回项目会话。 |
-| `app-initial-BKh04BVH.js` | `networkConfig` / Power / Subagent 语义 | `codexLocalGroupsPowerAndSubagentsPatchVersion=2` | 实际 Reasoning 菜单为 Sol 补 Max/Ultra，Power Picker 不过滤这两档，子 agent 活动发现和面板固定开启。 |
+| `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` | 注入 metadata 消息桥，并对已确认缺陷版本的自定义 provider 增加 app-server HTTP fallback；不改共享会话请求、认证、MCP 或插件。 |
+| `header-nb2Xra8M.js` | `recentTasksMenu` + `Search recent chats/tasks` | `codexLocalGroupsHeaderSafePatchVersion=15` | 当前项目严格隔离、原生 row 组件、需求分组、每组 5/+10/15/5、active 保留、粘性项目标题、600px 菜单、独立刷新、本地标题缓存失效和非字符串 `titleOverride`。 |
+| `app-initial-OtKCH0aX.js` | `untitledThreadLabel` + `conversation.title` | `codexLocalGroupsCodexUi26727PatchVersion=3` | 复用新版原生子 agent 和设置读写；仅对 `gpt-5.6-sol` 保留 Max/Ultra 的模型校验。 |
+| `app-initial-CToTcrdv.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory26727PatchVersion=5` | 独立项目历史查询；manager 能力检测；代理 manager 通过 `listAllThreads()` 兼容分支返回项目会话。 |
+| `app-initial-CToTcrdv.js` | `networkConfig` / Power / Subagent 语义 | `codexLocalGroupsPower26727PatchVersion=3` | 实际 Reasoning 菜单为 Sol 补 Max/Ultra，Power Picker 不过滤这两档，保留新版原生子 agent 活动发现和面板。 |
 
 当前 locator 允许 `appMainPath` / `appStatsigPath` / `appServerManagerSignalsPath` 指向同一文件。`CodexPatchEngine.plan()` 必须对合包和分包都只规划一次写入。
 
@@ -115,17 +116,17 @@ Header 操作
 
 ### 4.2 `src/patchEngine.js::CodexPatchEngine.plan()`
 
-当前未验证 `26.721` 之后的 minor 版本，所以新版会报：
+当前只验证了 `26.721` 和 `26.727`；其他 minor 版本会报：
 
 ```text
 不支持的 Codex 扩展版本
 ```
 
-这是正常的安全门禁。不能只删掉 `minor > 721` 判断或盲目放大上限。应先完成 bundle 定位、调用链和回归验证，然后再明确放行新版本。
+这是正常的安全门禁。不能把当前“`<=721` 或 `===727`”的明确白名单盲目放大。应先完成 bundle 定位、调用链和回归验证，然后再明确放行新版本。
 
 版本升级后检查：
 
-- safe mode 仍只规划 extension host、Header 和已确认的 26.721+ 特性 bundle。
+- safe mode 仍只规划 extension host、Header 和已确认的 `26.721` / `26.727` 特性 bundle。
 - 若新协议改变 `thread/list` 字段，先查新版 App Server 类型或源码；不推测 `cwd` / `cwds`。
 - 仅当生成后契约变化时提升对应 marker。只有 hash 或 clean anchor 变化、生成结果不变时，marker 可保持。
 - marker 提升必须保留上一个 live marker 的原地升级路径和后置条件检查。
@@ -136,6 +137,7 @@ Header 操作
 
 - `patchExtensionMetadataHelper()` 生成 `codexLocalGroupsPatchVersion=17`。
 - `patchExtensionMessageHandler()` 在 Codex 原生 webview message handler 边界拦截 Local Groups 消息。
+- `patchExtensionResponsesWebsocketFallback()` 仅为 `26.721.41059` 的已确认自定义 provider 追加 `supports_websockets=false` CLI 覆盖。
 - 支持 `getMetadata`、`saveConversationMeta`、`archiveConversationMeta`、`setPendingGroup`、`resetPendingGroup`。
 - 设置标题使用 `showInputBox(..., ignoreFocusOut: true)`。
 - 设置分组使用 `showQuickPick(..., ignoreFocusOut: true)`，可选已有分组、新建分组或清除分组。
@@ -147,6 +149,13 @@ Header 操作
 - `requestAllThreadList(e)`。
 - `"--disable","plugins"`。
 - ChatGPT 认证、OAuth、Statsig 网络屏蔽。
+
+HTTP fallback 的边界：
+
+- provider ID 只从 `$CODEX_HOME/config.toml` 或 `~/.codex/config.toml` 顶层 `model_provider` 读取，并确认存在对应的 `[model_providers.<provider>]` 表。
+- 不写配置文件，不覆盖 `amazon-bedrock`、`openai`、`ollama`、`lmstudio` 等 Codex 保留 provider。
+- provider 不可确认、字符不安全或 Codex 版本变化时不应用覆盖。
+- 官方修复后应移除版本门禁，不把 fallback 扩大为长期全局策略。
 
 ### 4.4 `src/patchEngine.js::patchHeader()`
 
@@ -405,7 +414,7 @@ code --install-extension ./vscode-codex-groups-<version>.vsix --force
 6. 继续展开到 25，确认同时有收起到 15 和收起到 5。
 7. 分别收起到 15 和 5，数量和“还有 N 条”正确。
 8. 当前 active 会话在第 5 条之后时仍显示且不重复。
-9. 设置标题、设置分组、新建分组、在分组内新建会话都可用。
+9. 设置标题后，下拉中的当前会话立即显示新标题；设置分组、新建分组、在分组内新建会话都可用。
 10. 菜单高度和滚动正常，项目标题滚动时保持可见。
 11. 归档 / 取消归档 / 删除 / metadata 变化能刷新项目历史。
 12. 5.6 Sol Reasoning 显示 Max/Ultra，选择 Ultra 后不回退 Light。
@@ -482,8 +491,33 @@ npm run restore-codex-ui
 | v0.0.44 | 空 default manager 导致 Oops | manager 未就绪时使用稳定 host key，不解引空值。 |
 | v0.0.45 | webview proxy 没有 worker listener / `listProjectConversations()` 导致 Oops 和空下拉 | 所有可选能力先检测；代理复用 `listAllThreads()`。 |
 | v0.0.46 | 误把 5/15/更多做成项目级 | 每个需求分组独立 5 -> 15 -> 25，独立收起到 15/5。 |
+| v0.0.49 | `26.727` Header、项目历史、Power/Reasoning 符号和 bundle 漂移 | 按新语义单独适配；复用原生子 agent 与设置链路；`26.721` HTTP fallback 不外扩。 |
 
-## 9. 每次适配的证据记录模板
+## 9. Codex 26.727.40816 适配记录
+
+### 上游变化
+
+- Header 变为 `header-nb2Xra8M.js`，execution-target / messenger 分别从新版 `app-initial-*` 语义导出定位。
+- App Main 为 `app-initial-OtKCH0aX.js`；设置读写和子 agent 活动已原生启用，只需保留 Sol Max/Ultra 校验。
+- App Server / Power 为 `app-initial-CToTcrdv.js`；项目历史 Hook 从 `e6e/t6e` 变为 `Xtt/Ztt`，Power 从 `KNt/XNt/XZ` 变为 `FUt/zUt/MQ`。
+- `1221508807` 旧开关已消失，不再对新版重复注入子 agent gate 补丁。
+
+### 修改与安全边界
+
+- `CodexPatchEngine.plan()` 只明确放行 `26.727`，未验证 minor 仍 fail closed。
+- Header v15 和项目历史 v5 复用既有项目隔离、分页、分组和标题契约，仅适配新符号与 React runtime。
+- Codex UI v3 只保留 Sol Max/Ultra 模型校验；Power v3 只补 Sol Max/Ultra Power 与实际 Reasoning 菜单。
+- `26.721.41059` 专用 Responses WebSocket fallback 不扩展到 `26.727.40816`。
+
+### 验证证据
+
+- clean 副本：4 个预期文件变更，Node 24 语法通过，二次 plan 为 0，verifier 通过。
+- live：4 个预期文件应用并备份，二次 plan 为 0，verifier 通过。
+- 仓库：compile、lint、178 tests 通过；`git diff --check` 通过。
+- VSIX：生成并安装 `vscode-codex-groups-0.0.49.vsix`；安装目录 compile、plan、verifier 通过。
+- 未完成：当前窗口仍需 Reload 后执行真实 UI 和旧会话工具人工验收。
+
+## 10. 每次适配的证据记录模板
 
 ```markdown
 ## Codex <version> 适配

@@ -1,6 +1,7 @@
 const { CodexExtensionLocator } = require('../src/extensionLocator');
 const { ConversationMetadataStore } = require('../src/metadataStore');
 const { CodexPatchEngine } = require('../src/patchEngine');
+const { configuredCustomModelProviderId } = require('../src/codexConfig');
 const { resolveNodePath } = require('./node-path');
 
 try {
@@ -13,7 +14,7 @@ try {
 function main() {
   const metadata = new ConversationMetadataStore().load();
   const target = new CodexExtensionLocator().locate();
-  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true });
+  const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), safeMode: true, responsesWebsocketFallbackProvider: configuredCustomModelProviderId() });
   const plan = engine.plan(target, metadata);
   console.log(`最新扩展目录：${target.extensionDir}`);
   console.log(`待修改文件数：${plan.changes.length}`);

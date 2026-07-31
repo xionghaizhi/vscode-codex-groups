@@ -42,7 +42,7 @@ const header26721Text = [
   'const recentMenuHeight={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
   'var messages={search:{defaultMessage:`Search recent chats`}};function Bn(e){return e.kind===`remote`}function Vn(){}',
   'var date=s=r==null?void 0:(0,Z.jsx)(c,{dateString:new Date(r).toISOString()});',
-  'const nativeLocalRow=(0,Z.jsx)(Fe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a});',
+  'var Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(23),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e=null,l;return t[17]!==r||t[18]!==n.conversation.id||t[19]!==a||t[20]!==i||t[21]!==e?(l=(0,Z.jsx)(Fe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.id,t[19]=a,t[20]=i,t[21]=e,t[22]=l):l=t[22],l}}});',
   'const nativeScrollHeight={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`},unrelatedHeight={className:`max-h-[300px]`};',
   'const nativeMenu=(0,Z.jsx)(N,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:ie,open:p,onOpenChange:h,children:G});',
 ].join('');
@@ -50,6 +50,18 @@ const split26721AppMainText = 'import{f as gi}from"./vscode-api-a.js";function U
 const split26721AppServerText = 'var n7={networkConfig:{api:jkn,logEventUrl:K5,sdkExceptionUrl:Mkn,networkOverrideFunc:Zye}};async function fFe(e,{modelProviders:t,archived:n=!1,sourceKinds:r=te}){let i=[],a=async o=>{let s={limit:100,cursor:o,sortKey:e.recentConversationsSortKey,modelProviders:t,sourceKinds:r,archived:n,useStateDbOnly:!0},c=await e.sendRequest(`thread/list`,s,{priority:`background`,source:`thread_list`});i.push(...c.data),c.nextCursor&&await a(c.nextCursor)};return await a(null),i}class Store{fetchedRecentConversations=!1;recentConversationSortKey=`recency_at`;async runRecentConversationRefresh(e,t){let n=e!==this.recentConversationSortKey;this.recentConversationSortKey=e;let r=this.params.getHistoryLimit?.()??50;if(r===0)return;let i=(t===`expanded`||n)&&r>50,a=i?r:50,o=performance.now(),s=await this.listRecentThreads({limit:i?Math.min(a,100):a,cursor:null,background:i});if(s.data.length<a&&s.nextCursor!=null){let e=[...s.data],t=new Set,n=s.nextCursor;for(;e.length<a&&n!=null&&!t.has(n);){t.add(n);let r=await this.listRecentThreads({limit:Math.min(a-e.length,100),cursor:n,background:i});e.push(...r.data.slice(0,a-e.length)),n=r.nextCursor}s={...s,data:e,nextCursor:n}}this.fetchedRecentConversations=!0;let c=s.data;if(i){let e=c;c=e.slice(0,50)}return c}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return fFe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return this.listAllThreads({modelProviders:null,archived:!0})}getThreadSummaryFromThread(e){return{conversationId:e.id,hostId:`local`,createdAt:e.createdAt,updatedAt:e.updatedAt,recencyAt:e.recencyAt,title:e.title,cwd:e.cwd}}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:te,useStateDbOnly:!0},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return i}}class Manager{getHostId(){return`local`}async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}addAnyConversationMetaCallback(){return()=>{}}}function e6e(){return t6e(`recent-conversations`)}function zGe(e,t){return e&&t?0:e?500:50}async function fg(e,t,n){e.removeConversationFromCache(t),e.broadcastThreadArchived({hostId:e.hostId,conversationId:t,cwd:n}).catch(()=>{})}';
 const split26721FeatureGateText = 'function nT(e,t){return e?.find(e=>e.model===t)}function EHe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=e?nT(n?.models,e):n?.defaultModel??nT(n?.models,`gpt-5.5`),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?r.model:e??`gpt-5.5`,reasoningEffort:a??t??n?.defaultModel?.defaultReasoningEffort??`medium`,profile:null,isLoading:!1}}function normalizeReasoningConfig(m){let C=m?.model??null,w=m?.model_reasoning_effort===`ultra`?null:m?.model_reasoning_effort??null,T;return{model:C,reasoningEffort:w}}function persistReasoningEffort(t,i,a,r,lT,o,p,Vne,n,N){let s=i;if(a[0]==="default"&&i===`ultra`){let e=r.getQueryData(lT(o,p))?.model_reasoning_effort??null;s=e===`ultra`?null:e}return Vne(n,a,{model:t,reasoningEffort:s},()=>N(t,s))}function bR(){return Bm(`1221508807`)}function featureWatch(t,m,n){let h=t(mp,`1221508807`),g=m.getHostId();let r=t(mp,`1221508807`);r&&t(Dkt,n.getHostId());return h||g||r}';
 const split26721PowerText = 'var K6e=[`minimal`,`low`,`medium`,`high`,`xhigh`,`max`];function vA(e){return e===`low`||e===`medium`||e===`high`||e===`xhigh`||e===`max`||e===`ultra`}function XZ(e,t){let n=e?.find(e=>e.model===t);return n==null?K6e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>vA(e.reasoningEffort))}function KNt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=XNt((t?[...XW,QNt]:XW).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=XNt($Nt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function XNt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var XW=[{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],QNt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},$Nt=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-terra:medium`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`medium`},{id:`gpt-5.6-terra:high`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`high`}];class FeatureStore{done(e){return this.scope!=null&&Wc(this.scope,`1221508807`)&&rke(this.a,this.b).has(e)}activity(e){this.scope!=null&&Wc(this.scope,`1221508807`)&&ike(e)&&this.subagentTopology.discover(e)}}var $Ze=new Set,eQe=H($,(e,{get:t})=>{if(!t(zc,`1221508807`))return $Ze;t(gKe);let n=t(jS,e);return n==null?$Ze:rke(t(zS,e),n.getCachedConversations())});function sRt(e,t){return QLt(e,{isBackgroundSubagentsEnabled:Wc(e,`1221508807`),sourceConversationId:t})}function subagentPanel(){let u=rs(zc,`1221508807`),d;return u}';
+const header26727Text = [
+  'import{A as Q}from"./app-initial-server26727.js";import{x as y}from"./app-initial-main26727.js";',
+  'function Yn(){let s=be(),{authMethod:c}=re(),u=fe(),d=oe(er),{data:f}=v(),p=wt(),x=null;return f}',
+  'function Rn(e){let d=be(),f=gt(),{authMethod:p}=re(),r=e.localConversations,n=e.cloudtasksQuery,S=null,v=null,i=null;let T=r.filter(w),E=Mn(n.data,r,S),te=E;return te.map(e=>(0,Z.jsx)(qn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&v===e.conversation.id,onClose:i,onActiveArchiveStart:f},e.key))}',
+  'const recentMenuHeight={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
+  'var messages={recentTasksMenu:1,search:{defaultMessage:`Search recent chats`}};function zn(e){return e.kind===`remote`}function Bn(){}',
+  'var qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(23),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e=null,l;return t[17]!==r||t[18]!==n.conversation.id||t[19]!==a||t[20]!==i||t[21]!==e?(l=(0,Z.jsx)(nt,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.id,t[19]=a,t[20]=i,t[21]=e,t[22]=l):l=t[22],l}}});',
+  'const nativeScrollHeight={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`};',
+  'const nativeMenu=(0,Z.jsx)(N,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:W,open:p,onOpenChange:h,children:G});',
+].join('');
+const split26727AppMainText = 'function KB(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function BVe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,type:`subagent-activity`,w,n}}var app=`untitledThreadLabel conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{KB as KB};';
+const split26727AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return OBe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function Xtt(){return Ztt(`recent-conversations`)}function MQ(e,t){let n=e?.find(e=>e.model===t);return n==null?Qnt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>Uk(e.reasoningEffort))}function FUt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=zUt((t?[...yG,VUt]:yG).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function zUt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var yG=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],VUt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`};var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;var qQ={};export{qQ as qQ};';
 
 function createTarget() {
   const dir = tempDir('codex-patch');
@@ -85,6 +97,17 @@ function configure26721Features(target) {
   fs.appendFileSync(target.appStatsigPath, split26721PowerText);
 }
 
+function configure26727Features(target) {
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.727.40816';
+  target.appStatsigPath = target.appServerManagerSignalsPath;
+  fs.writeFileSync(target.headerPath, header26727Text);
+  fs.writeFileSync(target.appMainPath, split26727AppMainText);
+  fs.writeFileSync(target.appServerManagerSignalsPath, split26727AppServerText);
+  fs.writeFileSync(path.join(assets, 'app-initial-main26727.js'), split26727AppMainText);
+  fs.writeFileSync(path.join(assets, 'app-initial-server26727.js'), split26727AppServerText);
+}
+
 function restoreSafe26721Layout(text) {
   return text
     .replace('(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:b,onClose:i,row:Jn,onActiveArchiveStart:p})', 'codexRecentTaskProjectRows(F,b,i,Jn,p)')
@@ -93,14 +116,22 @@ function restoreSafe26721Layout(text) {
     .replace('vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1', 'vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1');
 }
 
+function restoreSafe26721TitleOverride(text) {
+  const override = 'titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0,';
+  return text.replace(override, '');
+}
+
 function restoreSafe26721NativeHistory(text) {
-  return text
+  return restoreSafe26721TitleOverride(text)
     .replace('o=_e(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:s}=m(),c=fe(),l=ye(tr),{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),', 'o=_e(),{authMethod:s}=m(),c=fe(),l=ye(tr),{data:d}=ee(),')
     .replace('d=_e(),p=At(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,', 'd=_e(),p=At(),')
     .replace('let E=codexRecentTaskRootReady?codexRecentConversationFilter(r.filter(T),codexRecentTaskCurrentRoot):[],D=codexRecentTaskRootReady?codexRecentTaskFilter(Nn(n.data,r,w),codexRecentTaskCurrentRoot):[],', 'let E=r.filter(T),D=Nn(n.data,r,w),')
     .replace(',eR as codexUseExecutionTarget}from"./app-initial-DZH_C2c-.js"', '}from"./app-initial-DZH_C2c-.js"')
     .replace(/function codexRecentTaskFilter\(e,t\)\{[\s\S]*?\}function codexRecentConversationFilter/, 'function codexRecentTaskFilter(e,t){return e}function codexRecentConversationFilter')
     .replace(/function codexRecentConversationFilter\(e,t\)\{[\s\S]*?\}function codexRecentTaskNormalizePath/, 'function codexRecentConversationFilter(e,t){return e}function codexRecentTaskNormalizePath')
+    .replace('(0,Wn.c)(24)', '(0,Wn.c)(23)')
+    .replace('||t[23]!==n.conversation.title', '')
+    .replace('t[21]=e,t[23]=n.conversation.title,t[22]=l', 't[21]=e,t[22]=l')
     .replace('(0,Z.jsx)(Fe,{conversationId:n.conversation.id,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})', '(0,Z.jsx)(Fe,{conversationId:n.conversation.id,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})');
 }
 
@@ -163,6 +194,139 @@ module.exports = {
           fs.writeFileSync(change.path, change.nextText);
         }
         assert.strictEqual(engine.plan(target, { version: 1, conversations: { abc: { title: '本地标题', group: '需求A', projectRoot: '/p' } } }).changes.length, 0);
+      },
+    },
+    {
+      name: 'adapts Codex 26.727 split bundles with project history and Sol Max Ultra',
+      run() {
+        const target = createTarget();
+        configure26727Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true, responsesWebsocketFallbackProvider: 'newapi' });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath]);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=15'));
+        assert.ok(header.includes('codexRecentTaskRootReady?codexRecentConversationFilter'));
+        assert.ok(header.includes('contentStyle:{height:`600px`,overflow:`hidden`}'));
+        assert.ok(header.includes('(0,Wn.useState)(0)'));
+        assert.ok(main.includes('codexLocalGroupsCodexUi26727PatchVersion=3'));
+        assert.ok(server.includes('codexLocalGroupsProjectHistory26727PatchVersion=5'));
+        assert.ok(server.includes('codexLocalGroupsPower26727PatchVersion=3'));
+        assert.ok(!plan.changes.find((change) => change.path === target.extensionJsPath).nextText.includes('supports_websockets=false'));
+        const mainScript = `${main.replace(/export\{[^}]+\};?/, '')};let models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'},{model:'gpt-5.6-terra',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'}];console.log(JSON.stringify({sol:BVe({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,terra:BVe({userSavedModelString:'gpt-5.6-terra',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort}))`;
+        const mainResult = childProcess.spawnSync(resolveNodePath(), ['-e', mainScript], { encoding: 'utf8' });
+        assert.strictEqual(mainResult.status, 0, mainResult.stderr);
+        assert.deepStrictEqual(JSON.parse(mainResult.stdout), { sol: 'max', terra: 'high' });
+        const serverScript = `function Uk(){return true}function Fy(e){return{updatedAt:e.updatedAt??0}}function Eh(e){return{id:e.conversationId??e.id,cwd:e.cwd}}var Qnt=[];${server.replace(/export\{[^}]+\};?/, '')};(async()=>{let efforts=value=>value.map(reasoningEffort=>({description:'',reasoningEffort})),models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh'])},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low'])}],pages={first:{data:[{id:'root',cwd:'/project',updatedAt:3},{id:'other',cwd:'/project2',updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',updatedAt:1}],nextCursor:null}},store={threadsById:new Map,listRecentThreads:({cursor})=>Promise.resolve(cursor==null?pages.first:pages.next),getThreadSummaryFromThread:e=>({conversationId:e.id,cwd:e.cwd,updatedAt:e.updatedAt}),shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations26727(store,'/project');console.log(JSON.stringify({power:FUt(models).map(e=>e.reasoningEffort),sol:MQ(models,'gpt-5.6-sol').map(e=>e.reasoningEffort),terra:MQ(models,'gpt-5.6-terra').map(e=>e.reasoningEffort),project:project.map(e=>e.id)}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { power: ['low', 'xhigh', 'max', 'ultra'], sol: ['xhigh', 'max', 'ultra'], terra: ['low'], project: ['root', 'child'] });
+        for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }), { changes: [], errors: [], unsafeBundles: [] });
+      },
+    },
+    {
+      name: 'disables Responses WebSocket for a custom provider on affected Codex',
+      run() {
+        const target = createTarget();
+        target.version = '26.721.41059';
+        fs.writeFileSync(target.headerPath, header26721Text);
+        fs.writeFileSync(target.appServerManagerSignalsPath, split26721AppServerText);
+        configure26721Features(target);
+        fs.writeFileSync(path.join(path.dirname(target.headerPath), 'app-initial-DZH_C2c-.js'), 'function sT(e){return{activeWorkspaceRoot:`/xixian`,isActiveWorkspaceRootLoading:false}}const m=1;export{sT as eR,m as qQ};');
+        const current = fs.readFileSync(target.extensionJsPath, 'utf8').replace(
+          'kle(this.extensionUri,"app-server",["--analytics-default-enabled"])',
+          'Cde(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled"])',
+        );
+        fs.writeFileSync(target.extensionJsPath, current);
+        const engine = new CodexPatchEngine({
+          nodePath: process.execPath,
+          skipSyntaxCheck: true,
+          safeMode: true,
+          responsesWebsocketFallbackProvider: 'newapi',
+        });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(extension.includes('"-c","model_providers.newapi.supports_websockets=false"'));
+        assert.ok(!extension.includes('"--disable","plugins"'));
+        for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        assert.strictEqual(engine.plan(target, { version: 1, conversations: {} }).changes.length, 0);
+      },
+    },
+    {
+      name: 'does not add the WebSocket fallback outside the affected version',
+      run() {
+        const target = createTarget();
+        target.version = '26.720.1';
+        const engine = new CodexPatchEngine({
+          nodePath: process.execPath,
+          skipSyntaxCheck: true,
+          safeMode: true,
+          responsesWebsocketFallbackProvider: 'newapi',
+        });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(!extension.includes('supports_websockets=false'));
+      },
+    },
+    {
+      name: 'updates the Responses WebSocket fallback when the provider changes',
+      run() {
+        const target = createTarget();
+        target.version = '26.721.41059';
+        fs.writeFileSync(target.headerPath, header26721Text);
+        fs.writeFileSync(target.appServerManagerSignalsPath, split26721AppServerText);
+        configure26721Features(target);
+        fs.writeFileSync(path.join(path.dirname(target.headerPath), 'app-initial-DZH_C2c-.js'), 'function sT(e){return{activeWorkspaceRoot:`/xixian`,isActiveWorkspaceRootLoading:false}}const m=1;export{sT as eR,m as qQ};');
+        const current = fs.readFileSync(target.extensionJsPath, 'utf8').replace('kle(this.extensionUri,"app-server",["--analytics-default-enabled"])', 'Cde(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled"])');
+        fs.writeFileSync(target.extensionJsPath, current);
+        const first = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true, responsesWebsocketFallbackProvider: 'oldapi' });
+        for (const change of first.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const next = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true, responsesWebsocketFallbackProvider: 'newapi' });
+        const plan = next.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(extension.includes('model_providers.newapi.supports_websockets=false'));
+        assert.ok(!extension.includes('model_providers.oldapi.supports_websockets=false'));
+      },
+    },
+    {
+      name: 'removes a stale Responses WebSocket fallback without a custom provider',
+      run() {
+        const target = createTarget();
+        target.version = '26.721.41059';
+        fs.writeFileSync(target.headerPath, header26721Text);
+        fs.writeFileSync(target.appServerManagerSignalsPath, split26721AppServerText);
+        configure26721Features(target);
+        fs.writeFileSync(path.join(path.dirname(target.headerPath), 'app-initial-DZH_C2c-.js'), 'function sT(e){return{activeWorkspaceRoot:`/xixian`,isActiveWorkspaceRootLoading:false}}const m=1;export{sT as eR,m as qQ};');
+        const current = fs.readFileSync(target.extensionJsPath, 'utf8').replace('kle(this.extensionUri,"app-server",["--analytics-default-enabled"])', 'Cde(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled","-c","model_providers.oldapi.supports_websockets=false"])');
+        fs.writeFileSync(target.extensionJsPath, current);
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(!extension.includes('supports_websockets=false'));
+        assert.ok(extension.includes('Cde(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled"])'));
+      },
+    },
+    {
+      name: 'fails closed for duplicate Responses WebSocket fallbacks',
+      run() {
+        const target = createTarget();
+        target.version = '26.721.41059';
+        const duplicate = 'Cde(this.extensionUri,["-c","features.code_mode_host=true","app-server","--analytics-default-enabled","-c","model_providers.oldapi.supports_websockets=false","-c","model_providers.newapi.supports_websockets=false"])';
+        const current = fs.readFileSync(target.extensionJsPath, 'utf8').replace('kle(this.extensionUri,"app-server",["--analytics-default-enabled"])', duplicate);
+        fs.writeFileSync(target.extensionJsPath, current);
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true, responsesWebsocketFallbackProvider: 'newapi' });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('extension resumed thread websocket fallback: 检测到 2 个 transport 覆盖'));
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(extension.includes('model_providers.oldapi.supports_websockets=false'));
+        assert.ok(extension.includes('model_providers.newapi.supports_websockets=false'));
       },
     },
     {
@@ -724,7 +888,6 @@ module.exports = {
         fs.writeFileSync(target.headerPath, header26721Text);
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
         const plan = engine.plan(target, { version: 1, conversations: {} });
-        assert.deepStrictEqual(plan.errors, []);
         const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
         const items = Array.from({ length: 2000 }, (_, index) => ({ kind: 'local', key: `id${index + 1}`, conversation: { id: `id${index + 1}`, cwd: '/wms' } }));
         const legacy = JSON.stringify({ '/wms::未分组': true });
@@ -749,6 +912,7 @@ module.exports = {
         fs.writeFileSync(target.headerPath, header26721Text);
         const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
         const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
         const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
         const items = [
           { kind: 'local', key: 'wms-1', conversation: { id: 'wms-1', cwd: '/work/WMS' } },
@@ -825,7 +989,7 @@ module.exports = {
         assert.ok(plan.unsafeBundles.length > 0);
         const report = safe.apply(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(report.errors, []);
-        assert.ok(fs.readFileSync(target.headerPath, 'utf8').includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(fs.readFileSync(target.headerPath, 'utf8').includes('codexLocalGroupsHeaderSafePatchVersion=14'));
         const extension = fs.readFileSync(target.extensionJsPath, 'utf8');
         assert.ok(!extension.includes('c.cwd=s'));
         assert.ok(!extension.includes('c.cwds=s'));
@@ -1091,7 +1255,7 @@ module.exports = {
         const plan = engine.plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(plan.errors, []);
         const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
-        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=14'));
         assert.ok(header.includes('eR as codexUseExecutionTarget'));
         assert.ok(header.includes('codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null'));
         assert.ok(header.includes('{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)'));
@@ -1120,6 +1284,35 @@ module.exports = {
         const ids = run26721HeaderRows(header, items, '/wms');
         assert.deepStrictEqual(ids, ['wms']);
         for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        assert.strictEqual(engine.plan(target, { version: 1, conversations: {} }).changes.length, 0);
+      },
+    },
+    {
+      name: 'refreshes the 26.721 dropdown row after setting a local title',
+      run() {
+        const target = createTarget();
+        target.version = '26.721.41059';
+        configure26721Features(target);
+        fs.writeFileSync(path.join(path.dirname(target.headerPath), 'app-initial-DZH_C2c-.js'), 'const m=1;export{m as eR,m as qQ};');
+        fs.writeFileSync(target.headerPath, header26721Text);
+        const engine = new CodexPatchEngine({ nodePath: process.execPath, skipSyntaxCheck: true, safeMode: true });
+        const firstPlan = engine.plan(target, { version: 1, conversations: {} });
+        for (const change of firstPlan.changes) fs.writeFileSync(change.path, change.nextText);
+        const current = fs.readFileSync(target.headerPath, 'utf8');
+        const stale = restoreSafe26721TitleOverride(current)
+          .replace('codexLocalGroupsHeaderSafePatchVersion=14', 'codexLocalGroupsHeaderSafePatchVersion=13');
+        fs.writeFileSync(target.headerPath, stale);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [target.headerPath]);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const start = header.indexOf('var Jn=');
+        const end = header.indexOf(';const nativeScrollHeight', start) + 1;
+        const script = `const vm=require('vm'),cache=[],nativeTitle='原标题',Fe=props=>{let override=props.titleOverride;if(typeof override!==\`string\`&&override!=null)return override.props.children;return nativeTitle??props.threadSummary?.title??override?.trim()??'New chat'},context={Gn:{memo:e=>e},Wn:{c:()=>cache},Z:{Fragment:'fragment',jsx:(type,props)=>type===Fe?Fe(props):{type,props}},Fe,codexLocalGroupsLocalTitle:e=>e.conversation.title};vm.createContext(context);vm.runInContext(${JSON.stringify(header.slice(start, end))},context);const common={kind:'local',id:'one'},onClose=()=>{},first=context.Jn({item:{...common,conversation:{id:'one',title:'原标题'}},isActive:false,onClose}),second=context.Jn({item:{...common,conversation:{id:'one',title:'新标题'}},isActive:false,onClose});console.log(JSON.stringify([first,second]));`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+        assert.strictEqual(result.stdout.trim(), '["原标题","新标题"]');
+        fs.writeFileSync(target.headerPath, header);
         assert.strictEqual(engine.plan(target, { version: 1, conversations: {} }).changes.length, 0);
       },
     },
@@ -1155,11 +1348,11 @@ module.exports = {
           .replace('let E=r.filter(T),D=Nn(n.data,r,w),', 'let E=codexRecentConversationFilter(r.filter(T),codexRecentTaskCurrentRoot),D=codexRecentTaskFilter(Nn(n.data,r,w),codexRecentTaskCurrentRoot),')
           .replace('d=_e(),p=At(),', 'd=_e(),p=At(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??codexRecentTaskTarget.cwd??null,')
           .replace('}from"./app-initial-DZH_C2c-.js"', ',eR as codexUseExecutionTarget}from"./app-initial-DZH_C2c-.js"')
-          .replace('codexLocalGroupsHeaderSafePatchVersion=12', 'codexLocalGroupsHeaderSafePatchVersion=7');
+          .replace('codexLocalGroupsHeaderSafePatchVersion=14', 'codexLocalGroupsHeaderSafePatchVersion=7');
         fs.writeFileSync(target.headerPath, liveV7);
         const upgrade = engine.plan(target, { version: 1, conversations: {} });
         const header = upgrade.changes.find((change) => change.path === target.headerPath).nextText;
-        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=14'));
         assert.ok(header.includes('codexRecentTaskRootReady?codexRecentConversationFilter'));
         assert.ok(header.includes('function codexRecentTaskFilter(e,t){let n=codexRecentTaskNormalizePath(t);'));
         assert.ok(header.includes('function codexRecentConversationFilter(e,t){let n=codexRecentTaskNormalizePath(t);'));
@@ -1168,7 +1361,7 @@ module.exports = {
       },
     },
     {
-      name: 'fails closed when safe-v12 history height and group row-limit postconditions are incomplete',
+      name: 'fails closed when safe-v14 history height and group row-limit postconditions are incomplete',
       run() {
         const target = createTarget();
         target.version = '26.721.41059';
@@ -1182,12 +1375,12 @@ module.exports = {
         const partial = fs.readFileSync(target.headerPath, 'utf8').replace('vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1', 'vertical-scroll-fade-mask flex min-h-0 flex-col gap-0 overflow-y-auto pb-1');
         fs.writeFileSync(target.headerPath, partial);
         const second = engine.plan(target, { version: 1, conversations: {} });
-        assert.ok(second.errors.includes('header 26.721 current project history: 补丁标记不完整'));
+        assert.ok(second.errors.includes('header 26.721 local title override: 补丁标记不完整'));
         assert.ok(!second.changes.some((change) => change.path === target.headerPath));
       },
     },
     {
-      name: 'fails closed when safe-v12 group row refresh or active retention drifts',
+      name: 'fails closed when safe-v14 group row refresh or active retention drifts',
       run() {
         const drifts = [
           ['window.addEventListener(`codex-local-groups-refresh`,e)', 'window.addEventListener(`broken`,e)'],
@@ -1205,6 +1398,9 @@ module.exports = {
           ['function codexLocalGroupsProjectKey(e){let t=codexRecentTaskNormalizePath(codexLocalGroupsProjectRoot(e));return t||`${e.kind}:${codexLocalGroupsProjectLabel(e)}`}', 'function codexLocalGroupsProjectKey(e){return `shared`}'],
           ['function codexLocalGroupsConversationProjectRoot(e,t){let n=codexRecentTaskNormalizePath(t);if(n)return n;', 'function codexLocalGroupsConversationProjectRoot(e,t){let n=codexRecentTaskNormalizePath(t);if(!n)return n;'],
           ['sticky top-0 z-10 bg-token-dropdown-background', 'bg-token-dropdown-background'],
+          ['Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),', 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(23),'],
+          ['t[23]!==n.conversation.title', 't[23]===n.conversation.title'],
+          ['titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0', 'titleOverride:void 0'],
         ];
         for (const [before, after] of drifts) {
           const target = createTarget();
@@ -1221,13 +1417,13 @@ module.exports = {
           assert.notStrictEqual(partial, complete);
           fs.writeFileSync(target.headerPath, partial);
           const second = engine.plan(target, { version: 1, conversations: {} });
-          assert.ok(second.errors.includes('header 26.721 current project history: 补丁标记不完整'), `${before}: ${JSON.stringify(second.errors)}`);
+          assert.ok(second.errors.includes('header 26.721 local title override: 补丁标记不完整'), `${before}: ${JSON.stringify(second.errors)}`);
           assert.ok(!second.changes.some((change) => change.path === target.headerPath));
         }
       },
     },
     {
-      name: 'upgrades safe-v8 header to safe-v12 per-group limits',
+      name: 'upgrades safe-v8 header to safe-v14 per-group limits',
       run() {
         const target = createTarget();
         target.version = '26.721.41059';
@@ -1246,12 +1442,12 @@ module.exports = {
           .replace(/function codexLocalGroupsGroupLimit[\s\S]*?function codexLocalGroupsVisibleItems/, 'function codexLocalGroupsVisibleItems')
           .replace(/function codexLocalGroupsVisibleItems\(e,t,n,r\)\{[\s\S]*?\}function codexRecentTaskProjectRows/, 'function codexLocalGroupsVisibleItems(e,t,n,r){return e}function codexRecentTaskProjectRows')
           .replace(/,s&&\(h\|\|l\|\|c>0\)\?\(0,Z\.jsxs\)\(`div`,\{[\s\S]*?\},`group-more-`\+r\+`-`\+a\+`-`\+i\.label\):null/, '')
-          .replace('codexLocalGroupsHeaderSafePatchVersion=12', 'codexLocalGroupsHeaderSafePatchVersion=8');
+          .replace('codexLocalGroupsHeaderSafePatchVersion=14', 'codexLocalGroupsHeaderSafePatchVersion=8');
         fs.writeFileSync(target.headerPath, liveV8);
         const upgrade = engine.plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(upgrade.errors, []);
         const header = upgrade.changes.find((change) => change.path === target.headerPath).nextText;
-        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=14'));
         assert.ok(header.includes('codexLocalGroupsGroupLimit'));
         assert.ok(header.includes('group-more-'));
         assert.ok(header.includes('codex-local-groups-visible-counts-v1'));
@@ -1260,7 +1456,7 @@ module.exports = {
       },
     },
     {
-      name: 'upgrades live safe-v9 group limits to safe-v12 incremental group limits',
+      name: 'upgrades live safe-v9 group limits to safe-v14 incremental group limits',
       run() {
         const target = createTarget();
         target.version = '26.721.41059';
@@ -1287,13 +1483,13 @@ module.exports = {
         const upgrade = safe.plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(upgrade.errors, []);
         const header = upgrade.changes.find((change) => change.path === target.headerPath).nextText;
-        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=14'));
         assert.ok(header.includes('codexLocalGroupsGroupLimit'));
         assert.ok(header.includes('group-more-'));
       },
     },
     {
-      name: 'upgrades safe-v5 header to current-project-safe v12',
+      name: 'upgrades safe-v5 header to current-project-safe v14',
       run() {
         const target = createTarget();
         target.version = '26.721.41059';
@@ -1305,13 +1501,13 @@ module.exports = {
         const first = engine.plan(target, { version: 1, conversations: {} });
         const patched = first.changes.find((change) => change.path === target.headerPath).nextText;
         const legacy = restoreSafe26721NativeHistory(restoreSafe26721Layout(patched))
-          .replace('codexLocalGroupsHeaderSafePatchVersion=12', 'codexLocalGroupsHeaderSafePatchVersion=5');
+          .replace('codexLocalGroupsHeaderSafePatchVersion=14', 'codexLocalGroupsHeaderSafePatchVersion=5');
         fs.writeFileSync(target.headerPath, legacy);
         for (const change of first.changes) if (change.path !== target.headerPath) fs.writeFileSync(change.path, change.nextText);
         const upgrade = engine.plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(upgrade.errors, []);
         const header = upgrade.changes.find((change) => change.path === target.headerPath).nextText;
-        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=12'));
+        assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=14'));
         assert.ok(header.includes('contentStyle:{height:`600px`,overflow:`hidden`}'));
         assert.ok(header.includes('codexUseExecutionTarget'));
         assert.ok(header.includes('codexRecentTaskRootReady?codexRecentConversationFilter'));

@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.0.49 - 2026-07-31
+
+### Compatibility
+- 适配 `openai.chatgpt@26.727.40816` 的新 Header、App Server、Power Picker 和 Reasoning bundle 锚点。
+- Safe Header marker 升级到 v15，项目历史 marker 升级到 v5，保留当前窗口项目隔离、每组 5/+10/15/5、600px 菜单和本地标题即时刷新。
+- 新版 Codex 已原生启用子 agent 链路；仅补齐 5.6 Sol 的 Max/Ultra Power 与 Reasoning 选项，并保留设置校验结果。
+
+### Safety
+- `26.721.41059` 专用 Responses WebSocket HTTP fallback 不扩展到 `26.727.40816`。
+- 新增 `26.727` split bundle、Max/Ultra 行为、幂等和 verifier 回归；未验证的后续 minor 版本继续 fail closed。
+
+## v0.0.48 - 2026-07-28
+
+### Fixed
+- 为 `openai.chatgpt@26.721.41059` 恢复压缩历史时丢失原生工具的问题增加 HTTP fallback。
+- 对可确认的自定义 provider，在 app-server 启动参数中覆盖 `supports_websockets=false`；不写入用户 `config.toml`。
+- 修正 v0.0.47 标题刷新补丁：最近会话原生状态中的原标题优先于 `threadSummary`，现改用非字符串 `titleOverride` 显示本地标题。
+
+### Safety
+- 仅处理顶层、安全格式的自定义 provider ID；配置缺失、内置 provider 或其他 Codex 版本保持原行为。
+- 不伪造 `exec` / `apply_patch` 工具定义，不修改权限、sandbox、MCP 或 plugins。
+
+## v0.0.47 - 2026-07-28
+
+### Fixed
+- 修复设置本地标题后，Codex 26.721 最近会话下拉仍复用原标题的问题。
+- 将 `conversation.title` 加入本地会话行的 React compiler cache 依赖，保存后的 metadata 刷新可立即重建原生会话行。
+
+### Compatibility
+- Safe Header marker 升级到 v13，支持 live safe-v12 原地升级；标题依赖、缓存槽和写入后置条件缺失时 fail closed。
+
 ## v0.0.46 - 2026-07-26
 
 ### Fixed

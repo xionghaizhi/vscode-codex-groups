@@ -1,5 +1,6 @@
 const tests = [
   require('./metadata-store.test'),
+  require('./codex-config.test'),
   require('./locator.test'),
   require('./package-json.test'),
   require('./extension.test'),
