@@ -123,6 +123,8 @@ function main() {
     assertNotContains(target.appStatsigPath, '1221508807');
   }
   if (is26727) {
+    assertContains(target.headerPath, 'N0 as codexLocalGroupsMessengerImport');
+    assertNotContains(target.headerPath, 'qQ as codexLocalGroupsMessengerImport');
     assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsProjectHistory26727PatchVersion=5');
     assertContains(target.appServerManagerSignalsPath, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations26727(this,e)}');
     assertContains(target.appServerManagerSignalsPath, 'typeof e.addThreadArchivedListener===`function`');

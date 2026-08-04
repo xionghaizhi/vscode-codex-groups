@@ -687,30 +687,9 @@ function patchSidebarProjectGroupSignals(text, context) {
 }
 
 function patchHeader(text, context, file) {
-  let next = text;
-  if (!findVscodeMessengerAlias(next)) {
-    const vscodeImport = next.match(/import\{[^}]+\}from"(\.\/vscode-api-[^"]+\.js)";/);
-    const appInitialImports = matchingAppInitialImports(next, file, (appText) => {
-      const exportsText = appText.slice(appText.lastIndexOf('export{'));
-      return /(?:^|[,{}])(?:[A-Za-z_$][\w$]* as )?qQ(?=[,}])/.test(exportsText);
-    });
-    if (appInitialImports.length > 1) {
-      context.errors.push(`header: qQ messenger 候选模块数量为 ${appInitialImports.length}`);
-      return text;
-    }
-    const appInitialImport = appInitialImports[0];
-    if (appInitialImport && !next.includes('qQ as codexLocalGroupsMessengerImport')) {
-      const importText = appInitialImport.importText.replace('}from', ',qQ as codexLocalGroupsMessengerImport}from');
-      next = replaceOnce(next, appInitialImport.importText, importText, context, 'header messenger import current');
-    } else if (!vscodeImport) {
-      const hasAppInitialImport = /import\{[^}]+\}from"\.\/app-initial-[^"]+\.js";/.test(next);
-      context.errors.push(hasAppInitialImport ? 'header: app-initial 未导出 qQ messenger' : 'header: 找不到 vscode-api import 插入点');
-      return text;
-    } else {
-      const importText = `import{f as codexLocalGroupsMessengerImport}from"${vscodeImport[1]}";`;
-      next = `${next.slice(0, vscodeImport.index + vscodeImport[0].length)}${importText}${next.slice(vscodeImport.index + vscodeImport[0].length)}`;
-    }
-  }
+  const errorCount = context.errors.length;
+  let next = addVscodeMessengerImport(text, context, file);
+  if (context.errors.length > errorCount) return text;
   if (context.safeMode && context.codexMinor === 727 && next.includes('codexLocalGroupsHeaderSafePatchVersion=15')) {
     if (!safeHeader26727PostconditionsHold(next)) context.errors.push('header 26.727: 补丁标记不完整');
     return patchHeaderMetadataLiteral(next);
@@ -1467,6 +1446,43 @@ function addExecutionTargetImport(text, context, file) {
   return `${text.slice(0, match.index + match[0].length)}${importText}${text.slice(match.index + match[0].length)}`;
 }
 
+function addVscodeMessengerImport(text, context, file) {
+  const candidates = matchingAppInitialImports(text, file, (appText) => findVscodeMessengerExports(appText).length > 0);
+  if (candidates.length > 1) { context.errors.push(`header: VS Code messenger 候选模块数量为 ${candidates.length}`); return text; }
+  if (candidates.length === 1) {
+    const exports = findVscodeMessengerExports(candidates[0].moduleText);
+    if (exports.length !== 1) { context.errors.push(`header: VS Code messenger 导出数量为 ${exports.length}`); return text; }
+    const binding = `${exports[0]} as codexLocalGroupsMessengerImport`;
+    const current = candidates[0].importText;
+    const nextImport = current.includes(' as codexLocalGroupsMessengerImport')
+      ? current.replace(/([,{])[A-Za-z_$][\w$]* as codexLocalGroupsMessengerImport(?=[,}])/, `$1${binding}`)
+      : current.replace('}from', `,${binding}}from`);
+    return nextImport === current ? text : replaceOnce(text, current, nextImport, context, 'header messenger import current');
+  }
+  if (context.codexMinor === 727) { context.errors.push('header: app-initial 未导出 VS Code messenger'); return text; }
+  if (findVscodeMessengerAlias(text)) return text;
+  const vscodeImport = text.match(/import\{[^}]+\}from"(\.\/vscode-api-[^"]+\.js)";/);
+  const legacy = matchingAppInitialImports(text, file, (appText) => /(?:^|[,{}])(?:[A-Za-z_$][\w$]* as )?qQ(?=[,}])/.test(appText.slice(appText.lastIndexOf('export{'))));
+  if (legacy.length > 1) { context.errors.push(`header: qQ messenger 候选模块数量为 ${legacy.length}`); return text; }
+  if (legacy.length === 1) return replaceOnce(text, legacy[0].importText, legacy[0].importText.replace('}from', ',qQ as codexLocalGroupsMessengerImport}from'), context, 'header messenger import legacy');
+  if (!vscodeImport) { context.errors.push(/import\{[^}]+\}from"\.\/app-initial-[^"]+\.js";/.test(text) ? 'header: app-initial 未导出 qQ messenger' : 'header: 找不到 vscode-api import 插入点'); return text; }
+  const importText = `import{f as codexLocalGroupsMessengerImport}from"${vscodeImport[1]}";`;
+  return `${text.slice(0, vscodeImport.index + vscodeImport[0].length)}${importText}${text.slice(vscodeImport.index + vscodeImport[0].length)}`;
+}
+
+function findVscodeMessengerExports(text) {
+  const exportStart = text.lastIndexOf('export{');
+  if (exportStart < 0) return [];
+  const exports = [];
+  const entries = text.slice(exportStart).matchAll(/(?:^|[,{}])([A-Za-z_$][\w$]*) as ([A-Za-z_$][\w$]*)(?=[,}])/g);
+  for (const entry of entries) {
+    const local = entry[1];
+    const singleton = new RegExp(`(?:^|[^\\w$])${escapeRegex(local)}=[A-Za-z_$][\\w$]*\\.getInstance\\(\\)`).test(text);
+    if (singleton && text.includes(`${local}.dispatchMessage(`) && text.includes(`${local}.dispatchHostMessage(`)) exports.push(entry[2]);
+  }
+  return exports;
+}
+
 function findExecutionTargetExports(text) {
   const hooks = new Set();
   const pattern = /function ([A-Za-z_$][\w$]*)\([A-Za-z_$][\w$]*\)\{(?:(?!function )[\s\S]){0,1800}?isActiveWorkspaceRootLoading:/g;
@@ -2127,7 +2143,7 @@ function findAsset(dir, prefix, suffix, context) {
 }
 
 function findVscodeMessengerAlias(text) {
-  if (text.includes('qQ as codexLocalGroupsMessengerImport') || text.includes('f as codexLocalGroupsMessengerImport')) {
+  if (text.includes(' as codexLocalGroupsMessengerImport')) {
     return 'codexLocalGroupsMessengerImport';
   }
   const imports = text.matchAll(/import\{([^}]+)\}from"\.\/vscode-api-[^"]+\.js";/g);

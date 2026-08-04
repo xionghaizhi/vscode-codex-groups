@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.49-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.50-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.49
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.50
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.49
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.50
 ```
 
 Then in VSCode:
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.49.vsix
+code --install-extension vscode-codex-groups-0.0.50.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -209,7 +209,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.49
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.50
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -251,9 +251,9 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 - Broken after a Codex upgrade: startup detection offers one-click repair and Reload. You can also run `Apply Patches`, then Reload Window.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - Codex is still broken after disabling/uninstalling this extension: run `Codex Local Groups: Restore Original Codex UI`, or run `npm run restore-codex-ui`, then Reload Window. Disabling the extension does not automatically revert patched Codex bundles.
-- If the current project shows groups from other projects, upgrade to v0.0.49, run `Apply Patches`, then Reload Window. The project history is isolated by the current window's `activeWorkspaceRoot`, while child directories are merged into the root project.
-- If one requirement group renders too many conversations at once, upgrade to v0.0.49 and Reload Window. Each group independently starts at five rows, `Show more` adds ten, and collapse controls return it to fifteen or five.
-- If a local title still shows the original text after saving, upgrade to v0.0.49, run `Apply Patches`, then Reload Window. Later title saves refresh the current dropdown row immediately.
-- If a resumed conversation has no terminal tools, upgrade to v0.0.49, run `Apply Patches`, then Reload Window. For `26.721.41059` with a resolvable custom provider, app-server falls back to HTTP POST without editing `config.toml`.
+- If the current project shows groups from other projects, upgrade to v0.0.50, run `Apply Patches`, then Reload Window. The project history is isolated by the current window's `activeWorkspaceRoot`, while child directories are merged into the root project.
+- If one requirement group renders too many conversations at once, upgrade to v0.0.50 and Reload Window. Each group independently starts at five rows, `Show more` adds ten, and collapse controls return it to fifteen or five.
+- If `Set title`, `Set group`, or `Start chat in this group` does nothing, upgrade to v0.0.50, run `Apply Patches`, then Reload Window. This version fixes Codex 26.727 messenger export discovery.
+- If a resumed conversation has no terminal tools, upgrade to v0.0.50, run `Apply Patches`, then Reload Window. For `26.721.41059` with a resolvable custom provider, app-server falls back to HTTP POST without editing `config.toml`.
 - Patch failed: check the `Codex Local Groups` output channel.
 - Node version is too old: the extension prefers the VSCode Server Node; set `codexLocalGroups.nodePath` if needed.

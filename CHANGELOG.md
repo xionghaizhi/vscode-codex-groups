@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.0.50 - 2026-08-04
+
+### Fixed
+- 修复 Codex 26.727 的“设置标题”“设置分组”“在此分组新建会话”同时无响应。
+- 不再把 `qQ` 实时语音状态误当 VSCode messenger；改为按 singleton、`dispatchMessage()` 和 `dispatchHostMessage()` 语义唯一定位消息桥。
+- 支持把 v0.0.49 已写入 live Header 的错误 messenger import 原地升级，不因已有 Header marker 跳过修复。
+
+### Verification
+- 新增三个操作的消息反馈环、错误 import 升级、幂等和真实 bundle verifier 回归。
+
 ## v0.0.49 - 2026-07-31
 
 ### Compatibility

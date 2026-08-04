@@ -60,8 +60,8 @@ const header26727Text = [
   'const nativeScrollHeight={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`};',
   'const nativeMenu=(0,Z.jsx)(N,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:W,open:p,onOpenChange:h,children:G});',
 ].join('');
-const split26727AppMainText = 'function KB(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function BVe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,type:`subagent-activity`,w,n}}var app=`untitledThreadLabel conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{KB as KB};';
-const split26727AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return OBe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function Xtt(){return Ztt(`recent-conversations`)}function MQ(e,t){let n=e?.find(e=>e.model===t);return n==null?Qnt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>Uk(e.reasoningEffort))}function FUt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=zUt((t?[...yG,VUt]:yG).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function zUt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var yG=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],VUt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`};var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;var qQ={};export{qQ as qQ};';
+const split26727AppMainText = 'function KB(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}class VsCodeMessenger{static getInstance(){return new VsCodeMessenger}dispatchMessage(){}dispatchHostMessage(){}}var N0=VsCodeMessenger.getInstance(),qQ={phase:`inactive`};function useMessenger(){N0.dispatchMessage(`native`,{}),N0.dispatchHostMessage({type:`native`})}function BVe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,type:`subagent-activity`,w,n}}var app=`untitledThreadLabel conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{KB as KB,N0 as N0,qQ as qQ};';
+const split26727AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return OBe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function Xtt(){return Ztt(`recent-conversations`)}function MQ(e,t){let n=e?.find(e=>e.model===t);return n==null?Qnt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>Uk(e.reasoningEffort))}function FUt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=zUt((t?[...yG,VUt]:yG).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function zUt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var yG=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],VUt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`};var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;export{Store as Store};';
 
 function createTarget() {
   const dir = tempDir('codex-patch');
@@ -209,6 +209,8 @@ module.exports = {
         const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
         const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
         assert.ok(header.includes('codexLocalGroupsHeaderSafePatchVersion=15'));
+        assert.ok(header.includes('N0 as codexLocalGroupsMessengerImport'));
+        assert.ok(!header.includes('qQ as codexLocalGroupsMessengerImport'));
         assert.ok(header.includes('codexRecentTaskRootReady?codexRecentConversationFilter'));
         assert.ok(header.includes('contentStyle:{height:`600px`,overflow:`hidden`}'));
         assert.ok(header.includes('(0,Wn.useState)(0)'));
@@ -224,8 +226,22 @@ module.exports = {
         const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
         assert.strictEqual(serverResult.status, 0, serverResult.stderr);
         assert.deepStrictEqual(JSON.parse(serverResult.stdout), { power: ['low', 'xhigh', 'max', 'ultra'], sol: ['xhigh', 'max', 'ultra'], terra: ['low'], project: ['root', 'child'] });
+        assert.deepStrictEqual(run26727HeaderActions(header), {
+          dispatched: [
+            { channel: 'codex-local-groups', message: { action: 'promptConversationTitle', conversationId: 'abc', title: '标题', projectRoot: '/project' } },
+            { channel: 'codex-local-groups', message: { action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/project' } },
+            { channel: 'codex-local-groups', message: { action: 'setPendingGroup', projectRoot: '/project', group: '需求A', startedAtMs: 123 } },
+          ],
+          hostMessages: [{ type: 'new-chat' }],
+        });
         for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
         assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }), { changes: [], errors: [], unsafeBundles: [] });
+        const badHeader = fs.readFileSync(target.headerPath, 'utf8').replace('N0 as codexLocalGroupsMessengerImport', 'qQ as codexLocalGroupsMessengerImport');
+        fs.writeFileSync(target.headerPath, badHeader);
+        const repair = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(repair.errors, []);
+        assert.deepStrictEqual(repair.changes.map((change) => change.path), [target.headerPath]);
+        assert.ok(repair.changes[0].nextText.includes('N0 as codexLocalGroupsMessengerImport'));
       },
     },
     {
@@ -2806,6 +2822,23 @@ const source=${JSON.stringify(items)};function render(){let rows=context.zn({loc
 const initial=render();if(!${options.toggleMore === true})console.log(JSON.stringify(${options.includeProjects === true ? '{ids:initial.ids,projectLabels:initial.projects}' : 'initial.ids'}));else{findButton(initial.rows,'展开更多').props.onClick({preventDefault(){},stopPropagation(){}});const expanded=render();findButton(expanded.rows,'收起到最近 5 条').props.onClick({preventDefault(){},stopPropagation(){}});const collapsed=render();console.log(JSON.stringify({defaultIds:initial.ids,expandedIds:expanded.ids,collapsedIds:collapsed.ids,stateUpdates,storage}))}`;
   const result = childProcess.spawnSync(resolveNodePath(), ['-'], { input: script, encoding: 'utf8', timeout: 5000 });
   assert.strictEqual(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  return JSON.parse(result.stdout);
+}
+
+function run26727HeaderActions(header) {
+  const start = header.indexOf('function zn(e){return e.kind===`remote`}');
+  const end = header.indexOf('function Bn', start);
+  const script = `
+const vm=require('vm'),dispatched=[],hostMessages=[],storage={};
+const messenger={dispatchMessage(channel,message){dispatched.push({channel,message})},dispatchHostMessage(message){hostMessages.push(message)}};
+const context={codexLocalGroupsMessengerImport:messenger,localStorage:{getItem:key=>storage[key]??null,setItem:(key,value)=>{storage[key]=String(value)}},window:{addEventListener(){},dispatchEvent(){}},Event:function(type){this.type=type},Date:{now:()=>123},setTimeout(){}};
+vm.runInNewContext(${JSON.stringify(header.slice(start, end))},context);
+context.codexLocalGroupsPromptTitle('abc','标题','/project');
+context.codexLocalGroupsPromptGroup('abc','/project');
+context.codexLocalGroupsStartConversationInGroup('/project','需求A');
+console.log(JSON.stringify({dispatched:dispatched.filter(item=>item.message.action!=='getMetadata'),hostMessages}));`;
+  const result = childProcess.spawnSync(resolveNodePath(), ['-'], { input: script, encoding: 'utf8' });
+  assert.strictEqual(result.status, 0, result.stderr);
   return JSON.parse(result.stdout);
 }
 

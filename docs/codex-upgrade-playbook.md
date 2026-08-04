@@ -1,8 +1,8 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-07-31
+> 基线日期：2026-08-04
 > 当前 Codex：`openai.chatgpt@26.727.40816`
-> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.49`
+> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.50`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -73,7 +73,7 @@ Header 读取 activeWorkspaceRoot
 
 ```text
 Header 操作
-  -> qQ / VSCode messenger
+  -> 语义定位的 VSCode messenger singleton（26.727 当前导出 N0）
   -> out/extension.js 中的 codexLocalGroupsHandleWebviewMessage()
   -> ~/.codex/codex-vscode-conversation-meta.json
   -> metadataSaved 回传 Header
@@ -163,13 +163,14 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 
 1. 最近会话菜单组件和原生 row 组件。
 2. `activeWorkspaceRoot` 及 `isActiveWorkspaceRootLoading` 的 execution-target Hook。
-3. 真正可用的 `qQ` / VSCode messenger 导出。
+3. 真正可用的 VSCode messenger singleton 导出；必须同时确认 `getInstance()`、`dispatchMessage()` 和 `dispatchHostMessage()`，不能按 `qQ` 等压缩导出名猜测。
 4. 项目历史 query Hook 的调用位置。
 5. Radix 菜单外层、内层滚动区和 `contentStyle` 位置。
 
 现有可复用实现：
 
 - `addExecutionTargetImport()`：从真实 `app-initial-*` 导出中唯一定位 execution-target Hook。
+- `addVscodeMessengerImport()` / `findVscodeMessengerExports()`：按 singleton 和两种 dispatch 能力唯一定位消息桥，并修复已写入的错误 import。
 - `matchingAppInitialImports()`：按模块内容检查 import，不硬编码 hash。
 - `patchSafeHeader26721ProjectScope()`：使用窗口 root，root 未就绪时返回空列表。
 - `patchSafeHeader26721ThreadSummary()`：继续把原生 `threadSummary` 传给 row，保留点击打开协议。
@@ -492,6 +493,7 @@ npm run restore-codex-ui
 | v0.0.45 | webview proxy 没有 worker listener / `listProjectConversations()` 导致 Oops 和空下拉 | 所有可选能力先检测；代理复用 `listAllThreads()`。 |
 | v0.0.46 | 误把 5/15/更多做成项目级 | 每个需求分组独立 5 -> 15 -> 25，独立收起到 15/5。 |
 | v0.0.49 | `26.727` Header、项目历史、Power/Reasoning 符号和 bundle 漂移 | 按新语义单独适配；复用原生子 agent 与设置链路；`26.721` HTTP fallback 不外扩。 |
+| v0.0.50 | `26.727` 把 `qQ` 实时语音状态误当 messenger，标题、分组和分组内新会话均失效 | messenger 必须按 singleton + dispatch 能力定位；真实按钮消息和旧错误 import 原地升级都要回归。 |
 
 ## 9. Codex 26.727.40816 适配记录
 
@@ -506,6 +508,7 @@ npm run restore-codex-ui
 
 - `CodexPatchEngine.plan()` 只明确放行 `26.727`，未验证 minor 仍 fail closed。
 - Header v15 和项目历史 v5 复用既有项目隔离、分页、分组和标题契约，仅适配新符号与 React runtime。
+- Header messenger 不再按 `qQ` 猜测：`qQ -> Cp` 是实时语音状态，正确消息桥为 `N0 -> Au`。patcher 按 `getInstance()`、`dispatchMessage()`、`dispatchHostMessage()` 语义定位，并可把 live v0.0.49 的错误 import 原地改正。
 - Codex UI v3 只保留 Sol Max/Ultra 模型校验；Power v3 只补 Sol Max/Ultra Power 与实际 Reasoning 菜单。
 - `26.721.41059` 专用 Responses WebSocket fallback 不扩展到 `26.727.40816`。
 
@@ -515,6 +518,7 @@ npm run restore-codex-ui
 - live：4 个预期文件应用并备份，二次 plan 为 0，verifier 通过。
 - 仓库：compile、lint、178 tests 通过；`git diff --check` 通过。
 - VSIX：生成并安装 `vscode-codex-groups-0.0.49.vsix`；安装目录 compile、plan、verifier 通过。
+- 2026-08-04 hotfix：真实 Header 回归确认标题、分组和 `setPendingGroup + new-chat` 三条消息完整；live Header 已改用 `N0`，二次 plan 为 0，verifier 通过；`vscode-codex-groups-0.0.50.vsix` 已安装，安装目录 compile、plan、verifier 通过。
 - 未完成：当前窗口仍需 Reload 后执行真实 UI 和旧会话工具人工验收。
 
 ## 10. 每次适配的证据记录模板
