@@ -51,6 +51,23 @@ module.exports = {
       },
     },
     {
+      name: 'uses the active registry entry after Codex is rolled back',
+      run() {
+        const root = tempDir('codex-locator-active');
+        const stable = createExtension(root, 'openai.chatgpt-26727-linux-x64', new Date('2026-08-01T00:00:00Z'), '26.727.40816');
+        createExtension(root, 'openai.chatgpt-265730-linux-x64', new Date('2026-08-06T00:00:00Z'), '26.5730.61639');
+        fs.writeFileSync(path.join(root, 'extensions.json'), JSON.stringify([{
+          identifier: { id: 'openai.chatgpt' },
+          version: '26.727.40816',
+          relativeLocation: path.basename(stable),
+        }]));
+
+        const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
+        assert.strictEqual(target.extensionDir, stable);
+        assert.strictEqual(target.version, '26.727.40816');
+      },
+    },
+    {
       name: 'locates Codex 26.715 bundles without scanning unrelated assets',
       run() {
         const root = tempDir('codex-locator-26715');
@@ -107,6 +124,25 @@ module.exports = {
         assert.ok(target.appServerManagerSignalsPath.endsWith('app-initial-server.js'));
         assert.ok(target.appStatsigPath.endsWith('app-initial-server.js'));
         assert.strictEqual(target.sidebarPath, null);
+      },
+    },
+    {
+      name: 'locates Codex 26.5730 app-main after untitled label moves to another bundle',
+      run() {
+        const root = tempDir('codex-locator-265730');
+        const dir = createExtension(root, 'openai.chatgpt-1-linux-x64', new Date(), '26.5730.61639');
+        const assets = path.join(dir, 'webview/assets');
+        for (const name of ['app-main-a.js', 'app-server-manager-signals-a.js', 'request-a.js', 'sidebar-signals-a.js', 'local-conversation-title-signals-a.js']) fs.unlinkSync(path.join(assets, name));
+        fs.writeFileSync(path.join(assets, 'app-initial-ui.js'), 'conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e) supportedReasoningEfforts defaultReasoningEffort');
+        fs.writeFileSync(path.join(assets, 'app-initial-server.js'), 'untitledThreadLabel recentConversationsSortKey thread/list networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}');
+        fs.writeFileSync(path.join(assets, 'app-initial-other.js'), 'unrelated bundle');
+
+        const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
+        assert.ok(target.appMainPath.endsWith('app-initial-ui.js'));
+        assert.ok(target.requestPath.endsWith('app-initial-ui.js'));
+        assert.ok(target.localTitlePath.endsWith('app-initial-ui.js'));
+        assert.ok(target.appServerManagerSignalsPath.endsWith('app-initial-server.js'));
+        assert.ok(target.appStatsigPath.endsWith('app-initial-server.js'));
       },
     },
     {

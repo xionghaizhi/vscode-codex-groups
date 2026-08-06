@@ -45,6 +45,10 @@ class CodexExtensionLocator {
     if (!fs.existsSync(this.extensionsRoot)) {
       throw new Error(`未找到 VSCode 扩展目录：${this.extensionsRoot}`);
     }
+    const activeDir = activeExtensionDir(this.extensionsRoot);
+    if (activeDir) {
+      return activeDir;
+    }
     const dirs = fs.readdirSync(this.extensionsRoot)
       .filter((name) => name.startsWith('openai.chatgpt-'))
       .map((name) => path.join(this.extensionsRoot, name))
@@ -59,6 +63,23 @@ class CodexExtensionLocator {
         mtimeMs: fs.statSync(dir).mtimeMs,
       }))
       .sort(compareExtensionCandidate)[0].dir;
+  }
+}
+
+function activeExtensionDir(root) {
+  try {
+    const entries = JSON.parse(fs.readFileSync(path.join(root, 'extensions.json'), 'utf8'));
+    const active = entries.find((item) => item && item.identifier && String(item.identifier.id).toLowerCase() === 'openai.chatgpt');
+    const location = active && (active.relativeLocation || active.location && active.location.path);
+    if (typeof location !== 'string') return null;
+    const dir = path.resolve(root, location);
+    const relative = path.relative(root, dir);
+    if (relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) return null;
+    if (!path.basename(dir).startsWith('openai.chatgpt-') || !fs.statSync(dir).isDirectory()) return null;
+    if (active.version && packageVersion(dir) !== active.version) return null;
+    return dir;
+  } catch (error) {
+    return null;
   }
 }
 
@@ -127,7 +148,9 @@ function isHeaderBundle(text) {
 }
 
 function isAppMainBundle(text) {
-  return text.includes('untitledThreadLabel') && text.includes('conversation.title');
+  return text.includes('conversation.title') &&
+    (text.includes('untitledThreadLabel') ||
+      (text.includes('supportedReasoningEfforts') && text.includes('defaultReasoningEffort')));
 }
 
 function isStatsigConfigBundle(text) {

@@ -1,5 +1,43 @@
 # Changelog
 
+## v0.0.53 - 2026-08-07
+
+### Fixed
+
+- 修复 Codex `26.5730.61639` 在 Remote VSCode 中启动约 65 秒、却被新版固定 30 秒 Webview 超时提前覆盖的问题。
+- `CodexPatchEngine` 仅对 `26.5730` 将 Webview 启动保护延长到 120 秒，保留真正启动失败时的错误兜底。
+- verifier 新增 120 秒补丁和旧 30 秒锚点检查；隔离 clean bundle 应用、幂等、语法和 verifier 验证通过。
+- Reload 日志确认 `app routes mounted after 61906ms`，随后 `ready provider mounted`，且没有 `Webview did not finish starting`；当前 active Codex 已恢复为 `26.5730.61639`。
+
+## v0.0.52 - 2026-08-07
+
+### Fixed
+- 回退当前启用的 Codex 到已验证的 `26.727.40816`；`26.5730.61639` 的 clean Webview 在应用 Local Groups 补丁前已经无法完成启动。
+- locator 优先读取 VSCode `extensions.json` 中的 active `openai.chatgpt` 记录，不再因扩展目录残留的更高版本选择到未启用或已回退的 Codex。
+
+### Verification
+- 新增“高版本目录仍存在、active registry 已回退”的定位回归；当前 active 26.727 二次 plan 为 0，verifier 通过。
+- `Codex.log` 显示 clean 26.5730 在 00:20:46 已超时，首次 Local Groups backup 在 00:23:52 才创建，排除本次 bundle patch 是首次启动失败原因。
+- compile、lint、181 tests 和 `git diff --check` 通过；`vscode-codex-groups-0.0.52.vsix` 已安装，安装目录 compile、plan 0 和 verifier 通过。
+
+## v0.0.51 - 2026-08-06
+
+### Compatibility
+- 适配官方预发布版 `openai.chatgpt@26.5730.61639` 的 split app-main、Header、Extension Host、项目历史和 Power/Reasoning 锚点。
+- app-main 定位不再要求 `untitledThreadLabel` 与 `conversation.title` 位于同一 bundle；候选不唯一时仍 fail closed。
+- 保留当前项目及子目录隔离、每分组 5/+10/15/5、active 会话保留、600px 菜单、本地标题、需求分组和分组内新建会话。
+- 为 5.6 Sol 补齐 Max/Ultra Power、实际 Reasoning 菜单和模型校验；新版原生子 agent 链路保持不变。
+
+### Safety
+- Extension Host 消息桥兼容新版 `handleMessage(e,c)` 回调，Header messenger 与 execution target 继续按真实实现和导出表唯一定位。
+- 项目历史继续使用独立分页查询与本地严格过滤，不扩大共享 recent store；`26.721.41059` 专用 HTTP fallback 不扩展到新版。
+- 未验证版本继续 fail closed，marker 后置条件、clean backup、语法、幂等和事务回滚门禁保持不变。
+
+### Verification
+- 新增 `26.5730` split locator、三个 metadata 操作、项目分页隔离、Sol Max/Ultra、幂等和 verifier 回归。
+- 官方 clean 副本完成 4 个预期 bundle 的 plan/apply/plan，7 个 Node 语法检查和 verifier 均通过。
+- compile、lint、180 tests 和 `git diff --check` 通过；live 二次 plan 为 0，`vscode-codex-groups-0.0.51.vsix` 已安装且安装目录 verifier 通过。
+
 ## v0.0.50 - 2026-08-04
 
 ### Fixed
