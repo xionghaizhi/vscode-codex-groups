@@ -9,7 +9,7 @@
 - [x] 7. 完成 compile、lint、tests、git diff、clean-copy plan/apply/plan 和 verifier。
 - [x] 8. 应用 live bundle，确认二次 plan 为 0 且 verifier 通过。
 - [x] 9. 提升 Local Groups 版本，同步 README、CHANGELOG、升级手册，打包并安装 VSIX。
-- [ ] 10. Reload 后验证启动时间线和完整业务 UI 清单。
+- [x] 10. Reload 后验证启动时间线和完整业务 UI 清单。
 
 ## 当前证据
 
@@ -22,4 +22,5 @@
 - live：二次 plan 为 0，verifier 通过；`vscode-codex-groups-0.0.54.vsix` 已打包并安装，active registry 为 `0.0.54`，安装目录 compile、plan 0 和 verifier 通过。
 - 启动时间：clean 26.5803 于 09:29:28.598 请求 root render，09:30:02.008 在 `34,566ms` 完成 route mount，09:30:02.028 ready；旧 `61,906ms` 是 26.5730 上游 route mount 耗时，不是 120 秒看门狗增加的等待。
 - 实施阻碍：Remote Marketplace CLI 安装未可靠完成并留下未启用目录；官方 `vspackage` 需要先解开 gzip 包装；plan/apply CLI 不读取 `CODEX_EXTENSIONS_ROOT`；大 bundle 检查必须等待最终 exit code；`$1` import 必须使用 replacement callback。处理方式和防复发门禁见 `design.md`。
-- 待人工门禁：Reload 后逐项点击设置标题、设置分组、分组内新建会话，并记录 patched 26.5803 的新启动时间线。
+- patched Reload：10:26 会话在 `34,858ms` route mount 并立即 ready；10:28 会话在 `62,881ms` route mount、18ms 后 ready；两次均未出现 `Webview did not finish starting`。
+- 用户验收：2026-08-10 Reload 后已验证完整业务 UI，设置标题、设置分组和分组内新建会话均可正常使用，确认“可以，没问题”。
