@@ -21,4 +21,5 @@
 - 仓库：compile、lint、184 tests 和 `git diff --check` 通过。
 - live：二次 plan 为 0，verifier 通过；`vscode-codex-groups-0.0.54.vsix` 已打包并安装，active registry 为 `0.0.54`，安装目录 compile、plan 0 和 verifier 通过。
 - 启动时间：clean 26.5803 于 09:29:28.598 请求 root render，09:30:02.008 在 `34,566ms` 完成 route mount，09:30:02.028 ready；旧 `61,906ms` 是 26.5730 上游 route mount 耗时，不是 120 秒看门狗增加的等待。
+- 实施阻碍：Remote Marketplace CLI 安装未可靠完成并留下未启用目录；官方 `vspackage` 需要先解开 gzip 包装；plan/apply CLI 不读取 `CODEX_EXTENSIONS_ROOT`；大 bundle 检查必须等待最终 exit code；`$1` import 必须使用 replacement callback。处理方式和防复发门禁见 `design.md`。
 - 待人工门禁：Reload 后逐项点击设置标题、设置分组、分组内新建会话，并记录 patched 26.5803 的新启动时间线。

@@ -32,6 +32,18 @@
 - clean 26.5803 当前为 `34,566ms`，ready 再晚约 20ms。主要等待仍在上游 Webview 资源加载、bundle 求值和 React route mount 阶段，早于 Local Groups 项目历史查询和分组交互。
 - 不通过删除上游初始化、认证、Statsig、网络或子 agent 能力缩短启动；这些属于需求外高风险改动。当前修复只避免已确认的 30 秒误杀。
 
+## 实施阻碍与处理
+
+1. Remote `code --install-extension openai.chatgpt --pre-release --force` 未可靠完成安装，还留下了未启用的 `openai.chatgpt-26.803.41515-linux-x64` 残留目录。处理方式是通过 Marketplace 官方 API 确认 linux-x64 版本，下载并校验官方 VSIX，再按文件安装；后续定位必须以 `extensions.json` 的 active registry 为准，不能按残留目录名选最高版本。
+2. Marketplace `vspackage` 响应是 gzip 包装的数据，不能把原始响应直接当 VSIX。必须解包后再验证 ZIP、`package.json` 的 publisher/name/version/engine 和 SHA-256，验证失败不得安装。
+3. `scripts/verify-patched-bundles.js` 支持 `CODEX_EXTENSIONS_ROOT`，但 `scripts/plan-patches.js` 和 `scripts/apply-patches.js` 当前直接创建默认 locator，不读取该变量。clean-copy 验证不能假定三个 CLI 都会隔离到临时目录；plan/apply 必须显式使用 `new CodexExtensionLocator({extensionsRoot})`，并先打印、核对目标目录。
+4. 新版 Webview 约 174MB，多个主 bundle 为 3-5MB；locator、plan 和 Node 语法检查可能在工具首次 yield 后继续运行。必须等待最终 exit code，再判定 apply、幂等或 verifier 完成，不能把首段输出当成成功。
+5. `$1` messenger 导出触发 replacement capture 是实现阶段的真实失败点。新增二次 plan 回归后才暴露；修复后同时通过字面 import、语法和幂等三重门禁。
+
+### 需求外记录
+
+- 可在后续独立变更中让 plan/apply CLI 与 verifier 统一支持 `CODEX_EXTENSIONS_ROOT`，避免 clean-copy 验证误指向 live。该改动不属于本次版本适配，未顺手扩大范围。
+
 ## 验证门禁
 
 - 官方 clean 副本完成 plan/apply/plan、语法和 verifier。
