@@ -30,6 +30,10 @@ module.exports = {
         assert.ok(verify.includes('codexLocalGroupsProjectHistory265730PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsCodexUi265730PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsPower265730PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsHeaderSafe265803PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsProjectHistory265803PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsCodexUi265803PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsPower265803PatchVersion=1'));
         assert.ok(verify.includes('this.onTimeout()},12e4))'));
         assert.ok(verify.includes('codexLocalGroupsHandleWebviewMessage(c,e)'));
         assert.ok(verify.includes('CODEX_EXTENSIONS_ROOT'));

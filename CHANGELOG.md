@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.0.54 - 2026-08-10
+
+### Compatibility
+
+- 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5803.41515` 的 Header 新过滤分支、`hostId` row cache、项目历史 Hook、模型校验和 Power/Reasoning 锚点。
+- 保留当前项目及子目录隔离、每分组 5/+10/15/5、600px 菜单、本地标题、需求分组、分组内新建会话、Sol Max/Ultra 和新版原生子 agent。
+- 仅对已验证的 `26.5803` 延续 120 秒 Webview 看门狗；未知版本继续 fail closed。
+
+### Fixed
+
+- 修复新版 messenger 导出名 `$1` 在幂等 plan 中被 JavaScript replacement string 误解释为捕获组、从而生成非法 import 的问题；现用 replacement callback 保留字面导出名。
+- verifier 增加 26.5803 的 messenger、execution target、Header cache、项目历史、Power、Reasoning、启动看门狗和原生子 agent 后置条件。
+
+### Startup evidence
+
+- 旧版 `61,906ms` 是 `26.5730` Webview 从 React root 请求到 route mount 的真实上游耗时；120 秒补丁只避免 30 秒误杀，不会让上游初始化变快。
+- 当前 clean `26.5803` 在同一 Remote 环境为 `34,566ms`，随后约 20ms 进入 ready；主要等待仍发生在上游 Webview route mount 之前，不在 Local Groups metadata、Header 或项目历史补丁中。
+
 ## v0.0.53 - 2026-08-07
 
 ### Fixed

@@ -146,6 +146,23 @@ module.exports = {
       },
     },
     {
+      name: 'locates Codex 26.5803 split bundles with an unrelated app-initial bundle',
+      run() {
+        const root = tempDir('codex-locator-265803');
+        const dir = createExtension(root, 'openai.chatgpt-1', new Date(), '26.5803.41515');
+        const assets = path.join(dir, 'webview/assets');
+        for (const name of ['app-main-a.js', 'app-server-manager-signals-a.js', 'request-a.js', 'sidebar-signals-a.js', 'local-conversation-title-signals-a.js']) fs.unlinkSync(path.join(assets, name));
+        fs.writeFileSync(path.join(assets, 'app-initial-main.js'), 'conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e) supportedReasoningEfforts defaultReasoningEffort');
+        fs.writeFileSync(path.join(assets, 'app-initial-server.js'), 'recentConversationsSortKey thread/list networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}');
+        fs.writeFileSync(path.join(assets, 'app-initial-other.js'), 'supportedReasoningEfforts only');
+
+        const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
+        assert.ok(target.appMainPath.endsWith('app-initial-main.js'));
+        assert.ok(target.appServerManagerSignalsPath.endsWith('app-initial-server.js'));
+        assert.ok(target.appStatsigPath.endsWith('app-initial-server.js'));
+      },
+    },
+    {
       name: 'fails when header bundle cannot be uniquely identified',
       run() {
         const root = tempDir('codex-locator-missing');

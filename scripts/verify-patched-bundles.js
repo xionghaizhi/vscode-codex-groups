@@ -16,6 +16,7 @@ function main() {
   const target = new CodexExtensionLocator(locatorOptions).locate();
   const is26727 = String(target.version).startsWith('26.727.');
   const is265730 = String(target.version).startsWith('26.5730.');
+  const is265803 = String(target.version).startsWith('26.5803.');
   const emptyMetadata = 'var codexLocalGroupsInitialMeta={"version":1,"conversations":{}}';
   assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=17');
   assertNotContains(target.extensionJsPath, 'typeof $g!="undefined"?$g:require("vscode")');
@@ -35,12 +36,13 @@ function main() {
   } else if (fallbacks.length) {
     throw new Error(`存在过期 Responses WebSocket fallback：${target.extensionJsPath}`);
   }
-  const headerVersion = is265730 ? 16 : is26727 ? 15 : 14;
-  const rowMarker = is265730 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),' : is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),';
-  assertContains(target.headerPath, `codexLocalGroupsHeaderSafePatchVersion=${headerVersion}`);
+  const headerMarker = is265803 ? 'codexLocalGroupsHeaderSafe265803PatchVersion=1' : `codexLocalGroupsHeaderSafePatchVersion=${is265730 ? 16 : is26727 ? 15 : 14}`;
+  const rowMarker = is265803 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),' : is265730 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),' : is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),';
+  const titleSlot = is265803 ? 24 : 23;
+  assertContains(target.headerPath, headerMarker);
   assertContains(target.headerPath, rowMarker);
-  assertContains(target.headerPath, 't[23]!==n.conversation.title');
-  assertContains(target.headerPath, 't[23]=n.conversation.title');
+  assertContains(target.headerPath, `t[${titleSlot}]!==n.conversation.title`);
+  assertContains(target.headerPath, `t[${titleSlot}]=n.conversation.title`);
   assertContains(target.headerPath, 'titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0');
   assertContains(target.headerPath, 'contentStyle:{height:`600px`,overflow:`hidden`}');
   assertContains(target.headerPath, 'className:`flex h-full min-h-0 w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`');
@@ -54,7 +56,7 @@ function main() {
   assertContains(target.headerPath, 'dispatchHostMessage({type:`new-chat`})');
   assertContains(target.headerPath, 'codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null');
   assertContains(target.headerPath, 'codexRecentTaskRootReady?codexRecentConversationFilter');
-  const historySource = is265730 ? '{data:d}=p(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is26727 ? '{data:f}=v(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)';
+  const historySource = is265803 ? '{data:m}=r(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is265730 ? '{data:d}=p(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is26727 ? '{data:f}=v(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)';
   assertContains(target.headerPath, historySource);
   assertContains(target.headerPath, 'function codexRecentTaskFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
   assertContains(target.headerPath, 'function codexRecentConversationFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
@@ -80,9 +82,9 @@ function main() {
   assertContains(target.headerPath, '收起到最近 15 条');
   assertContains(target.headerPath, '收起到最近 5 条');
   assertContains(target.headerPath, '展开更多');
-  const projectRowsViewRuntime = is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
+  const projectRowsViewRuntime = is265803 || is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
   assertContains(target.headerPath, `function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,${projectRowsViewRuntime}.useState)(0);return(0,${projectRowsViewRuntime}.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(\`codex-local-groups-refresh\`,e),()=>window.removeEventListener(\`codex-local-groups-refresh\`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}`);
-  const projectRowsView = is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
+  const projectRowsView = is265803 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N' : is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
   assertContains(target.headerPath, projectRowsView);
   assertNotContains(target.headerPath, 'project-more-');
   assertNotContains(target.headerPath, 'codex-local-groups-expanded-projects-v1');
@@ -173,6 +175,21 @@ function main() {
     assertContains(target.appMainPath, 'type:`subagent-activity`');
     assertContains(target.appStatsigPath, 'isBackgroundSubagentsEnabled:!0');
     assertContains(target.appStatsigPath, 'subagentsPanel');
+    assertNotContains(target.appMainPath, '1221508807');
+    assertNotContains(target.appStatsigPath, '1221508807');
+  }
+  if (is265803) {
+    assertContains(target.extensionJsPath, 'this.onTimeout()},12e4))}dispose(){this.disposed=!0');
+    assertNotContains(target.extensionJsPath, 'this.onTimeout()},3e4))}dispose(){this.disposed=!0');
+    assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)});');
+    assertContains(target.headerPath, '$1 as codexLocalGroupsMessengerImport');
+    assertContains(target.headerPath, 'LV as codexUseExecutionTarget');
+    assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsProjectHistory265803PatchVersion=1');
+    assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsPower265803PatchVersion=1');
+    assertContains(target.appServerManagerSignalsPath, 'ROt([...JK,BOt].filter');
+    assertContains(target.appMainPath, 'codexLocalGroupsCodexUi265803PatchVersion=1');
+    assertContains(target.appMainPath, 'isBackgroundSubagentsEnabled:o=!0');
+    assertContains(target.appStatsigPath, 'isBackgroundSubagentsEnabled:!0');
     assertNotContains(target.appMainPath, '1221508807');
     assertNotContains(target.appStatsigPath, '1221508807');
   }

@@ -73,6 +73,16 @@ const header265730Text = [
 const split265730AppMainText = 'class Messenger{static getInstance(){return new Messenger}dispatchMessage(){}dispatchHostMessage(){}}var pu=Messenger.getInstance();function useMessenger(){pu.dispatchMessage(`native`,{}),pu.dispatchHostMessage({type:`native`})}function XS(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function IRe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,type:`subagent-activity`,w,n}}var app=`conversation.title supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{pu as N$,XS as wB};';
 const split265730AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return vIe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function FJe(){return IJe(`recent-conversations`)}function cQ(e,t){let n=e?.find(e=>e.model===t);return n==null?pYe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>JD(e.reasoningEffort))}function mOt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=vOt((t?[...Dq,bOt]:Dq).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function vOt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var Dq=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],bOt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`};var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;export{Store as Store};';
 const webviewTimeout265730Text = 'var JP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;start(){this.disposed||this.timeout!=null||(this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout()},3e4))}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};';
+const header265803Text = [
+  'import{$D as r}from"./app-initial-server265803.js";import{$1 as m,LV as x}from"./app-initial-main265803.js";',
+  'function Mn(e){let l=ie(),{authMethod:u}=te(),d=B(),f=se(Ln),p=se(Rn),{data:m}=r(),h=Ve(),g=null;return m}',
+  'function xn(e){let t=(0,En.c)(34),r=e.cloudtasksQuery,i=e.localConversations,a=e.onClose,s=e.showFilters,l=s===void 0||s,u=ie(),d=Se(),{authMethod:f}=te(),S=e=>!0,_=null,x=null;let C=i.filter(S),T=hn(r.data,i,x),N=T,B=N.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&_===e.conversation.id,onClose:a,onActiveArchiveStart:d},e.key)),V=(0,Z.jsxs)(I.Section,{className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`,children:[B]});return(0,Z.jsxs)(`div`,{className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`,children:[V]})}',
+  'var messages={recentTasksMenu:1,search:{defaultMessage:`Search recent chats`}};function Sn(e){return e.kind===`remote`}function Cn(){}',
+  'var An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e=null,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(Be,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
+  'const nativeMenu=(0,Q.jsx)(m,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:J,open:g,onOpenChange:_,children:ce});',
+].join('');
+const split265803AppMainText = 'class Messenger{static getInstance(){return new Messenger}dispatchMessage(){}dispatchHostMessage(){}}var pu=Messenger.getInstance();function useMessenger(){pu.dispatchMessage(`native`,{}),pu.dispatchHostMessage({type:`native`})}function cC(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function tBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,type:`subagent-activity`,w,n}}var app=`conversation.title supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{pu as $1,cC as LV};';
+const split265803AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;function Ob(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function Mh(e){return{id:e.conversationId??e.id,cwd:e.cwd}}function Ib(){return!0}function $Ie(e){return e.name??null}function Fb(e){return e}function vr(e){return e}class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return GIe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function _Xe(){return vXe(`recent-conversations`)}function zZ(e,t){let n=e?.find(e=>e.model===t);return n==null?YXe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>gD(e.reasoningEffort))}function POt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=ROt((t?[...JK,BOt]:JK).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=ROt(VOt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function ROt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var YXe=[],JK=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],BOt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},VOt=[];var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;export{_Xe as $D};';
 
 function createTarget() {
   const dir = tempDir('codex-patch');
@@ -131,6 +141,18 @@ function configure265730Features(target) {
   fs.writeFileSync(target.appServerManagerSignalsPath, split265730AppServerText);
   fs.writeFileSync(path.join(assets, 'app-initial-main265730.js'), split265730AppMainText);
   fs.writeFileSync(path.join(assets, 'app-initial-server265730.js'), split265730AppServerText);
+}
+
+function configure265803Features(target) {
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5803.41515';
+  target.appStatsigPath = target.appServerManagerSignalsPath;
+  fs.writeFileSync(target.extensionJsPath, extensionText.replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + webviewTimeout265730Text);
+  fs.writeFileSync(target.headerPath, header265803Text);
+  fs.writeFileSync(target.appMainPath, split265803AppMainText);
+  fs.writeFileSync(target.appServerManagerSignalsPath, split265803AppServerText);
+  fs.writeFileSync(path.join(assets, 'app-initial-main265803.js'), split265803AppMainText);
+  fs.writeFileSync(path.join(assets, 'app-initial-server265803.js'), split265803AppServerText);
 }
 
 function restoreSafe26721Layout(text) {
@@ -321,6 +343,57 @@ module.exports = {
         assert.ok(JSON.stringify(rows.rows).includes('还有 14 条，展开更多'));
         for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
         assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }), { changes: [], errors: [], unsafeBundles: [] });
+      },
+    },
+    {
+      name: 'adapts Codex 26.5803 filters without losing local group contracts',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [target.extensionJsPath, target.headerPath, target.appMainPath, target.appServerManagerSignalsPath]);
+        const result = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        const extension = result[target.extensionJsPath], header = result[target.headerPath], main = result[target.appMainPath], server = result[target.appServerManagerSignalsPath];
+        for (const marker of ['codexLocalGroupsHeaderSafe265803PatchVersion=1', '$1 as codexLocalGroupsMessengerImport', 'LV as codexUseExecutionTarget', 'contentStyle:{height:`600px`,overflow:`hidden`}']) assert.ok(header.includes(marker), marker);
+        for (const marker of ['codexLocalGroupsProjectHistory265803PatchVersion=1', 'codexLocalGroupsPower265803PatchVersion=1']) assert.ok(server.includes(marker), marker);
+        assert.ok(main.includes('codexLocalGroupsCodexUi265803PatchVersion=1'));
+        assert.ok(extension.includes('codexLocalGroupsHandleWebviewMessage(c,e)'));
+        assert.ok(extension.includes('this.onTimeout()},12e4))'));
+        assert.deepStrictEqual(run265730HeaderActions(header), {
+          dispatched: [
+            { channel: 'codex-local-groups', message: { action: 'promptConversationTitle', conversationId: 'abc', title: '标题', projectRoot: '/project' } },
+            { channel: 'codex-local-groups', message: { action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/project' } },
+            { channel: 'codex-local-groups', message: { action: 'setPendingGroup', projectRoot: '/project', group: '需求A', startedAtMs: 123 } },
+          ],
+          hostMessages: [{ type: 'new-chat' }],
+        });
+        const items = Array.from({ length: 40 }, (_, index) => ({ kind: 'local', key: `id${index + 1}`, conversation: { id: `id${index + 1}`, hostId: 'local', cwd: '/project' } }));
+        const metadata = { version: 1, conversations: Object.fromEntries(items.map((item, index) => [item.conversation.id, { group: index < 20 ? '需求A' : '需求B', projectRoot: '/project' }])) };
+        const rows = runHeaderRows(header, 'id40', { items, metadata, currentRoot: '/project', includeStorage: true, toggleMore: true });
+        assert.deepStrictEqual([rows.rows, rows.expandedRows, rows.collapsedRows].map(value => (JSON.stringify(value).match(/"type":"CodexRow"/g) || []).length), [11, 21, 11]);
+        for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }), { changes: [], errors: [], unsafeBundles: [] });
+      },
+    },
+    {
+      name: 'executes Codex 26.5803 project history and Sol contracts',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        const main = bundles[target.appMainPath].replace(/export\{[^}]+\};?/, '');
+        const mainScript = `${main};let models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'},{model:'gpt-5.6-terra',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'}];console.log(JSON.stringify({sol:tBe({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,terra:tBe({userSavedModelString:'gpt-5.6-terra',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort}))`;
+        const mainResult = childProcess.spawnSync(resolveNodePath(), ['-e', mainScript], { encoding: 'utf8' });
+        assert.strictEqual(mainResult.status, 0, mainResult.stderr);
+        assert.deepStrictEqual(JSON.parse(mainResult.stdout), { sol: 'max', terra: 'high' });
+        const server = bundles[target.appServerManagerSignalsPath].replace(/export\{[^}]+\};?/, '');
+        const serverScript = `function gD(){return true}${server};(async()=>{let efforts=value=>value.map(reasoningEffort=>({description:'',reasoningEffort})),models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh'])},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low'])}],pages={first:{data:[{id:'root',cwd:'/project',updatedAt:3},{id:'other',cwd:'/project2',updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',updatedAt:1}],nextCursor:null}},store={threadsById:new Map,listRecentThreads:({cursor})=>Promise.resolve(cursor==null?pages.first:pages.next),getThreadSummaryFromThread:e=>({conversationId:e.id,cwd:e.cwd,updatedAt:e.updatedAt}),shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265803(store,'/project');console.log(JSON.stringify({power:POt(models).map(e=>e.reasoningEffort),sol:zZ(models,'gpt-5.6-sol').map(e=>e.reasoningEffort),terra:zZ(models,'gpt-5.6-terra').map(e=>e.reasoningEffort),project:project.map(e=>e.id)}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { power: ['low', 'xhigh', 'max', 'ultra'], sol: ['xhigh', 'max', 'ultra'], terra: ['low'], project: ['root', 'child'] });
       },
     },
     {
