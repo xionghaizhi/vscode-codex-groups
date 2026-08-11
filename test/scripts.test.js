@@ -34,6 +34,9 @@ module.exports = {
         assert.ok(verify.includes('codexLocalGroupsProjectHistory265803PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsCodexUi265803PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsPower265803PatchVersion=1'));
+        assert.ok(verify.includes('collabAgentToolCall'));
+        assert.ok(verify.includes('multi-agent-action'));
+        assert.ok(verify.includes('subAgentActivity'));
         assert.ok(verify.includes('this.onTimeout()},12e4))'));
         assert.ok(verify.includes('codexLocalGroupsHandleWebviewMessage(c,e)'));
         assert.ok(verify.includes('CODEX_EXTENSIONS_ROOT'));

@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.54-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.55-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.54
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.55
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.54
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.55
 ```
 
 然后在 VSCode 中执行：
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.54.vsix
+code --install-extension vscode-codex-groups-0.0.55.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -209,7 +209,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.54
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.55
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -249,13 +249,13 @@ npm run verify-patched-bundles
 
 - 看不到分组 UI：执行 `Apply Patches` 后 Reload Window。
 - Codex 升级后失效：启动自检会提示一键“修复并 Reload”；也可手动执行 `Apply Patches` 后 Reload Window。
-- Codex `26.5730.61639` 显示“could not start / couldn't load its resources”：升级到 v0.0.54，执行 `Apply Patches` 后 Reload Window。该错误可能是固定 30 秒看门狗误杀需要 61-71 秒的健康 Remote Webview；v0.0.54 仅对该版本延长到 120 秒，并保留真正失败时的错误兜底。
-- Codex `26.5803.41515` 启动仍超过 30 秒：当前 clean 日志为 `34,566ms` route mount，随后约 20ms ready。120 秒补丁只避免 30 秒误杀，不会让 Webview 必须等待 120 秒，也不会缩短上游 bundle 加载和 React route mount。
+- Codex `26.5730.61639` 显示“could not start / couldn't load its resources”：升级到 v0.0.55，执行 `Apply Patches` 后 Reload Window。该错误可能是固定 30 秒看门狗误杀需要 61-71 秒的健康 Remote Webview；v0.0.55 仅对该版本延长到 120 秒，并保留真正失败时的错误兜底。
+- Codex `26.5803.61601` 启动仍超过 30 秒：本次 Reload 在 `66,081ms` 挂载 route，19ms 后 ready，UI 和分组功能正常。120 秒补丁只避免 30 秒误杀，不会让 Webview 必须等待 120 秒，也不会缩短上游 bundle 加载和 React route mount；该延迟仍作为上游性能观察项。
 - Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
 - 禁用/卸载本扩展后 Codex 仍异常：先执行 `Codex Local Groups: Restore Original Codex UI`，或终端运行 `npm run restore-codex-ui`，再 Reload Window。禁用扩展不会自动还原已 patch 的 Codex bundle。
-- 当前项目混入其他项目分组：升级到 v0.0.54，执行 `Apply Patches` 后 Reload Window；该版本按当前窗口 `activeWorkspaceRoot` 隔离项目，并把子目录会话归入根项目。
-- 单个需求分组一次展示太多会话：升级到 v0.0.54 并 Reload Window；每个分组默认独立渲染最近 5 条，展开更多每次增加 10 条，可收起到 15 条或 5 条。
-- 设置标题、设置分组或“在此分组新建会话”无响应：升级到 v0.0.54，执行 `Apply Patches` 后 Reload Window；该版本兼容 Codex 26.727/26.5730/26.5803 的 messenger 导出和 Extension Host 回调。
-- 恢复旧会话后没有终端工具：升级到 v0.0.54，执行 `Apply Patches` 后 Reload Window。对 `26.721.41059` 和可确认的自定义 provider，该版本让 app-server 回退到 HTTP POST，且不修改 `config.toml`。
+- 当前项目混入其他项目分组：升级到 v0.0.55，执行 `Apply Patches` 后 Reload Window；该版本按当前窗口 `activeWorkspaceRoot` 隔离项目，并把子目录会话归入根项目。
+- 单个需求分组一次展示太多会话：升级到 v0.0.55 并 Reload Window；每个分组默认独立渲染最近 5 条，展开更多每次增加 10 条，可收起到 15 条或 5 条。
+- 设置标题、设置分组或“在此分组新建会话”无响应：升级到 v0.0.55，执行 `Apply Patches` 后 Reload Window；该版本兼容 Codex 26.727/26.5730/26.5803 的 messenger 导出和 Extension Host 回调。
+- 恢复旧会话后没有终端工具：升级到 v0.0.55，执行 `Apply Patches` 后 Reload Window。对 `26.721.41059` 和可确认的自定义 provider，该版本让 app-server 回退到 HTTP POST，且不修改 `config.toml`。
 - patch 失败：查看 `Codex Local Groups` 输出面板。
 - Node 版本过低：扩展会优先使用 VSCode Server 自带 Node；必要时设置 `codexLocalGroups.nodePath`。

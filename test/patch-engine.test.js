@@ -81,7 +81,11 @@ const header265803Text = [
   'var An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e=null,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(Be,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
   'const nativeMenu=(0,Q.jsx)(m,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:J,open:g,onOpenChange:_,children:ce});',
 ].join('');
-const split265803AppMainText = 'class Messenger{static getInstance(){return new Messenger}dispatchMessage(){}dispatchHostMessage(){}}var pu=Messenger.getInstance();function useMessenger(){pu.dispatchMessage(`native`,{}),pu.dispatchHostMessage({type:`native`})}function cC(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function tBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,type:`subagent-activity`,w,n}}var app=`conversation.title supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{pu as $1,cC as LV};';
+const split265803AppMainText = 'class Messenger{static getInstance(){return new Messenger}dispatchMessage(){}dispatchHostMessage(){}}var pu=Messenger.getInstance();function useMessenger(){pu.dispatchMessage(`native`,{}),pu.dispatchHostMessage({type:`native`})}function cC(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function tBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:{if(!o||n.tool===`wait`)break;let e={type:`multi-agent-action`,id:n.id};d.push(e);break}case`subAgentActivity`:if(!o)break;d.push({type:`subagent-activity`,id:n.id});break}}var app=`conversation.title supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{pu as $1,cC as LV};';
+const split265803LatestAppMainText = split265803AppMainText.replace(
+  'function tBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),',
+  'function RS(e,t){return e?.find(e=>e.model===t)}function iBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=e?RS(n?.models,e):n?.defaultModel??RS(n?.models,`gpt-5.5`),',
+);
 const split265803AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;function Ob(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function Mh(e){return{id:e.conversationId??e.id,cwd:e.cwd}}function Ib(){return!0}function $Ie(e){return e.name??null}function Fb(e){return e}function vr(e){return e}class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return GIe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function _Xe(){return vXe(`recent-conversations`)}function zZ(e,t){let n=e?.find(e=>e.model===t);return n==null?YXe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>gD(e.reasoningEffort))}function POt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=ROt((t?[...JK,BOt]:JK).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=ROt(VOt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function ROt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var YXe=[],JK=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],BOt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},VOt=[];var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;export{_Xe as $D};';
 
 function createTarget() {
@@ -143,15 +147,15 @@ function configure265730Features(target) {
   fs.writeFileSync(path.join(assets, 'app-initial-server265730.js'), split265730AppServerText);
 }
 
-function configure265803Features(target) {
+function configure265803Features(target, version = '26.5803.41515', appMainText = split265803AppMainText) {
   const assets = path.dirname(target.headerPath);
-  target.version = '26.5803.41515';
+  target.version = version;
   target.appStatsigPath = target.appServerManagerSignalsPath;
   fs.writeFileSync(target.extensionJsPath, extensionText.replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + webviewTimeout265730Text);
   fs.writeFileSync(target.headerPath, header265803Text);
-  fs.writeFileSync(target.appMainPath, split265803AppMainText);
+  fs.writeFileSync(target.appMainPath, appMainText);
   fs.writeFileSync(target.appServerManagerSignalsPath, split265803AppServerText);
-  fs.writeFileSync(path.join(assets, 'app-initial-main265803.js'), split265803AppMainText);
+  fs.writeFileSync(path.join(assets, 'app-initial-main265803.js'), appMainText);
   fs.writeFileSync(path.join(assets, 'app-initial-server265803.js'), split265803AppServerText);
 }
 
@@ -359,6 +363,8 @@ module.exports = {
         for (const marker of ['codexLocalGroupsHeaderSafe265803PatchVersion=1', '$1 as codexLocalGroupsMessengerImport', 'LV as codexUseExecutionTarget', 'contentStyle:{height:`600px`,overflow:`hidden`}']) assert.ok(header.includes(marker), marker);
         for (const marker of ['codexLocalGroupsProjectHistory265803PatchVersion=1', 'codexLocalGroupsPower265803PatchVersion=1']) assert.ok(server.includes(marker), marker);
         assert.ok(main.includes('codexLocalGroupsCodexUi265803PatchVersion=1'));
+        assert.ok(main.includes('collabAgentToolCall'));
+        assert.ok(main.includes('multi-agent-action'));
         assert.ok(extension.includes('codexLocalGroupsHandleWebviewMessage(c,e)'));
         assert.ok(extension.includes('this.onTimeout()},12e4))'));
         assert.deepStrictEqual(run265730HeaderActions(header), {
@@ -375,6 +381,148 @@ module.exports = {
         assert.deepStrictEqual([rows.rows, rows.expandedRows, rows.collapsedRows].map(value => (JSON.stringify(value).match(/"type":"CodexRow"/g) || []).length), [11, 21, 11]);
         for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
         assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }), { changes: [], errors: [], unsafeBundles: [] });
+      },
+    },
+    {
+      name: 'fails closed when V1 output only appears in the next case branch',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const text = fs.readFileSync(target.appMainPath, 'utf8')
+          .replace('type:`multi-agent-action`', 'type:`missing-v1-action`')
+          .replace('type:`subagent-activity`', 'legacyType:`multi-agent-action`,type:`subagent-activity`');
+        fs.writeFileSync(target.appMainPath, text);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'fails closed when the V1 action object is not pushed',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const text = fs.readFileSync(target.appMainPath, 'utf8').replace('d.push(e);break}case`subAgentActivity`', 'void e;break}case`subAgentActivity`');
+        fs.writeFileSync(target.appMainPath, text);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'fails closed when the V1 action id comes from another input',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const text = fs.readFileSync(target.appMainPath, 'utf8').replace('id:n.id};d.push(e)', 'id:other.id};d.push(e)');
+        fs.writeFileSync(target.appMainPath, text);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'fails closed when the V1 gate reads another input',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const text = fs.readFileSync(target.appMainPath, 'utf8').replace('n.tool===`wait`', 'other.tool===`wait`');
+        fs.writeFileSync(target.appMainPath, text);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'fails closed when V2 output only appears in the default branch',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const text = fs.readFileSync(target.appMainPath, 'utf8')
+          .replace('type:`subagent-activity`', 'type:`missing-v2-action`')
+          .replace('break}}var app', 'break;default:d.push({type:`subagent-activity`});break}}var app');
+        fs.writeFileSync(target.appMainPath, text);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'fails closed when V2 output only appears after the switch closes',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const text = fs.readFileSync(target.appMainPath, 'utf8')
+          .replace('type:`subagent-activity`', 'type:`missing-v2-action`')
+          .replace('break}}var app', 'break}}var unrelated={type:`subagent-activity`};var app');
+        fs.writeFileSync(target.appMainPath, text);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'fails closed when the V2 activity id comes from another input',
+      run() {
+        const target = createTarget();
+        configure265803Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const text = fs.readFileSync(target.appMainPath, 'utf8').replace('type:`subagent-activity`,id:n.id', 'type:`subagent-activity`,id:other.id');
+        fs.writeFileSync(target.appMainPath, text);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'adapts Codex 26.5803.61601 model selector symbol drift',
+      run() {
+        const target = createTarget();
+        configure265803Features(target, '26.5803.61601', split265803LatestAppMainText);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(new Set(plan.changes.map((change) => change.path)), new Set([
+          target.extensionJsPath,
+          target.headerPath,
+          target.appMainPath,
+          target.appServerManagerSignalsPath,
+        ]));
+        const result = engine.apply(target, { version: 1, conversations: {} });
+        assert.strictEqual(result.idempotent, true);
+        const appMain = fs.readFileSync(target.appMainPath, 'utf8');
+        assert.ok(appMain.includes('codexLocalGroupsCodexUi265803PatchVersion=1;function iBe({userSavedModelString:'));
+        assert.ok(appMain.includes('e?RS(n?.models,e):n?.defaultModel??RS(n?.models,`gpt-5.5`)'));
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }), { changes: [], errors: [], unsafeBundles: [] });
+      },
+    },
+    {
+      name: 'fails closed without writing when Codex 26.5803 loses the model selector signature',
+      run() {
+        const target = createTarget();
+        configure265803Features(target, '26.5803.61601', split265803LatestAppMainText.replace('userSavedModelString', 'missingSavedModelString'));
+        const before = fs.readFileSync(target.appMainPath, 'utf8');
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const result = engine.apply(target, { version: 1, conversations: {} });
+        assert.ok(result.errors.includes('Codex UI 26.5803 marker: 期望 1 处匹配，实际 0 处'));
+        assert.strictEqual(result.idempotent, false);
+        assert.strictEqual(fs.readFileSync(target.appMainPath, 'utf8'), before);
+      },
+    },
+    {
+      name: 'fails closed when Codex 26.5803 has multiple model selector signatures',
+      run() {
+        const target = createTarget();
+        configure265803Features(target, '26.5803.61601', `${split265803LatestAppMainText}function duplicate({userSavedModelString:e}){}`);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5803 marker: 期望 1 处匹配，实际 2 处'));
       },
     },
     {

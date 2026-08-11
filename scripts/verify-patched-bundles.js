@@ -189,6 +189,8 @@ function main() {
     assertContains(target.appServerManagerSignalsPath, 'ROt([...JK,BOt].filter');
     assertContains(target.appMainPath, 'codexLocalGroupsCodexUi265803PatchVersion=1');
     assertContains(target.appMainPath, 'isBackgroundSubagentsEnabled:o=!0');
+    assertMatches(target.appMainPath, /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6000}?case`collabAgentToolCall`:\{if\(![A-Za-z_$][\w$]*\|\|\1\.tool===`wait`\)break;let ([A-Za-z_$][\w$]*)=\{type:`multi-agent-action`,id:\1\.id(?:,[^{}]{0,500})?\};[A-Za-z_$][\w$]*\.push\(\2\);break\}/, 'V1 子 agent 活动转换');
+    assertMatches(target.appMainPath, /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6500}?case`subAgentActivity`:if\(![A-Za-z_$][\w$]*\)break;[A-Za-z_$][\w$]*\.push\(\{type:`subagent-activity`,id:\1\.id(?:,[^{}]{0,300})?\}\);break;?/, 'V2 子 agent 活动转换');
     assertContains(target.appStatsigPath, 'isBackgroundSubagentsEnabled:!0');
     assertNotContains(target.appMainPath, '1221508807');
     assertNotContains(target.appStatsigPath, '1221508807');
@@ -223,6 +225,12 @@ function bundlePaths(target) {
 function assertContains(file, marker) {
   if (!fs.readFileSync(file, 'utf8').includes(marker)) {
     throw new Error(`缺少补丁标记：${file} ${marker}`);
+  }
+}
+
+function assertMatches(file, pattern, label) {
+  if (!pattern.test(fs.readFileSync(file, 'utf8'))) {
+    throw new Error(`缺少补丁契约：${file} ${label}`);
   }
 }
 

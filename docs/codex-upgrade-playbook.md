@@ -1,8 +1,8 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-08-10
-> 当前 Codex：`openai.chatgpt@26.5803.41515`
-> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.54`
+> 基线日期：2026-08-11
+> 当前 Codex：`openai.chatgpt@26.5803.61601`
+> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.55`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -21,10 +21,10 @@ Codex 升级后，应该恢复成以下状态：
 9. 当前 active 会话即使在分组上限之后也必须额外保留；“还有 N 条”只统计实际隐藏行。
 10. 最近会话菜单使用实际 `600px` 高度，列表区独立滚动，矮窗口继续受 Radix 可用高度约束。
 11. 保留本地标题、设置分组、新建分组、在分组中新建会话、搜索会话和 Manage Groups。
-12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` 保留原生子 agent 活动面板，`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
+12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` 保留原生子 agent 活动面板；`26.5803` 必须同时保留 V1 `collabAgentToolCall` 和 V2 `subAgentActivity` 消费链路。`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
 13. 启动时只读检查，不在多窗口启动阶段后台改写 Codex bundle。
 14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
-15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；clean `26.5803` 当前为 `34,566ms`，`26.5730` / `26.5803` 使用版本限定的 `120s` 看门狗。
+15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` 使用版本限定的 `120s` 看门狗。
 
 ## 2. 当前调用链
 
@@ -85,15 +85,15 @@ Header 操作
 
 ## 3. 当前 bundle 与目标契约
 
-下表是当前启用的 `26.5803.41515` 快照。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
+下表是当前启用的 `26.5803.61601` 快照。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
 
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
 | `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` + `this.onTimeout()},12e4))` | 注入 metadata 消息桥；仅对 `26.5730` / `26.5803` 把 Webview 看门狗从 30 秒延长到 120 秒；不改共享会话请求、认证、MCP 或插件。 |
-| `header-3dYZcpGE.js` | `recentTasksMenu` + `Search recent chats/tasks` | `codexLocalGroupsHeaderSafe265803PatchVersion=1` | 当前项目严格隔离、原生 row 组件、`hostId` cache、需求分组、每组 5/+10/15/5、active 保留、粘性项目标题、600px 菜单、独立刷新和本地标题覆盖。 |
-| `app-initial-D-Ftjleg.js` | `conversation.title` + 模型设置校验 | `codexLocalGroupsCodexUi265803PatchVersion=1` | 复用新版原生子 agent 和设置读写；仅对 `gpt-5.6-sol` 保留 Max/Ultra 的模型校验。 |
-| `app-initial-CF-0nv_7.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265803PatchVersion=1` | 独立项目历史查询；manager 能力检测；代理 manager 通过 `listAllThreads()` 兼容分支返回项目会话。 |
-| `app-initial-CF-0nv_7.js` | `networkConfig` / Power / Subagent 语义 | `codexLocalGroupsPower265803PatchVersion=1` | 实际 Reasoning 菜单为 Sol 补 Max/Ultra，Power Picker 不过滤这两档，保留新版原生子 agent 活动发现和面板。 |
+| `header-C4MbtUfx.js` | `recentTasksMenu` + `Search recent chats/tasks` | `codexLocalGroupsHeaderSafe265803PatchVersion=1` | 当前项目严格隔离、原生 row 组件、`hostId` cache、需求分组、每组 5/+10/15/5、active 保留、粘性项目标题、600px 菜单、独立刷新和本地标题覆盖。 |
+| `app-initial-BOIVXb2k.js` | `conversation.title` + 模型设置校验 | `codexLocalGroupsCodexUi265803PatchVersion=1` | 复用新版原生子 agent 和设置读写；仅对 `gpt-5.6-sol` 保留 Max/Ultra 的模型校验。 |
+| `app-initial-4D0dCZ-d.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265803PatchVersion=1` | 独立项目历史查询；manager 能力检测；代理 manager 通过 `listAllThreads()` 兼容分支返回项目会话。 |
+| `app-initial-4D0dCZ-d.js` | `networkConfig` / Power / Subagent 语义 | `codexLocalGroupsPower265803PatchVersion=1` | 实际 Reasoning 菜单为 Sol 补 Max/Ultra，Power Picker 不过滤这两档，保留新版原生子 agent 活动发现和面板。 |
 
 当前 locator 允许 `appMainPath` / `appStatsigPath` / `appServerManagerSignalsPath` 指向同一文件。`CodexPatchEngine.plan()` 必须对合包和分包都只规划一次写入。
 
@@ -236,7 +236,27 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 
 开关消费点数量、Power 锚点或作用域不唯一时必须停止，不得用全局字符串替换猜测新结构。
 
-### 4.7 Metadata 和命令能力
+### 4.7 自定义 provider 的跨模型子 agent
+
+当前 `newapi` provider 已直接使用 `https://rtai.jnrongtu.com/v1` 的 Responses 接口，跨模型失败不是 base URL 或 `/responses` 路径错误。`26.5803` 的原生 Multi-Agent V2 会把 `spawn_agent.message` 标记为加密参数，子线程收到私有 `agent_message + encrypted_content`：Grok 返回 `422 ModelInput`，Kimi 虽接受请求却读不到任务正文。
+
+当前兼容基线：
+
+```toml
+[features]
+multi_agent = true
+multi_agent_v2 = false
+```
+
+- GPT 主线程使用原生 Multi-Agent V1 的 `spawn_agent`，显式指定 `model="grok-4.5"` 或 `model="kimi-k3"`。
+- V1 直接给子线程发送普通 `input_text`，不需要给 Grok/Kimi 增加 `multi_agent_version="v2"`，也不需要改 provider 地址。
+- 禁止用 `codex exec`、shell 后台进程或伪造 UI 代替原生子线程；真实调用必须生成 `collabAgentToolCall`、子线程拓扑和完成状态。
+- `26.5803` Webview 的活动聚合同时消费 V1 `collabAgentToolCall` 与 V2 `subAgentActivity`。升级时两条消费链都必须保留，不能只检查 `type:\`subagent-activity\``。
+- 只有当自定义 provider 已明确支持 V2 的 `agent_message/encrypted_content`，并且 Grok/Kimi 都通过真实请求门禁后，才允许重新启用 V2 或给模型目录增加 V2 标记。
+
+每次 Codex 升级必须执行四组差分：V2 + Grok 应稳定暴露兼容失败或明确变为成功；V1 + Grok、V1 + Kimi 必须返回指定标记；Reload 后还要确认对话框上方出现原生子 agent 活动，而不是一条 `Running codex exec` 命令。
+
+### 4.8 Metadata 和命令能力
 
 `src/metadataStore.js::ConversationMetadataStore` 的数据契约不依赖 Codex bundle hash，升级时不应重构。
 
@@ -328,7 +348,7 @@ npm run plan-patches
 | `test/scripts.test.js` | verifier 强契约变化。 |
 | `package.json` | Local Groups 发布版本提升。 |
 | `README.md` / `README.en.md` / `CHANGELOG.md` | 安装版本、兼容版本、最终行为和历史记录。 |
-| `../openspec/changes/codex-local-groups-extension/` | 任务状态、契约边界、验证证据。 |
+| `openspec/changes/<本次-change>/` | 任务状态、契约边界、验证证据；不得写到仓库同级的 `../openspec/`。 |
 
 若新版只改 Vite hash，上表不代表每个文件都必须修改。只改必要的 locator / fixture / 版本文档，禁止顺手重构其他链路。
 
@@ -403,7 +423,7 @@ npx @vscode/vsce package --no-dependencies
 code --install-extension ./vscode-codex-groups-<version>.vsix --force
 ```
 
-5. 若 Remote CLI 长时无返回，先停止并确认没有半安装状态。仅在已备份 `/root/.vscode-server/extensions/extensions.json` 时使用手工安装兜底：解压 VSIX 中 `extension/` 到独立版本目录，校验 publisher/name/version，原子更新唯一 extension registry 记录，保留旧版目录直到新版验收完成。
+5. 若 Remote CLI 长时无返回，先同时观察 VSCode Server 安装子进程、目标目录和 `extensions.json`；服务端任务可能在 shell 静默时继续安装，不得立即停止或覆盖目录。只有任务完全退出且没有有效安装时，才能在已备份 registry 的前提下使用手工兜底：解压 VSIX 中 `extension/` 到独立版本目录，校验 publisher/name/version，原子更新唯一 extension registry 记录，保留旧版目录直到新版验收完成。
 6. 从已安装目录再跑 compile / plan / verifier，确认安装产物与仓库源码一致。
 
 ### 步骤 8：Reload 后人工验收
@@ -501,6 +521,7 @@ npm run restore-codex-ui
 | v0.0.52 | 初次将 `26.5730` 启动失败归因为 clean Webview 故障；回退后 locator 仍选中残留高版本目录 | bundle 语法、link、plan、verifier 不能替代真实 ready 信号；locator 必须优先 VSCode active registry；错误页根因仍需按完整时间线复核。 |
 | v0.0.53 | `26.5730` 固定 30 秒看门狗误杀 Remote 环境中需要 61-71 秒的健康 Webview | 错误页不能单独证明资源缺失；对时 root render、route mount、ready、timeout；仅对已确认版本延长到 120 秒并保留失败兜底。 |
 | v0.0.54 | `26.5803` 新过滤和 `hostId` cache 漂移；messenger 导出 `$1` 在 replacement string 中被误解释为捕获组 | 所有 `$` 导出名必须通过 replacement callback 写入；二次 plan 必须验证 import 仍合法；启动耗时与看门狗预算分开记录。 |
+| v0.0.55 | `26.5803.61601` 只重压缩 app-main，模型选择函数由 `tBe` 变为 `iBe`，硬编码 marker 锚点失效 | marker 必须围绕唯一业务签名定位；同一 minor 的新 build 也要跑 official clean plan/apply/plan、live verifier 和 Reload 人工门禁。 |
 
 ## 9. Codex 26.727.40816 适配记录
 
@@ -602,7 +623,50 @@ npm run restore-codex-ui
 - clean 副本：`/tmp/openai.chatgpt-26.5803.41515.clean-20260810-093910`；独立副本完成 4 个预期文件 plan/apply/plan、语法和 verifier。
 - 自动化覆盖 locator 多 bundle、真实 Header 三入口、两组长列表、项目历史分页、Sol/Terra 对照、启动看门狗、幂等和 verifier。
 
-## 12. 每次适配的证据记录模板
+## 12. Codex 26.5803.61601 适配记录
+
+### 上游变化与复用
+
+- 官方 linux-x64 预发布版从 `26.5803.41515` 更新到 `26.5803.61601`；资源拓扑未拆分或合并。
+- Header 变为 `header-C4MbtUfx.js`，app main 变为 `app-initial-BOIVXb2k.js`，App Server / Power 变为 `app-initial-4D0dCZ-d.js`。
+- `out/extension.js` 与上一 build 哈希相同；归一化 Vite 文件引用后，Header 和 App Server / Power bundle 也未发生语义变化。
+- app main 增加 198 bytes，模型选择函数由 `tBe()` 重压缩为 `iBe()`；`userSavedModelString`、Reasoning 校验、messenger、execution target 和 V1/V2 子 agent 活动契约保持不变。
+- 继续复用 `CodexExtensionLocator.locate()`、26.5803 Header、Extension Host metadata bridge、项目历史、Power/Reasoning 和 120 秒版本限定看门狗，不扩大版本或协议边界。
+
+### 根因、修复与防复发
+
+旧 `patchCodexUi265803()` 能唯一替换 Sol Max/Ultra 校验，却把 marker 注入点硬编码为 `function tBe({userSavedModelString:`。新版函数名变为 `iBe`，clean plan 因此稳定报两项错误：
+
+```text
+Codex UI 26.5803 marker: 期望 1 处匹配，实际 0 处
+Codex UI 26.5803: 补丁后置条件不完整
+```
+
+符号适配只把 marker 改为按唯一 `function <symbol>({userSavedModelString:` 业务签名定位，并用 replacement callback 保留完整匹配。Sol 生成结果未变，因此 marker 版本保持为 1；`26.5803.41515` 与 `26.5803.61601` fixture 必须同时通过。
+
+后续同一 minor 的 build 更新也不能只看版本白名单。必须重新执行 clean plan 并记录所有 anchor 计数；压缩符号不属于稳定契约，不得把 `tBe`、`iBe` 等名字继续加入新硬编码分支。
+
+Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则都可能跨 `case`、`default` 或 `switch` 闭合边界；只检查 action 对象又会放过未 push 的死对象；不回引外层 `switch(<event>.type)` 还会放过错输入。最终门禁必须绑定同一 event，要求 V1/V2 在各自分支完成真实 push。每次升级的失败回归必须覆盖：输出移到下一 `case`、`default`、`switch` 外，删除 V1 push，以及 V1/V2 使用错误 event 变量。
+
+### 安装阻碍与处理
+
+- Remote `code --install-extension <VSIX> --force` 超过 90 秒没有输出。停止前 registry 和目标目录仍是旧版，但 VSCode Server 的安装任务随后完成了标准 VSIX 布局和 active registry 切换。
+- 发现新版目录后先核对 package、文件数、目标 bundle 和 Codex 二进制哈希；唯一额外文件为标准 `.vsixmanifest`，`package.json` 只增加 VSCode 的 `__metadata`，不是半安装残留。
+- 下次遇到 CLI 无输出，必须同时观察安装子进程、目标目录和 `extensions.json`；停止前后都要再次检查，目标目录一旦出现就先验证，不得立即手工覆盖。手工 registry 兜底仍只允许在已备份且确认安装任务完全退出后执行。
+
+### 验证证据
+
+- Marketplace 官方 VSIX：`/tmp/openai.chatgpt-26.5803.61601-linux-x64.vsix`，SHA-256 `c232a7d039a0817064351d0d2d6915477256cc04ab9e342b13336dca71ee6279`。
+- 回滚副本：`/tmp/openai.chatgpt-26.5803.41515.rollback-20260811-091534`；registry 备份：`/tmp/extensions.json.before-codex-26.5803.61601-20260811-091534`。
+- clean：`/tmp/codex-26580361601-clean-20260811-091534`；隔离验证：`/tmp/codex-26580361601-validation-20260811-092239`。
+- clean 第一次 plan 为 4 个预期文件且 errors 为空；apply 后二次 plan 为 0，Extension Host 和三个唯一 ESM bundle 语法、verifier 均通过。
+- live：`/root/.vscode-server/extensions/openai.chatgpt-26.5803.61601`；4 个预期文件已备份并应用，幂等检查通过，二次 plan 为 0，live verifier 通过。
+- 自动回归加入新版 locator 文件名、`tBe -> iBe` 符号漂移和 V1/V2 假阳性用例；compile、lint、194 tests、`git diff --check` 与 OpenSpec strict validation 通过。
+- Reload 日志：10:45:35.389 请求 React root render，10:46:40.792 记录 `app routes mounted after 66081ms`，10:46:40.811 ready，route 到 ready 为 19ms；无 Oops、资源加载失败或启动看门狗超时。
+- 新 Extension Host 已使用 `26.5803.61601` app-server。用户 Reload 后确认最近会话、分组 5/15/25 与展开收起、标题/分组/新分组/分组内新建会话、600px 滚动、归档刷新、Sol Max/Ultra、原生子 agent 和 Check Status 均无问题。
+- `66,081ms` 是健康但偏慢的上游 route mount；120 秒补丁只防止误杀，该耗时仍作为后续 build 的性能观察项。
+
+## 13. 每次适配的证据记录模板
 
 ```markdown
 ## Codex <version> 适配

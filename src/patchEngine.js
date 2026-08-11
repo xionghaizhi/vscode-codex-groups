@@ -1326,7 +1326,7 @@ function patchCodexUi265803(text, context) {
     return text;
   }
   let next = replaceOnce(text, original, patched, context, 'Codex UI 26.5803 Sol Max Ultra validation');
-  next = replaceOnce(next, 'function tBe({userSavedModelString:', `var ${marker};function tBe({userSavedModelString:`, context, 'Codex UI 26.5803 marker');
+  next = replaceRegexOnce(next, /function [A-Za-z_$][\w$]*\(\{userSavedModelString:/, (match) => `var ${marker};${match}`, context, 'Codex UI 26.5803 marker');
   if (!codexUi265803PostconditionsHold(next)) context.errors.push('Codex UI 26.5803: 补丁后置条件不完整');
   return next;
 }
@@ -1335,7 +1335,8 @@ function codexUi265803PostconditionsHold(text) {
   return countMatches(text, 'codexLocalGroupsCodexUi265803PatchVersion=1') === 1
     && text.includes('i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)')
     && text.includes('isBackgroundSubagentsEnabled:o=!0')
-    && text.includes('type:`subagent-activity`')
+    && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6000}?case`collabAgentToolCall`:\{if\(![A-Za-z_$][\w$]*\|\|\1\.tool===`wait`\)break;let ([A-Za-z_$][\w$]*)=\{type:`multi-agent-action`,id:\1\.id(?:,[^{}]{0,500})?\};[A-Za-z_$][\w$]*\.push\(\2\);break\}/.test(text)
+    && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6500}?case`subAgentActivity`:if\(![A-Za-z_$][\w$]*\)break;[A-Za-z_$][\w$]*\.push\(\{type:`subagent-activity`,id:\1\.id(?:,[^{}]{0,300})?\}\);break;?/.test(text)
     && text.includes('model_reasoning_effort??null')
     && text.includes('model_reasoning_effort:t')
     && !text.includes('1221508807');

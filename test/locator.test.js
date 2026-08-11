@@ -146,20 +146,22 @@ module.exports = {
       },
     },
     {
-      name: 'locates Codex 26.5803 split bundles with an unrelated app-initial bundle',
+      name: 'locates Codex 26.5803.61601 split bundles with an unrelated app-initial bundle',
       run() {
         const root = tempDir('codex-locator-265803');
-        const dir = createExtension(root, 'openai.chatgpt-1', new Date(), '26.5803.41515');
+        const dir = createExtension(root, 'openai.chatgpt-1', new Date(), '26.5803.61601');
         const assets = path.join(dir, 'webview/assets');
         for (const name of ['app-main-a.js', 'app-server-manager-signals-a.js', 'request-a.js', 'sidebar-signals-a.js', 'local-conversation-title-signals-a.js']) fs.unlinkSync(path.join(assets, name));
-        fs.writeFileSync(path.join(assets, 'app-initial-main.js'), 'conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e) supportedReasoningEfforts defaultReasoningEffort');
-        fs.writeFileSync(path.join(assets, 'app-initial-server.js'), 'recentConversationsSortKey thread/list networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}');
-        fs.writeFileSync(path.join(assets, 'app-initial-other.js'), 'supportedReasoningEfforts only');
+        fs.renameSync(path.join(assets, 'header-a.js'), path.join(assets, 'header-C4MbtUfx.js'));
+        fs.writeFileSync(path.join(assets, 'app-initial-BOIVXb2k.js'), 'conversation.title safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e) supportedReasoningEfforts defaultReasoningEffort');
+        fs.writeFileSync(path.join(assets, 'app-initial-4D0dCZ-d.js'), 'recentConversationsSortKey thread/list networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}');
+        fs.writeFileSync(path.join(assets, 'app-initial-B8I9YTld.js'), 'supportedReasoningEfforts only');
 
         const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
-        assert.ok(target.appMainPath.endsWith('app-initial-main.js'));
-        assert.ok(target.appServerManagerSignalsPath.endsWith('app-initial-server.js'));
-        assert.ok(target.appStatsigPath.endsWith('app-initial-server.js'));
+        assert.ok(target.headerPath.endsWith('header-C4MbtUfx.js'));
+        assert.ok(target.appMainPath.endsWith('app-initial-BOIVXb2k.js'));
+        assert.ok(target.appServerManagerSignalsPath.endsWith('app-initial-4D0dCZ-d.js'));
+        assert.ok(target.appStatsigPath.endsWith('app-initial-4D0dCZ-d.js'));
       },
     },
     {

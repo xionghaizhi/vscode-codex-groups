@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.0.55 - 2026-08-11
+
+### Compatibility
+
+- 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5803.61601`，继续保留当前项目隔离、每分组 5/+10/15/5、600px 菜单、三个 metadata 入口、Sol Max/Ultra 和原生子 agent 活动。
+- 新版资源拓扑和功能契约未变；Header、App Server、Extension Host 继续复用 26.5803 的安全补丁和后置条件。
+
+### Fixed
+
+- 修复模型选择函数由 `tBe()` 重压缩为 `iBe()` 后，Codex UI marker 因硬编码函数名无法注入的问题；marker 现在按唯一 `userSavedModelString` 函数签名定位。
+- 新增 `26.5803.61601` locator 与模型选择符号漂移回归，同时保留 `26.5803.41515` fixture。
+- verifier 同时检查 V1 `collabAgentToolCall` / `multi-agent-action` 与 V2 `subAgentActivity`；从外层 `switch(<event>.type)` 绑定同一输入并校验完整 push 片段，拒绝跨 `case/default/switch`、死对象和错输入假阳性。
+
+### Verification
+
+- 官方 VSIX SHA-256 为 `c232a7d039a0817064351d0d2d6915477256cc04ab9e342b13336dca71ee6279`。
+- 官方 clean 副本和 live 扩展均完成 4 个预期文件的安全应用；二次 plan 为 0，语法与 live verifier 通过。
+- compile、lint、194 tests、`git diff --check` 与 OpenSpec strict validation 通过。
+- Reload 日志记录 `app routes mounted after 66081ms`，19ms 后 ready，无 Oops、资源加载失败或启动超时；用户已确认标题、分组、分组内新建会话及其余 UI 门禁正常。
+
 ## v0.0.54 - 2026-08-10
 
 ### Compatibility
