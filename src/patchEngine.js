@@ -708,7 +708,7 @@ function patchHeader(text, context, file) {
   if (context.errors.length > errorCount) return text;
   if (context.safeMode && context.codexMinor === 5803 && next.includes('codexLocalGroupsHeaderSafe265803PatchVersion=1')) {
     if (!safeHeader265803PostconditionsHold(next)) context.errors.push('header 26.5803: 补丁标记不完整');
-    return patchHeaderMetadataLiteral(next);
+    return patchOpenedConversationTitle265803(patchHeaderMetadataLiteral(next), context);
   }
   if (context.safeMode && context.codexMinor === 5803 && next.includes('function Sn(e){return e.kind===`remote`}')) {
     return patchSafeHeader265803(next, context, file);
@@ -1018,7 +1018,26 @@ function finishSafeHeader265803(text, context) {
   next = replaceOnce(next, 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),', 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),', context, 'header 26.5803 local row cache size');
   next = next.replace(/codexLocalGroupsHeaderSafePatchVersion=(?:6|8)/, 'codexLocalGroupsHeaderSafe265803PatchVersion=1');
   if (!safeHeader265803PostconditionsHold(next)) context.errors.push('header 26.5803: 补丁后置条件不完整');
+  return patchOpenedConversationTitle265803(next, context);
+}
+
+function patchOpenedConversationTitle265803(text, context) {
+  if (text.includes('codexLocalGroupsOpenedTitle265803PatchVersion=1')) {
+    if (!openedConversationTitle265803PostconditionsHold(text)) context.errors.push('header 26.5803: 补丁标记不完整');
+    return text;
+  }
+  const original = 'function Bn(e){let t=(0,Gn.c)(64),{allowInitialRouteBack:n,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:l}=e,u=';
+  const refresh = 'let[,codexLocalGroupsSetPageTitleRefresh]=(0,In.useState)(0);(0,In.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),s=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s;';
+  const patched = `var codexLocalGroupsOpenedTitle265803PatchVersion=1;${original.replace('=e,u=', '=e;')}${refresh}let u=`;
+  const next = replaceOnce(text, original, patched, context, 'header 26.5803 opened conversation title');
+  if (!openedConversationTitle265803PostconditionsHold(next)) context.errors.push('header 26.5803 opened conversation title: 补丁后置条件不完整');
   return next;
+}
+
+function openedConversationTitle265803PostconditionsHold(text) {
+  const contract = /var codexLocalGroupsOpenedTitle265803PatchVersion=1;function Bn\(e\)\{let t=\(0,Gn\.c\)\(64\),\{allowInitialRouteBack:n,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:l\}=e;let\[,([A-Za-z_$][\w$]*)\]=\(0,In\.useState\)\(0\);\(0,In\.useEffect\)\(\(\)=>\{let e=\(\)=>\1\(e=>e\+1\);return window\.addEventListener\(`codex-local-groups-refresh`,e\),\(\)=>window\.removeEventListener\(`codex-local-groups-refresh`,e\)\},\[\]\),s=o==null\?s:codexLocalGroupsLocalTitle\(\{kind:`local`,conversation:\{id:o\}\}\)\?\?s;/;
+  return countMatches(text, 'codexLocalGroupsOpenedTitle265803PatchVersion=1') === 1
+    && contract.test(text);
 }
 
 function safeHeader265803PostconditionsHold(text) {
@@ -1337,6 +1356,10 @@ function codexUi265803PostconditionsHold(text) {
     && text.includes('isBackgroundSubagentsEnabled:o=!0')
     && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6000}?case`collabAgentToolCall`:\{if\(![A-Za-z_$][\w$]*\|\|\1\.tool===`wait`\)break;let ([A-Za-z_$][\w$]*)=\{type:`multi-agent-action`,id:\1\.id(?:,[^{}]{0,500})?\};[A-Za-z_$][\w$]*\.push\(\2\);break\}/.test(text)
     && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6500}?case`subAgentActivity`:if\(![A-Za-z_$][\w$]*\)break;[A-Za-z_$][\w$]*\.push\(\{type:`subagent-activity`,id:\1\.id(?:,[^{}]{0,300})?\}\);break;?/.test(text)
+    && /function Zmt\(e,t,[A-Za-z_$][\w$]*\)\{[\s\S]{0,1800}?e\.type===`subAgentActivity`[\s\S]{0,700}?parentConversationId:t[\s\S]{0,900}?e\.type!==`collabAgentToolCall`\|\|e\.tool!==`spawnAgent`[\s\S]{0,700}?parentConversationId:t/.test(text)
+    && /function Xmt\(\{cachedConversations:e,conversationTurns:t,[^}]+\}\)\{[\s\S]{0,700}?=Zmt\(t,r,o\)\.map/.test(text)
+    && /XV=(?:Fs|Ps)\([^,]+,\(e,\{get:t\}\)=>\{[\s\S]{0,1400}?return Xmt\(\{[\s\S]{0,500}?conversationTurns:[^,}]+,[\s\S]{0,300}?parentConversationId:e[\s\S]{0,500}?\}\)\.filter\(/.test(text)
+    && /XV as sS(?:,|\})/.test(text)
     && text.includes('model_reasoning_effort??null')
     && text.includes('model_reasoning_effort:t')
     && !text.includes('1221508807');
@@ -1373,7 +1396,23 @@ function codexPower265803PostconditionsHold(text) {
     && text.includes('r.some(e=>e.reasoningEffort===`max`)')
     && text.includes('r.some(e=>e.reasoningEffort===`ultra`)')
     && text.includes('isBackgroundSubagentsEnabled:!0')
-    && text.includes('subagentsPanel') && !text.includes('1221508807');
+    && /sS as Up(?:,|\})/.test(text)
+    && /function Cen\(e\)\{[\s\S]{0,800}?=no\(Up,[^)]*\)[\s\S]{0,1200}?e=>e\.parentConversationId===n[\s\S]{0,500}?a\.filter\(e\)\.filter\(Een\)[\s\S]{0,500}?r\.filter\(wen\)[\s\S]{0,900}?visibleRows:/.test(text)
+    && /function ([A-Za-z_$][\w$]*)\(e\)\{return e\.isCurrentParentTurn\}/.test(text)
+    && /function ([A-Za-z_$][\w$]*)\(e\)\{return e\.canInteract&&e\.displayName\.trim\(\)\.length>0\}/.test(text)
+    && /xn=\(Xe\.length>0\|\|Ft\)&&[^,;]+[\s\S]{0,40000}?subagentsPanel:xn/.test(text)
+    && composerSubagentPanel265803PostconditionsHold(text)
+    && !text.includes('1221508807');
+}
+
+function composerSubagentPanel265803PostconditionsHold(text) {
+  const render = /xn\?(?:\(0,[A-Za-z_$][\w$]*\.jsx\)|jsx)\(_Rt,\{agentCount:Math\.max\(Xe\.length,Pt\)[\s\S]{0,500}?rows:Xe\}\):null/.test(text);
+  if (!render) return false;
+  const start = text.indexOf('function _Rt({rows:');
+  if (start < 0) return false;
+  const end = text.indexOf('function ', start + 10);
+  const panel = text.slice(start, end < 0 ? text.length : end);
+  return panel.includes('composer.backgroundSubagents.summary');
 }
 
 function patchCodexUi265730(text, context) {

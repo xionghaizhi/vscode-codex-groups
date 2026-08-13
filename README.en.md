@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.55-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.56-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.55
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.56
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.55
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.56
 ```
 
 Then in VSCode:
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.55.vsix
+code --install-extension vscode-codex-groups-0.0.56.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -209,7 +209,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.55
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.56
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -249,13 +249,13 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 
 - Group UI is missing: run `Apply Patches`, then Reload Window.
 - Broken after a Codex upgrade: startup detection offers one-click repair and Reload. You can also run `Apply Patches`, then Reload Window.
-- If Codex `26.5730.61639` shows “could not start / couldn't load its resources,” upgrade to v0.0.55, run `Apply Patches`, then Reload Window. The fixed 30-second watchdog can preempt a healthy Remote Webview that needs 61-71 seconds; v0.0.55 extends it to 120 seconds only for this version and preserves the real failure fallback.
+- If Codex `26.5730.61639` shows “could not start / couldn't load its resources,” upgrade to v0.0.56, run `Apply Patches`, then Reload Window. The fixed 30-second watchdog can preempt a healthy Remote Webview that needs 61-71 seconds; v0.0.56 extends it to 120 seconds only for this version and preserves the real failure fallback.
 - Codex `26.5803.61601` still takes more than 30 seconds to open: this Reload mounted routes after `66,081ms` and reached ready 19ms later, while the UI and grouping features worked normally. The 120-second patch only prevents a premature timeout; it neither forces a 120-second wait nor shortens upstream bundle loading and React route mounting. The delay remains an upstream performance observation.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - Codex is still broken after disabling/uninstalling this extension: run `Codex Local Groups: Restore Original Codex UI`, or run `npm run restore-codex-ui`, then Reload Window. Disabling the extension does not automatically revert patched Codex bundles.
-- If the current project shows groups from other projects, upgrade to v0.0.55, run `Apply Patches`, then Reload Window. The project history is isolated by the current window's `activeWorkspaceRoot`, while child directories are merged into the root project.
-- If one requirement group renders too many conversations at once, upgrade to v0.0.55 and Reload Window. Each group independently starts at five rows, `Show more` adds ten, and collapse controls return it to fifteen or five.
-- If `Set title`, `Set group`, or `Start chat in this group` does nothing, upgrade to v0.0.55, run `Apply Patches`, then Reload Window. This version supports the Codex 26.727/26.5730/26.5803 messenger exports and Extension Host callback.
-- If a resumed conversation has no terminal tools, upgrade to v0.0.55, run `Apply Patches`, then Reload Window. For `26.721.41059` with a resolvable custom provider, app-server falls back to HTTP POST without editing `config.toml`.
+- If the current project shows groups from other projects, upgrade to v0.0.56, run `Apply Patches`, then Reload Window. The project history is isolated by the current window's `activeWorkspaceRoot`, while child directories are merged into the root project.
+- If one requirement group renders too many conversations at once, upgrade to v0.0.56 and Reload Window. Each group independently starts at five rows, `Show more` adds ten, and collapse controls return it to fifteen or five.
+- If `Set title`, `Set group`, or `Start chat in this group` does nothing, upgrade to v0.0.56, run `Apply Patches`, then Reload Window. This version supports the Codex 26.727/26.5730/26.5803 messenger exports and Extension Host callback.
+- If a resumed conversation has no terminal tools, upgrade to v0.0.56, run `Apply Patches`, then Reload Window. For `26.721.41059` with a resolvable custom provider, app-server falls back to HTTP POST without editing `config.toml`.
 - Patch failed: check the `Codex Local Groups` output channel.
 - Node version is too old: the extension prefers the VSCode Server Node; set `codexLocalGroups.nodePath` if needed.

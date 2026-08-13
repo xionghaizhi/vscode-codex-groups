@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.0.56 - 2026-08-13
+
+### Fixed
+
+- 修复同一会话在最近会话下拉显示本地标题、打开后左上角仍显示 Codex 原生标题的问题；打开页复用本地标题并在 metadata 保存后即时刷新，空缺时回退原生标题，不修改 `thread_name`。
+- 记录 V2 membership 被 `canInteract` 过滤后“对话中有活动、顶部 composer 面板缺失”的上游行为；用户 Multi-Agent 配置保持其原始选择，不再由适配流程切换。
+- 将标题双入口及 `Up -> Cen -> visibleRows -> xn -> _Rt` 顶部面板全链加入 patch postcondition、live verifier 和升级 fail-closed 回归。
+
+### Verification
+
+- official clean 隔离副本完成 4 文件 plan/apply/plan，二次 plan 为 0；live Header 已备份应用，二次 plan 为 0，语法和 verifier 通过。
+- compile、lint、206 tests、`git diff --check` 与两个 OpenSpec strict validation 通过；Reload 后标题双入口待确认，子 agent 按用户现有 V2 配置记录顶部 composer、transcript 和任务正文结果的人工门禁也仍为 pending。
+
 ## v0.0.55 - 2026-08-11
 
 ### Compatibility
@@ -18,7 +31,7 @@
 - 官方 VSIX SHA-256 为 `c232a7d039a0817064351d0d2d6915477256cc04ab9e342b13336dca71ee6279`。
 - 官方 clean 副本和 live 扩展均完成 4 个预期文件的安全应用；二次 plan 为 0，语法与 live verifier 通过。
 - compile、lint、194 tests、`git diff --check` 与 OpenSpec strict validation 通过。
-- Reload 日志记录 `app routes mounted after 66081ms`，19ms 后 ready，无 Oops、资源加载失败或启动超时；用户已确认标题、分组、分组内新建会话及其余 UI 门禁正常。
+- Reload 日志记录 `app routes mounted after 66081ms`，19ms 后 ready，无 Oops、资源加载失败或启动超时；用户当时确认标题设置及下拉显示、分组、分组内新建会话和对话正文子 agent activity 可用，但未验证打开页标题一致性与顶部 composer 面板。
 
 ## v0.0.54 - 2026-08-10
 

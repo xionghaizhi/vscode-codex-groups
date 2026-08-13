@@ -2,7 +2,7 @@
 
 > 基线日期：2026-08-11
 > 当前 Codex：`openai.chatgpt@26.5803.61601`
-> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.55`
+> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.56`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -20,8 +20,8 @@ Codex 升级后，应该恢复成以下状态：
 8. 分组上限超过 15 时，同时显示“收起到最近 15 条”和“收起到最近 5 条”。
 9. 当前 active 会话即使在分组上限之后也必须额外保留；“还有 N 条”只统计实际隐藏行。
 10. 最近会话菜单使用实际 `600px` 高度，列表区独立滚动，矮窗口继续受 Radix 可用高度约束。
-11. 保留本地标题、设置分组、新建分组、在分组中新建会话、搜索会话和 Manage Groups。
-12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` 保留原生子 agent 活动面板；`26.5803` 必须同时保留 V1 `collabAgentToolCall` 和 V2 `subAgentActivity` 消费链路。`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
+11. 保留本地标题、设置分组、新建分组、在分组中新建会话、搜索会话和 Manage Groups。同一会话 ID 在最近会话下拉与打开页左上角必须显示一致：本地非空标题优先，本地标题缺失或为空时回退 Codex 原生标题；只覆盖展示，不写 Codex 原生 thread title。
+12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` 保留原生子 agent 活动面板；`26.5803` 必须同时保留 V1 `collabAgentToolCall` 和 V2 `subAgentActivity` 的 transcript 消费链，并按用户当前配置如实验证 composer 面板。不得为让面板出现而切换用户 V1/V2 配置。`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
 13. 启动时只读检查，不在多窗口启动阶段后台改写 Codex bundle。
 14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
 15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` 使用版本限定的 `120s` 看门狗。
@@ -83,6 +83,37 @@ Header 操作
   -> 独立分组视图重算
 ```
 
+### 2.5 标题双消费链
+
+```text
+最近会话下拉 row
+  -> codexLocalGroupsLocalTitle(item)
+  -> 本地非空标题 / Codex 原生标题回退
+
+/local/:conversationId lazy conversation
+  -> Header Bn({ desktopDeepLinkConversationId, title })
+  -> codexLocalGroupsLocalTitle({ kind: "local", conversation: { id } })
+  -> 本地非空标题 / 传入的 Codex 原生 title 回退
+```
+
+`metadataSaved` 发出 `codex-local-groups-refresh` 后，下拉分组视图和当前打开页的 `Header Bn` 都必须重算。两处只读取 Local Groups metadata；不得调用 `thread/name/set` 或改写 Codex 的原生 thread title。
+
+### 2.6 子 agent 双展示链
+
+```text
+App Main Zmt / Xmt
+  -> V1 collabAgentToolCall / V2 subAgentActivity transcript 聚合
+  -> Up 导出
+  -> App Server Cen
+  -> Een(canInteract && displayName)
+  -> wen(isCurrentParentTurn)
+  -> visibleRows
+  -> xn(subagentsPanel)
+  -> _Rt composer 面板
+```
+
+transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5803.61601` 中为 `canInteract=false`，会被 `Een` 排除，因此 transcript 有活动样式不能证明顶部面板可见。用户当前正式配置为 `multi_agent=true, multi_agent_v2=true`；这是用户选择，不是 Local Groups 可以纠正的“漂移”。不得切换 V1/V2，也不得通过 patch `canInteract` 改变 Codex 的交互语义。
+
 ## 3. 当前 bundle 与目标契约
 
 下表是当前启用的 `26.5803.61601` 快照。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
@@ -90,10 +121,10 @@ Header 操作
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
 | `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` + `this.onTimeout()},12e4))` | 注入 metadata 消息桥；仅对 `26.5730` / `26.5803` 把 Webview 看门狗从 30 秒延长到 120 秒；不改共享会话请求、认证、MCP 或插件。 |
-| `header-C4MbtUfx.js` | `recentTasksMenu` + `Search recent chats/tasks` | `codexLocalGroupsHeaderSafe265803PatchVersion=1` | 当前项目严格隔离、原生 row 组件、`hostId` cache、需求分组、每组 5/+10/15/5、active 保留、粘性项目标题、600px 菜单、独立刷新和本地标题覆盖。 |
-| `app-initial-BOIVXb2k.js` | `conversation.title` + 模型设置校验 | `codexLocalGroupsCodexUi265803PatchVersion=1` | 复用新版原生子 agent 和设置读写；仅对 `gpt-5.6-sol` 保留 Max/Ultra 的模型校验。 |
+| `header-C4MbtUfx.js` | `recentTasksMenu` + `Search recent chats/tasks` + `Header Bn` | `codexLocalGroupsHeaderSafe265803PatchVersion=1` + `codexLocalGroupsOpenedTitle265803PatchVersion=1` | 当前项目严格隔离、原生 row 组件、`hostId` cache、需求分组、每组 5/+10/15/5、active 保留、粘性项目标题、600px 菜单；下拉和打开页左上角复用同一本地标题优先规则，`Bn` 监听独立刷新并在本地标题为空时回退原生 title。 |
+| `app-initial-BOIVXb2k.js` | `conversation.title` + 模型设置校验 + `Zmt/Xmt/Up` | `codexLocalGroupsCodexUi265803PatchVersion=1` | 复用新版原生 V1/V2 transcript 聚合和设置读写；仅对 `gpt-5.6-sol` 保留 Max/Ultra 的模型校验。 |
 | `app-initial-4D0dCZ-d.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265803PatchVersion=1` | 独立项目历史查询；manager 能力检测；代理 manager 通过 `listAllThreads()` 兼容分支返回项目会话。 |
-| `app-initial-4D0dCZ-d.js` | `networkConfig` / Power / Subagent 语义 | `codexLocalGroupsPower265803PatchVersion=1` | 实际 Reasoning 菜单为 Sol 补 Max/Ultra，Power Picker 不过滤这两档，保留新版原生子 agent 活动发现和面板。 |
+| `app-initial-4D0dCZ-d.js` | `networkConfig` / Power / `Cen/Een/wen -> visibleRows -> xn -> _Rt` | `codexLocalGroupsPower265803PatchVersion=1` | 实际 Reasoning 菜单为 Sol 补 Max/Ultra，Power Picker 不过滤这两档；保留原生 composer 面板筛选与渲染链，不 patch `canInteract`。 |
 
 当前 locator 允许 `appMainPath` / `appStatsigPath` / `appServerManagerSignalsPath` 指向同一文件。`CodexPatchEngine.plan()` 必须对合包和分包都只规划一次写入。
 
@@ -169,6 +200,7 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 3. 真正可用的 VSCode messenger singleton 导出；必须同时确认 `getInstance()`、`dispatchMessage()` 和 `dispatchHostMessage()`，不能按 `qQ` 等压缩导出名猜测。
 4. 项目历史 query Hook 的调用位置。
 5. Radix 菜单外层、内层滚动区和 `contentStyle` 位置。
+6. 最近会话下拉的标题消费点，以及 `/local/:id` lazy conversation 把 `desktopDeepLinkConversationId` 和原生 `title` 传给 `Header Bn` 的打开页标题消费点。
 
 现有可复用实现：
 
@@ -180,6 +212,16 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 - `patchSafeHeader26721MenuLayout()`：实际 `600px` 高度 + `min-h-0 flex-1 overflow-y-auto`。
 - `safeHeaderHelper()`：生成分组、标题、操作按钮、分组展示数和刷新组件。
 - `safeHeader26721PostconditionsHold()`：校验整体契约，不是只检查 marker。
+- `patchOpenedConversationTitle265803()`：在 `Header Bn` 复用 `codexLocalGroupsLocalTitle()`，并监听 `codex-local-groups-refresh` 立即更新当前打开页标题。
+- `openedConversationTitle265803PostconditionsHold()`：独立校验 marker、刷新监听/清理和本地标题覆盖，缺任一项都 fail closed。
+
+#### 标题双消费最终规则
+
+- 最近会话下拉和打开页左上角必须以同一个 conversation ID 查询 Local Groups metadata。
+- metadata 中本地标题去空白后非空时，两处都显示本地标题；缺失或为空时，两处都回退各自已有的 Codex 原生标题。
+- `metadataSaved` 后两处都通过 `codex-local-groups-refresh` 立即重算，不要求重新打开会话。
+- 该能力只改变 Header 展示，不调用 Codex 原生改名接口，不修改 `session_index.jsonl` 中的 `thread_name`。
+- 新版若只能定位下拉或只能定位 `Header Bn`，plan、apply 和 verifier 都必须失败，不能降级成只修一处。
 
 #### 每组长列表最终规则
 
@@ -228,6 +270,8 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 这两条链路可能在新版中合包或分包，但最终目标不变：
 
 - 子 agent discovery、topology、activity store 和 panel 开关处于启用状态。
+- App Main 的 `Zmt/Xmt` 同时聚合 V1/V2 transcript 活动并通过 `Up` 交给 App Server；App Server 的 `Cen/Een/wen -> visibleRows -> xn -> _Rt` composer 面板链完整。
+- postcondition 和 verifier 必须绑定这条数据、筛选、开关、渲染链；仅找到 `subagentsPanel`、`subagent-activity` 或 transcript chip 不算通过。
 - `gpt-5.6-sol` Power 数据有 `max` 和 `ultra`。
 - `XNt` 的 supported-effort 过滤不删除 Sol Max/Ultra。
 - 截图中真正的 Reasoning 菜单链路是“当前模型 -> 后端 supported efforts -> 菜单数组”。当前压缩符号为 `g$t -> XZ`，下一版应重新按语义找到它，不能只改 Power Picker。
@@ -240,21 +284,22 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 
 当前 `newapi` provider 已直接使用 `https://rtai.jnrongtu.com/v1` 的 Responses 接口，跨模型失败不是 base URL 或 `/responses` 路径错误。`26.5803` 的原生 Multi-Agent V2 会把 `spawn_agent.message` 标记为加密参数，子线程收到私有 `agent_message + encrypted_content`：Grok 返回 `422 ModelInput`，Kimi 虽接受请求却读不到任务正文。
 
-当前兼容基线：
+用户当前正式配置（只读记录，不是 Local Groups 的目标值）：
 
 ```toml
 [features]
 multi_agent = true
-multi_agent_v2 = false
+multi_agent_v2 = true
 ```
 
-- GPT 主线程使用原生 Multi-Agent V1 的 `spawn_agent`，显式指定 `model="grok-4.5"` 或 `model="kimi-k3"`。
-- V1 直接给子线程发送普通 `input_text`，不需要给 Grok/Kimi 增加 `multi_agent_version="v2"`，也不需要改 provider 地址。
+- 隔离差分已证明 V1 会给子线程发送普通 `input_text`，Grok/Kimi 能返回固定标记；这是诊断事实，不授权修改用户正式配置。
+- 用户当前选择 V2；已知 Grok 返回 `422 ModelInput`、Kimi 读不到任务正文、顶部 composer 会过滤 `canInteract=false` membership，都必须如实记录。
 - 禁止用 `codex exec`、shell 后台进程或伪造 UI 代替原生子线程；真实调用必须生成 `collabAgentToolCall`、子线程拓扑和完成状态。
 - `26.5803` Webview 的活动聚合同时消费 V1 `collabAgentToolCall` 与 V2 `subAgentActivity`。升级时两条消费链都必须保留，不能只检查 `type:\`subagent-activity\``。
-- 只有当自定义 provider 已明确支持 V2 的 `agent_message/encrypted_content`，并且 Grok/Kimi 都通过真实请求门禁后，才允许重新启用 V2 或给模型目录增加 V2 标记。
+- 顶部 composer 面板还会经 `Een` 排除 `canInteract=false` 的 membership。当前 V2 membership 因此可以出现在 transcript，却不会进入 `visibleRows`；这不是 panel bundle 被删除，也不能通过强改 `canInteract` 修复。
+- 不给模型目录增加未经验证的 V2 标记，也不因兼容结果自动切换用户的 V1/V2 开关。
 
-每次 Codex 升级必须执行四组差分：V2 + Grok 应稳定暴露兼容失败或明确变为成功；V1 + Grok、V1 + Kimi 必须返回指定标记；Reload 后还要确认对话框上方出现原生子 agent 活动，而不是一条 `Running codex exec` 命令。
+每次 Codex 升级必须执行四组隔离差分：V2 + Grok、V2 + Kimi 都应稳定暴露既知兼容失败或明确变为成功；V1 + Grok、V1 + Kimi 必须返回指定标记。正式 Reload 只按用户现有配置验收并记录顶部 composer、transcript 和任务正文，不能为得到 PASS 改配置。差分必须使用隔离 `CODEX_HOME`；不能隔离时先询问用户。
 
 ### 4.8 Metadata 和命令能力
 
@@ -301,6 +346,25 @@ multi_agent_v2 = false
 
 ## 5. 下一次 Codex 升级的标准流程
 
+### 5.0 全量已知回归矩阵：一次性交付门禁
+
+每次新 build 都必须复制并完整填写下表。阶段列只能写 `PASS + 证据` 或 `N/A + 理由`，不能留空。修改 live 前，Fixture/自动、Official clean、Patched clean 三列全部完成；发布或宣称适配完成前，Live 与 Reload 人工两列全部完成。任一适用项 pending、失败或缺证据，整次适配都不能标记完成。发现遗漏时先把它加入矩阵，再重跑全部适用项，禁止只验证刚暴露的问题。
+
+| 回归域 | 必验内容 | Fixture/自动 | Official clean | Patched clean | Live/verifier | Reload 人工 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 启动 | 资源加载；root render、route mount、ready、timeout 时间线 |  |  |  |  |  |
+| 定位与安全 | active registry；唯一 bundle；未知版本 fail closed；safe-mode 禁项；备份、回滚、语法、幂等 |  |  |  |  |  |
+| 项目历史 | root、child、跨项目、缺 cwd、root 未就绪、manager 能力、分页 cursor |  |  |  |  |  |
+| 分组列表 | 两组各 5；单组 +10；15/5 收起；active 额外保留；隐藏数；600px、scroll、sticky |  |  |  |  |  |
+| Metadata 四入口 | 设置标题、设置分组、新建分组、分组内新会话；真实 messenger、host callback、`metadataSaved` |  |  |  |  |  |
+| 标题双消费 | 同 ID 原生 A/本地 B；下拉和 `Bn` 都显示 B；空白/缺失都回退 A；即时双刷新；cleanup；不写原生标题 |  |  |  |  |  |
+| Sol | Power、Reasoning 菜单、写入、回读、校验；其他模型不变 |  |  |  |  |  |
+| 子 agent | V1/V2 transcript producer；membership producer/export；parent/`Een`/`wen`/`visibleRows`/`xn`/`_Rt`；按用户配置实测 |  |  |  |  |  |
+| 用户配置 | `config.toml` 内容哈希和 mtime 前后不变；不得改 V1/V2、provider 或认证 |  |  |  |  |  |
+| 安装与状态 | VSIX、安装目录、active registry、plan 0、Check Status；无 debug、临时代码或凭证 |  |  |  |  |  |
+
+标题域还必须包含以下负例：dropdown 消费者缺失、`Bn` 消费者缺失、marker 存在但 override/subscribe/cleanup 任一缺失、错误 conversation ID、空白 title。子 agent 域中 transcript 与顶部 composer 必须分开记录，不能互相替代。
+
 ### 步骤 1：记录基线，不立即 Apply
 
 ```bash
@@ -318,6 +382,7 @@ npm run plan-patches
 - locator 是否唯一定位所有语义 bundle。
 - `plan-patches` 的完整错误，不仅仅记录“不兼容”。
 - clean bundle 与已打补丁 bundle 的哈希和备份情况。
+- 用户 `config.toml` 的内容 SHA-256 和 mtime；后续所有步骤结束后必须逐项一致。
 
 如果当前分支是 `dev` / `test` / `pre` / `prod`，先创建 `hotfix/codex-<version>-compat`，不在公共分支直接提交。
 
@@ -330,9 +395,11 @@ npm run plan-patches
 1. 查 `package.json.version` 和新版 bundle 列表。
 2. 按第 3 节语义定位 Header、app main、project history、Power/Subagent。
 3. 确认 Header 使用的 messenger 和 execution-target Hook 真实导出。
-4. 跟踪最近会话原生 query、row 组件和 App Server manager 能力。
-5. 跟踪 Sol Reasoning 菜单生成、设置写入、回读和校验四条链路。
-6. 先补新版 fixture 和失败测试，再修 patch anchor。
+4. 分别追踪 Header 最近会话下拉的标题覆盖，以及 `/local/:id` lazy conversation 到 `Header Bn({ desktopDeepLinkConversationId, title })` 的打开页标题链路。
+5. 跟踪最近会话原生 query、row 组件和 App Server manager 能力。
+6. 跟踪 Sol Reasoning 菜单生成、设置写入、回读和校验四条链路。
+7. 跟踪 `App Main Zmt/Xmt/Up -> App Server Cen/Een/wen -> visibleRows -> xn -> _Rt`；不能以 transcript 可见代替 composer 面板验证。
+8. 先补新版 fixture 和失败测试，再修 patch anchor。
 
 ### 步骤 3：按影响范围修代码
 
@@ -373,8 +440,11 @@ git diff --check
 - 两个需求分组默认各 5 条，一组 +10 不影响另一组。
 - 5 -> 15 -> 25，收起到 15 / 5，active 额外保留，隐藏数正确。
 - 600px 高度、独立滚动和项目标题 sticky。
+- 同一 ID 的原生标题 A、本地非空标题 B：下拉和打开页左上角都显示 B；本地标题缺失或为空时都回退 A。
+- `metadataSaved` 后下拉和当前打开页都立即刷新；打开页刷新监听卸载时会清理。
+- 打开页独立 marker、刷新或标题覆盖缺失时 fail closed；不能只验证下拉 helper 或总 Header marker。
 - Sol Reasoning 菜单 Max/Ultra、Ultra 持久化、其他模型不变。
-- 子 agent 面板和活动发现。
+- V1/V2 transcript 聚合，以及 V1 可交互 membership 经过 `Cen/Een/wen` 进入 `visibleRows`、打开 `xn` 并由 `_Rt` 渲染；删除任一筛选、开关或渲染段时 fail closed。
 - 旧高风险 marker 恢复事务、缺 clean backup 零写入、中途失败回滚。
 
 ### 步骤 5：验证 clean 副本
@@ -390,7 +460,7 @@ apply.idempotent = true
 所有语法检查通过
 ```
 
-同时在 clean 副本执行与 `scripts/verify-patched-bundles.js` 等价的完整后置条件检查。新版如果分包变化，先更新 verifier，不得为了让它通过而删除关键断言。
+同时在 clean 副本执行与 `scripts/verify-patched-bundles.js` 等价的完整后置条件检查。标题门禁必须同时验证下拉本地标题覆盖和 `Header Bn` 的独立 marker、刷新监听/清理、非空优先及原生回退。子 agent 门禁必须验证 `Zmt/Xmt/Up -> Cen/Een/wen -> visibleRows -> xn -> _Rt`，缺任一段都 fail closed。新版如果分包变化，先更新 verifier，不得为了让它通过而删除关键断言。
 
 ### 步骤 6：再应用 live bundle
 
@@ -404,7 +474,7 @@ npm run verify-patched-bundles
 最终要求：
 
 - 第二次 `plan-patches` 显示待修改 0。
-- `verify-patched-bundles` 检查实际安装的新 Codex 目录并通过。
+- `verify-patched-bundles` 检查实际安装的新 Codex 目录并通过，包括下拉与打开页左上角两处标题契约，以及 transcript 与顶部 composer 面板两条子 agent 消费链。
 - 不存在 debug logger、临时 bundle、未删除的诊断代码或凭证。
 
 ### 步骤 7：打包和安装 Local Groups
@@ -438,12 +508,14 @@ code --install-extension ./vscode-codex-groups-<version>.vsix --force
 6. 继续展开到 25，确认同时有收起到 15 和收起到 5。
 7. 分别收起到 15 和 5，数量和“还有 N 条”正确。
 8. 当前 active 会话在第 5 条之后时仍显示且不重复。
-9. 设置标题后，下拉中的当前会话立即显示新标题；设置分组、新建分组、在分组内新建会话都可用。
-10. 菜单高度和滚动正常，项目标题滚动时保持可见。
-11. 归档 / 取消归档 / 删除 / metadata 变化能刷新项目历史。
-12. 5.6 Sol Reasoning 显示 Max/Ultra，选择 Ultra 后不回退 Light。
-13. 子 agent 活动面板和发现链路可用。
-14. `Codex Local Groups: Check Status` 不提示“当前工具不兼容，补丁未应用”。
+9. 设置标题后，下拉中的当前会话立即显示新标题；点击该同一 ID 会话后，打开页左上角必须显示相同标题。
+10. 找一条没有本地非空标题的会话，确认下拉和打开页左上角都回退 Codex 原生标题；不得用设置标题成功代替此检查。
+11. 设置分组、新建分组、在分组内新建会话都可用。
+12. 菜单高度和滚动正常，项目标题滚动时保持可见。
+13. 归档 / 取消归档 / 删除 / metadata 变化能刷新项目历史。
+14. 5.6 Sol Reasoning 显示 Max/Ultra，选择 Ultra 后不回退 Light。
+15. 保持用户现有 Multi-Agent 配置不变，分别启动 Grok/Kimi 子 agent，分开记录顶部 composer、transcript 和任务正文结果；已知上游限制可以记录为失败证据，但不得为得到 PASS 改配置或伪造 `canInteract`。
+16. `Codex Local Groups: Check Status` 不提示“当前工具不兼容，补丁未应用”。
 
 ## 6. 故障分流
 
@@ -465,7 +537,24 @@ code --install-extension ./vscode-codex-groups-<version>.vsix --force
 - thread 的真实 cwd 和 root 规范化是否匹配。
 - 是否错误使用 metadata projectRoot 伪造历史归属。
 
-### 6.3 右下角提示不兼容、补丁未应用
+### 6.3 下拉标题与打开页左上角不一致
+
+先确认两处是否为同一 conversation ID，再分别读取 Local Groups metadata title 和 Codex 原生 title。若同一 ID 在下拉显示本地标题、打开页显示原生标题，说明只修复了 Header dropdown，遗漏了 lazy conversation 到 `Header Bn` 的第二个消费点；这不是导航到了另一条会话，也不应通过改写 Codex 原生 thread title 掩盖。
+
+检查顺序：
+
+1. `codexLocalGroupsLocalTitle()` 是否能从 metadata 读到去空白后的非空标题。
+2. `/local/:id` 是否仍把同一 ID 和原生 `title` 传给 `Header Bn`。
+3. `codexLocalGroupsOpenedTitle265803PatchVersion=1`、`Bn` 标题覆盖、`codex-local-groups-refresh` 监听和清理是否全部存在。
+4. plan 和 verifier 是否错误地只检查总 Header marker 或下拉 helper。
+
+### 6.4 transcript 有子 agent，顶部 composer 面板缺失
+
+先只读记录 `[features]`，不要把 `multi_agent_v2=true` 称为漂移或自动切换。`26.5803.61601` 的 V2 membership 为 `canInteract=false`，App Server `Een` 会把它从 `visibleRows` 排除；transcript 使用独立聚合链，仍能显示活动 chip。这是当前上游行为，应如实记录，不是通过改配置、patch `Een` 或伪造 `canInteract` 修复。
+
+配置正确仍缺失时，依次核对 `App Main Zmt/Xmt/Up`、`App Server Cen/Een/wen`、`visibleRows`、`xn` 和 `_Rt`。plan 或 verifier 若只检查 transcript、`subagentsPanel` 字符串或面板文案，属于假阳性。
+
+### 6.5 右下角提示不兼容、补丁未应用
 
 这说明 locator、版本门禁或 postcondition 有一项不通过。应读取 `plan-patches` 的精确错误，定位漂移链路。不得：
 
@@ -474,7 +563,7 @@ code --install-extension ./vscode-codex-groups-<version>.vsix --force
 - 仅更改 marker 让 plan 变成 0。
 - 删除 verifier 关键断言。
 
-### 6.4 窗口卡死或菜单布局循环
+### 6.6 窗口卡死或菜单布局循环
 
 优先恢复 clean bundle。检查是否重新引入 `900px`、外层 `60vh`、只有 `maxHeight` 的半成品高度，或改写了上游 React compiler cache slot。
 
@@ -522,6 +611,8 @@ npm run restore-codex-ui
 | v0.0.53 | `26.5730` 固定 30 秒看门狗误杀 Remote 环境中需要 61-71 秒的健康 Webview | 错误页不能单独证明资源缺失；对时 root render、route mount、ready、timeout；仅对已确认版本延长到 120 秒并保留失败兜底。 |
 | v0.0.54 | `26.5803` 新过滤和 `hostId` cache 漂移；messenger 导出 `$1` 在 replacement string 中被误解释为捕获组 | 所有 `$` 导出名必须通过 replacement callback 写入；二次 plan 必须验证 import 仍合法；启动耗时与看门狗预算分开记录。 |
 | v0.0.55 | `26.5803.61601` 只重压缩 app-main，模型选择函数由 `tBe` 变为 `iBe`，硬编码 marker 锚点失效 | marker 必须围绕唯一业务签名定位；同一 minor 的新 build 也要跑 official clean plan/apply/plan、live verifier 和 Reload 人工门禁。 |
+| v0.0.56 | 同一 ID 的下拉标题已读 Local Groups metadata，打开页左上角仍读 Codex 原生 title | 标题有 dropdown 与 `Header Bn` 两个消费点；本地非空优先、空缺回退原生，只改展示不写原生 title；自动、verifier、clean/live 和 Reload 都必须验双处。 |
+| v0.0.56 | `multi_agent_v2=true` 时 transcript 有子 agent 样式，顶部 composer 面板缺失 | V2 membership 的 `canInteract=false` 会被 `Een` 过滤；只记录上游行为，不改用户配置、不 patch 交互语义；每次升级验证完整双展示链。 |
 
 ## 9. Codex 26.727.40816 适配记录
 
@@ -648,6 +739,14 @@ Codex UI 26.5803: 补丁后置条件不完整
 
 Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则都可能跨 `case`、`default` 或 `switch` 闭合边界；只检查 action 对象又会放过未 push 的死对象；不回引外层 `switch(<event>.type)` 还会放过错输入。最终门禁必须绑定同一 event，要求 V1/V2 在各自分支完成真实 push。每次升级的失败回归必须覆盖：输出移到下一 `case`、`default`、`switch` 外，删除 V1 push，以及 V1/V2 使用错误 event 变量。
 
+本次后续真实 UI 检查又发现标题门禁范围不足。会话 ID `019feeee-54a3-78b1-aac4-fd11f6a9b5e1` 在 Local Groups metadata 中的标题为“积分订单导出修改”，Codex `session_index.jsonl` 的原生 `thread_name` 为“切换到指定 Git 分支”；最近会话下拉使用前者，打开同一 ID 后左上角却使用后者。根因不是导航错会话或 metadata 丢失，而是此前只覆盖并验收了下拉 row 的 `codexLocalGroupsLocalTitle()`，遗漏了 lazy conversation 把原生 `title` 传入 `Header Bn` 的第二个标题消费点。
+
+修复在同一 Header bundle 增加独立 `codexLocalGroupsOpenedTitle265803PatchVersion=1`：`Bn` 按 `desktopDeepLinkConversationId` 复用本地标题读取，非空本地标题优先，缺失或空白时保留传入的原生 title，并监听/清理 `codex-local-groups-refresh` 以响应 `metadataSaved`。这只是展示覆盖，不写 Codex 原生 thread title。后续适配必须同时定位、测试和验证下拉与 `Bn`；任一消费点缺失都 fail closed。
+
+同一轮 UI 检查还发现 transcript 已显示 Grok/Kimi 子 agent 活动，顶部 composer 面板却缺失。用户启用 `multi_agent_v2=true` 时，App Main 的 V2 `subAgentActivity` 仍进入 transcript 聚合，但 V2 membership 在本 build 为 `canInteract=false`，被 App Server `Een` 排除，导致 `visibleRows=0`、`xn=false`，最终 `_Rt` 不渲染。这证明 transcript 可见不是顶部面板通过证据。
+
+本次曾未经充分确认把正式配置切换为 `[features] multi_agent=true, multi_agent_v2=false`。用户明确要求保持其自配值后，已用改动前备份把 `config.toml` 逐字恢复为 `multi_agent=true, multi_agent_v2=true`。这是配置所有权事故，不是有效修复方案。后续升级不得修改该文件；clean 与 live verifier 仍必须绑定 `Zmt/Xmt/Up -> Cen/Een/wen -> visibleRows -> xn -> _Rt`，缺任一段都 fail closed。
+
 ### 安装阻碍与处理
 
 - Remote `code --install-extension <VSIX> --force` 超过 90 秒没有输出。停止前 registry 和目标目录仍是旧版，但 VSCode Server 的安装任务随后完成了标准 VSIX 布局和 active registry 切换。
@@ -659,11 +758,14 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - Marketplace 官方 VSIX：`/tmp/openai.chatgpt-26.5803.61601-linux-x64.vsix`，SHA-256 `c232a7d039a0817064351d0d2d6915477256cc04ab9e342b13336dca71ee6279`。
 - 回滚副本：`/tmp/openai.chatgpt-26.5803.41515.rollback-20260811-091534`；registry 备份：`/tmp/extensions.json.before-codex-26.5803.61601-20260811-091534`。
 - clean：`/tmp/codex-26580361601-clean-20260811-091534`；隔离验证：`/tmp/codex-26580361601-validation-20260811-092239`。
-- clean 第一次 plan 为 4 个预期文件且 errors 为空；apply 后二次 plan 为 0，Extension Host 和三个唯一 ESM bundle 语法、verifier 均通过。
-- live：`/root/.vscode-server/extensions/openai.chatgpt-26.5803.61601`；4 个预期文件已备份并应用，幂等检查通过，二次 plan 为 0，live verifier 通过。
-- 自动回归加入新版 locator 文件名、`tBe -> iBe` 符号漂移和 V1/V2 假阳性用例；compile、lint、194 tests、`git diff --check` 与 OpenSpec strict validation 通过。
+- 初次版本适配的 clean 第一次 plan 为 4 个预期文件且 errors 为空；apply 后二次 plan 为 0，Extension Host 和三个唯一 ESM bundle 语法、verifier 均通过。该证据不包含本次标题双消费修复。
+- 本次隔离验证：`/tmp/codex-26580361601-title-panel-validation-20260813-105338`；official clean 首次 plan 4、apply 后二次 plan 0、语法、标题与 composer 全链 verifier 均通过。
+- 初次版本适配的 live 为 `/root/.vscode-server/extensions/openai.chatgpt-26.5803.61601`；当时 4 个预期文件已备份并应用，幂等检查通过，二次 plan 为 0，live verifier 通过。该证据不包含本次标题双消费修复。
+- 初次适配的自动回归加入新版 locator 文件名、`tBe -> iBe` 符号漂移和 V1/V2 transcript 假阳性用例；当时 compile、lint、194 tests、`git diff --check` 与 OpenSpec strict validation 通过，但标题覆盖只验证了设置入口和最近会话下拉，子 agent 也未把顶部 composer 渲染链作为独立门禁。
 - Reload 日志：10:45:35.389 请求 React root render，10:46:40.792 记录 `app routes mounted after 66081ms`，10:46:40.811 ready，route 到 ready 为 19ms；无 Oops、资源加载失败或启动看门狗超时。
-- 新 Extension Host 已使用 `26.5803.61601` app-server。用户 Reload 后确认最近会话、分组 5/15/25 与展开收起、标题/分组/新分组/分组内新建会话、600px 滚动、归档刷新、Sol Max/Ultra、原生子 agent 和 Check Status 均无问题。
+- 新 Extension Host 已使用 `26.5803.61601` app-server。用户 Reload 后确认最近会话、分组 5/15/25 与展开收起、标题设置入口及下拉显示、分组/新分组/分组内新建会话、600px 滚动、归档刷新、Sol Max/Ultra、对话正文子 agent 活动和 Check Status 均无问题；该历史“标题通过”不包含打开页左上角一致性，也没有确认顶部 composer 子 agent 面板。
+- 标题双消费修复已通过 compile、lint、206 tests、postcondition/verifier、official clean 与 live plan/apply/plan；Local Groups `0.0.56` VSIX 已打包安装，安装目录 plan 0、verifier 通过；Reload 后同 ID 双处人工验收：**pending**。
+- 子 agent composer 全链已通过 postcondition/verifier、official clean 与 live plan/apply/plan；用户正式配置已恢复为原 V2 选择，Reload 后顶部 composer、transcript 和任务正文人工记录：**pending**。未取得证据前不得改写为通过，也不得为得到通过而改配置。
 - `66,081ms` 是健康但偏慢的上游 route mount；120 秒补丁只防止误杀，该耗时仍作为后续 build 的性能观察项。
 
 ## 13. 每次适配的证据记录模板
@@ -675,8 +777,9 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - 扩展目录：
 - bundle 合并/分裂：
 - Header 调用链：
+- 标题双消费链：dropdown row；`/local/:id` lazy conversation -> `Header Bn`：
 - App Server manager 能力：
-- Reasoning / Subagent 链路：
+- Reasoning / Subagent 链路：`Zmt/Xmt/Up -> Cen/Een/wen -> visibleRows -> xn -> _Rt`：
 
 ### 根因与修改
 - 真实故障：
@@ -692,6 +795,7 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - 版本与文档：
 
 ### 验证证据
+- 全量回归矩阵（每行各阶段 PASS/N/A + 证据）：
 - compile：
 - lint：
 - tests：
@@ -702,7 +806,9 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - VSIX 和安装目录：
 - clean root render / route mount / ready / timeout 时间线：
 - patched root render / route mount / ready / timeout 时间线：
-- Reload 人工验收：
+- Reload 人工验收：同 ID 下拉/打开页左上角一致、本地空缺回退原生、子 agent 顶部 composer/transcript 双处、其余 UI：
+- 用户 `config.toml` 验证前内容 SHA-256 / mtime：
+- 用户 `config.toml` 验证后内容 SHA-256 / mtime（必须一致）：
 
 ### Review
 - 代码/调用链：

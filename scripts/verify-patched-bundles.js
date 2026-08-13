@@ -4,11 +4,13 @@ const { CodexPatchEngine } = require('../src/patchEngine');
 const { configuredCustomModelProviderId } = require('../src/codexConfig');
 const { resolveNodePath } = require('./node-path');
 
-try {
-  main();
-} catch (error) {
-  console.error(error && error.message ? error.message : String(error));
-  process.exit(1);
+if (require.main === module) {
+  try {
+    main();
+  } catch (error) {
+    console.error(error && error.message ? error.message : String(error));
+    process.exit(1);
+  }
 }
 
 function main() {
@@ -179,6 +181,8 @@ function main() {
     assertNotContains(target.appStatsigPath, '1221508807');
   }
   if (is265803) {
+    verifyOpenedConversationTitle265803(target.headerPath);
+    verifyComposerSubagentPanel265803(target.appMainPath, target.appStatsigPath);
     assertContains(target.extensionJsPath, 'this.onTimeout()},12e4))}dispose(){this.disposed=!0');
     assertNotContains(target.extensionJsPath, 'this.onTimeout()},3e4))}dispose(){this.disposed=!0');
     assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)});');
@@ -206,6 +210,54 @@ function main() {
     console.log(`语法检查通过：${item.file}`);
   }
   console.log(`安全补丁标记检查通过：${target.extensionDir}`);
+}
+
+function verifyOpenedConversationTitle265803(headerPath) {
+  assertContains(headerPath, 'codexLocalGroupsOpenedTitle265803PatchVersion=1');
+  assertMatches(
+    headerPath,
+    /function Bn\(e\)\{let t=\(0,Gn\.c\)\(64\),\{allowInitialRouteBack:n,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:l\}=e;let\[,([A-Za-z_$][\w$]*)\]=\(0,In\.useState\)\(0\);\(0,In\.useEffect\)\(\(\)=>\{let e=\(\)=>\1\(e=>e\+1\);return window\.addEventListener\(`codex-local-groups-refresh`,e\),\(\)=>window\.removeEventListener\(`codex-local-groups-refresh`,e\)\},\[\]\),s=o==null\?s:codexLocalGroupsLocalTitle\(\{kind:`local`,conversation:\{id:o\}\}\)\?\?s;/,
+    '26.5803 已打开会话标题刷新',
+  );
+}
+
+function verifyComposerSubagentPanel265803(appMainPath, appServerPath) {
+  verifySubagentMembershipProducer265803(appMainPath);
+  assertMatches(appServerPath, /sS as Up/, '26.5803 子 agent 数据源导入');
+  assertMatches(
+    appServerPath,
+    /function Cen\(e\)\{[\s\S]{0,800}?a=no\(Up,r\?n:null\)[\s\S]{0,800}?e=>e\.parentConversationId===n[\s\S]{0,500}?\.filter\(Een\)[\s\S]{0,300}?s=[A-Za-z_$][\w$]*\.filter\(wen\)[\s\S]{0,800}?visibleRows:c/,
+    '26.5803 子 agent 面板行筛选',
+  );
+  assertMatches(appServerPath, /function wen\(e\)\{return e\.isCurrentParentTurn\}/, '26.5803 当前父轮次筛选');
+  assertMatches(appServerPath, /function Een\(e\)\{return e\.canInteract&&e\.displayName\.trim\(\)\.length>0\}/, '26.5803 可交互子 agent 筛选');
+  assertMatches(appServerPath, /xn=\(Xe\.length>0\|\|Ft\)[\s\S]{0,40000}?subagentsPanel:xn/, '26.5803 子 agent 面板可见性');
+  assertMatches(
+    appServerPath,
+    /xn\?\(0,[A-Za-z_$][\w$]*\.jsx\)\(_Rt,\{agentCount:Math\.max\(Xe\.length,Pt\)[\s\S]{0,500}?rows:Xe\}\):null/,
+    '26.5803 子 agent 面板渲染',
+  );
+  const text = fs.readFileSync(appServerPath, 'utf8');
+  const panelStart = text.indexOf('function _Rt({rows:e');
+  const panelEnd = text.indexOf('}var bRt,', panelStart);
+  if (panelStart < 0 || panelEnd < 0 || !text.slice(panelStart, panelEnd).includes('composer.backgroundSubagents.summary')) {
+    throw new Error(`缺少补丁契约：${appServerPath} 26.5803 子 agent 面板摘要`);
+  }
+}
+
+function verifySubagentMembershipProducer265803(appMainPath) {
+  assertMatches(
+    appMainPath,
+    /function Zmt\(e,t,n\)\{[\s\S]{0,700}?e\.type===`subAgentActivity`[\s\S]{0,700}?parentConversationId:t[\s\S]{0,700}?e\.type!==`collabAgentToolCall`\|\|e\.tool!==`spawnAgent`[\s\S]{0,700}?parentConversationId:t/,
+    '26.5803 子 agent membership 生产者',
+  );
+  assertMatches(appMainPath, /function Xmt\(\{cachedConversations:e,conversationTurns:t,[^}]+\}\)\{[\s\S]{0,700}?=Zmt\(t,r,o\)\.map/, '26.5803 子 agent membership 聚合');
+  assertMatches(
+    appMainPath,
+    /XV=(?:Fs|Ps)\(Z,\(e,\{get:t\}\)=>\{[\s\S]{0,1600}?return Xmt\(\{cachedConversations:n\.getCachedConversations\(\),conversationTurns:o,[\s\S]{0,700}?parentConversationId:e[\s\S]{0,700}?\}\)\.filter/,
+    '26.5803 子 agent membership selector',
+  );
+  assertMatches(appMainPath, /export\{[\s\S]{0,40000}?XV as sS(?:,|\})/, '26.5803 子 agent membership 导出');
 }
 
 function bundlePaths(target) {
@@ -239,3 +291,5 @@ function assertNotContains(file, marker) {
     throw new Error(`存在不应出现的补丁标记：${file} ${marker}`);
   }
 }
+
+module.exports = { verifyComposerSubagentPanel265803, verifyOpenedConversationTitle265803 };

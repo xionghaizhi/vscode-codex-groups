@@ -9,7 +9,17 @@
 - [x] 7. 完成 compile、lint、194 tests、`git diff --check` 和代码/QA review。
 - [x] 8. 提升 Local Groups 版本，同步中英文 README、CHANGELOG、升级手册和本 OpenSpec。
 - [x] 9. 打包并安装 Local Groups VSIX，从安装目录复验 compile、plan 0 和 verifier。
-- [x] 10. Reload 后记录启动时间线并完成人工业务 UI 门禁。
+- [x] 10. Reload 后记录启动时间线并完成当时定义的人工业务 UI 门禁。
+
+## 打开页标题一致性补充修复
+
+- [x] 11. 用同一 conversation ID 对照本地 metadata 与原生 session index，确认不是错误导航或 metadata 覆盖，而是最近会话和打开页使用了不同标题源。
+- [x] 12. 先增加“本地标题优先、空白回退原生、保存后即时刷新”的失败回归，再在 Header `Bn` 展示层复用 `codexLocalGroupsLocalTitle()` 使测试转绿。
+- [x] 13. 新增独立打开页标题 marker，并增加缺少标题覆盖、刷新订阅或清理监听时的 postcondition / verifier fail-closed 回归。
+- [x] 14. 在 official clean 副本和已带旧 Header marker 的 live bundle 完成 plan/apply/plan、语法、postcondition、verifier 和幂等验证。
+- [ ] 15. Reload 后设置当前会话标题，确认下拉和左上角同时立即刷新；再从最近会话重新打开同一 conversation ID，确认两处文字一致；最后用本地标题缺失或空白的同一 ID，确认下拉和左上角都回退原生标题。
+- [x] 16. 建立下一版必须一次性执行的全量已知回归矩阵，并新增“任一适用项 pending 就不得宣称适配完成”的 OpenSpec 与升级手册门禁。
+- [x] 17. 记录用户配置所有权事故并恢复改动前 `config.toml`；以后适配前后校验内容哈希和 mtime，不得自动切换 V1/V2。
 
 ## 当前证据
 
@@ -25,5 +35,16 @@
 - 安装阻碍：Remote CLI 长时间无输出，停止后 VSCode Server 安装任务仍完成目录和 registry；已验证标准 `.vsixmanifest`、package `__metadata` 和关键文件，处理原则见 `design.md`。
 - Reload 证据：`exthost7/openai.chatgpt/Codex.log` 在 10:45:35.389 记录 React root render，10:46:40.792 记录 `app routes mounted after 66081ms`，10:46:40.811 ready，route 到 ready 为 19ms；无 Oops、资源加载失败或启动超时。
 - Reload 后新 Extension Host 运行 `/root/.vscode-server/extensions/openai.chatgpt-26.5803.61601/bin/linux-x86_64/codex`，active registry 为 Codex `26.5803.61601` / Local Groups `0.0.55`。
-- 用户在上述 Reload 后确认无问题；前述人工门禁中的最近会话项目隔离、分组 5/15/25 与展开收起、标题/分组/新分组/分组内新建会话、600px 滚动、归档刷新、Sol Max/Ultra、原生子 agent 和 Check Status 均通过。
+- 用户在上述 Reload 后确认最近会话项目隔离、分组 5/15/25 与展开收起、设置标题动作与最近会话行显示、分组/新分组/分组内新建会话、600px 滚动、归档刷新、Sol Max/Ultra、对话正文子 agent 活动和 Check Status 可用。该轮没有验证顶部 composer 子 agent 面板，也没有进入同一会话核对打开页左上角，不能作为本次两个人工门禁的通过证据。
 - 性能观察：功能启动健康，但 route mount 仍需 `66,081ms`；120 秒看门狗避免误杀，不代表上游启动延迟已消除。
+
+## 标题错配复现证据
+
+- conversation ID：`019feeee-54a3-78b1-aac4-fd11f6a9b5e1`。
+- Local Groups metadata 标题：`积分订单导出修改`。
+- Codex 原生 `thread_name`：`切换到指定 Git 分支`。
+- 标题修复隔离验证：`/tmp/codex-26580361601-title-panel-validation-20260813-105338`；official clean 首次 plan 4、apply 语法/幂等通过、二次 plan 0、verifier 通过。
+- 标题修复 live 验证：已备份并更新 `header-C4MbtUfx.js`；语法/幂等通过，二次 plan 0，verifier 通过。
+- 自动化：compile、lint、206 tests、`git diff --check` 与两个 OpenSpec strict validation 通过。
+- VSIX：`vscode-codex-groups-0.0.56.vsix` 已打包并安装；active registry 为 Local Groups `0.0.56`，安装目录 compile、plan 0、verifier 通过。最终 SHA-256 由同目录 `sha256sum` 发布证据记录，避免在被打包文档内写入自身哈希造成循环变化。
+- 修复前的复现状态为最近会话显示本地标题、打开页左上角显示原生标题；修复后的 Reload 人工门禁完成前，不得把该项标记为通过。

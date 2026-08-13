@@ -80,13 +80,14 @@ const header265803Text = [
   'var messages={recentTasksMenu:1,search:{defaultMessage:`Search recent chats`}};function Sn(e){return e.kind===`remote`}function Cn(){}',
   'var An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e=null,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(Be,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
   'const nativeMenu=(0,Q.jsx)(m,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:J,open:g,onOpenChange:_,children:ce});',
+  'function Bn(e){let t=(0,Gn.c)(64),{allowInitialRouteBack:n,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:l}=e,u=n!==void 0&&n,d=B(),f=c??Hn,p=d.pathname===`/`,m=Vn,{data:h}=r(),g=p,_;t[0]===g?_=t[1]:(_={taskFilter:`current`,limit:20,enabled:g},t[0]=g,t[1]=_);let v=F(_),y;t[2]===h?y=t[3]:(y=h??[],t[2]=h,t[3]=y);let b=hn(v.data,y,null),x=u||xe==null,S;t[25]===i?S=t[26]:(S=ae(`draggable extension:px-panel`,i),t[25]=i,t[26]=S);let C=`justify-between`,T;t[27]===C?T=t[28]:(T=ae(`flex items-center electron:h-toolbar extension:py-row-y`,C),t[27]=C,t[28]=T);let E;t[29]!==c||t[30]!==!1?(E=null,t[29]=c,t[30]=!1,t[31]=E):E=t[31];let D;t[32]!==f||t[33]!==b||t[34]!==x||t[35]!==s?(D=(0,$.jsx)(`div`,{children:s?(0,$.jsx)(`span`,{children:s}):null}),t[32]=f,t[33]=b,t[34]=x,t[35]=s,t[36]=D):D=t[36];return D}function Vn(){}',
 ].join('');
-const split265803AppMainText = 'class Messenger{static getInstance(){return new Messenger}dispatchMessage(){}dispatchHostMessage(){}}var pu=Messenger.getInstance();function useMessenger(){pu.dispatchMessage(`native`,{}),pu.dispatchHostMessage({type:`native`})}function cC(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function tBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:{if(!o||n.tool===`wait`)break;let e={type:`multi-agent-action`,id:n.id};d.push(e);break}case`subAgentActivity`:if(!o)break;d.push({type:`subagent-activity`,id:n.id});break}}var app=`conversation.title supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{pu as $1,cC as LV};';
+const split265803AppMainText = 'class Messenger{static getInstance(){return new Messenger}dispatchMessage(){}dispatchHostMessage(){}}var pu=Messenger.getInstance();function useMessenger(){pu.dispatchMessage(`native`,{}),pu.dispatchHostMessage({type:`native`})}function cC(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function tBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:{if(!o||n.tool===`wait`)break;let e={type:`multi-agent-action`,id:n.id};d.push(e);break}case`subAgentActivity`:if(!o)break;d.push({type:`subagent-activity`,id:n.id});break}}function Zmt(e,t,n){let r=[];for(let i of e)for(let e of i.items)if(e.type===`subAgentActivity`)r.push({conversationId:e.agentThreadId,parentConversationId:t});else if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let e of e.receiverThreadIds)r.push({conversationId:e,parentConversationId:t});return r}function Xmt({cachedConversations:e,conversationTurns:t,getThreadRuntimeStatusEvidence:n,parentConversationId:r,sourceLinkedThreads:o}){let i=Zmt(t,r,o).map(e=>e);return i}var XV=Ps(Z,(e,{get:t})=>{let n=t(lr,e);return Xmt({cachedConversations:[],conversationTurns:n.turns,getThreadRuntimeStatusEvidence:null,parentConversationId:e,sourceLinkedThreads:null}).filter(({conversationId:e})=>!t(blocked).includes(e))});var app=`conversation.title supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{pu as $1,cC as LV,XV as sS};';
 const split265803LatestAppMainText = split265803AppMainText.replace(
   'function tBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),',
   'function RS(e,t){return e?.find(e=>e.model===t)}function iBe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=e?RS(n?.models,e):n?.defaultModel??RS(n?.models,`gpt-5.5`),',
 );
-const split265803AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;function Ob(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function Mh(e){return{id:e.conversationId??e.id,cwd:e.cwd}}function Ib(){return!0}function $Ie(e){return e.name??null}function Fb(e){return e}function vr(e){return e}class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return GIe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function _Xe(){return vXe(`recent-conversations`)}function zZ(e,t){let n=e?.find(e=>e.model===t);return n==null?YXe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>gD(e.reasoningEffort))}function POt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=ROt((t?[...JK,BOt]:JK).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=ROt(VOt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function ROt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var YXe=[],JK=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],BOt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},VOt=[];var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;export{_Xe as $D};';
+const split265803AppServerText = 'import{sS as Up}from"./app-initial-main265803.js";var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;function Ob(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function Mh(e){return{id:e.conversationId??e.id,cwd:e.cwd}}function Ib(){return!0}function $Ie(e){return e.name??null}function Fb(e){return e}function vr(e){return e}class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return GIe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function _Xe(){return vXe(`recent-conversations`)}function zZ(e,t){let n=e?.find(e=>e.model===t);return n==null?YXe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>gD(e.reasoningEffort))}function POt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=ROt((t?[...JK,BOt]:JK).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=ROt(VOt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function ROt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var YXe=[],JK=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],BOt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},VOt=[];function Cen(e){let t=(0,Den.c)(12),{activeConversationId:n,enabled:r,includeMentionItems:i}=e,a=no(Up,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e;t[5]===n?e=t[6]:(e=e=>e.parentConversationId===n,t[5]=n,t[6]=e);let r=a.filter(e).filter(Een);o=i?r.map(Ten):[],s=r.filter(wen),t[0]=n,t[1]=i,t[2]=a,t[3]=o,t[4]=s}else o=t[3],s=t[4];let c=s,l=no(Oen,r?n:null),u;return t[7]!==l||t[8]!==o||t[9]!==a||t[10]!==c?(u={rows:a,visibleRows:c,mentionItems:o,firstApproval:l},t[7]=l,t[8]=o,t[9]=a,t[10]=c,t[11]=u):u=t[11],u}function wen(e){return e.isCurrentParentTurn}function Ten(e){return{conversationId:e.conversationId,status:e.status}}function Een(e){return e.canInteract&&e.displayName.trim().length>0}function _Rt({rows:e,agentCount:t=e.length}){return panel({id:`composer.backgroundSubagents.summary`,children:e.map(row)})}function unn(e){let K=e,Ke=!0,Je={ui:{active:!0}},{rows:Ye,visibleRows:Xe,mentionItems:Ze,firstApproval:Qe}=Cen({activeConversationId:K,enabled:Ke,includeMentionItems:Je.ui?.active===!0}),Pt=Ye.filter(a8).length,Ft=Pt>0,at=!1,vn=!1,lt=!1,st=!1,xn=(Xe.length>0||Ft)&&!at&&!vn&&!lt&&!st;xFt({subagentsPanel:xn});return xn?jsx(_Rt,{agentCount:Math.max(Xe.length,Pt),canStopAll:Ft,isStopAllDisabled:!1,onOpenThread:e=>{Nt(e)},onStopAll:zt,rows:Xe}):null}var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;export{_Xe as $D};';
 
 function createTarget() {
   const dir = tempDir('codex-patch');
@@ -384,6 +385,65 @@ module.exports = {
       },
     },
     {
+      name: 'keeps the 26.5803 opened conversation title consistent with the local dropdown title',
+      run() {
+        const target = createTarget();
+        configure265803Features(target, '26.5803.61601', split265803LatestAppMainText);
+        const metadata = { version: 1, conversations: { abc: { title: '积分订单导出修改' }, empty: { title: '   ' } } };
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, metadata);
+        assert.deepStrictEqual(plan.errors, []);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        assert.ok(header.includes('codexLocalGroupsHeaderSafe265803PatchVersion=1'));
+        assert.ok(header.includes('codexLocalGroupsOpenedTitle265803PatchVersion=1'));
+        assert.ok(header.includes('let[,codexLocalGroupsSetPageTitleRefresh]=(0,In.useState)(0)'));
+        assert.ok(header.includes('window.addEventListener(`codex-local-groups-refresh`,e)'));
+        assert.ok(header.includes('window.removeEventListener(`codex-local-groups-refresh`,e)'));
+        assert.ok(header.includes('s=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s'));
+        const headerStart = header.indexOf('function Bn(e){');
+        const headerEnd = header.indexOf('function Vn()', headerStart);
+        const pageHeader = header.slice(headerStart, headerEnd);
+        const script = `const listeners={},window={addEventListener:(name,fn)=>listeners[name]=fn,removeEventListener:(name,fn)=>listeners[name]===fn&&delete listeners[name]},codexLocalGroupsLocalTitle=({conversation})=>conversation.id==='abc'?'积分订单导出修改':null,In={useState:()=>[0,fn=>globalThis.refresh=fn(0)],useEffect:fn=>globalThis.cleanup=fn()},Gn={c:()=>[]},B=()=>({pathname:'/local/abc'}),Hn=()=>{},Vn=()=>{},r=()=>({data:[]}),F=()=>({data:[]}),hn=()=>[],xe=null,ae=()=>'',$={jsx:(type,props)=>props.children};globalThis.refresh=null;${pageHeader};const local=Bn({desktopDeepLinkConversationId:'abc',title:'切换到指定 Git 分支'}),missing=Bn({desktopDeepLinkConversationId:'missing',title:'切换到指定 Git 分支'}),empty=Bn({desktopDeepLinkConversationId:'empty',title:'切换到指定 Git 分支'});listeners['codex-local-groups-refresh']();cleanup();console.log(JSON.stringify([local,missing,empty,refresh,listeners['codex-local-groups-refresh']??null]))`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), ['积分订单导出修改', '切换到指定 Git 分支', '切换到指定 Git 分支', 1, null]);
+      },
+    },
+    {
+      name: 'fails closed when the 26.5803 opened conversation title hook is incomplete',
+      run() {
+        const drifts = [
+          ['window.addEventListener(`codex-local-groups-refresh`,e)', 'window.addEventListener(`broken`,e)'],
+          ['s=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s', 's=s'],
+          ['),s=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s;let u=', ');let u='],
+        ];
+        for (const [before, after] of drifts) {
+          const target = createTarget();
+          configure265803Features(target, '26.5803.61601', split265803LatestAppMainText);
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+          const header = fs.readFileSync(target.headerPath, 'utf8');
+          const partial = header.replace(before, after);
+          assert.notStrictEqual(partial, header);
+          fs.writeFileSync(target.headerPath, partial);
+          const plan = engine.plan(target, { version: 1, conversations: {} });
+          assert.ok(plan.errors.includes('header 26.5803: 补丁标记不完整'));
+          assert.ok(!plan.changes.some((change) => change.path === target.headerPath));
+        }
+        const target = createTarget();
+        configure265803Features(target, '26.5803.61601', split265803LatestAppMainText);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+        const header = fs.readFileSync(target.headerPath, 'utf8');
+        const title = 's=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s';
+        const moved = header.replace(`${title};let u=`, 'let u=').replace('function Vn()', `${title};function Vn()`);
+        assert.notStrictEqual(moved, header);
+        fs.writeFileSync(target.headerPath, moved);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('header 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
       name: 'fails closed when V1 output only appears in the next case branch',
       run() {
         const target = createTarget();
@@ -396,6 +456,57 @@ module.exports = {
         fs.writeFileSync(target.appMainPath, text);
         const plan = engine.plan(target, { version: 1, conversations: {} });
         assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'fails closed when the 26.5803 subagent membership producer, selector, or export drifts',
+      run() {
+        const drifts = [
+          ['e.type===`subAgentActivity`', 'e.type===`missingSubAgentActivity`'],
+          ['let i=Zmt(t,r,o).map(e=>e)', 'let i=[]'],
+          ['return Xmt({cachedConversations:[],conversationTurns:n.turns,getThreadRuntimeStatusEvidence:null,parentConversationId:e,sourceLinkedThreads:null}).filter', 'return [].filter'],
+          ['XV as sS', 'XV as missingMemberships'],
+        ];
+        for (const [before, after] of drifts) {
+          const target = createTarget();
+          configure265803Features(target);
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+          const current = fs.readFileSync(target.appMainPath, 'utf8');
+          const drifted = current.replace(before, after);
+          assert.notStrictEqual(drifted, current);
+          fs.writeFileSync(target.appMainPath, drifted);
+          const plan = engine.plan(target, { version: 1, conversations: {} });
+          assert.ok(plan.errors.includes('Codex UI 26.5803: 补丁标记不完整'));
+        }
+      },
+    },
+    {
+      name: 'fails closed when the composer subagent panel chain is incomplete while transcript activity remains',
+      run() {
+        const drifts = [
+          ['sS as Up', 'sS as MissingUp'],
+          ['e.parentConversationId===n', 'e.parentConversationId===other'],
+          ['a.filter(e).filter(Een)', 'a.filter(e)'],
+          ['return e.canInteract&&e.displayName.trim().length>0', 'return e.displayName.trim().length>0'],
+          ['return e.isCurrentParentTurn', 'return !0'],
+          ['xn=(Xe.length>0||Ft)', 'xn=Ft'],
+          ['subagentsPanel:xn', 'subagentsPanel:!1'],
+          ['return xn?jsx(_Rt,{agentCount:', 'function FakePanel(){return null}return xn?jsx(FakePanel,{agentCount:'],
+          ['composer.backgroundSubagents.summary', 'composer.backgroundSubagents.missing'],
+        ];
+        for (const [before, after] of drifts) {
+          const target = createTarget();
+          configure265803Features(target);
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          for (const change of engine.plan(target, { version: 1, conversations: {} }).changes) fs.writeFileSync(change.path, change.nextText);
+          const current = fs.readFileSync(target.appStatsigPath, 'utf8');
+          const drifted = current.replace(before, after);
+          assert.notStrictEqual(drifted, current);
+          fs.writeFileSync(target.appStatsigPath, drifted);
+          const plan = engine.plan(target, { version: 1, conversations: {} });
+          assert.ok(plan.errors.includes('Codex power 26.5803: 补丁标记不完整'));
+        }
       },
     },
     {
@@ -533,11 +644,13 @@ module.exports = {
         const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
         const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
         const main = bundles[target.appMainPath].replace(/export\{[^}]+\};?/, '');
-        const mainScript = `${main};let models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'},{model:'gpt-5.6-terra',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'}];console.log(JSON.stringify({sol:tBe({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,terra:tBe({userSavedModelString:'gpt-5.6-terra',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort}))`;
+        const mainScript = `function Ps(){return null}var Z;${main};let models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'},{model:'gpt-5.6-terra',supportedReasoningEfforts:[{reasoningEffort:'high'}],defaultReasoningEffort:'high'}];console.log(JSON.stringify({sol:tBe({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,terra:tBe({userSavedModelString:'gpt-5.6-terra',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort}))`;
         const mainResult = childProcess.spawnSync(resolveNodePath(), ['-e', mainScript], { encoding: 'utf8' });
         assert.strictEqual(mainResult.status, 0, mainResult.stderr);
         assert.deepStrictEqual(JSON.parse(mainResult.stdout), { sol: 'max', terra: 'high' });
-        const server = bundles[target.appServerManagerSignalsPath].replace(/export\{[^}]+\};?/, '');
+        const server = bundles[target.appServerManagerSignalsPath]
+          .replace(/import\{[^}]+\}from[^;]+;/, 'var Up=null;')
+          .replace(/export\{[^}]+\};?/, '');
         const serverScript = `function gD(){return true}${server};(async()=>{let efforts=value=>value.map(reasoningEffort=>({description:'',reasoningEffort})),models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh'])},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low'])}],pages={first:{data:[{id:'root',cwd:'/project',updatedAt:3},{id:'other',cwd:'/project2',updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',updatedAt:1}],nextCursor:null}},store={threadsById:new Map,listRecentThreads:({cursor})=>Promise.resolve(cursor==null?pages.first:pages.next),getThreadSummaryFromThread:e=>({conversationId:e.id,cwd:e.cwd,updatedAt:e.updatedAt}),shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265803(store,'/project');console.log(JSON.stringify({power:POt(models).map(e=>e.reasoningEffort),sol:zZ(models,'gpt-5.6-sol').map(e=>e.reasoningEffort),terra:zZ(models,'gpt-5.6-terra').map(e=>e.reasoningEffort),project:project.map(e=>e.id)}))})()`;
         const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
         assert.strictEqual(serverResult.status, 0, serverResult.stderr);
