@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.57 - 2026-08-14
+
+- 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5810.41047`。
+- 新增 26.5810 专用 Header / UI / Power / 项目历史 / `jP` 120 秒看门狗，不复用 26.5803 压缩名。
+- 上游已有 Sol Ultra，只补缺失 Max；标题双消费、metadata 四入口、V1/V2 子 agent 链继续保留。
+- official clean 4 文件 plan/apply/plan 与 verifier 通过。不修改用户 `config.toml`，不在本 change 安装 live。
+
 ## v0.0.56 - 2026-08-13
 
 ### Fixed

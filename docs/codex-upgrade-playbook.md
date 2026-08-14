@@ -1,8 +1,9 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-08-11
-> 当前 Codex：`openai.chatgpt@26.5803.61601`
-> 当前 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.56`
+> 基线日期：2026-08-14
+> 适配目标 Codex：`openai.chatgpt@26.5810.41047`
+> live active Codex 仍为 `openai.chatgpt@26.5803.61601`（本 change 未安装 live）
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.57`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -13,7 +14,7 @@ Codex 升级后，应该恢复成以下状态：
 1. 最近会话只显示当前窗口 `activeWorkspaceRoot` 根目录及其子目录。
 2. 子目录会话归入当前工作区根项目，不产生第二个项目标题。
 3. 不扩大共享 recent store，不给共享 `thread/list` 注入 `cwd` / `cwds`。
-4. Codex `26.721` / `26.727` / `26.5730` / `26.5803` 通过独立项目历史查询分页读取会话，再在本地严格过滤根目录和子目录。
+4. Codex `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` 通过独立项目历史查询分页读取会话，再在本地严格过滤根目录和子目录。
 5. 工作区 root 未就绪、查询失败或项目归属不可确认时 fail closed，不用其他项目数据兜底。
 6. 页面结构为“项目 > 需求分组 > 会话”，项目标题在内层滚动区粘性置顶。
 7. **每个需求分组独立**默认显示最近 5 条，“展开更多”每次 +10，不是整个项目共享 5 条。
@@ -21,10 +22,10 @@ Codex 升级后，应该恢复成以下状态：
 9. 当前 active 会话即使在分组上限之后也必须额外保留；“还有 N 条”只统计实际隐藏行。
 10. 最近会话菜单使用实际 `600px` 高度，列表区独立滚动，矮窗口继续受 Radix 可用高度约束。
 11. 保留本地标题、设置分组、新建分组、在分组中新建会话、搜索会话和 Manage Groups。同一会话 ID 在最近会话下拉与打开页左上角必须显示一致：本地非空标题优先，本地标题缺失或为空时回退 Codex 原生标题；只覆盖展示，不写 Codex 原生 thread title。
-12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` 保留原生子 agent 活动面板；`26.5803` 必须同时保留 V1 `collabAgentToolCall` 和 V2 `subAgentActivity` 的 transcript 消费链，并按用户当前配置如实验证 composer 面板。不得为让面板出现而切换用户 V1/V2 配置。`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
+12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` 保留原生子 agent 活动面板；`26.5803` 必须同时保留 V1 `collabAgentToolCall` 和 V2 `subAgentActivity` 的 transcript 消费链，并按用户当前配置如实验证 composer 面板。不得为让面板出现而切换用户 V1/V2 配置。`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
 13. 启动时只读检查，不在多窗口启动阶段后台改写 Codex bundle。
 14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
-15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` 使用版本限定的 `120s` 看门狗。
+15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` / `26.5810` 使用版本限定的 `120s` 看门狗。`26.5810` 必须改 `jP`，不能再用旧 `onTimeout()},3e4`。
 
 ## 2. 当前调用链
 
@@ -116,7 +117,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 ## 3. 当前 bundle 与目标契约
 
-下表是当前启用的 `26.5803.61601` 快照。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
+下表曾是 `26.5803.61601` live 快照。`26.5810.41047` 是已完成 official clean 适配、尚未 live 安装的目标：Header `header-DPGKK91L.js`，app main/statsig/Power `app-initial-CuO8rPSL.js`，server/history `app-initial-DLJA_f9P.js`。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
 
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
@@ -148,7 +149,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 ### 4.2 `src/patchEngine.js::CodexPatchEngine.plan()`
 
-当前明确支持 `26.721`、`26.727`、`26.5730` 和 `26.5803`。其他 minor 版本会报：
+当前明确支持 `26.721`、`26.727`、`26.5730`、`26.5803` 和 `26.5810`。其他 minor 版本会报：
 
 ```text
 不支持的 Codex 扩展版本
@@ -158,7 +159,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 版本升级后检查：
 
-- safe mode 仍只规划 extension host、Header 和已确认的 `26.721` / `26.727` / `26.5730` / `26.5803` 特性 bundle。
+- safe mode 仍只规划 extension host、Header 和已确认的 `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` 特性 bundle。
 - 若新协议改变 `thread/list` 字段，先查新版 App Server 类型或源码；不推测 `cwd` / `cwds`。
 - 仅当生成后契约变化时提升对应 marker。只有 hash 或 clean anchor 变化、生成结果不变时，marker 可保持。
 - marker 提升必须保留上一个 live marker 的原地升级路径和后置条件检查。
@@ -170,7 +171,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 - `patchExtensionMetadataHelper()` 生成 `codexLocalGroupsPatchVersion=17`。
 - `patchExtensionMessageHandler()` 在 Codex 原生 webview message handler 边界拦截 Local Groups 消息。
-- `patchExtensionWebviewTimeout()` 仅对 `26.5730` / `26.5803` 把已确认的 `30s` 看门狗精确改为 `120s`；保留 `onTimeout()`，锚点漂移时 fail closed。
+- `patchExtensionWebviewTimeout()` 对 `26.5730` / `26.5803` 使用旧 `onTimeout()},3e4` 锚点，对 `26.5810` 使用唯一 `jP` `timeoutMs:3e4},3e4` 锚点，把已确认的 `30s` 看门狗精确改为 `120s`；保留 `onTimeout()`，锚点漂移时 fail closed。
 - `patchExtensionResponsesWebsocketFallback()` 仅为 `26.721.41059` 的已确认自定义 provider 追加 `supports_websockets=false` CLI 覆盖。
 - 支持 `getMetadata`、`saveConversationMeta`、`archiveConversationMeta`、`setPendingGroup`、`resetPendingGroup`。
 - 设置标题使用 `showInputBox(..., ignoreFocusOut: true)`。
@@ -818,3 +819,34 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 ```
 
 适配完成前，不得把“单元测试通过”等同于“真实 Codex UI 已验收”。
+
+
+## 13. Codex 26.5810.41047 适配记录
+
+### 上游变化与复用
+
+- 官方 linux-x64 从 `26.5803.61601` 更新到 `26.5810.41047`。
+- Locator 仍能唯一定位：Header `header-DPGKK91L.js`；app main/statsig/Power `app-initial-CuO8rPSL.js`；server/history `app-initial-DLJA_f9P.js`。
+- 不能复用 26.5803 压缩名。Power 函数为 `Pon`/`Ion`/`Lon`/`kon`/`u$`；历史 hook 为 `Ron()/Bon()`；transcript 为 `dyn/uyn/lJ as FT`；composer 为 `DOr/AOr/OOr/xzn`。
+- 看门狗改为 `var jP=class`，旧 `this.onTimeout()},3e4))}dispose()` 消失。
+- 上游已有 `gpt-5.6-sol:ultra`，没有 `gpt-5.6-sol:max`。
+
+### 根因、修复与防复发
+
+- 白名单未含 `5810` 会在定位成功后报 `不支持的 Codex 扩展版本`。
+- 必须新增 5810 专用 patch / marker / 后置条件 / verifier，禁止把 5803 锚点放行到新 minor。
+- `jP` 必须独立验证；跳过 120s 会在 30s 再次 Oops。旧 61601 route mount 实测 `66,081ms`。
+- messenger 扫描改为先收集 `getInstance()` 单例再对导出求交，避免 3757 个 export 对 6MB 文件做 O(n×size) 扫描。
+- `runSyntaxChecks` 必须跳过空的 `localTitlePath`，否则 apply 在写入后回滚。
+- Ultra 只保留上游那一处对象；只插入 Max。
+
+### 验证证据
+
+- official VSIX SHA-256 `d6ef20f9dca65f732918bcc3c84ba32d6cf284fd813f0da9738929422f6e3e25`。
+- final validation（patched clean）：`/tmp/codex-26581041047-final-validation-20260814-102809/openai.chatgpt-26.5810.41047`。
+- plan 4 / apply 幂等 / 二次 plan 0 / verifier 通过。
+- official/patched clean 为隔离副本，不挂载 UI；live Reload 启动时间线已取得。
+- Live active 已切到 Codex `26.5810.41047` 与 Local Groups `0.0.57`；live plan 4 / apply / plan 0 / verifier 通过。Local Groups VSIX SHA-256 为 `74c9c00feea52b6e9552cfced1d08993419603b353b0b1319927df2462d61a33`。
+- 本适配代码路径未写 `config.toml`。任务期间 agent 编排 / CLI 激活曾意外切换 model/reasoning；主线程最终恢复原始 `grok-4.6/high`，SHA-256 `9c0111f6be62b12a9af2ae53b8619c2ab9fe6de126ff13c3ad30de90b8d7649e`，mtime `2026-08-13 19:17:29 +0800`。
+- Reload 日志：2026-08-14 10:50:30.398 root render，10:51:03.528 routes mounted（`36,967ms`），10:51:03.550 ready，无 `Webview did not finish starting`。用户确认 5.0 UI 矩阵无问题。
+- 本次阻碍：5810 压缩名/分包全漂移，`jP` 启动看门狗锚点改变，export 扫描性能退化，`localTitlePath=null` 会触发语法检查回滚；首轮还遗漏子 agent composer 全链、`promptNewGroup`、25 条 15/5 双收起和同 ID 标题双消费。下次升级必须一次跑完全矩阵，不得只验刚发现的一项。

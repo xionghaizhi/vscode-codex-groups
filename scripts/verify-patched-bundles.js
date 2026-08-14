@@ -19,6 +19,7 @@ function main() {
   const is26727 = String(target.version).startsWith('26.727.');
   const is265730 = String(target.version).startsWith('26.5730.');
   const is265803 = String(target.version).startsWith('26.5803.');
+  const is265810 = String(target.version).startsWith('26.5810.');
   const emptyMetadata = 'var codexLocalGroupsInitialMeta={"version":1,"conversations":{}}';
   assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=17');
   assertNotContains(target.extensionJsPath, 'typeof $g!="undefined"?$g:require("vscode")');
@@ -38,9 +39,9 @@ function main() {
   } else if (fallbacks.length) {
     throw new Error(`存在过期 Responses WebSocket fallback：${target.extensionJsPath}`);
   }
-  const headerMarker = is265803 ? 'codexLocalGroupsHeaderSafe265803PatchVersion=1' : `codexLocalGroupsHeaderSafePatchVersion=${is265730 ? 16 : is26727 ? 15 : 14}`;
-  const rowMarker = is265803 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),' : is265730 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),' : is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),';
-  const titleSlot = is265803 ? 24 : 23;
+  const headerMarker = is265810 ? 'codexLocalGroupsHeaderSafe265810PatchVersion=1' : is265803 ? 'codexLocalGroupsHeaderSafe265803PatchVersion=1' : `codexLocalGroupsHeaderSafePatchVersion=${is265730 ? 16 : is26727 ? 15 : 14}`;
+  const rowMarker = is265810 || is265803 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),' : is265730 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),' : is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),';
+  const titleSlot = is265810 || is265803 ? 24 : 23;
   assertContains(target.headerPath, headerMarker);
   assertContains(target.headerPath, rowMarker);
   assertContains(target.headerPath, `t[${titleSlot}]!==n.conversation.title`);
@@ -58,7 +59,7 @@ function main() {
   assertContains(target.headerPath, 'dispatchHostMessage({type:`new-chat`})');
   assertContains(target.headerPath, 'codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null');
   assertContains(target.headerPath, 'codexRecentTaskRootReady?codexRecentConversationFilter');
-  const historySource = is265803 ? '{data:m}=r(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is265730 ? '{data:d}=p(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is26727 ? '{data:f}=v(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)';
+  const historySource = is265810 ? '{data:p}=j(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is265803 ? '{data:m}=r(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is265730 ? '{data:d}=p(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is26727 ? '{data:f}=v(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)';
   assertContains(target.headerPath, historySource);
   assertContains(target.headerPath, 'function codexRecentTaskFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
   assertContains(target.headerPath, 'function codexRecentConversationFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
@@ -84,9 +85,9 @@ function main() {
   assertContains(target.headerPath, '收起到最近 15 条');
   assertContains(target.headerPath, '收起到最近 5 条');
   assertContains(target.headerPath, '展开更多');
-  const projectRowsViewRuntime = is265803 || is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
+  const projectRowsViewRuntime = is265810 || is265803 || is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
   assertContains(target.headerPath, `function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,${projectRowsViewRuntime}.useState)(0);return(0,${projectRowsViewRuntime}.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(\`codex-local-groups-refresh\`,e),()=>window.removeEventListener(\`codex-local-groups-refresh\`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}`);
-  const projectRowsView = is265803 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N' : is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
+  const projectRowsView = is265810 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:y,onClose:i,row:An,onActiveArchiveStart:u}' : is265803 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N' : is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
   assertContains(target.headerPath, projectRowsView);
   assertNotContains(target.headerPath, 'project-more-');
   assertNotContains(target.headerPath, 'codex-local-groups-expanded-projects-v1');
@@ -177,6 +178,35 @@ function main() {
     assertContains(target.appMainPath, 'type:`subagent-activity`');
     assertContains(target.appStatsigPath, 'isBackgroundSubagentsEnabled:!0');
     assertContains(target.appStatsigPath, 'subagentsPanel');
+    assertNotContains(target.appMainPath, '1221508807');
+    assertNotContains(target.appStatsigPath, '1221508807');
+  }
+
+  if (is265810) {
+    verifyOpenedConversationTitle265810(target.headerPath);
+    verifyComposerSubagentPanel265810(target.appMainPath);
+    assertContains(target.extensionJsPath, 'timeoutMs:12e4})},12e4)');
+    assertNotContains(target.extensionJsPath, 'timeoutMs:3e4})},3e4)');
+    assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)});');
+    assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(n))return;let o=B8(n)');
+    assertContains(target.headerPath, 'Oat as codexLocalGroupsMessengerImport');
+    assertContains(target.headerPath, 'KZ as codexUseExecutionTarget');
+    assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsProjectHistory265810PatchVersion=1');
+    assertContains(target.appServerManagerSignalsPath, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}');
+    assertContains(target.appServerManagerSignalsPath, 'typeof e.addThreadArchivedListener===`function`');
+    assertContains(target.appServerManagerSignalsPath, 'typeof e.listAllThreads!==`function`');
+    assertNotContains(target.appServerManagerSignalsPath, 'Number.MAX_SAFE_INTEGER');
+    assertContains(target.appMainPath, 'codexLocalGroupsCodexUi265810PatchVersion=1');
+    assertContains(target.appMainPath, 'r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)');
+    assertContains(target.appStatsigPath, 'codexLocalGroupsPower265810PatchVersion=1');
+    assertContains(target.appStatsigPath, 'gpt-5.6-sol:max');
+    assertContains(target.appStatsigPath, 'gpt-5.6-sol:ultra');
+    assertContains(target.appStatsigPath, 'Pon([...Ion,Lon].filter');
+    assertContains(target.appStatsigPath, 'r.some(e=>e.reasoningEffort===`max`)');
+    assertContains(target.appStatsigPath, 'r.some(e=>e.reasoningEffort===`ultra`)');
+    assertMatches(target.appMainPath, /isBackgroundSubagentsEnabled:[A-Za-z_$][\w$]*=!0/, '26.5810 背景子 agent 默认开启');
+    assertMatches(target.appMainPath, /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6000}?case`collabAgentToolCall`:\{if\(![A-Za-z_$][\w$]*\|\|\1\.tool===`wait`\)break;let ([A-Za-z_$][\w$]*)=\{type:`multi-agent-action`,id:\1\.id(?:,[^{}]{0,500})?\};[A-Za-z_$][\w$]*\.push\(\2\);break\}/, 'V1 子 agent 活动转换');
+    assertMatches(target.appMainPath, /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6500}?case`subAgentActivity`:if\(![A-Za-z_$][\w$]*\)break;[A-Za-z_$][\w$]*\.push\(\{type:`subagent-activity`,id:\1\.id(?:,[^{}]{0,300})?\}\);break;?/, 'V2 子 agent 活动转换');
     assertNotContains(target.appMainPath, '1221508807');
     assertNotContains(target.appStatsigPath, '1221508807');
   }
@@ -292,4 +322,41 @@ function assertNotContains(file, marker) {
   }
 }
 
-module.exports = { verifyComposerSubagentPanel265803, verifyOpenedConversationTitle265803 };
+function verifyOpenedConversationTitle265810(headerPath) {
+  assertContains(headerPath, 'codexLocalGroupsOpenedTitle265810PatchVersion=1');
+  assertMatches(
+    headerPath,
+    /function Bn\(e\)\{let t=\(0,Gn\.c\)\(64\),\{allowInitialRouteBack:r,className:i,centerContent:a,desktopDeepLinkConversationId:s,title:c,onBack:l,trailing:u\}=e;let\[,([A-Za-z_$][\w$]*)\]=\(0,In\.useState\)\(0\);\(0,In\.useEffect\)\(\(\)=>\{let e=\(\)=>\1\(e=>e\+1\);return window\.addEventListener\(`codex-local-groups-refresh`,e\),\(\)=>window\.removeEventListener\(`codex-local-groups-refresh`,e\)\},\[\]\),c=s==null\?c:codexLocalGroupsLocalTitle\(\{kind:`local`,conversation:\{id:s\}\}\)\?\?c;/,
+    '26.5810 已打开会话标题刷新',
+  );
+}
+
+function verifyComposerSubagentPanel265810(appMainPath) {
+  verifySubagentMembershipProducer265810(appMainPath);
+  assertMatches(appMainPath, /function DOr\(e\)\{[\s\S]{0,900}?wc\(lJ,/, '26.5810 子 agent membership 消费');
+  assertMatches(appMainPath, /function DOr\(e\)\{[\s\S]{0,1600}?parentConversationId===n[\s\S]{0,400}?\.filter\(AOr\)[\s\S]{0,400}?\.filter\(OOr\)[\s\S]{0,900}?visibleRows:c/, '26.5810 子 agent 面板行筛选');
+  assertMatches(appMainPath, /function OOr\(e\)\{return e\.isCurrentParentTurn\}/, '26.5810 当前父轮次筛选');
+  assertMatches(appMainPath, /function AOr\(e\)\{return e\.canInteract&&e\.displayName\.trim\(\)\.length>0\}/, '26.5810 可交互子 agent 筛选');
+  assertMatches(appMainPath, /function aNr[\s\S]{0,40000}?fn=\(Xe\.length>0\|\|kt\)/, '26.5810 子 agent 面板可见性');
+  assertMatches(appMainPath, /function aNr[\s\S]{0,50000}?subagentsPanel:fn/, '26.5810 子 agent 面板开关');
+  assertMatches(appMainPath, /function aNr[\s\S]{0,80000}?fn\?\(0,J6\.jsx\)\(xzn,[\s\S]{0,400}?rows:Xe/, '26.5810 子 agent 面板渲染');
+  const text = fs.readFileSync(appMainPath, 'utf8');
+  const panelStart = text.indexOf('function xzn(e){');
+  const panelEnd = text.indexOf('function ', panelStart + 1);
+  if (panelStart < 0 || panelEnd < 0 || !text.slice(panelStart, panelEnd).includes('composer.backgroundSubagents.summary') || !text.slice(panelStart, panelEnd).includes('{rows:n,agentCount:r')) {
+    throw new Error(`缺少补丁契约：${appMainPath} 26.5810 子 agent 面板摘要`);
+  }
+}
+
+function verifySubagentMembershipProducer265810(appMainPath) {
+  assertMatches(
+    appMainPath,
+    /function dyn\(e,t,[A-Za-z_$][\w$]*,[A-Za-z_$][\w$]*\)\{[\s\S]{0,1800}?e\.type===`subAgentActivity`[\s\S]{0,500}?parentConversationId:t[\s\S]{0,900}?e\.type!==`collabAgentToolCall`\|\|e\.tool!==`spawnAgent`[\s\S]{0,500}?parentConversationId:t/,
+    '26.5810 子 agent membership 生产者',
+  );
+  assertMatches(appMainPath, /function uyn\(\{cachedConversations:e,conversationTurns:t,[^}]+\}\)\{[\s\S]{0,900}?=dyn\(t,/, '26.5810 子 agent membership 聚合');
+  assertMatches(appMainPath, /lJ=Dc\([^,]+,\(e,\{get:t\}\)=>\{[\s\S]{0,2400}?uyn\(\{[\s\S]{0,800}?conversationTurns:[^,}]+,[\s\S]{0,800}?parentConversationId:/, '26.5810 子 agent membership selector');
+  assertMatches(appMainPath, /lJ as FT(?:,|\})/, '26.5810 子 agent membership 导出');
+}
+
+module.exports = { verifyComposerSubagentPanel265803, verifyComposerSubagentPanel265810, verifyOpenedConversationTitle265803, verifyOpenedConversationTitle265810 };

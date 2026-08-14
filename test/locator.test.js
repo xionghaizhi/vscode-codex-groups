@@ -165,6 +165,25 @@ module.exports = {
       },
     },
     {
+      name: 'locates Codex 26.5810.41047 split app-main/statsig and server bundles',
+      run() {
+        const root = tempDir('codex-locator-265810');
+        const dir = createExtension(root, 'openai.chatgpt-1', new Date(), '26.5810.41047');
+        const assets = path.join(dir, 'webview/assets');
+        for (const name of ['app-main-a.js', 'app-server-manager-signals-a.js', 'request-a.js', 'sidebar-signals-a.js', 'local-conversation-title-signals-a.js']) fs.unlinkSync(path.join(assets, name));
+        fs.renameSync(path.join(assets, 'header-a.js'), path.join(assets, 'header-DPGKK91L.js'));
+        fs.writeFileSync(path.join(assets, 'app-initial-CuO8rPSL.js'), 'conversation.title untitledThreadLabel networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m} supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)');
+        fs.writeFileSync(path.join(assets, 'app-initial-DLJA_f9P.js'), 'recentConversationsSortKey thread/list');
+        fs.writeFileSync(path.join(assets, 'app-initial-other.js'), 'supportedReasoningEfforts only');
+
+        const target = new CodexExtensionLocator({ extensionsRoot: root }).locate();
+        assert.ok(target.headerPath.endsWith('header-DPGKK91L.js'));
+        assert.ok(target.appMainPath.endsWith('app-initial-CuO8rPSL.js'));
+        assert.ok(target.appStatsigPath.endsWith('app-initial-CuO8rPSL.js'));
+        assert.ok(target.appServerManagerSignalsPath.endsWith('app-initial-DLJA_f9P.js'));
+      },
+    },
+    {
       name: 'fails when header bundle cannot be uniquely identified',
       run() {
         const root = tempDir('codex-locator-missing');
