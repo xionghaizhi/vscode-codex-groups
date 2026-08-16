@@ -50,7 +50,7 @@ const openedTitle265810Header = [
   'c=s==null?c:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:s}})??c;',
 ].join('');
 
-const composerSubagentPanel265810 = [
+const composerSubagentPanel26581041047 = [
   'function DOr(e){let a=wc(lJ,r?n:null),parent=e=>e.parentConversationId===n,rw=a.filter(parent).filter(AOr),s=rw.filter(OOr),c=s;return{rows:a,visibleRows:c,mentionItems:o,firstApproval:l}}',
   'function OOr(e){return e.isCurrentParentTurn}',
   'function AOr(e){return e.canInteract&&e.displayName.trim().length>0}',
@@ -58,7 +58,7 @@ const composerSubagentPanel265810 = [
   'function aNr(){let {rows:Ye,visibleRows:Xe}=DOr({activeConversationId:ie,enabled:Ke,includeMentionItems:!0}),fn=(Xe.length>0||kt)&&!it;dCn({subagentsPanel:fn});return fn?(0,J6.jsx)(xzn,{agentCount:Math.max(Xe.length,Ot),rows:Xe}):null}',
 ].join('');
 
-const subagentMemberships265810 = [
+const subagentMemberships26581041047 = [
   'function uyn({cachedConversations:e,conversationTurns:t,parentConversationId:a,sourceLinkedThreads:o}){let i=dyn(t,a,null,null).map(e=>e);return i}',
   'function dyn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){',
   'if(e.type===`subAgentActivity`){i.set(e.agentThreadId,{parentConversationId:t});continue}',
@@ -66,6 +66,68 @@ const subagentMemberships265810 = [
   'lJ=Dc($,(e,{get:t})=>{let n=t(store,e);return uyn({cachedConversations:[],conversationTurns:n.turns,parentConversationId:e,sourceLinkedThreads:null}).filter(Boolean)});',
   'export{foo as a,lJ as FT,bar as z};',
 ].join('');
+
+const composerSubagentPanel26581052044 = [
+  'function AOr(e){let a=jc(uJ,r?n:null),parent=e=>e.parentConversationId===n,rw=a.filter(parent).filter(NOr),s=rw.filter(jOr),c=s;return{rows:a,visibleRows:c,mentionItems:o,firstApproval:l}}',
+  'function jOr(e){return e.isCurrentParentTurn}',
+  'function NOr(e){return e.canInteract&&e.displayName.trim().length>0}',
+  'function Szn(e){let t=(0,Dzn.c)(40),{rows:n,agentCount:r,canStopAll:i,isStopAllDisabled:a,onOpenThread:o,onStopAll:s}=e;return {id:`composer.backgroundSubagents.summary`,rows:n}}',
+  'function cNr(){let {rows:Ye,visibleRows:Xe}=AOr({activeConversationId:ie,enabled:Ke,includeMentionItems:!0}),pn=(Xe.length>0||kt)&&!it;dCn({subagentsPanel:pn});return pn?(0,q6.jsx)(Szn,{agentCount:Math.max(Xe.length,Ot),rows:Xe}):null}',
+].join('');
+
+const subagentMemberships26581052044 = [
+  'function dyn({cachedConversations:e,conversationTurns:t,parentConversationId:a,sourceLinkedThreads:o}){let i=fyn(t,a,null,null).map(e=>e);return i}',
+  'function fyn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){',
+  'if(e.type===`subAgentActivity`){i.set(e.agentThreadId,{parentConversationId:t});continue}',
+  'if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))i.set(e.receiverThreadIds[0],{parentConversationId:t})}return Array.from(i.values())}',
+  'uJ=Nc($,(e,{get:t})=>{let n=t(store,e);return dyn({cachedConversations:[],conversationTurns:n.turns,parentConversationId:e,sourceLinkedThreads:null}).filter(Boolean)});',
+  'export{foo as a,uJ as FT,bar as z};',
+].join('');
+
+const SCRIPTS_265810_VARIANTS = [
+  {
+    build: '41047',
+    memberships: subagentMemberships26581041047,
+    panel: composerSubagentPanel26581041047,
+    selectorDrifts: [
+      ['return uyn({cachedConversations:[],conversationTurns:n.turns,parentConversationId:e,sourceLinkedThreads:null}).filter(Boolean)', 'return [].filter(Boolean)'],
+      ['lJ as FT', 'lJ as broken'],
+    ],
+    composerDrifts: [
+      ['wc(lJ,r?n:null)', 'wc(broken,r?n:null)'],
+      ['.filter(AOr)', '.filter(Boolean)'],
+      ['.filter(OOr)', '.filter(Boolean)'],
+      ['visibleRows:c', 'visibleRows:[]'],
+      ['return e.canInteract&&e.displayName.trim().length>0', 'return e.displayName.trim().length>0'],
+      ['return e.isCurrentParentTurn', 'return !0'],
+      ['fn=(Xe.length>0||kt)&&!it', 'fn=kt'],
+      ['subagentsPanel:fn', 'subagentsPanel:!1'],
+      ['rows:Xe', 'rows:[]'],
+      ['composer.backgroundSubagents.summary', 'composer.backgroundSubagents.broken'],
+    ],
+  },
+  {
+    build: '52044',
+    memberships: subagentMemberships26581052044,
+    panel: composerSubagentPanel26581052044,
+    selectorDrifts: [
+      ['return dyn({cachedConversations:[],conversationTurns:n.turns,parentConversationId:e,sourceLinkedThreads:null}).filter(Boolean)', 'return [].filter(Boolean)'],
+      ['uJ as FT', 'uJ as broken'],
+    ],
+    composerDrifts: [
+      ['jc(uJ,r?n:null)', 'jc(broken,r?n:null)'],
+      ['.filter(NOr)', '.filter(Boolean)'],
+      ['.filter(jOr)', '.filter(Boolean)'],
+      ['visibleRows:c', 'visibleRows:[]'],
+      ['return e.canInteract&&e.displayName.trim().length>0', 'return e.displayName.trim().length>0'],
+      ['return e.isCurrentParentTurn', 'return !0'],
+      ['pn=(Xe.length>0||kt)&&!it', 'pn=kt'],
+      ['subagentsPanel:pn', 'subagentsPanel:!1'],
+      ['rows:Xe', 'rows:[]'],
+      ['composer.backgroundSubagents.summary', 'composer.backgroundSubagents.broken'],
+    ],
+  },
+];
 
 module.exports = {
   name: 'scripts',
@@ -220,77 +282,63 @@ module.exports = {
         assert.throws(() => verifyOpenedConversationTitle265810(headerPath), /缺少补丁/);
       },
     },
-    {
-      name: 'verifies the 26.5810 composer subagent panel contract',
-      run() {
-        const appMainPath = writeBundle(subagentMemberships265810 + composerSubagentPanel265810, 'app-main.js');
-        assert.doesNotThrow(() => verifyComposerSubagentPanel265810(appMainPath));
+    ...SCRIPTS_265810_VARIANTS.flatMap((v) => [
+      {
+        name: `verifies the 26.5810.${v.build} composer subagent panel contract`,
+        run() {
+          const appMainPath = writeBundle(v.memberships + v.panel, 'app-main.js');
+          assert.doesNotThrow(() => verifyComposerSubagentPanel265810(appMainPath, v.build));
+        },
       },
-    },
-    {
-      name: 'fails closed when the 26.5810 subagent membership producer drifts',
-      run() {
-        const appMainPath = writeBundle(
-          subagentMemberships265810.replace('e.type===`subAgentActivity`', 'e.type===`broken`') + composerSubagentPanel265810,
-          'app-main.js',
-        );
-        assert.throws(() => verifyComposerSubagentPanel265810(appMainPath), /membership 生产者/);
+      {
+        name: `fails closed when the 26.5810.${v.build} subagent membership producer drifts`,
+        run() {
+          const appMainPath = writeBundle(
+            v.memberships.replace('e.type===`subAgentActivity`', 'e.type===`broken`') + v.panel,
+            'app-main.js',
+          );
+          assert.throws(() => verifyComposerSubagentPanel265810(appMainPath, v.build), /membership 生产者/);
+        },
       },
-    },
-    {
-      name: 'fails closed when the 26.5810 V1 spawnAgent parent binding drifts',
-      run() {
-        const appMainPath = writeBundle(
-          subagentMemberships265810.replace('e.tool!==`spawnAgent`))i.set(e.receiverThreadIds[0],{parentConversationId:t}', 'e.tool!==`spawnAgent`))i.set(e.receiverThreadIds[0],{parentConversationId:other}') + composerSubagentPanel265810,
-          'app-main.js',
-        );
-        assert.throws(() => verifyComposerSubagentPanel265810(appMainPath), /membership 生产者/);
+      {
+        name: `fails closed when the 26.5810.${v.build} V1 spawnAgent parent binding drifts`,
+        run() {
+          const appMainPath = writeBundle(
+            v.memberships.replace('e.tool!==`spawnAgent`))i.set(e.receiverThreadIds[0],{parentConversationId:t}', 'e.tool!==`spawnAgent`))i.set(e.receiverThreadIds[0],{parentConversationId:other}') + v.panel,
+            'app-main.js',
+          );
+          assert.throws(() => verifyComposerSubagentPanel265810(appMainPath, v.build), /membership 生产者/);
+        },
       },
-    },
-    {
-      name: 'fails closed when the 26.5810 selector or export drifts',
-      run() {
-        const drifts = [
-          ['return uyn({cachedConversations:[],conversationTurns:n.turns,parentConversationId:e,sourceLinkedThreads:null}).filter(Boolean)', 'return [].filter(Boolean)'],
-          ['lJ as FT', 'lJ as broken'],
-        ];
-        for (const [before, after] of drifts) {
-          const appMainPath = writeBundle(subagentMemberships265810.replace(before, after) + composerSubagentPanel265810, 'app-main.js');
-          assert.throws(() => verifyComposerSubagentPanel265810(appMainPath), /membership /);
-        }
+      {
+        name: `fails closed when the 26.5810.${v.build} selector or export drifts`,
+        run() {
+          for (const [before, after] of v.selectorDrifts) {
+            const appMainPath = writeBundle(v.memberships.replace(before, after) + v.panel, 'app-main.js');
+            assert.throws(() => verifyComposerSubagentPanel265810(appMainPath, v.build), /membership /);
+          }
+        },
       },
-    },
-    {
-      name: 'fails closed when the 26.5810 composer consumer chain or xzn summary drifts',
-      run() {
-        const drifts = [
-          ['wc(lJ,r?n:null)', 'wc(broken,r?n:null)'],
-          ['.filter(AOr)', '.filter(Boolean)'],
-          ['.filter(OOr)', '.filter(Boolean)'],
-          ['visibleRows:c', 'visibleRows:[]'],
-          ['return e.canInteract&&e.displayName.trim().length>0', 'return e.displayName.trim().length>0'],
-          ['return e.isCurrentParentTurn', 'return !0'],
-          ['fn=(Xe.length>0||kt)&&!it', 'fn=kt'],
-          ['subagentsPanel:fn', 'subagentsPanel:!1'],
-          ['rows:Xe', 'rows:[]'],
-          ['composer.backgroundSubagents.summary', 'composer.backgroundSubagents.broken'],
-        ];
-        for (const [before, after] of drifts) {
-          const appMainPath = writeBundle(subagentMemberships265810 + composerSubagentPanel265810.replace(before, after), 'app-main.js');
-          assert.throws(() => verifyComposerSubagentPanel265810(appMainPath), /缺少补丁契约/);
-        }
+      {
+        name: `fails closed when the 26.5810.${v.build} composer consumer chain or panel summary drifts`,
+        run() {
+          for (const [before, after] of v.composerDrifts) {
+            const appMainPath = writeBundle(v.memberships + v.panel.replace(before, after), 'app-main.js');
+            assert.throws(() => verifyComposerSubagentPanel265810(appMainPath, v.build), /缺少补丁契约/);
+          }
+        },
       },
-    },
-    {
-      name: 'fails closed when the 26.5810 summary is moved out of xzn',
-      run() {
-        const moved = composerSubagentPanel265810
-          .replace('return {id:`composer.backgroundSubagents.summary`,rows:n}', 'return {id:`missing`,rows:n}')
-          + 'function other(){return `composer.backgroundSubagents.summary`}';
-        const appMainPath = writeBundle(subagentMemberships265810 + moved, 'app-main.js');
-        assert.throws(() => verifyComposerSubagentPanel265810(appMainPath), /面板摘要/);
+      {
+        name: `fails closed when the 26.5810.${v.build} summary is moved out of the panel`,
+        run() {
+          const moved = v.panel
+            .replace('return {id:`composer.backgroundSubagents.summary`,rows:n}', 'return {id:`missing`,rows:n}')
+            + 'function other(){return `composer.backgroundSubagents.summary`}';
+          const appMainPath = writeBundle(v.memberships + moved, 'app-main.js');
+          assert.throws(() => verifyComposerSubagentPanel265810(appMainPath, v.build), /面板摘要/);
+        },
       },
-    },
+    ]),
   ],
 };
 

@@ -1,9 +1,9 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-08-14
-> 适配目标 Codex：`openai.chatgpt@26.5810.41047`
-> live active Codex 仍为 `openai.chatgpt@26.5803.61601`（本 change 未安装 live）
-> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.57`
+> 基线日期：2026-08-16
+> 适配目标 Codex：`openai.chatgpt@26.5810.52044`
+> 当前 active Codex：`openai.chatgpt@26.5810.52044`
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.58`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -117,7 +117,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 ## 3. 当前 bundle 与目标契约
 
-下表曾是 `26.5803.61601` live 快照。`26.5810.41047` 是已完成 official clean 适配、尚未 live 安装的目标：Header `header-DPGKK91L.js`，app main/statsig/Power `app-initial-CuO8rPSL.js`，server/history `app-initial-DLJA_f9P.js`。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
+下表曾是 `26.5803.61601` live 快照。`26.5810.41047` 为 Header `header-DPGKK91L.js`，app main/statsig/Power `app-initial-CuO8rPSL.js`，server/history `app-initial-DLJA_f9P.js`；`26.5810.52044` 为 Header `header-CSBoBpDg.js`，app main/statsig/Power `app-initial-BYsFXcPC.js`，server/history `app-initial-CireNHNv.js`。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
 
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
@@ -820,8 +820,7 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 
 适配完成前，不得把“单元测试通过”等同于“真实 Codex UI 已验收”。
 
-
-## 13. Codex 26.5810.41047 适配记录
+## 14. Codex 26.5810.41047 适配记录
 
 ### 上游变化与复用
 
@@ -850,3 +849,46 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - 本适配代码路径未写 `config.toml`。任务期间 agent 编排 / CLI 激活曾意外切换 model/reasoning；主线程最终恢复原始 `grok-4.6/high`，SHA-256 `9c0111f6be62b12a9af2ae53b8619c2ab9fe6de126ff13c3ad30de90b8d7649e`，mtime `2026-08-13 19:17:29 +0800`。
 - Reload 日志：2026-08-14 10:50:30.398 root render，10:51:03.528 routes mounted（`36,967ms`），10:51:03.550 ready，无 `Webview did not finish starting`。用户确认 5.0 UI 矩阵无问题。
 - 本次阻碍：5810 压缩名/分包全漂移，`jP` 启动看门狗锚点改变，export 扫描性能退化，`localTitlePath=null` 会触发语法检查回滚；首轮还遗漏子 agent composer 全链、`promptNewGroup`、25 条 15/5 双收起和同 ID 标题双消费。下次升级必须一次跑完全矩阵，不得只验刚发现的一项。
+
+
+## 15. Codex 26.5810.52044 适配记录
+
+### 获取阻碍与替代流程
+
+- Marketplace CDN 直下载多次断流（`cdn-partial` 残件），官方 CLI 安装也失败；最终通过 HTTP/1.1 Range 分段续传拿到完整官方 VSIX，并独立校验 SHA-256 `193a2a17e0ebe0b7938a6f7416f84c786426f3f1b76d235aa970cf8e09554bf2` 后才解包使用。
+- 教训：下载必须先落 `vsix-url` / `vsix.sha256` 证据再解包；残件一律不得当作 official clean。
+
+### 上游变化（同 minor 全量重压缩）
+
+- 分包拓扑不变，hash 全变：Header `header-CSBoBpDg.js`；app main/statsig/Power/composer `app-initial-BYsFXcPC.js`；server/history `app-initial-CireNHNv.js`。
+- Extension Host `out/extension.js` 锚点未漂移：`jP` `timeoutMs:3e4},3e4` 唯一、capn `B8` 会话校验消息桥唯一，全部原样命中。
+- 语义定位全部自动命中，locator 零改动：execution target 导出 `qZ`、messenger 导出 `kat`、`function Sn(e){return e.kind===`remote`}function Cn` helper 插入点、`Bn` 打开页标题、`An` memo cache 24、300px/60vh 菜单布局。
+- Header 漂移：rows `onClose:i,u→a,f`；历史源父组件 `c=g(),{authMethod:l}=m(),u=n(),d=E(Ln),f=E(Rn),{data:p}=j(),h=ke(),` → `l=r(),{authMethod:u}=p(),d=n(),f=ee(Ln),m=ee(Rn),{data:h}=te(),g=Ae(),`；菜单组件改为 `c=o!==void 0&&o,l=s===void 0||s,u=r(),f=we(),{authMethod:m}=p(),`；过滤 `let E=r.filter(T),D=hn(n.data,r,w),` → `let T=i.filter(w),E=hn(n.data,i,ee),`；行组件 `pt→_t`；菜单 `triggerButton:oe→se`。
+- Power 漂移：`Pon→Fon`、主数组 `Ion→Lon`、Ultra 对象 `Lon→Ron`（上游新增 `removeXHigh` 参数）、`kon→Aon`、Reasoning 菜单 `u$→l$`（过滤 `wC→TC`）；上游仍无 `gpt-5.6-sol:max`。
+- 子 agent 链漂移：producer `dyn→fyn` 与 aggregator `uyn→dyn` 名字对调；membership store `lJ=Dc→uJ=Nc`，导出别名仍 `as FT`；composer hook `DOr→AOr`（`wc(lJ`→`jc(uJ`）；筛选 `AOr→NOr`（canInteract）、`OOr→jOr`（isCurrentParentTurn）；composer 组件 `aNr→cNr`；面板 `xzn→Szn`；面板开关 `fn→pn`；jsx 绑定 `J6→q6`。
+- 项目历史漂移：`Ron/Bon→ssn/lsn`（导出 `ssn as qm`）、store 请求 `aRt→gRt`、`eH→MV`、`YO→ZO`、`nH→PV`、`kon→Qon`、`Oon→Zon`、`IF→EF`、`Lk→zk`、`zF→kF`、`pRt/BF→wRt/AF`；manager/store `listAllThreads` 与全部能力检测方法签名不变。
+- `1221508807` 旧开关仍不存在，不重新注入子 agent gate。
+
+### 根因与防复发
+
+- 真实故障：同 minor 新 build 全量重压缩，5810 专用锚点字符串与命名后置条件全部失配，plan fail closed（Header/UI/Power/History 16 项错误），extension host 无错误。
+- marker 不升级：注入的生成代码（helper 体、fail-closed 过滤、分组视图、双消费 override）不变，只换原生符号引用，符合“只有 clean anchor 变化时 marker 可保持”。
+- 同 minor 必须双 build 兼容：Review 发现首版整体替换锚点后 41047 patched 无法幂等识别（4 项“补丁标记不完整”），破坏了已支持版本和滚回链。最终按完整版本号显式选择变体（`context.codexBuild` + `CODEX_265810_BUILDS` 白名单 41047/52044），Header/Power/History/子 agent 四张变体表只存原生符号名与锚点串，注入生成体共享单一实现；postcondition 与 verifier 对具体 build 验具体链，不允许 OR 混搭假绿。
+- 未知 5810 build（如 53000）plan 报 `不支持的 Codex 26.5810 build` 且不规划任何特性 bundle、apply 零写入；41047 clean 与 52044 clean 都 plan 4 / apply 幂等 / plan 0，41047 patched 幂等 plan 0。
+- 同一 minor 的新 build 要按全矩阵一次性适配，并把新旧两套 fixture/断链负例都保留在回归里。
+- 改名类后置条件尽量用捕获组写语义结构（V1/V2 transcript switch 本次零改动继续命中）；必须命名的链（producer→store→composer→panel）每次重压缩都要重新映射。
+
+### 验证证据
+
+- official VSIX：`/tmp/codex-26581052044-20260816-155401/openai.chatgpt-26.5810.52044-linux-x64.vsix`，SHA-256 见上。
+- official clean：`/tmp/codex-26581052044-20260816-155401/clean/extension`（52044）与 `/tmp/codex-26581041047-clean-20260814-092455/extension`（41047）。
+- 双版本最终验证副本 `/tmp/clg-5810-dual-final-1786872909`：
+  - `clean41047`：plan 4（extension/header/main/server）/ errors 0；apply 幂等、未回滚；二次 plan 0；5 项语法通过；verifier 通过。
+  - `clean52044`：plan 4 / errors 0；apply 幂等；二次 plan 0；语法通过；verifier 通过。
+  - `patched41047`（live 回滚副本）：plan 0 / errors []；verifier 通过（旧 build 幂等识别）。
+- compile、lint、243 tests、`git diff --check` 通过；5810 十项用例 × 双 build + 未知 build 负例、verifier 六项 × 双 build、locator 双 build 正向定位（52044 含 unrelated app-initial 候选与 main/statsig/request 合包断言）。
+- 用户 `config.toml` 全程未写：SHA-256 `47d1d34e2a1e0f20f86ee3a631651b539834eaa82b6287ead7431a5ae8eb9889`、mtime epoch `1786814971`，前后一致。
+- 主线程独立双版本复验 `/tmp/clg-root-review-5810-dual-20260816-174631`：41047 / 52044 official clean 均为 plan 4 / apply 幂等 / plan 0 / verifier 通过。
+- live active 已切到 Codex `26.5810.52044`：安装后四个业务文件与 official clean 哈希一致；live plan 4 / apply 幂等 / plan 0 / verifier 通过。
+- Local Groups `0.0.58` VSIX SHA-256 `ff4464be5305c92d41c1801f0eeeea4d16541aa6d71ec007a603579943b4abbf`；active registry 已切换，安装目录关键代码哈希一致、plan 0 / verifier 通过。
+- Reload 人工验收：pending（未取得用户证据前不得写 PASS）。

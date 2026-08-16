@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.0.58 - 2026-08-16
+
+- 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5810.52044`（同 minor 全量重压缩）。
+- Extension Host 锚点（`jP` 120 秒看门狗、capn 消息桥、metadata helper）未漂移，原样保留。
+- Header 适配新压缩符号：项目历史源 `{data:h}=te()`、execution target 组件、fail-closed 过滤 `T=i.filter(w),E=hn(n.data,i,ee)`、行组件 `_t`、菜单 `triggerButton:se`。
+- Power：`Pon/Ion/Lon/kon/u$` 漂移为 `Fon/Lon/Ron/Aon/l$`，继续只为 5.6 Sol 补 Max，Ultra 仍只保留上游单份。
+- 子 agent 链：producer/aggregator 名对调（`dyn`↔`fyn`），store `lJ=Dc`→`uJ=Nc`（导出仍 `as FT`），composer `DOr/AOr/OOr/aNr/xzn` 漂移为 `AOr/NOr/jOr/cNr/Szn`，完整 transcript+面板链后置条件同步更新。
+- 项目历史：`Ron/Bon/eH/YO/nH/kon/Oon/IF/Lk/zF/pRt/BF/aRt` 漂移为 `ssn/lsn/MV/ZO/PV/Qon/Zon/EF/zk/kF/wRt/AF/gRt`。
+- official VSIX 经 HTTP/1.1 range 续传完整校验（SHA-256 `193a2a17e0ebe0b7938a6f7416f84c786426f3f1b76d235aa970cf8e09554bf2`）；隔离 clean 副本 4 文件 plan/apply/plan 幂等、语法与 verifier 通过。
+- 同 minor 双 build 兼容：按完整版本号显式选择 41047/52044 锚点变体，clean 41047 与 52044 均 plan 4 / apply 幂等 / plan 0 / verifier 通过，已 patched 41047 幂等 plan 0；未知 5810 build fail closed。
+- 不修改用户 `config.toml`，不切换 V1/V2，不 patch `canInteract`；marker 保持 `=1`（生成契约不变，仅上游压缩锚点漂移）。
+
 ## v0.0.57 - 2026-08-14
 
 - 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5810.41047`。

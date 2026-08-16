@@ -40,11 +40,15 @@ class CodexPatchEngine {
       errors: [],
       safeMode: this.safeMode,
       codexMinor: minor,
+      codexBuild: versionParts[2] || '',
       cwdFilterKey: major === 26 && minor === 721 ? 'cwd' : 'cwds',
       responsesWebsocketFallbackProvider: version === '26.721.41059' ? this.responsesWebsocketFallbackProvider : '',
     };
     if (version && (major !== 26 || !Number.isInteger(minor) || (minor > 721 && minor !== 727 && minor !== 5730 && minor !== 5803 && minor !== 5810))) {
       context.errors.push(`不支持的 Codex 扩展版本：${version}`);
+    }
+    if (major === 26 && minor === 5810 && !CODEX_265810_BUILDS.has(context.codexBuild)) {
+      context.errors.push(`不支持的 Codex 26.5810 build：${version}`);
     }
     const changes = [];
     if (this.safeMode) {
@@ -392,6 +396,7 @@ function patchExtensionWebviewTimeout(text, context) {
 }
 
 function patchExtensionWebviewTimeout265810(text, context) {
+  if (!codex265810Build(context)) return text;
   const current = 'this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)';
   const patched = 'this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:12e4})},12e4)';
   if (text.includes(patched)) {
@@ -729,10 +734,11 @@ function patchSidebarProjectGroupSignals(text, context) {
 
 function patchHeader(text, context, file) {
   const errorCount = context.errors.length;
+  if (context.safeMode && context.codexMinor === 5810 && !codex265810Build(context)) return text;
   let next = addVscodeMessengerImport(text, context, file);
   if (context.errors.length > errorCount) return text;
   if (context.safeMode && context.codexMinor === 5810 && next.includes('codexLocalGroupsHeaderSafe265810PatchVersion=1')) {
-    if (!safeHeader265810PostconditionsHold(next)) context.errors.push('header 26.5810: 补丁标记不完整');
+    if (!safeHeader265810PostconditionsHold(next, context.codexBuild)) context.errors.push('header 26.5810: 补丁标记不完整');
     return patchOpenedConversationTitle265810(patchHeaderMetadataLiteral(next), context);
   }
   if (context.safeMode && context.codexMinor === 5810 && next.includes('function Sn(e){return e.kind===`remote`}')) {
@@ -976,6 +982,7 @@ function patchSafeHeaderProjectRowsView(text, context) {
     ['codexRecentTaskProjectRows(P,v,a,An,f)', '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P,activeId:v,onClose:a,row:An,onActiveArchiveStart:f})'],
     ['codexRecentTaskProjectRows(N,_,a,An,d)', '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N,activeId:_,onClose:a,row:An,onActiveArchiveStart:d})'],
     ['codexRecentTaskProjectRows(F,y,i,An,u)', '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:y,onClose:i,row:An,onActiveArchiveStart:u})'],
+    ['codexRecentTaskProjectRows(F,y,a,An,f)', '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:y,onClose:a,row:An,onActiveArchiveStart:f})'],
   ];
   const row = rows.find(([direct]) => text.includes(direct));
   return row ? replaceOnce(text, row[0], row[1], context, 'header safe project rows view') : text;
@@ -1074,51 +1081,100 @@ function openedConversationTitle265803PostconditionsHold(text) {
 }
 
 
+const CODEX_265810_BUILDS = new Set(['41047', '52044']);
+const HEADER_265810_VARIANTS = {
+  41047: {
+    rows: 'F.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key))',
+    rowsCall: 'codexRecentTaskProjectRows(F,y,i,An,u)',
+    historyParent: 'c=g(),{authMethod:l}=m(),u=n(),d=E(Ln),f=E(Rn),{data:p}=j(),h=ke(),',
+    historyParentScoped: 'c=g(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:l}=m(),u=n(),d=E(Ln),f=E(Rn),{data:p}=j(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),h=ke(),',
+    execTarget: 'c=o===void 0||o,l=g(),u=Ce(),{authMethod:d}=m(),',
+    execTargetScoped: 'c=o===void 0||o,l=g(),u=Ce(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,{authMethod:d}=m(),',
+    projectFilter: 'let E=r.filter(T),D=hn(n.data,r,w),',
+    projectFilterScoped: 'let E=codexRecentTaskRootReady?codexRecentConversationFilter(r.filter(T),codexRecentTaskCurrentRoot):[],D=codexRecentTaskRootReady?codexRecentTaskFilter(hn(n.data,r,w),codexRecentTaskCurrentRoot):[],',
+    rowComponent: 'pt',
+    menuTrigger: 'triggerButton:oe',
+    historySourcePost: '{data:p}=j(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)',
+    conversationFilterPost: 'let E=codexRecentTaskRootReady?codexRecentConversationFilter',
+    taskFilterPost: 'D=codexRecentTaskRootReady?codexRecentTaskFilter',
+    rowsViewPost: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:y,onClose:i,row:An,onActiveArchiveStart:u})',
+  },
+  52044: {
+    rows: 'F.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:a,onActiveArchiveStart:f},e.key))',
+    rowsCall: 'codexRecentTaskProjectRows(F,y,a,An,f)',
+    historyParent: 'l=r(),{authMethod:u}=p(),d=n(),f=ee(Ln),m=ee(Rn),{data:h}=te(),g=Ae(),',
+    historyParentScoped: 'l=r(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:u}=p(),d=n(),f=ee(Ln),m=ee(Rn),{data:h}=te(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),g=Ae(),',
+    execTarget: 'c=o!==void 0&&o,l=s===void 0||s,u=r(),f=we(),{authMethod:m}=p(),',
+    execTargetScoped: 'c=o!==void 0&&o,l=s===void 0||s,u=r(),f=we(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,{authMethod:m}=p(),',
+    projectFilter: 'let T=i.filter(w),E=hn(n.data,i,ee),',
+    projectFilterScoped: 'let T=codexRecentTaskRootReady?codexRecentConversationFilter(i.filter(w),codexRecentTaskCurrentRoot):[],E=codexRecentTaskRootReady?codexRecentTaskFilter(hn(n.data,i,ee),codexRecentTaskCurrentRoot):[],',
+    rowComponent: '_t',
+    menuTrigger: 'triggerButton:se',
+    historySourcePost: '{data:h}=te(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)',
+    conversationFilterPost: 'let T=codexRecentTaskRootReady?codexRecentConversationFilter',
+    taskFilterPost: 'E=codexRecentTaskRootReady?codexRecentTaskFilter',
+    rowsViewPost: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:y,onClose:a,row:An,onActiveArchiveStart:f})',
+  },
+};
+const COMPOSER_265810_VARIANTS = {
+  41047: { producer: 'dyn', aggregator: 'uyn', store: 'lJ', storeFactory: 'Dc', storeRead: 'wc', hook: 'DOr', interactFilter: 'AOr', turnFilter: 'OOr', composer: 'aNr', panel: 'xzn', panelFlag: 'fn', jsx: 'J6' },
+  52044: { producer: 'fyn', aggregator: 'dyn', store: 'uJ', storeFactory: 'Nc', storeRead: 'jc', hook: 'AOr', interactFilter: 'NOr', turnFilter: 'jOr', composer: 'cNr', panel: 'Szn', panelFlag: 'pn', jsx: 'q6' },
+};
+const POWER_265810_VARIANTS = {
+  41047: { filterFn: 'Pon', powersArray: 'Ion', ultraObject: 'Lon', sliderFn: 'kon', menuFn: 'u$', menuFilter: 'wC' },
+  52044: { filterFn: 'Fon', powersArray: 'Lon', ultraObject: 'Ron', sliderFn: 'Aon', menuFn: 'l$', menuFilter: 'TC' },
+};
+const HISTORY_265810_VARIANTS = {
+  41047: { hook: 'Ron', impl: 'Bon', registry: 'eH', query: 'YO', react: 'nH', subscribe: 'kon', combine: 'Oon', timestamps: 'IF', summary: 'Lk', visible: 'zF', title: 'pRt', titleSanitizer: 'BF', storeRequest: 'aRt' },
+  52044: { hook: 'ssn', impl: 'lsn', registry: 'MV', query: 'ZO', react: 'PV', subscribe: 'Qon', combine: 'Zon', timestamps: 'EF', summary: 'zk', visible: 'kF', title: 'wRt', titleSanitizer: 'AF', storeRequest: 'gRt' },
+};
+
+function codex265810Build(context) {
+  return CODEX_265810_BUILDS.has(context.codexBuild) ? context.codexBuild : null;
+}
+
 function patchSafeHeader265810(text, context, file) {
+  const variant = HEADER_265810_VARIANTS[codex265810Build(context)];
+  if (!variant) return text;
   let next = addExecutionTargetImport(text, context, file);
-  const rows = 'F.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key))';
-  next = replaceOnce(next, rows, 'codexRecentTaskProjectRows(F,y,i,An,u)', context, 'header 26.5810 project rows');
+  next = replaceOnce(next, variant.rows, variant.rowsCall, context, 'header 26.5810 project rows');
   next = patchHeaderGroupHelper(patchHeaderMetadataLiteral(next), context);
-  next = patchSafeHeader265810ProjectScope(next, context);
-  next = patchSafeHeader265810ThreadSummary(next, context);
-  next = patchSafeHeader265810MenuLayout(next, context);
+  next = patchSafeHeader265810ProjectScope(next, context, variant);
+  next = patchSafeHeader265810ThreadSummary(next, context, variant);
+  next = patchSafeHeader265810MenuLayout(next, context, variant);
   next = patchSafeHeaderProjectRowsView(next, context);
-  return finishSafeHeader265810(next, context);
+  return finishSafeHeader265810(next, context, variant);
 }
 
-function patchSafeHeader265810ProjectScope(text, context) {
-  const parent = 'c=g(),{authMethod:l}=m(),u=n(),d=E(Ln),f=E(Rn),{data:p}=j(),h=ke(),';
-  const scopedParent = 'c=g(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:l}=m(),u=n(),d=E(Ln),f=E(Rn),{data:p}=j(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),h=ke(),';
-  let next = replaceOnce(text, parent, scopedParent, context, 'header 26.5810 project history source');
-  const target = 'c=o===void 0||o,l=g(),u=Ce(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,{authMethod:d}=m(),';
-  next = replaceOnce(next, 'c=o===void 0||o,l=g(),u=Ce(),{authMethod:d}=m(),', target, context, 'header 26.5810 execution target');
-  const rows = 'let E=codexRecentTaskRootReady?codexRecentConversationFilter(r.filter(T),codexRecentTaskCurrentRoot):[],D=codexRecentTaskRootReady?codexRecentTaskFilter(hn(n.data,r,w),codexRecentTaskCurrentRoot):[],';
-  return replaceOnce(next, 'let E=r.filter(T),D=hn(n.data,r,w),', rows, context, 'header 26.5810 current project filter');
+function patchSafeHeader265810ProjectScope(text, context, variant) {
+  let next = replaceOnce(text, variant.historyParent, variant.historyParentScoped, context, 'header 26.5810 project history source');
+  next = replaceOnce(next, variant.execTarget, variant.execTargetScoped, context, 'header 26.5810 execution target');
+  return replaceOnce(next, variant.projectFilter, variant.projectFilterScoped, context, 'header 26.5810 current project filter');
 }
 
-function patchSafeHeader265810ThreadSummary(text, context) {
-  const original = '(0,Z.jsx)(pt,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
-  const patched = '(0,Z.jsx)(pt,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
+function patchSafeHeader265810ThreadSummary(text, context, variant) {
+  const original = '(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
+  const patched = '(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
   return replaceOnce(text, original, patched, context, 'header 26.5810 project history row summary');
 }
 
-function patchSafeHeader265810MenuLayout(text, context) {
+function patchSafeHeader265810MenuLayout(text, context, variant) {
   const outer = 'className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`';
   const fixedOuter = 'className:`flex h-full min-h-0 w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`';
   let next = replaceOnce(text, outer, fixedOuter, context, 'header 26.5810 safe container height');
   next = replaceOnce(next, 'vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1', 'vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1', context, 'header 26.5810 safe scroll height');
-  return replaceOnce(next, 'contentClassName:`!pb-0 mt-[9px]`,triggerButton:oe', 'contentClassName:`!pb-0 mt-[9px]`,contentStyle:{height:`600px`,overflow:`hidden`},triggerButton:oe', context, 'header 26.5810 safe menu height');
+  return replaceOnce(next, 'contentClassName:`!pb-0 mt-[9px]`,' + variant.menuTrigger, 'contentClassName:`!pb-0 mt-[9px]`,contentStyle:{height:`600px`,overflow:`hidden`},' + variant.menuTrigger, context, 'header 26.5810 safe menu height');
 }
 
-function finishSafeHeader265810(text, context) {
+function finishSafeHeader265810(text, context, variant) {
   const current = 't[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?';
-  const row = '(c=(0,Z.jsx)(pt,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c';
+  const row = '(c=(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c';
   const fixed = 't[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e||t[24]!==n.conversation.title?';
   const nextRow = row.replace('threadSummary:n.conversation,', 'threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0,').replace('t[22]=e,t[23]=c', 't[22]=e,t[24]=n.conversation.title,t[23]=c');
   let next = replaceOnce(text, current + row, fixed + nextRow, context, 'header 26.5810 local title row');
   next = replaceOnce(next, 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),', 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),', context, 'header 26.5810 local row cache size');
   next = next.replace(/codexLocalGroupsHeaderSafePatchVersion=(?:6|8)/, 'codexLocalGroupsHeaderSafe265810PatchVersion=1');
-  if (!safeHeader265810PostconditionsHold(next)) context.errors.push('header 26.5810: 补丁后置条件不完整');
+  if (!safeHeader265810PostconditionsHold(next, context.codexBuild)) context.errors.push('header 26.5810: 补丁后置条件不完整');
   return patchOpenedConversationTitle265810(next, context);
 }
 
@@ -1141,13 +1197,15 @@ function openedConversationTitle265810PostconditionsHold(text) {
     && contract.test(text);
 }
 
-function safeHeader265810PostconditionsHold(text) {
+function safeHeader265810PostconditionsHold(text, build) {
+  const variant = HEADER_265810_VARIANTS[build];
+  if (!variant) return false;
   const view = 'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,Dn.useState)(0);return(0,Dn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}';
   return countMatches(text, 'codexLocalGroupsHeaderSafe265810PatchVersion=1') === 1
-    && text.includes('{data:p}=j(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)')
-    && text.includes('let E=codexRecentTaskRootReady?codexRecentConversationFilter')
-    && text.includes('D=codexRecentTaskRootReady?codexRecentTaskFilter')
-    && text.includes('(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:y,onClose:i,row:An,onActiveArchiveStart:u})')
+    && text.includes(variant.historySourcePost)
+    && text.includes(variant.conversationFilterPost)
+    && text.includes(variant.taskFilterPost)
+    && text.includes(variant.rowsViewPost)
     && text.includes(view) && text.includes('An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),')
     && text.includes('hostId:n.conversation.hostId,threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)')
     && text.includes('t[24]!==n.conversation.title') && text.includes('t[24]=n.conversation.title')
@@ -1530,80 +1588,97 @@ function patchCodexUi265810(text, context) {
   const original = 'a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort';
   const patched = 'a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
   if (text.includes(marker)) {
-    if (!codexUi265810PostconditionsHold(text)) context.errors.push('Codex UI 26.5810: 补丁标记不完整');
+    if (!codexUi265810PostconditionsHold(text, context.codexBuild)) context.errors.push('Codex UI 26.5810: 补丁标记不完整');
     return text;
   }
+  if (!codex265810Build(context)) return text;
   let next = replaceOnce(text, original, patched, context, 'Codex UI 26.5810 Sol Max Ultra validation');
   next = replaceRegexOnce(next, /function [A-Za-z_$][\w$]*\(\{userSavedModelString:/, (match) => `var ${marker};${match}`, context, 'Codex UI 26.5810 marker');
-  if (!codexUi265810PostconditionsHold(next)) context.errors.push('Codex UI 26.5810: 补丁后置条件不完整');
+  if (!codexUi265810PostconditionsHold(next, context.codexBuild)) context.errors.push('Codex UI 26.5810: 补丁后置条件不完整');
   return next;
 }
 
-function xznSummary265810Holds(text) {
-  const start = text.indexOf('function xzn(e){');
+function xznSummary265810Holds(text, build) {
+  const variant = COMPOSER_265810_VARIANTS[build];
+  if (!variant) return false;
+  const start = text.indexOf('function ' + variant.panel + '(e){');
   if (start < 0) return false;
   const next = text.indexOf('function ', start + 1);
   const body = next < 0 ? text.slice(start) : text.slice(start, next);
   return body.includes('composer.backgroundSubagents.summary') && body.includes('{rows:n,agentCount:r');
 }
 
-function codexUi265810PostconditionsHold(text) {
+function codexUi265810PostconditionsHold(text, build) {
+  const chain = composer265810Chain(build);
+  if (!chain) return false;
   return countMatches(text, 'codexLocalGroupsCodexUi265810PatchVersion=1') === 1
     && text.includes('i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)')
     && /isBackgroundSubagentsEnabled:[A-Za-z_$][\w$]*=!0/.test(text)
     && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6000}?case`collabAgentToolCall`:\{if\(![A-Za-z_$][\w$]*\|\|\1\.tool===`wait`\)break;let ([A-Za-z_$][\w$]*)=\{type:`multi-agent-action`,id:\1\.id(?:,[^{}]{0,500})?\};[A-Za-z_$][\w$]*\.push\(\2\);break\}/.test(text)
     && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6500}?case`subAgentActivity`:if\(![A-Za-z_$][\w$]*\)break;[A-Za-z_$][\w$]*\.push\(\{type:`subagent-activity`,id:\1\.id(?:,[^{}]{0,300})?\}\);break;?/.test(text)
-    && /function dyn\(e,t,[A-Za-z_$][\w$]*,[A-Za-z_$][\w$]*\)\{[\s\S]{0,1800}?e\.type===`subAgentActivity`[\s\S]{0,500}?parentConversationId:t[\s\S]{0,900}?e\.type!==`collabAgentToolCall`\|\|e\.tool!==`spawnAgent`[\s\S]{0,500}?parentConversationId:t/.test(text)
-    && /function uyn\(\{cachedConversations:e,conversationTurns:t,[^}]+\}\)\{[\s\S]{0,900}?=dyn\(t,/.test(text)
-    && /lJ=Dc\([^,]+,\(e,\{get:t\}\)=>\{[\s\S]{0,2400}?uyn\(\{[\s\S]{0,800}?conversationTurns:[^,}]+,[\s\S]{0,800}?parentConversationId:/.test(text)
-    && /lJ as FT(?:,|\})/.test(text)
-    && /function DOr\(e\)\{[\s\S]{0,900}?wc\(lJ,/.test(text)
-    && /function DOr\(e\)\{[\s\S]{0,1600}?parentConversationId===n[\s\S]{0,400}?\.filter\(AOr\)[\s\S]{0,400}?\.filter\(OOr\)[\s\S]{0,900}?visibleRows:c/.test(text)
-    && /function AOr\(e\)\{return e\.canInteract&&e\.displayName\.trim\(\)\.length>0\}/.test(text)
-    && /function OOr\(e\)\{return e\.isCurrentParentTurn\}/.test(text)
-    && /function aNr[\s\S]{0,20000}?DOr\(\{activeConversationId:/.test(text)
-    && /function aNr[\s\S]{0,40000}?fn=\(Xe\.length>0\|\|kt\)/.test(text)
-    && /function aNr[\s\S]{0,50000}?subagentsPanel:fn/.test(text)
-    && /function aNr[\s\S]{0,80000}?fn\?\(0,J6\.jsx\)\(xzn,[\s\S]{0,400}?rows:Xe/.test(text)
-    && xznSummary265810Holds(text)
+    && chain.every((item) => item.test(text))
+    && xznSummary265810Holds(text, build)
     && text.includes('model_reasoning_effort??null')
     && text.includes('model_reasoning_effort:t')
     && !text.includes('1221508807');
 }
 
+function composer265810Chain(build) {
+  const v = COMPOSER_265810_VARIANTS[build];
+  if (!v) return null;
+  return [
+    new RegExp('function ' + v.producer + '\\(e,t,[A-Za-z_$][\\w$]*,[A-Za-z_$][\\w$]*\\)\\{[\\s\\S]{0,1800}?e\\.type===`subAgentActivity`[\\s\\S]{0,500}?parentConversationId:t[\\s\\S]{0,900}?e\\.type!==`collabAgentToolCall`\\|\\|e\\.tool!==`spawnAgent`[\\s\\S]{0,500}?parentConversationId:t'),
+    new RegExp('function ' + v.aggregator + '\\(\\{cachedConversations:e,conversationTurns:t,[^}]+\\}\\)\\{[\\s\\S]{0,900}?=' + v.producer + '\\(t,'),
+    new RegExp(v.store + '=' + v.storeFactory + '\\([^,]+,\\(e,\\{get:t\\}\\)=>\\{[\\s\\S]{0,2400}?' + v.aggregator + '\\(\\{[\\s\\S]{0,800}?conversationTurns:[^,}]+,[\\s\\S]{0,800}?parentConversationId:'),
+    new RegExp(v.store + ' as FT(?:,|\\})'),
+    new RegExp('function ' + v.hook + '\\(e\\)\\{[\\s\\S]{0,900}?' + v.storeRead + '\\(' + v.store + ','),
+    new RegExp('function ' + v.hook + '\\(e\\)\\{[\\s\\S]{0,1600}?parentConversationId===n[\\s\\S]{0,400}?\\.filter\\(' + v.interactFilter + '\\)[\\s\\S]{0,400}?\\.filter\\(' + v.turnFilter + '\\)[\\s\\S]{0,900}?visibleRows:c'),
+    new RegExp('function ' + v.interactFilter + '\\(e\\)\\{return e\\.canInteract&&e\\.displayName\\.trim\\(\\)\\.length>0\\}'),
+    new RegExp('function ' + v.turnFilter + '\\(e\\)\\{return e\\.isCurrentParentTurn\\}'),
+    new RegExp('function ' + v.composer + '[\\s\\S]{0,20000}?' + v.hook + '\\(\\{activeConversationId:'),
+    new RegExp('function ' + v.composer + '[\\s\\S]{0,40000}?' + v.panelFlag + '=\\(Xe\\.length>0\\|\\|kt\\)'),
+    new RegExp('function ' + v.composer + '[\\s\\S]{0,50000}?subagentsPanel:' + v.panelFlag),
+    new RegExp('function ' + v.composer + '[\\s\\S]{0,80000}?' + v.panelFlag + '\\?\\(0,' + v.jsx + '\\.jsx\\)\\(' + v.panel + ',[\\s\\S]{0,400}?rows:Xe'),
+  ];
+}
+
 function patchCodexPower265810(text, context) {
   const marker = 'codexLocalGroupsPower265810PatchVersion=1';
+  const v = POWER_265810_VARIANTS[codex265810Build(context)];
   if (text.includes(marker)) {
-    if (!codexPower265810PostconditionsHold(text)) context.errors.push('Codex power 26.5810: 补丁标记不完整');
+    if (!codexPower265810PostconditionsHold(text, context.codexBuild)) context.errors.push('Codex power 26.5810: 补丁标记不完整');
     return text;
   }
-  const xhigh = '{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],Lon=';
-  const max = '{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`},{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}],Lon=';
+  if (!v) return text;
+  const xhigh = '{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],' + v.ultraObject + '=';
+  const max = '{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`},{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}],' + v.ultraObject + '=';
   let next = replaceOnce(text, xhigh, max, context, 'Codex power 26.5810 Sol Max option');
-  next = replaceOnce(next, 'function Pon(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}', 'function Pon(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}', context, 'Codex power 26.5810 Sol support');
-  next = replaceOnce(next, 'Pon((t?[...Ion,Lon]:Ion).filter', 'Pon([...Ion,Lon].filter', context, 'Codex power 26.5810 Sol Ultra option');
-  next = patchCodexReasoningMenu265810(next, context);
-  next = replaceOnce(next, 'function kon(e,{includeUltraInSlider:', `var ${marker};function kon(e,{includeUltraInSlider:`, context, 'Codex power 26.5810 marker');
-  if (!codexPower265810PostconditionsHold(next)) context.errors.push('Codex power 26.5810: 补丁后置条件不完整');
+  next = replaceOnce(next, 'function ' + v.filterFn + '(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}', 'function ' + v.filterFn + '(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}', context, 'Codex power 26.5810 Sol support');
+  next = replaceOnce(next, v.filterFn + '((t?[...' + v.powersArray + ',' + v.ultraObject + ']:' + v.powersArray + ').filter', v.filterFn + '([...' + v.powersArray + ',' + v.ultraObject + '].filter', context, 'Codex power 26.5810 Sol Ultra option');
+  next = patchCodexReasoningMenu265810(next, context, v);
+  next = replaceOnce(next, 'function ' + v.sliderFn + '(e,{includeUltraInSlider:', `var ${marker};function ` + v.sliderFn + '(e,{includeUltraInSlider:', context, 'Codex power 26.5810 marker');
+  if (!codexPower265810PostconditionsHold(next, context.codexBuild)) context.errors.push('Codex power 26.5810: 补丁后置条件不完整');
   return next;
 }
 
-function patchCodexReasoningMenu265810(text, context) {
-  const original = 'function u$(e,t){let n=e?.find(e=>e.model===t);return n==null?e4e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>wC(e.reasoningEffort))}';
-  const patched = 'function u$(e,t){let n=e?.find(e=>e.model===t),r=n==null?e4e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>wC(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
+function patchCodexReasoningMenu265810(text, context, v) {
+  const original = 'function ' + v.menuFn + '(e,t){let n=e?.find(e=>e.model===t);return n==null?e4e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>' + v.menuFilter + '(e.reasoningEffort))}';
+  const patched = 'function ' + v.menuFn + '(e,t){let n=e?.find(e=>e.model===t),r=n==null?e4e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>' + v.menuFilter + '(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
   return replaceOnce(text, original, patched, context, 'Codex Reasoning menu 26.5810');
 }
 
-function codexPower265810PostconditionsHold(text) {
+function codexPower265810PostconditionsHold(text, build) {
+  const v = POWER_265810_VARIANTS[build];
+  if (!v) return false;
   return countMatches(text, 'codexLocalGroupsPower265810PatchVersion=1') === 1
     && text.includes('gpt-5.6-sol:max')
     && text.includes('gpt-5.6-sol:ultra')
     && countMatches(text, '{id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`}') === 1
     && text.includes('e.reasoningEffort===`max`||e.reasoningEffort===`ultra`')
-    && text.includes('Pon([...Ion,Lon].filter')
+    && text.includes(v.filterFn + '([...' + v.powersArray + ',' + v.ultraObject + '].filter')
     && text.includes('r.some(e=>e.reasoningEffort===`max`)')
     && text.includes('r.some(e=>e.reasoningEffort===`ultra`)')
-    && !text.includes('Pon((t?[...Ion,Lon]:Ion).filter');
+    && !text.includes(v.filterFn + '((t?[...' + v.powersArray + ',' + v.ultraObject + ']:' + v.powersArray + ').filter');
 }
 
 
@@ -2414,12 +2489,14 @@ function projectHistory265803PostconditionsHold(text) {
 
 function patchProjectHistory265810(text, context) {
   const marker = 'codexLocalGroupsProjectHistory265810PatchVersion=1';
+  const v = HISTORY_265810_VARIANTS[codex265810Build(context)];
   if (text.includes(marker)) {
-    if (!projectHistory265810PostconditionsHold(text)) context.errors.push('26.5810 project history: 补丁标记不完整');
+    if (!projectHistory265810PostconditionsHold(text, context.codexBuild)) context.errors.push('26.5810 project history: 补丁标记不完整');
     return text;
   }
-  const hook = 'function Ron(){return Bon(`recent-conversations`)}';
-  const store = 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return aRt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads()';
+  if (!v) return text;
+  const hook = 'function ' + v.hook + '(){return ' + v.impl + '(`recent-conversations`)}';
+  const store = 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return ' + v.storeRequest + '({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads()';
   const manager = 'async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads()';
   if (countMatches(text, hook) !== 1 || countMatches(text, store) !== 1 || countMatches(text, manager) !== 1) {
     context.errors.push('26.5810 project history: 找不到唯一原生注入点');
@@ -2427,25 +2504,27 @@ function patchProjectHistory265810(text, context) {
   }
   let next = text.replace(store, store.replace('async listArchivedThreads()', 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}async listArchivedThreads()'));
   next = next.replace(manager, manager.replace('async listArchivedThreads()', 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}async listArchivedThreads()'));
-  next = next.replace(hook, projectHistory265810Helper());
-  if (!projectHistory265810PostconditionsHold(next)) context.errors.push('26.5810 project history: 补丁后置条件不完整');
+  next = next.replace(hook, projectHistory265810Helper(v));
+  if (!projectHistory265810PostconditionsHold(next, context.codexBuild)) context.errors.push('26.5810 project history: 补丁后置条件不完整');
   return next;
 }
 
-function projectHistory265810Helper() {
-  return 'var codexLocalGroupsProjectHistory265810PatchVersion=1;function codexLocalGroupsProjectHistoryPath265810(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265810(e,t){let n=codexLocalGroupsProjectHistoryPath265810(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265810(e,t){t=codexLocalGroupsProjectHistoryPath265810(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&IF(i).updatedAt>IF(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(Lk(s))}o!=null&&r.add(o),i=o}while(i!=null);return n}function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function Ron(e,t,n){let r=arguments.length>0,i=Bon(`recent-conversations`),a=eH(),o=codexLocalGroupsProjectHistoryPath265810(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=YO({enabled:s,queryKey:[`codex-local-groups-project-history-265810-v1`,c,o],staleTime:3e4,' + projectHistory265810Query() + '}),u=l.refetch;(0,nH.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=kon({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?Oon([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:{...l,data:[]}:i}';
+function projectHistory265810Helper(v) {
+  return 'var codexLocalGroupsProjectHistory265810PatchVersion=1;function codexLocalGroupsProjectHistoryPath265810(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265810(e,t){let n=codexLocalGroupsProjectHistoryPath265810(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265810(e,t){t=codexLocalGroupsProjectHistoryPath265810(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&' + v.timestamps + '(i).updatedAt>' + v.timestamps + '(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(' + v.summary + '(s))}o!=null&&r.add(o),i=o}while(i!=null);return n}function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function ' + v.hook + '(e,t,n){let r=arguments.length>0,i=' + v.impl + '(`recent-conversations`),a=' + v.registry + '(),o=codexLocalGroupsProjectHistoryPath265810(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=' + v.query + '({enabled:s,queryKey:[`codex-local-groups-project-history-265810-v1`,c,o],staleTime:3e4,' + projectHistory265810Query(v) + '}),u=l.refetch;(0,' + v.react + '.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=' + v.subscribe + '({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?' + v.combine + '([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:{...l,data:[]}:i}';
 }
 
-function projectHistory265810Query() {
-  return 'queryFn:async()=>{let e=a.getForHostId(c);if(e==null)return[];if(typeof e.listProjectConversations===`function`)return e.listProjectConversations(o);if(typeof e.listAllThreads!==`function`)return[];let t=new Map;for(let n of typeof e.getRecentConversations===`function`?e.getRecentConversations():[])t.set(n.id,n);let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!zF(r)||!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue;let i=r.id,a=t.get(i);if(a!=null){n.push(a);continue}let{createdAt:s,updatedAt:l,recencyAt:u}=IF(r);n.push(Lk({conversationId:i,hostId:c,createdAt:s,updatedAt:l,recencyAt:u,title:pRt(r,BF),cwd:r.cwd||null,gitInfo:r.gitInfo,historyMode:r.historyMode,modelProvider:r.modelProvider,parentThreadId:r.parentThreadId,mode:r.mode,threadStartKind:r.threadStartKind,source:r.source,threadSource:r.threadSource,threadRuntimeStatus:r.status}))}return n}';
+function projectHistory265810Query(v) {
+  return 'queryFn:async()=>{let e=a.getForHostId(c);if(e==null)return[];if(typeof e.listProjectConversations===`function`)return e.listProjectConversations(o);if(typeof e.listAllThreads!==`function`)return[];let t=new Map;for(let n of typeof e.getRecentConversations===`function`?e.getRecentConversations():[])t.set(n.id,n);let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!' + v.visible + '(r)||!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue;let i=r.id,a=t.get(i);if(a!=null){n.push(a);continue}let{createdAt:s,updatedAt:l,recencyAt:u}=' + v.timestamps + '(r);n.push(' + v.summary + '({conversationId:i,hostId:c,createdAt:s,updatedAt:l,recencyAt:u,title:' + v.title + '(r,' + v.titleSanitizer + '),cwd:r.cwd||null,gitInfo:r.gitInfo,historyMode:r.historyMode,modelProvider:r.modelProvider,parentThreadId:r.parentThreadId,mode:r.mode,threadStartKind:r.threadStartKind,source:r.source,threadSource:r.threadSource,threadRuntimeStatus:r.status}))}return n}';
 }
 
-function projectHistory265810PostconditionsHold(text) {
+function projectHistory265810PostconditionsHold(text, build) {
+  const v = HISTORY_265810_VARIANTS[build];
+  if (!v) return false;
   return countMatches(text, 'codexLocalGroupsProjectHistory265810PatchVersion=1') === 1
     && countMatches(text, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}') === 1
     && countMatches(text, 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}') === 1
-    && countMatches(text, 'function Ron(e,t,n)') === 1
-    && countMatches(text, 'function Ron(){return Bon(`recent-conversations`)}') === 0
+    && countMatches(text, 'function ' + v.hook + '(e,t,n)') === 1
+    && countMatches(text, 'function ' + v.hook + '(){return ' + v.impl + '(`recent-conversations`)}') === 0
     && countMatches(text, 'codex-local-groups-project-history-265810-v1') === 1
     && text.includes('c=t??a.getDefault()?.getHostId()??`local`')
     && text.includes('App Server repeated a thread list cursor')
