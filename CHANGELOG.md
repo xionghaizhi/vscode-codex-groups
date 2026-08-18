@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.0.59 - 2026-08-18
+
+- 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5814.41407`（新 minor 与全量重压缩）；未知 5814 build 在恢复备份或写文件前即 fail closed。
+- Extension Host 的 Webview 看门狗类由 `jP` 漂移为 `YI`，capn 消息解析器由 `B8` 漂移为 `Q9`；继续只将已确认的 30 秒 Webview 看门狗延长为 120 秒。
+- Header 适配 `header-BdmTQpqZ.js`；保留当前项目隔离、每组 5/+10/15/5、600px 菜单、Metadata 四入口和同 ID 下拉/打开页标题双消费。
+- Power / 项目历史适配新压缩链，继续为 5.6 Sol 保留 Max/Ultra 的菜单、校验、写入和回读。
+- 子 agent 门禁同时绑定 V1/V2 membership 的 normalized ID、`conversationId`、parent selector、原生可见守卫和 composer 面板渲染；不修改 `canInteract`或用户 Multi-Agent 配置。
+- official VSIX 经 HTTP/1.1 Range 分段下载，完整文件 SHA-256 为 `a25dc61555d079b989e32c22017cd5e43e0b6894d3428481ae34581838c66708`；official clean 四文件 plan/apply/plan 0、语法和 verifier 通过。
+- 回归新增真实 41407 fixture、Metadata/标题/分组/Sol/历史/子 agent 执行与断链负例；用户 `config.toml` 全程只读。
+
 ## v0.0.58 - 2026-08-16
 
 - 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5810.52044`（同 minor 全量重压缩）。

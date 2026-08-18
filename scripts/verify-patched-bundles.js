@@ -22,6 +22,114 @@ const CODEX_265810_VERIFIER_VARIANTS = {
     composer: { producer: 'fyn', aggregator: 'dyn', store: 'uJ', storeFactory: 'Nc', storeRead: 'jc', hook: 'AOr', interactFilter: 'NOr', turnFilter: 'jOr', composer: 'cNr', panel: 'Szn', panelFlag: 'pn', jsx: 'q6' },
   },
 };
+const CODEX_265814_VERIFIER_VARIANTS = {
+  41407: {
+    historySource: '{data:f}=n(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)',
+    projectRowsView: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:I,activeId:v,onClose:a,row:An,onActiveArchiveStart:d}',
+    messengerImport: 'Vst as codexLocalGroupsMessengerImport',
+    executionTargetImport: 'U$ as codexUseExecutionTarget',
+    powerUltraCall: 'Jdn([...Xdn,Zdn].filter',
+  },
+};
+
+function minifiedBlockScope(text, open) {
+  if (open < 0 || text[open] !== '{') return '';
+  let depth = 0;
+  let quote = '';
+  let regex = false;
+  let characterClass = false;
+  let previous = '';
+  for (let index = open; index < text.length; index += 1) {
+    const current = text[index];
+    if ((quote || regex) && current === '\\') { index += 1; continue; }
+    if (quote) { if (current === quote) { quote = ''; previous = 'x'; } continue; }
+    if (regex) {
+      if (current === '[') characterClass = true;
+      if (current === ']') characterClass = false;
+      if (current === '/' && !characterClass) { regex = false; previous = 'x'; }
+      continue;
+    }
+    if (current === "'" || current === '"' || current === '`') { quote = current; continue; }
+    if (current === '/' && text[index + 1] === '*') { index = text.indexOf('*/', index + 2); if (index < 0) return ''; index += 1; continue; }
+    if (current === '/' && text[index + 1] === '/') { index = text.indexOf('\n', index + 2); if (index < 0) return ''; continue; }
+    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; continue; }
+    if (current === '{') depth += 1;
+    if (current === '}' && --depth === 0) return text.slice(open, index + 1);
+    if (!/\s/.test(current)) previous = current;
+  }
+  return '';
+}
+
+function minifiedFunctionScope(text, name) {
+  const start = text.indexOf(`function ${name}`);
+  if (start < 0) return '';
+  const open = text.indexOf('){', start);
+  const body = minifiedBlockScope(text, open + 1);
+  return body ? text.slice(start, open + 1) + body : '';
+}
+
+function minifiedCodeAtDepth(text, wanted) {
+  let depth = 0;
+  let quote = '';
+  let regex = false;
+  let characterClass = false;
+  let previous = '';
+  let output = '';
+  for (let index = 0; index < text.length; index += 1) {
+    const current = text[index];
+    if ((quote || regex) && current === '\\') { if (depth === wanted) output += current + text[index + 1]; index += 1; continue; }
+    if (quote) { if (depth === wanted) output += current; if (current === quote) { quote = ''; previous = 'x'; } continue; }
+    if (regex) {
+      if (depth === wanted) output += current;
+      if (current === '[') characterClass = true;
+      if (current === ']') characterClass = false;
+      if (current === '/' && !characterClass) { regex = false; previous = 'x'; }
+      continue;
+    }
+    if (current === "'" || current === '"' || current === '`') { quote = current; if (depth === wanted) output += current; continue; }
+    if (current === '/' && text[index + 1] === '*') { index = text.indexOf('*/', index + 2); if (index < 0) return ''; index += 1; continue; }
+    if (current === '/' && text[index + 1] === '/') { index = text.indexOf('\n', index + 2); if (index < 0) return output; continue; }
+    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; if (depth === wanted) output += current; continue; }
+    if (current === '{') depth += 1;
+    else if (current === '}') depth -= 1;
+    else if (depth === wanted) output += current;
+    if (!/\s/.test(current)) previous = current;
+  }
+  return output;
+}
+
+function minifiedAnchoredBlock(text, anchor, wanted) {
+  let depth = 0, quote = '', regex = false, characterClass = false, previous = '', match = '';
+  for (let index = 0; index < text.length; index += 1) {
+    const current = text[index];
+    if (!quote && !regex && depth === wanted && text.startsWith(anchor, index)) {
+      if (match) return '';
+      match = minifiedBlockScope(text, index + anchor.length - 1);
+    }
+    if ((quote || regex) && current === '\\') { index += 1; continue; }
+    if (quote) { if (current === quote) { quote = ''; previous = 'x'; } continue; }
+    if (regex) {
+      if (current === '[') characterClass = true;
+      if (current === ']') characterClass = false;
+      if (current === '/' && !characterClass) { regex = false; previous = 'x'; }
+      continue;
+    }
+    if (current === "'" || current === '"' || current === '`') { quote = current; continue; }
+    if (current === '/' && text[index + 1] === '*') { index = text.indexOf('*/', index + 2); if (index < 0) return ''; index += 1; continue; }
+    if (current === '/' && text[index + 1] === '/') { index = text.indexOf('\n', index + 2); if (index < 0) return ''; continue; }
+    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; continue; }
+    if (current === '{') depth += 1;
+    else if (current === '}') depth -= 1;
+    if (!/\s/.test(current)) previous = current;
+  }
+  return match;
+}
+
+function minifiedNestedBlock(text, anchors) {
+  let block = text;
+  for (const [anchor, depth] of anchors) block = minifiedAnchoredBlock(block, anchor, depth);
+  return block;
+}
 if (require.main === module) {
   try {
     main();
@@ -38,11 +146,18 @@ function main() {
   const is265730 = String(target.version).startsWith('26.5730.');
   const is265803 = String(target.version).startsWith('26.5803.');
   const is265810 = String(target.version).startsWith('26.5810.');
+  const is265814 = String(target.version).startsWith('26.5814.');
   const codex265810Build = is265810 ? String(target.version).split('.')[2] : '';
   if (is265810 && !CODEX_265810_VERIFIER_VARIANTS[codex265810Build]) {
     throw new Error(`不支持的 Codex 26.5810 build：${target.version}`);
   }
+  const codex265814Build = is265814 ? String(target.version).split('.')[2] : '';
+  if (is265814 && !CODEX_265814_VERIFIER_VARIANTS[codex265814Build]) {
+    throw new Error(`不支持的 Codex 26.5814 build：${target.version}`);
+  }
   const v265810 = CODEX_265810_VERIFIER_VARIANTS[codex265810Build] || null;
+  const v265814 = CODEX_265814_VERIFIER_VARIANTS[codex265814Build] || null;
+  const v26581x = v265814 || v265810;
   const emptyMetadata = 'var codexLocalGroupsInitialMeta={"version":1,"conversations":{}}';
   assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=17');
   assertNotContains(target.extensionJsPath, 'typeof $g!="undefined"?$g:require("vscode")');
@@ -62,9 +177,9 @@ function main() {
   } else if (fallbacks.length) {
     throw new Error(`存在过期 Responses WebSocket fallback：${target.extensionJsPath}`);
   }
-  const headerMarker = is265810 ? 'codexLocalGroupsHeaderSafe265810PatchVersion=1' : is265803 ? 'codexLocalGroupsHeaderSafe265803PatchVersion=1' : `codexLocalGroupsHeaderSafePatchVersion=${is265730 ? 16 : is26727 ? 15 : 14}`;
-  const rowMarker = is265810 || is265803 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),' : is265730 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),' : is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),';
-  const titleSlot = is265810 || is265803 ? 24 : 23;
+  const headerMarker = is265810 || is265814 ? 'codexLocalGroupsHeaderSafe265810PatchVersion=1' : is265803 ? 'codexLocalGroupsHeaderSafe265803PatchVersion=1' : `codexLocalGroupsHeaderSafePatchVersion=${is265730 ? 16 : is26727 ? 15 : 14}`;
+  const rowMarker = is265810 || is265814 || is265803 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),' : is265730 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),' : is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),';
+  const titleSlot = is265810 || is265814 || is265803 ? 24 : 23;
   assertContains(target.headerPath, headerMarker);
   assertContains(target.headerPath, rowMarker);
   assertContains(target.headerPath, `t[${titleSlot}]!==n.conversation.title`);
@@ -82,7 +197,7 @@ function main() {
   assertContains(target.headerPath, 'dispatchHostMessage({type:`new-chat`})');
   assertContains(target.headerPath, 'codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null');
   assertContains(target.headerPath, 'codexRecentTaskRootReady?codexRecentConversationFilter');
-  const historySource = is265810 ? v265810.historySource : is265803 ? '{data:m}=r(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is265730 ? '{data:d}=p(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is26727 ? '{data:f}=v(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)';
+  const historySource = is265810 || is265814 ? v26581x.historySource : is265803 ? '{data:m}=r(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is265730 ? '{data:d}=p(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : is26727 ? '{data:f}=v(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)' : '{data:d}=ee(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)';
   assertContains(target.headerPath, historySource);
   assertContains(target.headerPath, 'function codexRecentTaskFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
   assertContains(target.headerPath, 'function codexRecentConversationFilter(e,t){let n=codexRecentTaskNormalizePath(t);');
@@ -108,9 +223,9 @@ function main() {
   assertContains(target.headerPath, '收起到最近 15 条');
   assertContains(target.headerPath, '收起到最近 5 条');
   assertContains(target.headerPath, '展开更多');
-  const projectRowsViewRuntime = is265810 || is265803 || is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
+  const projectRowsViewRuntime = is265810 || is265814 || is265803 || is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
   assertContains(target.headerPath, `function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,${projectRowsViewRuntime}.useState)(0);return(0,${projectRowsViewRuntime}.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(\`codex-local-groups-refresh\`,e),()=>window.removeEventListener(\`codex-local-groups-refresh\`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}`);
-  const projectRowsView = is265810 ? v265810.projectRowsView : is265803 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N' : is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
+  const projectRowsView = is265810 || is265814 ? v26581x.projectRowsView : is265803 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N' : is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
   assertContains(target.headerPath, projectRowsView);
   assertNotContains(target.headerPath, 'project-more-');
   assertNotContains(target.headerPath, 'codex-local-groups-expanded-projects-v1');
@@ -205,15 +320,15 @@ function main() {
     assertNotContains(target.appStatsigPath, '1221508807');
   }
 
-  if (is265810) {
-    verifyOpenedConversationTitle265810(target.headerPath);
-    verifyComposerSubagentPanel265810(target.appMainPath, codex265810Build);
+  if (is265810 || is265814) {
+    is265814 ? verifyOpenedConversationTitle265814(target.headerPath) : verifyOpenedConversationTitle265810(target.headerPath);
+    is265814 ? verifyComposerSubagentPanel265814(target.appMainPath) : verifyComposerSubagentPanel265810(target.appMainPath, codex265810Build);
     assertContains(target.extensionJsPath, 'timeoutMs:12e4})},12e4)');
     assertNotContains(target.extensionJsPath, 'timeoutMs:3e4})},3e4)');
     assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)});');
-    assertContains(target.extensionJsPath, 'if(codexLocalGroupsHandleWebviewMessage(n))return;let o=B8(n)');
-    assertContains(target.headerPath, v265810.messengerImport);
-    assertContains(target.headerPath, v265810.executionTargetImport);
+    assertContains(target.extensionJsPath, `if(codexLocalGroupsHandleWebviewMessage(n))return;let o=${is265814 ? 'Q9' : 'B8'}(n)`);
+    assertContains(target.headerPath, v26581x.messengerImport);
+    assertContains(target.headerPath, v26581x.executionTargetImport);
     assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsProjectHistory265810PatchVersion=1');
     assertContains(target.appServerManagerSignalsPath, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}');
     assertContains(target.appServerManagerSignalsPath, 'typeof e.addThreadArchivedListener===`function`');
@@ -224,14 +339,15 @@ function main() {
     assertContains(target.appStatsigPath, 'codexLocalGroupsPower265810PatchVersion=1');
     assertContains(target.appStatsigPath, 'gpt-5.6-sol:max');
     assertContains(target.appStatsigPath, 'gpt-5.6-sol:ultra');
-    assertContains(target.appStatsigPath, v265810.powerUltraCall);
+    assertContains(target.appStatsigPath, v26581x.powerUltraCall);
     assertContains(target.appStatsigPath, 'r.some(e=>e.reasoningEffort===`max`)');
     assertContains(target.appStatsigPath, 'r.some(e=>e.reasoningEffort===`ultra`)');
-    assertMatches(target.appMainPath, /isBackgroundSubagentsEnabled:[A-Za-z_$][\w$]*=!0/, '26.5810 背景子 agent 默认开启');
+    assertMatches(target.appMainPath, /isBackgroundSubagentsEnabled:[A-Za-z_$][\w$]*=!0/, `${is265814 ? '26.5814' : '26.5810'} 背景子 agent 默认开启`);
     assertMatches(target.appMainPath, /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6000}?case`collabAgentToolCall`:\{if\(![A-Za-z_$][\w$]*\|\|\1\.tool===`wait`\)break;let ([A-Za-z_$][\w$]*)=\{type:`multi-agent-action`,id:\1\.id(?:,[^{}]{0,500})?\};[A-Za-z_$][\w$]*\.push\(\2\);break\}/, 'V1 子 agent 活动转换');
     assertMatches(target.appMainPath, /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6500}?case`subAgentActivity`:if\(![A-Za-z_$][\w$]*\)break;[A-Za-z_$][\w$]*\.push\(\{type:`subagent-activity`,id:\1\.id(?:,[^{}]{0,300})?\}\);break;?/, 'V2 子 agent 活动转换');
     assertNotContains(target.appMainPath, '1221508807');
     assertNotContains(target.appStatsigPath, '1221508807');
+    if (is265814) verifyMetadata265814(target.extensionJsPath, target.headerPath);
   }
   if (is265803) {
     verifyOpenedConversationTitle265803(target.headerPath);
@@ -354,6 +470,94 @@ function verifyOpenedConversationTitle265810(headerPath) {
   );
 }
 
+function verifyOpenedConversationTitle265814(headerPath) {
+  assertContains(headerPath, 'codexLocalGroupsOpenedTitle265810PatchVersion=1');
+  assertMatches(
+    headerPath,
+    /function zn\(e\)\{let t=\(0,Wn\.c\)\(64\),\{allowInitialRouteBack:r,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:l\}=e;let\[,([A-Za-z_$][\w$]*)\]=\(0,In\.useState\)\(0\);\(0,In\.useEffect\)\(\(\)=>\{let e=\(\)=>\1\(e=>e\+1\);return window\.addEventListener\(`codex-local-groups-refresh`,e\),\(\)=>window\.removeEventListener\(`codex-local-groups-refresh`,e\)\},\[\]\),s=o==null\?s:codexLocalGroupsLocalTitle\(\{kind:`local`,conversation:\{id:o\}\}\)\?\?s;/,
+    '26.5814 已打开会话标题刷新',
+  );
+}
+
+function verifyMetadata265814(extensionJsPath, headerPath) {
+  const header = fs.readFileSync(headerPath, 'utf8');
+  const host = fs.readFileSync(extensionJsPath, 'utf8');
+  if (!headerMetadata265814Holds(header)) throw new Error(`缺少补丁契约：${headerPath} 26.5814 Metadata Header 入口`);
+  if (!hostMetadata265814Holds(host)) throw new Error(`缺少补丁契约：${extensionJsPath} 26.5814 Metadata Host 回调`);
+}
+
+function headerMetadata265814Holds(text) {
+  const title = minifiedFunctionScope(text, 'codexLocalGroupsPromptTitle');
+  const group = minifiedFunctionScope(text, 'codexLocalGroupsPromptGroup');
+  const newGroup = minifiedFunctionScope(text, 'codexLocalGroupsPromptNewGroup');
+  const start = minifiedFunctionScope(text, 'codexLocalGroupsStartConversationInGroup');
+  const anchor = 'window.addEventListener(`message`,e=>{';
+  const listener = minifiedBlockScope(text, text.indexOf(anchor) + anchor.length - 1);
+  const dispatch = 'codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{';
+  const titleMessage = minifiedAnchoredBlock(minifiedAnchoredBlock(title, 'try{', 1), dispatch, 1);
+  const groupMessage = minifiedAnchoredBlock(minifiedAnchoredBlock(group, 'try{', 1), dispatch, 1);
+  const newGroupMessage = minifiedAnchoredBlock(minifiedAnchoredBlock(newGroup, 'try{', 1), dispatch, 1);
+  const startTry = minifiedAnchoredBlock(start, 'try{', 1);
+  const startMessage = minifiedAnchoredBlock(startTry, dispatch, 1);
+  return minifiedCodeAtDepth(titleMessage, 1).includes('action:`promptConversationTitle`')
+    && minifiedCodeAtDepth(groupMessage, 1).includes('action:`promptConversationGroup`')
+    && minifiedCodeAtDepth(newGroupMessage, 1).includes('action:`promptNewGroup`')
+    && minifiedCodeAtDepth(startMessage, 1).includes('action:`setPendingGroup`')
+    && minifiedCodeAtDepth(minifiedAnchoredBlock(startTry, 'codexLocalGroupsMessenger.dispatchHostMessage({', 1), 1).includes('type:`new-chat`')
+    && minifiedCodeAtDepth(listener, 1).includes('t.action===`metadataSaved`')
+    && minifiedCodeAtDepth(listener, 1).includes('codexLocalGroupsStoreMeta(')
+    && text.includes('var codexLocalGroupsMessenger=codexLocalGroupsMessengerImport');
+}
+
+function hostMetadata265814Holds(text) {
+  const conversation = minifiedFunctionScope(text, 'codexLocalGroupsPromptConversation');
+  const groupSave = minifiedFunctionScope(text, 'codexLocalGroupsSavePromptGroup');
+  const newGroup = minifiedFunctionScope(text, 'codexLocalGroupsPromptNewGroup');
+  const message = minifiedFunctionScope(text, 'codexLocalGroupsHandleWebviewMessage');
+  const conversationDirect = minifiedCodeAtDepth(conversation, 1);
+  const messageDirect = minifiedCodeAtDepth(minifiedAnchoredBlock(message, 'try{', 1), 1);
+  const rpcAnchor = 'onDidReceiveMessage(n=>{';
+  const rpc = minifiedBlockScope(text, text.indexOf(rpcAnchor) + rpcAnchor.length - 1);
+  const webviewAnchor = 'onDidReceiveMessage(c=>{';
+  const webview = minifiedBlockScope(text, text.indexOf(webviewAnchor) + webviewAnchor.length - 1);
+  return conversationDirect.includes('e.action==="promptConversationTitle"') && minifiedCodeAtDepth(minifiedAnchoredBlock(conversation, 'if(!o){', 1), 1).includes('codexLocalGroupsPromptGroupPick(r,')
+    && minifiedCodeAtDepth(minifiedNestedBlock(conversation, [['codexLocalGroupsInputBox("设置本地标题",i,(i,a)=>{', 1], ['try{', 1], ['t?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:s')
+    && minifiedCodeAtDepth(minifiedNestedBlock(groupSave, [['try{', 1], ['n?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:i')
+    && minifiedCodeAtDepth(minifiedNestedBlock(newGroup, [['codexLocalGroupsInputBox("新建需求分组","",(n,o)=>{', 1], ['try{', 1], ['t?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:s')
+    && messageDirect.includes('e.action==="promptConversationTitle"||e.action==="promptConversationGroup"')
+    && messageDirect.includes('e.action==="promptNewGroup"')
+    && messageDirect.includes('e.action==="setPendingGroup"||e.action==="newConversationInGroup"')
+    && minifiedCodeAtDepth(minifiedNestedBlock(message, [['try{', 1], ['if(e.action==="getMetadata"){', 1], ['try{', 1], ['t?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:r')
+    && minifiedCodeAtDepth(rpc, 1).includes('if(codexLocalGroupsHandleWebviewMessage(n))return;let o=Q9(n)')
+    && minifiedCodeAtDepth(webview, 1).includes('if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)');
+}
+
+function verifyComposerSubagentPanel265814(appMainPath) {
+  const text = fs.readFileSync(appMainPath, 'utf8');
+  const composer = minifiedFunctionScope(text, 'vWr');
+  const body = composer.slice(composer.indexOf('){') + 1);
+  const direct = minifiedCodeAtDepth(body, 1);
+  const hook = minifiedAnchoredBlock(body, 'zBr({', 1);
+  const layout = minifiedAnchoredBlock(body, 'QFn({', 1);
+  const panelProps = minifiedAnchoredBlock(body, 'yn?(0,I6.jsx)(RQn,{', 4);
+  verifySubagentMembershipProducer265814(appMainPath);
+  assertMatches(appMainPath, /function zBr\(e\)\{[\s\S]{0,300}?sl\(lX,/, '26.5814 子 agent membership 消费');
+  assertMatches(appMainPath, /function zBr\(e\)\{[\s\S]{0,1000}?parentConversationId===n[\s\S]{0,300}?\.filter\(HBr\)[\s\S]{0,300}?\.filter\(BBr\)[\s\S]{0,600}?visibleRows:c/, '26.5814 子 agent 面板行筛选');
+  assertMatches(appMainPath, /function BBr\(e\)\{return e\.isCurrentParentTurn\}/, '26.5814 当前父轮次筛选');
+  assertMatches(appMainPath, /function HBr\(e\)\{return e\.canInteract&&e\.displayName\.trim\(\)\.length>0\}/, '26.5814 可交互子 agent 筛选');
+  if (!minifiedCodeAtDepth(hook, 1).includes('activeConversationId:') || !direct.includes('yn=(rt.length>0||It)&&!dt&&!hn&&!ht&&!pt')) throw new Error(`缺少补丁契约：${appMainPath} 26.5814 子 agent 面板可见性`);
+  if (!minifiedCodeAtDepth(layout, 1).includes('subagentsPanel:yn') || !minifiedCodeAtDepth(panelProps, 1).includes('rows:rt')) throw new Error(`缺少补丁契约：${appMainPath} 26.5814 子 agent 面板渲染`);
+  const panel = text.slice(text.indexOf('function RQn(e){'), text.indexOf('function ', text.indexOf('function RQn(e){') + 1));
+  if (!panel.includes('composer.backgroundSubagents.summary') || !panel.includes('{rows:n,agentCount:r')) throw new Error(`缺少补丁契约：${appMainPath} 26.5814 子 agent 面板摘要`);
+}
+
+function verifySubagentMembershipProducer265814(appMainPath) {
+  assertMatches(appMainPath, /function SNn\(e,t,n,r\)\{[\s\S]{0,500}?e\.type===`subAgentActivity`\)\{let ([A-Za-z_$][\w$]*)=js\(e\.agentThreadId\)[\s\S]{0,500}?i\.set\(\1,\{conversationId:\1,[\s\S]{0,500}?parentConversationId:t[\s\S]{0,500}?e\.tool!==`spawnAgent`\)\)for\(let ([A-Za-z_$][\w$]*) of e\.receiverThreadIds\)\{let ([A-Za-z_$][\w$]*)=js\(\2\)[\s\S]{0,500}?i\.has\(\3\)\|\|i\.set\(\3,\{conversationId:\3,[\s\S]{0,500}?parentConversationId:t/, '26.5814 子 agent membership 生产者');
+  assertMatches(appMainPath, /function xNn\(\{cachedConversations:e,conversationTurns:t,[^}]+\}\)\{[\s\S]{0,900}?=SNn\(t,/, '26.5814 子 agent membership 聚合');
+  assertMatches(appMainPath, /lX=Ri\([^,]+,\(e,\{get:t\}\)=>\{[\s\S]{0,300}?let n=typeof e==`string`\?e:e\.conversationId[\s\S]{0,3300}?xNn\(\{[\s\S]{0,1200}?conversationTurns:[^,}]+,[\s\S]{0,1200}?parentConversationId:n(?:,|\})/, '26.5814 子 agent membership selector');
+  assertMatches(appMainPath, /lX as IC(?:,|\})/, '26.5814 子 agent membership 导出');
+}
+
 function verifyComposerSubagentPanel265810(appMainPath, build) {
   const v = CODEX_265810_VERIFIER_VARIANTS[build] && CODEX_265810_VERIFIER_VARIANTS[build].composer;
   if (!v) throw new Error(`不支持的 Codex 26.5810 build：${build}`);
@@ -386,4 +590,4 @@ function verifySubagentMembershipProducer265810(appMainPath, build) {
   assertMatches(appMainPath, new RegExp(v.store + ' as FT(?:,|\\})'), '26.5810 子 agent membership 导出');
 }
 
-module.exports = { verifyComposerSubagentPanel265803, verifyComposerSubagentPanel265810, verifyOpenedConversationTitle265803, verifyOpenedConversationTitle265810 };
+module.exports = { verifyComposerSubagentPanel265803, verifyComposerSubagentPanel265810, verifyComposerSubagentPanel265814, verifyMetadata265814, verifyOpenedConversationTitle265803, verifyOpenedConversationTitle265810, verifyOpenedConversationTitle265814 };

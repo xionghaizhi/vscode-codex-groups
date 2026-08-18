@@ -5,8 +5,11 @@ const path = require('path');
 const {
   verifyComposerSubagentPanel265803,
   verifyComposerSubagentPanel265810,
+  verifyComposerSubagentPanel265814,
+  verifyMetadata265814,
   verifyOpenedConversationTitle265803,
   verifyOpenedConversationTitle265810,
+  verifyOpenedConversationTitle265814,
 } = require('../scripts/verify-patched-bundles');
 
 const openedTitle265803Header = [
@@ -82,6 +85,54 @@ const subagentMemberships26581052044 = [
   'if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))i.set(e.receiverThreadIds[0],{parentConversationId:t})}return Array.from(i.values())}',
   'uJ=Nc($,(e,{get:t})=>{let n=t(store,e);return dyn({cachedConversations:[],conversationTurns:n.turns,parentConversationId:e,sourceLinkedThreads:null}).filter(Boolean)});',
   'export{foo as a,uJ as FT,bar as z};',
+].join('');
+
+const openedTitle265814Header = [
+  'var codexLocalGroupsOpenedTitle265810PatchVersion=1;',
+  'function zn(e){let t=(0,Wn.c)(64),{allowInitialRouteBack:r,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:l}=e;',
+  'let[,codexLocalGroupsSetPageTitleRefresh]=(0,In.useState)(0);',
+  '(0,In.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),',
+  's=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s;',
+].join('');
+
+const subagentMemberships265814 = [
+  'function SNn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){',
+  'if(e.type===`subAgentActivity`){let r=js(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}',
+  'if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=js(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}',
+  'function xNn({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=SNn(t,a,null,n);return d}',
+  'lX=Ri($,(e,{get:t})=>{if(e==null)return[];let n=typeof e==`string`?e:e.conversationId,l=t(store,n);return xNn({cachedConversations:[],conversationTurns:l.turns,getIndexedSubagentItems:null,parentConversationId:n})});',
+  'export{foo as a,lX as IC,bar as z};',
+].join('');
+
+const composerSubagentPanel265814 = [
+  'function zBr(e){let n=e.activeConversationId,a=sl(lX,n),o,s;let parent=e=>e.parentConversationId===n,rw=a.filter(parent).filter(HBr);o=e.includeMentionItems?rw.map(VBr):[],s=rw.filter(BBr);let c=s;return{rows:a,visibleRows:c,mentionItems:o}}',
+  'function BBr(e){return e.isCurrentParentTurn}',
+  'function HBr(e){return e.canInteract&&e.displayName.trim().length>0}',
+  'function RQn(e){let{rows:n,agentCount:r}=e;return{id:`composer.backgroundSubagents.summary`,rows:n,agentCount:r}}',
+  'function vWr(){let {rows:nt,visibleRows:rt}=zBr({activeConversationId:ae,enabled:$e,includeMentionItems:tt.ui?.active===!0}),It=!1,dt=!1,hn=!1,ht=!1,pt=!1,yn=(rt.length>0||It)&&!dt&&!hn&&!ht&&!pt;let layout=QFn({subagentsPanel:yn});if(a){if(b){if(c){return yn?(0,I6.jsx)(RQn,{agentCount:Math.max(rt.length,Ft),rows:rt}):null}}}return null}',
+].join('');
+
+const metadata265814Header = [
+  'var codexLocalGroupsMessenger=codexLocalGroupsMessengerImport;',
+  'function codexLocalGroupsPromptTitle(e,t,n){try{codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`promptConversationTitle`,conversationId:e,title:t,projectRoot:n})}catch{}}',
+  'function codexLocalGroupsPromptGroup(e,t){try{codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`promptConversationGroup`,conversationId:e,projectRoot:t})}catch{}}',
+  'function codexLocalGroupsPromptNewGroup(e){try{codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`promptNewGroup`,projectRoot:e})}catch{}}',
+  'function codexLocalGroupsStartConversationInGroup(e,t){try{codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`setPendingGroup`,projectRoot:e,group:t}),codexLocalGroupsMessenger.dispatchHostMessage({type:`new-chat`})}catch{}}',
+  'window.addEventListener(`message`,e=>{let t=e.data;t?.type===`codex-local-groups`&&t.action===`metadataSaved`&&t.metadata&&codexLocalGroupsStoreMeta(t.metadata)})',
+].join('');
+
+const metadata265814Host = [
+  'function codexLocalGroupsSavePromptGroup(e,t,r,n,o){let i={};try{n?.postMessage?.({type:"codex-local-groups",action:"metadataSaved",metadata:i})}catch{}}',
+  'function codexLocalGroupsPromptGroupPick(e,t,r,n){return n}',
+  'function codexLocalGroupsPromptConversation(e,t){let r="id",o=e.action==="promptConversationTitle";if(!o){codexLocalGroupsPromptGroupPick(r,"","",t);return}let i="title";codexLocalGroupsInputBox("设置本地标题",i,(i,a)=>{let s={};try{t?.postMessage?.({type:"codex-local-groups",action:"metadataSaved",metadata:s})}catch{}})}',
+  'function codexLocalGroupsPromptNewGroup(e,t){codexLocalGroupsInputBox("新建需求分组","",(n,o)=>{let s={};try{t?.postMessage?.({type:"codex-local-groups",action:"metadataSaved",metadata:s})}catch{}})}',
+  'function codexLocalGroupsHandleWebviewMessage(e,t){try{',
+  'if(e.action==="promptConversationTitle"||e.action==="promptConversationGroup"){codexLocalGroupsPromptConversation(e,t);return!0}',
+  'if(e.action==="promptNewGroup"){codexLocalGroupsPromptNewGroup(e,t);return!0}',
+  'let r={};if(e.action==="getMetadata"){try{t?.postMessage?.({type:"codex-local-groups",action:"metadataSaved",metadata:r})}catch{}return!0}',
+  'if(e.action==="save"){}else if(e.action==="setPendingGroup"||e.action==="newConversationInGroup"){}return!0}catch(t){return!0}}',
+  'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=Q9(n)});',
+  'e.onDidReceiveMessage(c=>{if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)});',
 ].join('');
 
 const SCRIPTS_265810_VARIANTS = [
@@ -339,6 +390,159 @@ module.exports = {
         },
       },
     ]),
+    {
+      name: 'verifies the 26.5814 opened conversation title contract',
+      run() {
+        const headerPath = writeHeader(openedTitle265814Header);
+        assert.doesNotThrow(() => verifyOpenedConversationTitle265814(headerPath));
+      },
+    },
+    {
+      name: 'verifies the 26.5814 metadata entry contracts',
+      run() {
+        const extensionPath = writeBundle(metadata265814Host, 'extension.js');
+        const headerPath = writeHeader(metadata265814Header);
+        assert.doesNotThrow(() => verifyMetadata265814(extensionPath, headerPath));
+      },
+    },
+    {
+      name: 'fails closed when the 26.5814 metadata entry contracts drift',
+      run() {
+        const drifts = ['promptConversationTitle', 'promptConversationGroup', 'promptNewGroup', 'setPendingGroup', 'new-chat', 'metadataSaved'];
+        for (const marker of drifts) {
+          const extensionPath = writeBundle(metadata265814Host.replace(marker, 'broken'), 'extension.js');
+          const headerPath = writeHeader(metadata265814Header.replace(marker, 'broken'));
+          assert.throws(() => verifyMetadata265814(extensionPath, headerPath), /缺少补丁/, marker);
+        }
+        for (const marker of ['Q9(n)', 'this.handleMessage(e,c)']) {
+          const extensionPath = writeBundle(metadata265814Host.replace(marker, 'broken'), 'extension.js');
+          const headerPath = writeHeader(metadata265814Header);
+          assert.throws(() => verifyMetadata265814(extensionPath, headerPath), /缺少补丁/);
+        }
+      },
+    },
+    {
+      name: 'rejects 26.5814 metadata entry decoys outside their function scopes',
+      run() {
+        for (const action of ['promptConversationTitle', 'promptConversationGroup', 'promptNewGroup', 'setPendingGroup']) {
+          const header = metadata265814Header.replace('action:`' + action + '`', 'action:`broken`') + `function laterMetadataDecoy(){return{action:\`${action}\`}}`;
+          assert.throws(() => verifyMetadata265814(writeBundle(metadata265814Host, 'extension.js'), writeHeader(header)), /缺少补丁/);
+        }
+        for (const callback of ['action:"metadataSaved",metadata:i', 'action:"metadataSaved",metadata:s']) {
+          const host = metadata265814Host.replace(callback, 'action:"broken",metadata:null') + `function laterHostDecoy(){return{${callback}}}`;
+          assert.throws(() => verifyMetadata265814(writeBundle(host, 'extension.js'), writeHeader(metadata265814Header)), /缺少补丁/);
+        }
+        for (const callback of ['if(codexLocalGroupsHandleWebviewMessage(n))return;let o=Q9(n)', 'if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)']) {
+          const host = metadata265814Host.replace(callback, 'brokenHostCallback') + `function laterHostDecoy(){${callback}}`;
+          assert.throws(() => verifyMetadata265814(writeBundle(host, 'extension.js'), writeHeader(metadata265814Header)), /缺少补丁/);
+        }
+      },
+    },
+    {
+      name: 'rejects 26.5814 nested and same-try metadata decoys',
+      run() {
+        const brokenHeader = metadata265814Header.replace('action:`promptConversationTitle`', 'action:`broken`');
+        const nestedHeader = brokenHeader.replace('function codexLocalGroupsPromptTitle(e,t,n){', 'function codexLocalGroupsPromptTitle(e,t,n){function nested(){try{codexLocalGroupsMessenger.dispatchMessage(`codex-local-groups`,{action:`promptConversationTitle`})}catch{}}');
+        const sameTryHeader = brokenHeader.replace('function codexLocalGroupsPromptTitle(e,t,n){try{', 'function codexLocalGroupsPromptTitle(e,t,n){try{({action:`promptConversationTitle`});');
+        for (const header of [nestedHeader, sameTryHeader]) {
+          assert.throws(() => verifyMetadata265814(writeBundle(metadata265814Host, 'extension.js'), writeHeader(header)), /缺少补丁/);
+        }
+        const brokenHost = metadata265814Host.replace('action:"metadataSaved",metadata:i', 'action:"broken",metadata:null');
+        const nestedHost = brokenHost.replace('function codexLocalGroupsSavePromptGroup(e,t,r,n,o){', 'function codexLocalGroupsSavePromptGroup(e,t,r,n,o){function nested(){try{n?.postMessage?.({action:"metadataSaved",metadata:i})}catch{}}');
+        const sameTryHost = brokenHost.replace('n?.postMessage?.({', '({action:"metadataSaved",metadata:i});n?.postMessage?.({');
+        for (const host of [nestedHost, sameTryHost]) {
+          assert.throws(() => verifyMetadata265814(writeBundle(host, 'extension.js'), writeHeader(metadata265814Header)), /缺少补丁/);
+        }
+      },
+    },
+    {
+      name: 'fails closed when the 26.5814 opened conversation title contract drifts',
+      run() {
+        const drifts = ['codexLocalGroupsSetPageTitleRefresh]=(0,In.useState)', 'In.useEffect', 'addEventListener(`codex-local-groups-refresh`', 'removeEventListener(`codex-local-groups-refresh`', 'conversation:{id:o}'];
+        for (const marker of drifts) {
+          const headerPath = writeHeader(openedTitle265814Header.replace(marker, 'broken'));
+          assert.throws(() => verifyOpenedConversationTitle265814(headerPath), /缺少补丁/);
+        }
+      },
+    },
+    {
+      name: 'verifies the 26.5814 composer subagent panel contract',
+      run() {
+        const appMainPath = writeBundle(subagentMemberships265814 + composerSubagentPanel265814, 'app-main.js');
+        assert.doesNotThrow(() => verifyComposerSubagentPanel265814(appMainPath));
+      },
+    },
+    {
+      name: 'fails closed when the 26.5814 membership chain drifts',
+      run() {
+        const drifts = [
+          ['e.type===`subAgentActivity`', 'e.type===`broken`'],
+          ['js(e.agentThreadId)', 'e.agentThreadId'],
+          ['i.set(r,{conversationId:r', 'i.set(r,{conversationId:broken'],
+          ['let e=js(r)', 'let e=r'],
+          ['i.set(e,{conversationId:e', 'i.set(e,{conversationId:broken'],
+          ['e:e.conversationId', 'e:broken'],
+          ['parentConversationId:n', 'parentConversationId:broken'],
+          ['lX as IC', 'lX as broken'],
+        ];
+        for (const [before, after] of drifts) {
+          const appMainPath = writeBundle(
+            subagentMemberships265814.replace(before, after) + composerSubagentPanel265814,
+            'app-main.js',
+          );
+          assert.throws(() => verifyComposerSubagentPanel265814(appMainPath), /membership /);
+        }
+      },
+    },
+    {
+      name: 'fails closed when the 26.5814 composer consumer or panel drifts',
+      run() {
+        const drifts = [
+          ['sl(lX,n)', 'sl(broken,n)'],
+          ['.filter(HBr)', '.filter(Boolean)'],
+          ['.filter(BBr)', '.filter(Boolean)'],
+          ['visibleRows:c', 'visibleRows:[]'],
+          ['return e.canInteract&&e.displayName.trim().length>0', 'return e.displayName.trim().length>0'],
+          ['return e.isCurrentParentTurn', 'return !0'],
+          ['yn=(rt.length>0||It)', 'yn=It'],
+          ['&&!dt', ''],
+          ['&&!hn', ''],
+          ['&&!ht', ''],
+          ['&&!pt', ''],
+          ['subagentsPanel:yn', 'subagentsPanel:!1'],
+          ['rows:rt', 'rows:[]'],
+          ['composer.backgroundSubagents.summary', 'composer.backgroundSubagents.broken'],
+        ];
+        for (const [before, after] of drifts) {
+          const appMainPath = writeBundle(
+            subagentMemberships265814 + composerSubagentPanel265814.replace(before, after),
+            'app-main.js',
+          );
+          assert.throws(() => verifyComposerSubagentPanel265814(appMainPath), /缺少补丁契约/);
+        }
+      },
+    },
+    {
+      name: 'rejects a broken 26.5814 composer gate despite a later function decoy',
+      run() {
+        const decoy = 'function laterComposerDecoy(){let yn=(rt.length>0||It)&&!dt&&!hn&&!ht&&!pt;return QFn({subagentsPanel:yn}),yn?(0,I6.jsx)(RQn,{rows:rt}):null}';
+        const panel = composerSubagentPanel265814.replace('yn=(rt.length>0||It)&&!dt&&!hn&&!ht&&!pt', 'yn=!1') + decoy;
+        const appMainPath = writeBundle(subagentMemberships265814 + panel, 'app-main.js');
+        assert.throws(() => verifyComposerSubagentPanel265814(appMainPath), /面板可见性/);
+      },
+    },
+    {
+      name: 'rejects broken 26.5814 composer contracts hidden by nested decoys',
+      run() {
+        const decoy = 'function nestedComposerDecoy(){let yn=(rt.length>0||It)&&!dt&&!hn&&!ht&&!pt;zBr({activeConversationId:ae});QFn({subagentsPanel:yn});if(a){if(b){if(c){return yn?(0,I6.jsx)(RQn,{rows:rt}):null}}}}';
+        const gate = composerSubagentPanel265814.replace('yn=(rt.length>0||It)&&!dt&&!hn&&!ht&&!pt', 'yn=!1').replace('function vWr(){', 'function vWr(){' + decoy);
+        const activeId = composerSubagentPanel265814.replace('activeConversationId:ae', 'brokenActiveConversationId:ae').replace('function vWr(){', 'function vWr(){function nested(){activeConversationId:ae}');
+        for (const panel of [gate, activeId]) {
+          const appMainPath = writeBundle(subagentMemberships265814 + panel, 'app-main.js');
+          assert.throws(() => verifyComposerSubagentPanel265814(appMainPath), /面板/);
+        }
+      },
+    },
   ],
 };
 
