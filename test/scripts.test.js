@@ -3,13 +3,21 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const {
+  exactVerifierBuild,
   verifyComposerSubagentPanel265803,
   verifyComposerSubagentPanel265810,
   verifyComposerSubagentPanel265814,
+  verifyComposerSubagentPanel265818,
+  verifyExecutionTargetImport265818,
+  verifyHeaderTitleOverride265818,
   verifyMetadata265814,
   verifyOpenedConversationTitle265803,
   verifyOpenedConversationTitle265810,
   verifyOpenedConversationTitle265814,
+  verifyOpenedConversationTitle265818,
+  verifyPower265818,
+  verifyProjectHistory265818,
+  verifyWatchdog265818,
 } = require('../scripts/verify-patched-bundles');
 
 const openedTitle265803Header = [
@@ -134,6 +142,46 @@ const metadata265814Host = [
   'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=Q9(n)});',
   'e.onDidReceiveMessage(c=>{if(codexLocalGroupsHandleWebviewMessage(c,e))return;this.handleMessage(e,c)});',
 ].join('');
+
+
+const openedTitle265818Header = [
+  'var codexLocalGroupsOpenedTitle265810PatchVersion=1;',
+  'function zn(e){let t=(0,Wn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:l}=e;',
+  'let[,codexLocalGroupsSetPageTitleRefresh]=(0,In.useState)(0);',
+  '(0,In.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),',
+  's=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s;return s}',
+].join('');
+
+const dropdownTitle265818Header = 'var An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e=null,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e||t[24]!==n.conversation.title?(c=(0,Z.jsx)(Te,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[24]=n.conversation.title,t[23]=c):c=t[23],c}}});';
+const watchdog265818Host = 'var QP=class{constructor(e){this.onTimeout=e}start(){let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:12e4})},12e4)}};';
+const power265818Bundle = 'function ogn(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model)?[{...e,powerSettingIndex:n}]:[])}function $hn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=ogn([...cgn,lgn].filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function v$(e,t){let n=e?.find(e=>e.model===t),r=n==null?X8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>GS(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
+const historyTitle265818Call = '(t=>{let n=$j(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=sw(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=$j(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:sA(i,60)})(r)';
+const projectHistory265818Bundle = [
+  'function codexLocalGroupsLoadProjectConversations265810(e,t){let n=[];for(let r of []){let s={cwd:r.cwd};codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(s)}return n}',
+  'function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values())}',
+  'function NPn(e,t,n){let r=arguments.length>0,i={data:[]},a={getForHostId:()=>e},o=`/project`,s=true,c=`local`,l=HN({queryFn:async()=>{let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!udt(r)||!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue;n.push(jk({title:' + historyTitle265818Call + ',cwd:r.cwd||null}))}return n}});return r?s?{...l,data:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:i}',
+].join('');
+
+const subagentMemberships265818 = [
+  'function W7e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+  'function t9e(){let o={},_=null,T=null,M=T==null?o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null;return M}function a9e(){let x={profile:null},o={setQueryData(){}},n={},a=null,c=null,re=async(e,t)=>{try{o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}));let s=await Vi(a,c).setDefaultModelConfig(e,t,x.profile)}catch{}};return re}',
+  'function Wzn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){',
+  'if(e.type===`subAgentActivity`){let r=bs(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}',
+  'if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=bs(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}',
+  'function Uzn({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=Wzn(t,a,null,n);return d}',
+  'Pq=ua($,(e,{get:t})=>{if(e==null)return[];let n=typeof e==`string`?e:e.conversationId,l=t(store,n),b=Uzn({cachedConversations:[],conversationTurns:l.turns,getIndexedSubagentItems:null,parentConversationId:n});return b});',
+  'export{foo as a,Pq as sw,bar as z};',
+].join('');
+
+const composerSubagentPanel265818 = [
+  'function JKr(e){let t=(0,QKr.c)(12),{activeConversationId:n,enabled:r,includeMentionItems:i}=e,a=f(Pq,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e;t[5]===n?e=t[6]:(e=e=>e.parentConversationId===n,t[5]=n,t[6]=e);let rw=a.filter(e).filter(ZKr);o=i?rw.map(XKr):[],s=rw.filter(YKr),t[0]=n,t[1]=i,t[2]=a,t[3]=o,t[4]=s}else o=t[3],s=t[4];let c=s,u={rows:a,visibleRows:c,mentionItems:o};return u}',
+  'function YKr(e){return e.isCurrentParentTurn}',
+  'function ZKr(e){return e.canInteract&&e.displayName.trim().length>0}',
+  'function $4n(e){let{rows:n,agentCount:r}=e;return{id:`composer.backgroundSubagents.summary`,rows:n,agentCount:r}}',
+  'function DXr(){let {rows:nt,visibleRows:at}=JKr({activeConversationId:ae,enabled:$e,includeMentionItems:tt.ui?.active===!0}),Rt=!1,pt=!1,vn=!1,_t=!1,ht=!1,xn=(at.length>0||Rt)&&!pt&&!vn&&!_t&&!ht;let layout=SHn({subagentsPanel:xn});if(a){if(b){if(c){return xn?(0,j6.jsx)($4n,{agentCount:Math.max(at.length,Lt),rows:at}):null}}}return null}',
+].join('');
+
+const metadata265818Host = metadata265814Host.replace('let o=Q9(n)', 'let o=nY(n)');
 
 const SCRIPTS_265810_VARIANTS = [
   {
@@ -540,6 +588,190 @@ module.exports = {
         for (const panel of [gate, activeId]) {
           const appMainPath = writeBundle(subagentMemberships265814 + panel, 'app-main.js');
           assert.throws(() => verifyComposerSubagentPanel265814(appMainPath), /面板/);
+        }
+      },
+    },
+    {
+      name: 'verifies the 26.5818 opened conversation title contract',
+      run() {
+        const headerPath = writeHeader(openedTitle265818Header);
+        assert.doesNotThrow(() => verifyOpenedConversationTitle265818(headerPath));
+      },
+    },
+    {
+      name: 'rejects a suffixed Codex 26.5818 verifier version',
+      run() {
+        assert.strictEqual(exactVerifierBuild('26.5818.31338', '26.5818', { 31338: {} }), '31338');
+        assert.throws(() => exactVerifierBuild('26.5818.31338.1', '26.5818', { 31338: {} }), /不支持的 Codex 26\.5818 build/);
+      },
+    },
+    {
+      name: 'rejects 26.5818 title consumers hidden by later or string decoys',
+      run() {
+        assert.doesNotThrow(() => verifyHeaderTitleOverride265818(writeHeader(dropdownTitle265818Header)));
+        assert.throws(() => verifyHeaderTitleOverride265818(writeHeader(dropdownTitle265818Header + dropdownTitle265818Header)), /下拉会话标题/);
+        const opened = openedTitle265818Header.replace('s=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s;', 's=`broken`;') + openedTitle265818Header.slice(openedTitle265818Header.indexOf('function zn'));
+        assert.throws(() => verifyOpenedConversationTitle265818(writeHeader(opened)), /标题刷新/);
+        const dropdown = dropdownTitle265818Header.replace('titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0', 'titleOverride:void 0') + 'var titleDecoy=`titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0`;';
+        assert.throws(() => verifyHeaderTitleOverride265818(writeHeader(dropdown)), /下拉会话标题/);
+      },
+    },
+    {
+      name: 'rejects a wrong 26.5818 execution target import alias',
+      run() {
+        const header = 'import{foo as a,Flt as codexLocalGroupsMessengerImport,c0 as codexUseExecutionTarget,bar as z}from"./app-initial-main.js";';
+        assert.doesNotThrow(() => verifyExecutionTargetImport265818(writeHeader(header)));
+        assert.throws(() => verifyExecutionTargetImport265818(writeHeader(header.replace('c0 as codexUseExecutionTarget', 'U$ as codexUseExecutionTarget'))), /Header semantic imports/);
+        const wrong = header.replace('Flt as codexLocalGroupsMessengerImport', 'Vst as codexLocalGroupsMessengerImport');
+        const decoys = ['var decoy=`Flt as codexLocalGroupsMessengerImport`;', 'function later(){return`Flt as codexLocalGroupsMessengerImport`}', 'function outer(){function nested(){return`Flt as codexLocalGroupsMessengerImport`}}'];
+        for (const decoy of decoys) assert.throws(() => verifyExecutionTargetImport265818(writeHeader(wrong + decoy)), /Header semantic imports/);
+      },
+    },
+    {
+      name: 'rejects 26.5818 watchdog history and power string decoys',
+      run() {
+        assert.doesNotThrow(() => verifyWatchdog265818(writeBundle(watchdog265818Host, 'extension.js')));
+        assert.throws(() => verifyWatchdog265818(writeBundle(watchdog265818Host + watchdog265818Host, 'extension.js')), /QP 看门狗/);
+        assert.doesNotThrow(() => verifyProjectHistory265818(writeBundle(projectHistory265818Bundle, 'server.js')));
+        assert.doesNotThrow(() => verifyPower265818(writeBundle(power265818Bundle, 'power.js')));
+        const watchdog = watchdog265818Host.replaceAll('12e4', '99e4') + 'var watchdogDecoy=`timeoutMs:12e4})},12e4)`;';
+        assert.throws(() => verifyWatchdog265818(writeBundle(watchdog, 'extension.js')), /QP 看门狗/);
+        for (const replacement of ['title:null', 'title:wRt(r,AF)']) {
+          const history = projectHistory265818Bundle.replace('title:' + historyTitle265818Call, replacement) + 'var historyDecoy=`' + historyTitle265818Call + '`;';
+          assert.throws(() => verifyProjectHistory265818(writeBundle(history, 'server.js')), /project history 隔离与标题/);
+        }
+        const power = power265818Bundle.replace('return t===`gpt-5.6-sol`&&', 'return t===`broken-model`&&') + 'var powerDecoy=`return t===gpt-5.6-sol`';
+        assert.throws(() => verifyPower265818(writeBundle(power, 'power.js')), /Sol Max Ultra/);
+      },
+    },
+    {
+      name: 'rejects 26.5818 Power slider consumer decoys',
+      run() {
+        const expected = 'ogn([...cgn,lgn].filter';
+        const broken = power265818Bundle.replace(expected, 'ogn([...cgn].filter');
+        const decoys = ['var decoy=`' + expected + '`;', 'function later(){return`' + expected + '`}', 'function outer(){function nested(){return`' + expected + '`}}'];
+        for (const decoy of decoys) assert.throws(() => verifyPower265818(writeBundle(broken + decoy, 'power.js')), /Sol Max Ultra/);
+      },
+    },
+    {
+      name: 'rejects 26.5818 history isolation string decoys',
+      run() {
+        const isolation = [
+          ['codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(', 'true&&n.push('],
+          ['codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e)', 'true&&r.set(e.id,e)'],
+          ['!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue', '!1)continue'],
+          ['codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)', 'l.data'],
+        ];
+        for (const [expected, broken] of isolation) {
+          const history = projectHistory265818Bundle.replace(expected, broken) + 'var historyIsolationDecoy=`' + expected + '`;';
+          assert.throws(() => verifyProjectHistory265818(writeBundle(history, 'server.js')), /project history 隔离与标题/);
+        }
+      },
+    },
+    {
+      name: 'verifies the 26.5818 metadata entry contracts',
+      run() {
+        const extensionPath = writeBundle(metadata265818Host, 'extension.js');
+        const headerPath = writeHeader(metadata265814Header);
+        assert.doesNotThrow(() => verifyMetadata265814(extensionPath, headerPath, 'nY'));
+      },
+    },
+    {
+      name: 'rejects 26.5818 metadata entry decoys outside their function scopes',
+      run() {
+        for (const action of ['promptConversationTitle', 'promptConversationGroup', 'promptNewGroup', 'setPendingGroup']) {
+          const header = metadata265814Header.replace('action:`' + action + '`', 'action:`broken`') + `function laterMetadataDecoy(){return{action:\`${action}\`}}`;
+          assert.throws(() => verifyMetadata265814(writeBundle(metadata265818Host, 'extension.js'), writeHeader(header), 'nY'), /缺少补丁/);
+        }
+        const host = metadata265818Host.replace('action:"metadataSaved",metadata:i', 'action:"broken",metadata:null') + 'function laterHostDecoy(){return{action:"metadataSaved",metadata:i}}';
+        assert.throws(() => verifyMetadata265814(writeBundle(host, 'extension.js'), writeHeader(metadata265814Header), 'nY'), /缺少补丁/);
+      },
+    },
+    {
+      name: 'rejects 26.5818 nested and same-try metadata decoys',
+      run() {
+        const brokenHeader = metadata265814Header.replace('action:`promptConversationTitle`', 'action:`broken`');
+        assert.throws(() => verifyMetadata265814(writeBundle(metadata265818Host, 'extension.js'), writeHeader(brokenHeader + 'function nested(){function inner(){return{action:`promptConversationTitle`}}}'), 'nY'), /缺少补丁/);
+        assert.throws(() => verifyMetadata265814(writeBundle(metadata265818Host, 'extension.js'), writeHeader(brokenHeader + 'try{const decoy={action:`promptConversationTitle`}}catch{}'), 'nY'), /缺少补丁/);
+      },
+    },
+    {
+      name: 'verifies the 26.5818 composer subagent panel contract',
+      run() {
+        const appMainPath = writeBundle(subagentMemberships265818 + composerSubagentPanel265818, 'app-main.js');
+        assert.doesNotThrow(() => verifyComposerSubagentPanel265818(appMainPath));
+      },
+    },
+    {
+      name: 'rejects a broken 26.5818 Sol validation hidden by a string decoy',
+      run() {
+        const expected = 'r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)';
+        const base = subagentMemberships265818 + composerSubagentPanel265818;
+        const validation = base.replace(expected, 'r?.model===`broken-model`&&(t===`max`||t===`ultra`)') + 'var validationDecoy=`' + expected + '`;';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(validation, 'app-main.js')), /Sol reasoning validation/);
+        const read = 'o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(base.replace(read, 'o?.brokenReasoningEffort??null') + 'var readDecoy=`' + read + '`;', 'app-main.js')), /Sol reasoning persistence/);
+        const write = 'o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}))';
+        const broken = base.replace(write, 'o.setQueryData(n,n=>n)') + 'function laterPersistence(){let re=async(e,t)=>{' + write + '}}';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(broken, 'app-main.js')), /Sol reasoning persistence/);
+        const nested = base.replace(write, 'o.setQueryData(n,n=>n)').replace('re=async(e,t)=>{try{', 're=async(e,t)=>{try{if(false){' + write + '}');
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(nested, 'app-main.js')), /Sol reasoning persistence/);
+      },
+    },
+    {
+      name: 'fails closed when the 26.5818 membership chain drifts',
+      run() {
+        const drifts = [
+          ['e.type===`subAgentActivity`', 'e.type===`brokenActivity`'],
+          ['e.tool!==`spawnAgent`', 'e.tool!==`brokenSpawn`'],
+          ['Pq as sw', 'Pq as broken'],
+          ['parentConversationId:n', 'parentConversationId:other'],
+        ];
+        for (const [before, after] of drifts) {
+          const appMainPath = writeBundle(subagentMemberships265818.replace(before, after) + composerSubagentPanel265818, 'app-main.js');
+          assert.throws(() => verifyComposerSubagentPanel265818(appMainPath), /membership /);
+        }
+      },
+    },
+    {
+      name: 'rejects 26.5818 membership scopes hidden by nested or string decoys',
+      run() {
+        const main = subagentMemberships265818 + composerSubagentPanel265818;
+        const producer = main.slice(main.indexOf('function Wzn'), main.indexOf('function Uzn'));
+        const aggregator = main.slice(main.indexOf('function Uzn'), main.indexOf('Pq=ua'));
+        const selector = main.slice(main.indexOf('Pq=ua'), main.indexOf('export{'));
+        const hook = main.slice(main.indexOf('function JKr'), main.indexOf('function YKr'));
+        const drifts = [
+          main.replace('e.type===`subAgentActivity`', 'e.type===`brokenActivity`').replace('function DXr(){', 'function DXr(){function nestedProducer(){' + producer + '}'),
+          main.replace('let d=Wzn(t,a,null,n)', 'let d=broken(t,a,null,n)').replace('function DXr(){', 'function DXr(){function nestedAggregator(){' + aggregator + '}'),
+          main.replace('b=Uzn({', 'b=broken({').replace('function DXr(){', 'function DXr(){function nestedSelector(){' + selector + '}'),
+          main.replace('Pq as sw', 'Pq as broken') + 'var exportDecoy=`Pq as sw,`;',
+          main.replace('parentConversationId===n', 'parentConversationId===other').replace('function DXr(){', 'function DXr(){function nestedHook(){' + hook + '}'),
+        ];
+        for (const drift of drifts) {
+          const appMainPath = writeBundle(drift, 'app-main.js');
+          assert.throws(() => verifyComposerSubagentPanel265818(appMainPath), /membership|面板行筛选/);
+        }
+      },
+    },
+    {
+      name: 'rejects a broken 26.5818 composer gate despite a later function decoy',
+      run() {
+        const decoy = 'function laterComposerDecoy(){let xn=(at.length>0||Rt)&&!pt&&!vn&&!_t&&!ht;return SHn({subagentsPanel:xn}),xn?(0,j6.jsx)($4n,{rows:at}):null}';
+        const panel = composerSubagentPanel265818.replace('xn=(at.length>0||Rt)&&!pt&&!vn&&!_t&&!ht', 'xn=!1') + decoy;
+        const appMainPath = writeBundle(subagentMemberships265818 + panel, 'app-main.js');
+        assert.throws(() => verifyComposerSubagentPanel265818(appMainPath), /面板可见性/);
+      },
+    },
+    {
+      name: 'rejects broken 26.5818 composer contracts hidden by nested decoys',
+      run() {
+        const decoy = 'function nestedComposerDecoy(){let xn=(at.length>0||Rt)&&!pt&&!vn&&!_t&&!ht;JKr({activeConversationId:ae});SHn({subagentsPanel:xn});if(a){if(b){if(c){return xn?(0,j6.jsx)($4n,{rows:at}):null}}}}';
+        const gate = composerSubagentPanel265818.replace('xn=(at.length>0||Rt)&&!pt&&!vn&&!_t&&!ht', 'xn=!1').replace('function DXr(){', 'function DXr(){' + decoy);
+        const activeId = composerSubagentPanel265818.replace('activeConversationId:ae', 'brokenActiveConversationId:ae').replace('function DXr(){', 'function DXr(){function nested(){activeConversationId:ae}');
+        for (const panel of [gate, activeId]) {
+          const appMainPath = writeBundle(subagentMemberships265818 + panel, 'app-main.js');
+          assert.throws(() => verifyComposerSubagentPanel265818(appMainPath), /面板/);
         }
       },
     },

@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.60 - 2026-08-21
+
+- 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5818.31338`；只放行精确三段版本，未知 minor/build 在任何规划、备份恢复或写入前 fail closed。
+- Extension Host 适配 `QP` 120 秒 Webview 看门狗和 `nY` 消息解析器；Header 重新按语义定位真实 `Flt` messenger 与 `c0` execution-target，拒绝新包中同名但无关的 `Vst` / `U$` 导出。
+- 保留 Metadata 四入口、每组 5/+10/15/5、600px 菜单和同 ID 标题双消费；下拉与打开页本地标题一致，空白/缺失回退原生标题。
+- 项目历史适配 `NPn/FPn` 与 `$j/sw/sA` 标题 fallback；隔离加载、合并、fallback filter 和返回链均加入 scoped engine/verifier 门禁。
+- Sol Max/Ultra 的校验、Power 列表、Reasoning 菜单、回读和写入绑定 `W7e/ogn/$hn/v$/t9e/a9e` 真实作用域；子 agent 完整绑定 `Wzn -> Uzn -> Pq as sw -> JKr -> DXr/$4n`。
+- engine 与 verifier 拒绝 later/nested/string/duplicate decoy；official clean 四文件 plan/apply/plan 0、语法和 verifier 通过，314 tests、compile、lint、diff-check 与两轮 Standards/Spec review 通过。
+- 记录 Remote VSCode 安装事务可能在 CLI 返回后继续异步覆盖 bundle；live apply 必须等最后一次安装完成，再重新执行 plan/apply/plan 0/verifier。
+- official VSIX SHA-256 为 `6eb72e234e83b809e776fa100f377f289910fd6410d0680438bae9ac5c9cfb2c`；用户 `config.toml` 全程只读，不切换 Multi-Agent 配置，不 patch `canInteract`。
+
 ## v0.0.59 - 2026-08-18
 
 - 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5814.41407`（新 minor 与全量重压缩）；未知 5814 build 在恢复备份或写文件前即 fail closed。
