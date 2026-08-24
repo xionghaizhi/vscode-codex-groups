@@ -387,6 +387,41 @@ function configure265818Features(target) {
   fs.writeFileSync(path.join(assets, 'app-initial-server265818.js'), split26581831338AppServerText);
 }
 
+function configure26581841705Features(target) {
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5818.41705';
+  target.appStatsigPath = target.appMainPath;
+  const header = [
+    'import{U$ as decoyExec,Vst as decoyMsg}from"./app-initial-main265818.js";',
+    'function Mn(e){let a=i===void 0||i,o=p(),{authMethod:c}=ee(),l=te(),u=w(Ln),{data:d}=s(),f=gt(),z=null;return d}',
+    'function xn(e){let t=(0,En.c)(34),{cloudtasksQuery:n,localConversations:r,onClose:i}=e,s=a!==void 0&&a,c=o===void 0||o,l=p(),u=We(),{authMethod:d}=ee(),w=e=>!0,C=null,v=null;let T=r.filter(w),E=hn(n.data,r,C),N=E,B=N.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&v===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key)),V=(0,Z.jsxs)(z.Section,{className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`,children:[B]});return(0,Z.jsxs)(`div`,{className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`,children:[V]})}',
+    'var messages={recentTasksMenu:1,search:{defaultMessage:`Search recent chats`}};function Sn(e){return e.kind===`remote`}function Cn(){}',
+    'var An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),{item:r,isActive:i,onClose:a,onActiveArchiveStart:o}=e;switch(r.kind){case`local`:{let e,n;return t[17]!==i||t[18]!==r.conversation.hostId||t[19]!==r.conversation.id||t[20]!==o||t[21]!==a||t[22]!==e?(n=(0,Z.jsx)(xe,{conversationId:r.conversation.id,hostId:r.conversation.hostId,isActive:i,metaContent:e,onClick:a,onActiveArchiveStart:o}),t[17]=i,t[18]=r.conversation.hostId,t[19]=r.conversation.id,t[20]=o,t[21]=a,t[22]=e,t[23]=n):n=t[23],n}}});',
+    'const nativeMenu=(0,Q.jsx)(m,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:G,open:g,onOpenChange:_,children:ce});',
+    'function zn(e){let t=(0,Wn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:c,trailing:l}=e,u=n!==void 0&&n;return o}function Vn(){}',
+  ].join('');
+  const main = [
+    'var Tu={postMessage(){}},U_e=null;function V_e(e){U_e=e}var ku,Au,ju=e((()=>{ku=class e{static getInstance(){return new e}dispatchMessage(e,t){Tu.postMessage({...t,type:e})}deliverMessage(){}dispatchHostMessage(e){this.deliverMessage(e.type,e)}},Au=ku.getInstance(),V_e((e,t)=>{Au.dispatchMessage(e,t)})}));function hostMessage(){Au.dispatchHostMessage({type:`native`})}function Bw(e){let f=e,g=!1,h=null,p={},_;return _={activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p},_}function mtt(){return{mutationFn:null}}function jd(){return`linux`}',
+    'function F7e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+    'function K7e(){let o={},_=null,T=null,M=T==null?o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null;return M}function X7e(){let w={profile:null},o={setQueryData(){}},n={},a=null,c=null,oe=async(e,t)=>{try{o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}));let s=await Ce(a,c).setDefaultModelConfig(e,t,w.profile)}catch{}};return oe}',
+    'function nativeState(m,t){let{isBackgroundSubagentsEnabled:s=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:s,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:{if(!o||n.tool===`wait`)break;let e={type:`multi-agent-action`,id:n.id};d.push(e);break}case`subAgentActivity`:if(!o)break;d.push({type:`subagent-activity`,id:n.id});break}}',
+    'function ks(e){return String(e)}function GWn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ks(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ks(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}function WWn({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=GWn(t,a,c,n);return d}function ti(e,t){return t}var zX,BX=e((()=>{zX=ti($,(e,{get:t})=>{if(e==null)return[];let n=typeof e==`string`?e:e.conversationId,l=t(store,n),m=[],v=WWn({cachedConversations:m,conversationTurns:l,parentConversationId:n});return v})}));',
+    'function Bc(e,t){return[]}function Uqr(e){let t={},n=e.activeConversationId,r=e.enabled,i=e.includeMentionItems,a=Bc(zX,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e=e=>e.parentConversationId===n,r=a.filter(e).filter(Kqr);o=i?r:[],s=r.filter(Wqr)}let c=s,l=null,u={rows:a,visibleRows:c,mentionItems:o,firstApproval:l};return u}function Wqr(e){return e.isCurrentParentTurn}function Kqr(e){return e.canInteract&&e.displayName.trim().length>0}function yer(e){let{rows:n,agentCount:r}=e,l={formatMessage(){}};if(a){if(b){if(c){let m=l.formatMessage({id:`composer.backgroundSubagents.summary`,defaultMessage:`summary`,description:`summary`},{count:r??n.length});return m}}}return null}function Iqn(e){return e}function SZr(){let {rows:st,visibleRows:Vt}=Uqr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0}),Bt=0,ht=!1,bn=!1,yt=!1,_t=!1,Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;let layout=Iqn({subagentsPanel:Cn});if(a){if(b){if(c){return Cn?(0,A6.jsx)(yer,{agentCount:Math.max(st.length,Bt),rows:st}):null}}}return null}',
+    'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var SCn=[{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],CCn={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},wCn=[];function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=bCn((t?[...SCn,CCn]:SCn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function dw(){return!0}var J8e=[];function y$(e,t){let n=e?.find(e=>e.model===t);return n==null?J8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))}',
+    'export{Au as Jlt,Bw as Z1,zX as DS,mtt as U$,jd as Vst};',
+  ].join('');
+  const server = [
+    'var PT=`local`,CE=[],Store=class{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return wdt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}};class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}}',
+    'function qPn(){return YPn(`recent-conversations`)}function YPn(e){return{data:[]}}function SA(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function bdt(e){return{id:e.conversationId??e.id,cwd:e.cwd}}function ddt(){return!0}function vM(e){return String(e||``).trim()}function xA(e,t){return String(e).slice(0,t)}function $C(e){return null}function vG(){return{getDefault:()=>({getHostId:()=>`local`}),getForHostId:()=>null}}function IN(e){return e}function LPn(e){return()=>{for(let t of e)t()}}function RPn(){return()=>{}}var bG={useEffect(){}};',
+  ].join('');
+  fs.writeFileSync(target.extensionJsPath, extensionText.replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=oY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})').replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + webviewTimeout265818Text);
+  fs.writeFileSync(target.headerPath, header);
+  fs.writeFileSync(target.appMainPath, main);
+  fs.writeFileSync(target.appServerManagerSignalsPath, server);
+  fs.writeFileSync(path.join(assets, 'app-initial-main265818.js'), main);
+  fs.writeFileSync(path.join(assets, 'app-initial-server265818.js'), server);
+}
+
 function restoreSafe26721Layout(text) {
   return text
     .replace('(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:b,onClose:i,row:Jn,onActiveArchiveStart:p})', 'codexRecentTaskProjectRows(F,b,i,Jn,p)')
@@ -1507,6 +1542,154 @@ module.exports = {
       },
     },
     {
+      name: 'recognizes the exact Codex 26.5818.41705 build and stays idempotent',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 4);
+        const applied = engine.apply(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(applied.errors, []);
+        const header = fs.readFileSync(target.headerPath, 'utf8');
+        assert.ok(header.includes('Jlt as codexLocalGroupsMessengerImport'));
+        assert.ok(header.includes('Z1 as codexUseExecutionTarget'));
+        assert.ok(header.includes('threadSummary:r.conversation'));
+        assert.ok(fs.readFileSync(target.extensionJsPath, 'utf8').includes('let o=oY(n)'));
+        assert.ok(fs.readFileSync(target.appServerManagerSignalsPath, 'utf8').includes('vM(String(t.name??``).trim())'));
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'uses the state database only for Codex 26.5818.41705 project history',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        const script = `${server};(async()=>{let pages={first:{data:[{id:'root',cwd:'/project',updatedAt:3}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',updatedAt:1}],nextCursor:null}},projectRequests=[],projectStore={threadsById:new Map,listRecentThreads:e=>(projectRequests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:e=>({conversationId:e.id,cwd:e.cwd,updatedAt:e.updatedAt}),shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265810(projectStore,'/project'),nativeRequests=[],nativeStore=Object.create(Store.prototype);nativeStore.params={hostId:'local',requestClient:{getCompatibleThreadSortKey:e=>e,sendRequest:(e,t)=>(nativeRequests.push(t),Promise.resolve({data:[],nextCursor:null}))}},nativeStore.recentConversationSortKey='recency_at';await nativeStore.listRecentThreads({cursor:null,limit:1});await nativeStore.listRecentThreads({cursor:null,limit:1,useStateDbOnly:true});console.log(JSON.stringify({project:project.map(e=>e.id),projectFlags:projectRequests.map(e=>e.useStateDbOnly),nativeFlags:nativeRequests.map(e=>e.useStateDbOnly)}))})()`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), { project: ['root', 'child'], projectFlags: [true, true], nativeFlags: [false, true] });
+      },
+    },
+    {
+      name: 'migrates the previous Codex 26.5818.41705 project history marker once',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const file = target.appServerManagerSignalsPath;
+        const patched = fs.readFileSync(file, 'utf8');
+        const legacy = patched
+          .replace('async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==PT})', 'async listRecentThreads({cursor:e,limit:t,background:n=!1})')
+          .replace('sourceKinds:CE,useStateDbOnly:a}', 'sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT}')
+          .replace('background:!0,useStateDbOnly:!0})', 'background:!0})');
+        fs.writeFileSync(file, legacy);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [file]);
+        assert.ok(plan.changes[0].nextText.includes('background:!0,useStateDbOnly:!0})'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'rejects Codex 26.5818.41705 state database comment and string decoys',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const method = 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==PT}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:a},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}';
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const file = target.appServerManagerSignalsPath;
+        const patched = fs.readFileSync(file, 'utf8');
+        fs.writeFileSync(file, patched.replace('sourceKinds:CE,useStateDbOnly:a}', 'sourceKinds:CE,useStateDbOnly:!1}') + `/*${method}*/`);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5818 project history: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const restored = fs.readFileSync(file, 'utf8');
+        const call = 'e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0})';
+        fs.writeFileSync(file, restored.replace(call, 'e.listRecentThreads({cursor:i,limit:100,background:!0}),fake=`' + call + '`'));
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5818 project history: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const native = 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}';
+        const fakeClass = fs.readFileSync(file, 'utf8').replace(method, native) + `class FakeStateDbDecoy{${method}}`;
+        fs.writeFileSync(file, fakeClass);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5818 project history: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'rejects 26.5818.41705 nested decoys and semantic import drift',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const header = fs.readFileSync(target.headerPath, 'utf8');
+        const title = header.replace('titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0', 'titleOverride:void 0') + 'function nested(){let n=(0,Z.jsx)(xe,{threadSummary:r.conversation,titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0});return n}';
+        fs.writeFileSync(target.headerPath, title);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('header 26.5818: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const broken = main.replace('e.type===`subAgentActivity`', 'e.type===`brokenActivity`') + 'function nested(){function GWn(e,t,n,r){return Array.from(new Map)}}';
+        fs.writeFileSync(target.appMainPath, broken);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5818: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const internalProducerMain = fs.readFileSync(target.appMainPath, 'utf8');
+        const internalProducer = internalProducerMain.replace('}}return Array.from(i.values())}function WWn', '}}function fake(){return Array.from(i.values())}return []}function WWn');
+        fs.writeFileSync(target.appMainPath, internalProducer);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5818: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const selectorMain = fs.readFileSync(target.appMainPath, 'utf8');
+        const selector = selectorMain.replace('zX=ti($,(e,{get:t})=>{', 'zX=broken($,(e,{get:t})=>{') + 'function nestedSelector(){let zX=ti($,(e,{get:t})=>{let n=typeof e==`string`?e:e.conversationId,l=t(store,n),m=[],v=WWn({cachedConversations:m,conversationTurns:l,parentConversationId:n});return v})}';
+        fs.writeFileSync(target.appMainPath, selector);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5818: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const aggregatorMain = fs.readFileSync(target.appMainPath, 'utf8');
+        const aggregator = aggregatorMain.replace('GWn(t,a,c,n)', 'broken(t,a,c,n)') + 'function nestedAggregator(){return GWn(t,a,c,n)}';
+        fs.writeFileSync(target.appMainPath, aggregator);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5818: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const composerMain = fs.readFileSync(target.appMainPath, 'utf8');
+        const composer = composerMain.replace('Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t', 'Cn=!1').replace('function SZr(){', 'function SZr(){function fake(){let Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;Uqr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0});Iqn({subagentsPanel:Cn});if(a){if(b){if(c){return Cn?(0,A6.jsx)(yer,{agentCount:Math.max(st.length,Bt),rows:st}):null}}}}');
+        fs.writeFileSync(target.appMainPath, composer);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5818: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const summaryMain = fs.readFileSync(target.appMainPath, 'utf8');
+        const summary = summaryMain.replace('id:`composer.backgroundSubagents.summary`', 'id:`broken.summary`') + 'function nestedSummary(){return`m=l.formatMessage({id:\\`composer.backgroundSubagents.summary\\``}';
+        fs.writeFileSync(target.appMainPath, summary);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5818: 补丁标记不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const importHeader = fs.readFileSync(target.headerPath, 'utf8').replace('Z1 as codexUseExecutionTarget', 'AZ1 as codexUseExecutionTarget');
+        fs.writeFileSync(target.headerPath, importHeader);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('header 26.5818: semantic imports 不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const source = path.join(path.dirname(target.headerPath), 'app-initial-main265818.js');
+        const semantic = fs.readFileSync(source, 'utf8').replace('Au=ku.getInstance()', 'Au=null') + 'function nestedSemantic(){let Au=ku.getInstance();Au.dispatchMessage(`native`,{});Au.dispatchHostMessage({type:`native`});return`Au=ku.getInstance(),V_e((e,t)=>{Au.dispatchMessage(e,t)})`}';
+        fs.writeFileSync(source, semantic);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('header 26.5818: semantic imports 不完整'));
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const messageSource = path.join(path.dirname(target.headerPath), 'app-initial-main265818.js');
+        const message = fs.readFileSync(messageSource, 'utf8').replace('Tu.postMessage({...t,type:e})', 'let decoy=`Tu.postMessage({...t,type:e})`');
+        fs.writeFileSync(messageSource, message);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('header 26.5818: semantic imports 不完整'));
+      },
+    },
+    {
       name: 'executes Codex 26.5818 metadata four entries',
       run() {
         const target = createTarget();
@@ -1889,6 +2072,21 @@ module.exports = {
         assert.deepStrictEqual(report.cleanRestored, []);
         assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), unsafe);
         assert.strictEqual(fs.statSync(target.headerPath).mtimeMs, before);
+      },
+    },
+    {
+      name: 'writes nothing before rejecting a suffixed 26.5818.41705 version',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        target.version = '26.5818.41705.1';
+        const before = fs.readFileSync(target.headerPath, 'utf8');
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.changes, []);
+        assert.ok(plan.errors.includes('不支持的 Codex 26.5818 build：26.5818.41705.1'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+        assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), before);
       },
     },
     {

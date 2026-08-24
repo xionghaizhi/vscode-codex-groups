@@ -182,6 +182,41 @@ const composerSubagentPanel265818 = [
 ].join('');
 
 const metadata265818Host = metadata265814Host.replace('let o=Q9(n)', 'let o=nY(n)');
+const openedTitle26581841705Header = [
+  'var codexLocalGroupsOpenedTitle265810PatchVersion=1;',
+  'function zn(e){let t=(0,Wn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:c,trailing:l}=e;',
+  'let[,codexLocalGroupsSetPageTitleRefresh]=(0,In.useState)(0);',
+  '(0,In.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),',
+  'o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o;return o}',
+].join('');
+const dropdownTitle26581841705Header = 'var An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),{item:r,isActive:i,onClose:a,onActiveArchiveStart:o}=e;switch(r.kind){case`local`:{let e,n;return t[17]!==i||t[18]!==r.conversation.hostId||t[19]!==r.conversation.id||t[20]!==o||t[21]!==a||t[22]!==e||t[24]!==r.conversation.title?(n=(0,Z.jsx)(xe,{conversationId:r.conversation.id,hostId:r.conversation.hostId,threadSummary:r.conversation,titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0,isActive:i,metaContent:e,onClick:a,onActiveArchiveStart:o}),t[17]=i,t[18]=r.conversation.hostId,t[19]=r.conversation.id,t[20]=o,t[21]=a,t[22]=e,t[24]=r.conversation.title,t[23]=n):n=t[23],n}}});';
+const power26581841705Bundle = 'function bCn(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model)?[{...e,powerSettingIndex:n}]:[])}function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=bCn([...SCn,CCn].filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function y$(e,t){let n=e?.find(e=>e.model===t),r=n==null?J8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
+const historyTitle26581841705Call = '(t=>{let n=vM(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=$C(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=vM(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:xA(i,60)})(r)';
+const projectHistory26581841705StateDbMethod = 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==PT}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:a},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}';
+const projectHistory26581841705NativeMethod = 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}';
+const projectHistory26581841705StateDbCall = 'e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0})';
+const projectHistory26581841705Bundle = [
+  'var Store=class{async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}async listArchivedThreads(){}' + projectHistory26581841705StateDbMethod + '};',
+  'async function codexLocalGroupsLoadProjectConversations265810(e,t){let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0}),o=a.nextCursor,s={cwd:t};codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(bdt(s)),o!=null&&r.add(o),i=o}while(i!=null);return n}',
+  'function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values())}',
+  'function qPn(e,t,n){let r=arguments.length>0,i={data:[]},a={getForHostId:()=>e},o=`/project`,s=true,c=`local`,l=IN({queryFn:async()=>{let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!ddt(r)||!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue;n.push(bdt({title:' + historyTitle26581841705Call + ',cwd:r.cwd||null}))}return n}});return r?s?{...l,data:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:i}',
+].join('');
+const subagentMemberships26581841705 = [
+  'function F7e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+  'function K7e(){let o={},_=null,T=null,M=T==null?o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null;return M}function X7e(){let w={profile:null},o={setQueryData(){}},n={},a=null,c=null,oe=async(e,t)=>{try{o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}));let s=await Ce(a,c).setDefaultModelConfig(e,t,w.profile)}catch{}};return oe}',
+  'function GWn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ks(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ks(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}',
+  'function WWn({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=GWn(t,a,c,n);return d}',
+  'var zX,BX=e((()=>{zX=ti($,(e,{get:t})=>{if(e==null)return[];let n=typeof e==`string`?e:e.conversationId,l=t(store,n),m=[],v=WWn({cachedConversations:m,conversationTurns:l,parentConversationId:n});return v})}));',
+  'export{foo as a,zX as DS,bar as z};',
+].join('');
+const composerSubagentPanel26581841705 = [
+  'function Uqr(e){let t={},n=e.activeConversationId,r=e.enabled,i=e.includeMentionItems,a=Bc(zX,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e=e=>e.parentConversationId===n,r=a.filter(e).filter(Kqr);o=i?r:[],s=r.filter(Wqr)}let c=s,l=null,u={rows:a,visibleRows:c,mentionItems:o,firstApproval:l};return u}',
+  'function Wqr(e){return e.isCurrentParentTurn}',
+  'function Kqr(e){return e.canInteract&&e.displayName.trim().length>0}',
+  'function yer(e){let{rows:n,agentCount:r}=e,l={formatMessage(){}};if(a){if(b){if(c){let m=l.formatMessage({id:`composer.backgroundSubagents.summary`,defaultMessage:`summary`,description:`summary`},{count:r??n.length});return m}}}return null}',
+  'function SZr(){let {rows:st,visibleRows:Vt}=Uqr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0}),Bt=0,ht=!1,bn=!1,yt=!1,_t=!1,Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;let layout=Iqn({subagentsPanel:Cn});if(a){if(b){if(c){return Cn?(0,A6.jsx)(yer,{agentCount:Math.max(st.length,Bt),rows:st}):null}}}return null}',
+].join('');
+const semanticImports26581841705Main = 'var Tu={postMessage(){}},U_e=null;function V_e(e){U_e=e}var ku,Au,ju=e((()=>{ku=class e{static getInstance(){return new e}dispatchMessage(e,t){Tu.postMessage({...t,type:e})}deliverMessage(){}dispatchHostMessage(e){this.deliverMessage(e.type,e)}},Au=ku.getInstance(),V_e((e,t)=>{Au.dispatchMessage(e,t)})}));function Bw(e){let f=e,g=!1,h=null,p={},_;return _={activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p},_}export{Au as Jlt,Bw as Z1};';
 
 const SCRIPTS_265810_VARIANTS = [
   {
@@ -602,7 +637,74 @@ module.exports = {
       name: 'rejects a suffixed Codex 26.5818 verifier version',
       run() {
         assert.strictEqual(exactVerifierBuild('26.5818.31338', '26.5818', { 31338: {} }), '31338');
+        assert.strictEqual(exactVerifierBuild('26.5818.41705', '26.5818', { 31338: {}, 41705: {} }), '41705');
         assert.throws(() => exactVerifierBuild('26.5818.31338.1', '26.5818', { 31338: {} }), /不支持的 Codex 26\.5818 build/);
+        assert.throws(() => exactVerifierBuild('26.5818.41705.1', '26.5818', { 31338: {}, 41705: {} }), /不支持的 Codex 26\.5818 build/);
+      },
+    },
+    {
+      name: 'verifies the exact 26.5818.41705 scoped contracts',
+      run() {
+        assert.doesNotThrow(() => verifyOpenedConversationTitle265818(writeHeader(openedTitle26581841705Header), '41705'));
+        assert.doesNotThrow(() => verifyHeaderTitleOverride265818(writeHeader(dropdownTitle26581841705Header), '41705'));
+        assert.doesNotThrow(() => verifyExecutionTargetImport265818(writeHeader('import{Jlt as codexLocalGroupsMessengerImport,Z1 as codexUseExecutionTarget}from"./app-initial-main.js";'), writeBundle(semanticImports26581841705Main, 'app-main.js'), '41705'));
+        assert.doesNotThrow(() => verifyProjectHistory265818(writeBundle(projectHistory26581841705Bundle, 'server.js'), '41705'));
+        assert.doesNotThrow(() => verifyPower265818(writeBundle(power26581841705Bundle, 'power.js'), '41705'));
+        assert.doesNotThrow(() => verifyComposerSubagentPanel265818(writeBundle(subagentMemberships26581841705 + composerSubagentPanel26581841705, 'app-main.js'), '41705'));
+      },
+    },
+    {
+      name: 'rejects 26.5818.41705 scoped decoys',
+      run() {
+        const title = dropdownTitle26581841705Header.replace('titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0', 'titleOverride:void 0') + 'function nested(){let n=(0,Z.jsx)(xe,{threadSummary:r.conversation,titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0});return n}';
+        assert.throws(() => verifyHeaderTitleOverride265818(writeHeader(title), '41705'), /下拉会话标题/);
+        const power = power26581841705Bundle.replace('e.reasoningEffort===`max`||e.reasoningEffort===`ultra`', 'e.reasoningEffort===`broken`') + 'function nested(){function bCn(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model)?[{...e,powerSettingIndex:n}]:[])}}';
+        assert.throws(() => verifyPower265818(writeBundle(power, 'power.js'), '41705'), /Sol Max Ultra/);
+        const slowHistory = projectHistory26581841705Bundle.replace('background:!0,useStateDbOnly:!0', 'background:!0');
+        assert.throws(() => verifyProjectHistory265818(writeBundle(slowHistory, 'server.js'), '41705'), /state DB/);
+        const nativeHistory = projectHistory26581841705Bundle.replace('useStateDbOnly:a}', 'useStateDbOnly:this.params.hostId!==PT}');
+        assert.throws(() => verifyProjectHistory265818(writeBundle(nativeHistory, 'server.js'), '41705'), /state DB/);
+        const methodDecoy = projectHistory26581841705Bundle.replace('sourceKinds:CE,useStateDbOnly:a}', 'sourceKinds:CE,useStateDbOnly:!1}') + '/*' + projectHistory26581841705StateDbMethod + '*/';
+        assert.throws(() => verifyProjectHistory265818(writeBundle(methodDecoy, 'server.js'), '41705'), /state DB/);
+        const callDecoy = projectHistory26581841705Bundle.replace(projectHistory26581841705StateDbCall, 'e.listRecentThreads({cursor:i,limit:100,background:!0}),fake=`' + projectHistory26581841705StateDbCall + '`');
+        assert.throws(() => verifyProjectHistory265818(writeBundle(callDecoy, 'server.js'), '41705'), /state DB/);
+        const classDecoy = projectHistory26581841705Bundle.replace(projectHistory26581841705StateDbMethod, projectHistory26581841705NativeMethod) + 'class FakeStateDbDecoy{' + projectHistory26581841705StateDbMethod + '}';
+        assert.throws(() => verifyProjectHistory265818(writeBundle(classDecoy, 'server.js'), '41705'), /state DB/);
+        const base = subagentMemberships26581841705 + composerSubagentPanel26581841705;
+        const validation = base.replace('r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)', 'r?.model===`broken`') + 'function nested(){function F7e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort;return a}}';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(validation, 'app-main.js'), '41705'), /Sol reasoning validation/);
+        const producer = base.replace('e.type===`subAgentActivity`', 'e.type===`brokenActivity`') + 'function nested(){function GWn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ks(e.agentThreadId);i.set(r,{conversationId:r,parentConversationId:t})}return Array.from(i.values())}}';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(producer, 'app-main.js'), '41705'), /membership/);
+        const internalProducer = base.replace('}}return Array.from(i.values())}function WWn', '}}function fake(){return Array.from(i.values())}return []}function WWn');
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(internalProducer, 'app-main.js'), '41705'), /membership/);
+        const selector = base.replace('zX=ti($,(e,{get:t})=>{', 'zX=broken($,(e,{get:t})=>{') + 'function nestedSelector(){let zX=ti($,(e,{get:t})=>{let n=typeof e==`string`?e:e.conversationId,l=t(store,n),m=[],v=WWn({cachedConversations:m,conversationTurns:l,parentConversationId:n});return v})}';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(selector, 'app-main.js'), '41705'), /membership/);
+        const aggregator = base.replace('GWn(t,a,c,n)', 'broken(t,a,c,n)') + 'function nestedAggregator(){return GWn(t,a,c,n)}';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(aggregator, 'app-main.js'), '41705'), /membership/);
+        const panel = base.replace('Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t', 'Cn=!1') + 'function nested(){function SZr(){let Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;return Cn?(0,A6.jsx)(yer,{rows:st}):null}}';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(panel, 'app-main.js'), '41705'), /子 agent 面板/);
+        const internalPanel = base.replace('Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t', 'Cn=!1').replace('function SZr(){', 'function SZr(){function fake(){let Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;Uqr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0});Iqn({subagentsPanel:Cn});if(a){if(b){if(c){return Cn?(0,A6.jsx)(yer,{agentCount:Math.max(st.length,Bt),rows:st}):null}}}}');
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(internalPanel, 'app-main.js'), '41705'), /子 agent 面板/);
+        const summary = base.replace('id:`composer.backgroundSubagents.summary`', 'id:`broken.summary`') + 'function nestedSummary(){return`m=l.formatMessage({id:\\`composer.backgroundSubagents.summary\\``}';
+        assert.throws(() => verifyComposerSubagentPanel265818(writeBundle(summary, 'app-main.js'), '41705'), /子 agent 面板/);
+      },
+    },
+    {
+      name: 'rejects 26.5818.41705 Header imports when Main semantic exports drift',
+      run() {
+        const header = writeHeader('import{Jlt as codexLocalGroupsMessengerImport,Z1 as codexUseExecutionTarget}from"./app-initial-main.js";');
+        const main = writeBundle(semanticImports26581841705Main, 'app-main.js');
+        assert.doesNotThrow(() => verifyExecutionTargetImport265818(header, main, '41705'));
+        const wrongHeader = writeHeader('import{Jlt as codexLocalGroupsMessengerImport,AZ1 as codexUseExecutionTarget}from"./app-initial-main.js";');
+        assert.throws(() => verifyExecutionTargetImport265818(wrongHeader, main, '41705'), /semantic imports/);
+        const drifted = semanticImports26581841705Main.replace('Au as Jlt', 'Au as broken') + 'function nested(){return`Au as Jlt`}';
+        assert.throws(() => verifyExecutionTargetImport265818(header, writeBundle(drifted, 'app-main.js'), '41705'), /semantic imports/);
+        const messenger = semanticImports26581841705Main.replace('Au=ku.getInstance()', 'Au=null') + 'function nested(){let Au=ku.getInstance();Au.dispatchMessage(`native`,{});Au.dispatchHostMessage({type:`native`});return`Au=ku.getInstance(),V_e((e,t)=>{Au.dispatchMessage(e,t)})`}';
+        assert.throws(() => verifyExecutionTargetImport265818(header, writeBundle(messenger, 'app-main.js'), '41705'), /semantic imports/);
+        const message = semanticImports26581841705Main.replace('Tu.postMessage({...t,type:e})', 'let decoy=`Tu.postMessage({...t,type:e})`');
+        assert.throws(() => verifyExecutionTargetImport265818(header, writeBundle(message, 'app-main.js'), '41705'), /semantic imports/);
+        const target = semanticImports26581841705Main.replace('isActiveWorkspaceRootLoading:g', 'isBroken:g') + 'function nested(){function Bw(e){return{activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p}}}';
+        assert.throws(() => verifyExecutionTargetImport265818(header, writeBundle(target, 'app-main.js'), '41705'), /semantic imports/);
       },
     },
     {

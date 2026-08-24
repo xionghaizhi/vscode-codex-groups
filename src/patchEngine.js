@@ -73,7 +73,38 @@ function minifiedFunctionScope(text, name) {
   return body ? text.slice(start, open + 1) + body : '';
 }
 
-function minifiedCodeAtDepth(text, wanted) {
+function minifiedTopLevelFunctionScope(text, name) {
+  const anchor = `function ${name}(`;
+  let depth = 0, quote = '', regex = false, characterClass = false, previous = '', match = '';
+  for (let index = 0; index < text.length; index += 1) {
+    const current = text[index];
+    if (!quote && !regex && depth === 0 && text.startsWith(anchor, index)) {
+      if (match) return '';
+      const open = text.indexOf('){', index + anchor.length);
+      const body = minifiedBlockScope(text, open + 1);
+      if (!body) return '';
+      match = text.slice(index, open + 1) + body;
+    }
+    if ((quote || regex) && current === '\\') { index += 1; continue; }
+    if (quote) { if (current === quote) { quote = ''; previous = 'x'; } continue; }
+    if (regex) {
+      if (current === '[') characterClass = true;
+      if (current === ']') characterClass = false;
+      if (current === '/' && !characterClass) { regex = false; previous = 'x'; }
+      continue;
+    }
+    if (current === "'" || current === '"' || current === '`') { quote = current; continue; }
+    if (current === '/' && text[index + 1] === '*') { index = text.indexOf('*/', index + 2); if (index < 0) return ''; index += 1; continue; }
+    if (current === '/' && text[index + 1] === '/') { index = text.indexOf('\n', index + 2); if (index < 0) return ''; continue; }
+    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; continue; }
+    if (current === '{') depth += 1;
+    else if (current === '}') depth -= 1;
+    if (!/\s/.test(current)) previous = current;
+  }
+  return match;
+}
+
+function minifiedCodeAtDepth(text, wanted, includeLiterals = true) {
   let depth = 0;
   let quote = '';
   let regex = false;
@@ -82,19 +113,19 @@ function minifiedCodeAtDepth(text, wanted) {
   let output = '';
   for (let index = 0; index < text.length; index += 1) {
     const current = text[index];
-    if ((quote || regex) && current === '\\') { if (depth === wanted) output += current + text[index + 1]; index += 1; continue; }
-    if (quote) { if (depth === wanted) output += current; if (current === quote) { quote = ''; previous = 'x'; } continue; }
+    if ((quote || regex) && current === '\\') { if (includeLiterals && depth === wanted) output += current + text[index + 1]; index += 1; continue; }
+    if (quote) { if (includeLiterals && depth === wanted) output += current; if (current === quote) { quote = ''; previous = 'x'; } continue; }
     if (regex) {
-      if (depth === wanted) output += current;
+      if (includeLiterals && depth === wanted) output += current;
       if (current === '[') characterClass = true;
       if (current === ']') characterClass = false;
       if (current === '/' && !characterClass) { regex = false; previous = 'x'; }
       continue;
     }
-    if (current === "'" || current === '"' || current === '`') { quote = current; if (depth === wanted) output += current; continue; }
+    if (current === "'" || current === '"' || current === '`') { quote = current; if (includeLiterals && depth === wanted) output += current; continue; }
     if (current === '/' && text[index + 1] === '*') { index = text.indexOf('*/', index + 2); if (index < 0) return ''; index += 1; continue; }
     if (current === '/' && text[index + 1] === '/') { index = text.indexOf('\n', index + 2); if (index < 0) return output; continue; }
-    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; if (depth === wanted) output += current; continue; }
+    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; if (includeLiterals && depth === wanted) output += current; continue; }
     if (current === '{') depth += 1;
     else if (current === '}') depth -= 1;
     else if (depth === wanted) output += current;
@@ -513,7 +544,8 @@ function patchExtensionSafeHost(text, context) {
   next = patchExtensionMessageHandler(next, context);
   next = patchExtensionWebviewTimeout(next, context);
   next = patchExtensionResponsesWebsocketFallback(next, context);
-  const metadataComplete = extensionMetadata265814PostconditionsHold(next, context.codexMinor === 5818 ? 'nY' : 'Q9');
+  const metadataParser = context.codexMinor === 5818 ? (context.codexBuild === '41705' ? 'oY' : 'nY') : 'Q9';
+  const metadataComplete = extensionMetadata265814PostconditionsHold(next, metadataParser);
   if ((context.codexMinor === 5814 || context.codexMinor === 5818) && !metadataComplete) {
     context.errors.push(`extension metadata ${codex26581xLabel(context)}: 补丁标记不完整`);
   }
@@ -752,7 +784,9 @@ function patchExtensionMessageHandler(text, context) {
   const capnNew5814 = 'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=Q9(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
   const capnOld5818 = 'e.onDidReceiveMessage(n=>{let o=nY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
   const capnNew5818 = 'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=nY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
-  if (!next.includes(capnNewV2) && !next.includes(capnNewV1) && !next.includes(capnNew5810) && !next.includes(capnNew5814) && !next.includes(capnNew5818)) {
+  const capnOld581841705 = 'e.onDidReceiveMessage(n=>{let o=oY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
+  const capnNew581841705 = 'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=oY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
+  if (!next.includes(capnNewV2) && !next.includes(capnNewV1) && !next.includes(capnNew5810) && !next.includes(capnNew5814) && !next.includes(capnNew5818) && !next.includes(capnNew581841705)) {
     if (next.includes(capnOldV2)) {
       next = replaceOnce(next, capnOldV2, capnNewV2, context, 'extension capn metadata message handler');
     } else if (next.includes(capnOldV1)) {
@@ -763,6 +797,8 @@ function patchExtensionMessageHandler(text, context) {
       next = replaceOnce(next, capnOld5814, capnNew5814, context, 'extension capn metadata message handler 26.5814');
     } else if (next.includes(capnOld5818)) {
       next = replaceOnce(next, capnOld5818, capnNew5818, context, 'extension capn metadata message handler 26.5818');
+    } else if (next.includes(capnOld581841705)) {
+      next = replaceOnce(next, capnOld581841705, capnNew581841705, context, 'extension capn metadata message handler 26.5818.41705');
     }
   }
   const webviewOld = 'this.handleMessage(e,a)});';
@@ -777,7 +813,8 @@ function patchExtensionMessageHandler(text, context) {
     }
   }
   if (context.codexMinor === 5814 && !next.includes(capnNew5814)) context.errors.push('extension capn metadata message handler 26.5814: 补丁后置条件不完整');
-  if (context.codexMinor === 5818 && !next.includes(capnNew5818)) context.errors.push('extension capn metadata message handler 26.5818: 补丁后置条件不完整');
+  const capnCurrent5818 = context.codexBuild === '41705' ? capnNew581841705 : capnNew5818;
+  if (context.codexMinor === 5818 && !next.includes(capnCurrent5818)) context.errors.push('extension capn metadata message handler 26.5818: 补丁后置条件不完整');
   return next;
 }
 
@@ -914,6 +951,9 @@ function patchHeader(text, context, file) {
     next = addExecutionTargetImport(next, context, file);
     if (context.errors.length > errorCount) return text;
     if (!safeHeader265810PostconditionsHold(next, context.codexBuild)) context.errors.push(`header ${codex26581xLabel(context)}: 补丁标记不完整`);
+    if (context.codexBuild === '41705' && !headerSemanticImports26581841705Hold(next, file)) {
+      context.errors.push('header 26.5818: semantic imports 不完整');
+    }
     return patchOpenedConversationTitle265810(patchHeaderMetadataLiteral(next), context);
   }
   if (context.safeMode && (context.codexMinor === 5810 || context.codexMinor === 5814 || context.codexMinor === 5818) && next.includes('function Sn(e){return e.kind===`remote`}')) {
@@ -1261,7 +1301,7 @@ function openedConversationTitle265803PostconditionsHold(text) {
 
 const CODEX_265810_BUILDS = new Set(['41047', '52044']);
 const CODEX_265814_BUILDS = new Set(['41407']);
-const CODEX_265818_BUILDS = new Set(['31338']);
+const CODEX_265818_BUILDS = new Set(['31338', '41705']);
 const HEADER_265810_VARIANTS = {
   41047: {
     rows: 'F.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key))',
@@ -1312,6 +1352,25 @@ const HEADER_265810_VARIANTS = {
     rowsViewPost: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:I,activeId:v,onClose:a,row:An,onActiveArchiveStart:d})',
     opened: { functionName: 'zn', cache: 'Wn', react: 'In', deepLink: 'o', title: 's', tail: 'u' },
   },
+  41705: {
+    rows: 'N.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&v===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key))',
+    rowsCall: 'codexRecentTaskProjectRows(N,v,i,An,u)',
+    historyParent: 'a=i===void 0||i,o=p(),{authMethod:c}=ee(),l=te(),u=w(Ln),{data:d}=s(),f=gt(),',
+    historyParentScoped: 'a=i===void 0||i,o=p(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:c}=ee(),l=te(),u=w(Ln),{data:d}=s(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),f=gt(),',
+    execTarget: 's=a!==void 0&&a,c=o===void 0||o,l=p(),u=We(),{authMethod:d}=ee(),',
+    execTargetScoped: 's=a!==void 0&&a,c=o===void 0||o,l=p(),u=We(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,{authMethod:d}=ee(),',
+    projectFilter: 'let T=r.filter(w),E=hn(n.data,r,C),',
+    projectFilterScoped: 'let T=codexRecentTaskRootReady?codexRecentConversationFilter(r.filter(w),codexRecentTaskCurrentRoot):[],E=codexRecentTaskRootReady?codexRecentTaskFilter(hn(n.data,r,C),codexRecentTaskCurrentRoot):[],',
+    rowComponent: 'xe',
+    rowOriginal: '(0,Z.jsx)(xe,{conversationId:r.conversation.id,hostId:r.conversation.hostId,isActive:i,metaContent:e,onClick:a,onActiveArchiveStart:o})',
+    rowPatched: '(0,Z.jsx)(xe,{conversationId:r.conversation.id,hostId:r.conversation.hostId,threadSummary:r.conversation,isActive:i,metaContent:e,onClick:a,onActiveArchiveStart:o})',
+    menuTrigger: 'triggerButton:G',
+    historySourcePost: '{data:d}=s(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)',
+    conversationFilterPost: 'let T=codexRecentTaskRootReady?codexRecentConversationFilter',
+    taskFilterPost: 'E=codexRecentTaskRootReady?codexRecentTaskFilter',
+    rowsViewPost: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N,activeId:v,onClose:i,row:An,onActiveArchiveStart:u})',
+    opened: { functionName: 'zn', cache: 'Wn', react: 'In', deepLink: 'a', title: 'o', tail: 'u', routeBack: 'n', className: 'r', center: 'i', onBack: 'c', trailing: 'l' },
+  },
   31338: {
     rows: 'F.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&v===e.conversation.id,onClose:i,onActiveArchiveStart:d},e.key))',
     rowsCall: 'codexRecentTaskProjectRows(F,v,i,An,d)',
@@ -1335,18 +1394,25 @@ const COMPOSER_265810_VARIANTS = {
   52044: { producer: 'fyn', aggregator: 'dyn', store: 'uJ', storeFactory: 'Nc', storeRead: 'jc', hook: 'AOr', interactFilter: 'NOr', turnFilter: 'jOr', composer: 'cNr', panel: 'Szn', panelFlag: 'pn', jsx: 'q6' },
   41407: { producer: 'SNn', aggregator: 'xNn', store: 'lX', storeFactory: 'Ri', storeRead: 'sl', hook: 'zBr', interactFilter: 'HBr', turnFilter: 'BBr', composer: 'vWr', panel: 'RQn', panelFlag: 'yn', jsx: 'I6', exportAlias: 'IC', current: true },
   31338: { producer: 'Wzn', aggregator: 'Uzn', store: 'Pq', storeFactory: 'ua', storeRead: 'f', hook: 'JKr', interactFilter: 'ZKr', turnFilter: 'YKr', composer: 'DXr', panel: '$4n', panelFlag: 'xn', jsx: 'j6', exportAlias: 'sw', current: true, idFn: 'bs', layout: 'SHn', panelRows: 'at', panelFlagExpr: 'xn=(at.length>0||Rt)&&!pt&&!vn&&!_t&&!ht' },
+  41705: { producer: 'GWn', aggregator: 'WWn', store: 'zX', storeFactory: 'ti', storeRead: 'Bc', hook: 'Uqr', interactFilter: 'Kqr', turnFilter: 'Wqr', composer: 'SZr', panel: 'yer', panelFlag: 'Cn', jsx: 'A6', exportAlias: 'DS', current: true, idFn: 'ks', layout: 'Iqn', panelRows: 'st', panelFlagExpr: 'Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t' },
 };
 const POWER_265810_VARIANTS = {
   41047: { filterFn: 'Pon', powersArray: 'Ion', ultraObject: 'Lon', sliderFn: 'kon', menuFn: 'u$', menuFilter: 'wC' },
   52044: { filterFn: 'Fon', powersArray: 'Lon', ultraObject: 'Ron', sliderFn: 'Aon', menuFn: 'l$', menuFilter: 'TC' },
   41407: { filterFn: 'Jdn', powersArray: 'Xdn', ultraObject: 'Zdn', sliderFn: 'Udn', menuFn: 'S$', menuFilter: 'NC', menuFallback: 'q3e' },
   31338: { filterFn: 'ogn', powersArray: 'cgn', ultraObject: 'lgn', sliderFn: '$hn', menuFn: 'v$', menuFilter: 'GS', menuFallback: 'X8e' },
+  41705: { filterFn: 'bCn', powersArray: 'SCn', ultraObject: 'CCn', sliderFn: 'pCn', menuFn: 'y$', menuFilter: 'dw', menuFallback: 'J8e' },
 };
 const HISTORY_265810_VARIANTS = {
   41047: { hook: 'Ron', impl: 'Bon', registry: 'eH', query: 'YO', react: 'nH', subscribe: 'kon', combine: 'Oon', timestamps: 'IF', summary: 'Lk', visible: 'zF', title: 'pRt', titleSanitizer: 'BF', storeRequest: 'aRt' },
   52044: { hook: 'ssn', impl: 'lsn', registry: 'MV', query: 'ZO', react: 'PV', subscribe: 'Qon', combine: 'Zon', timestamps: 'EF', summary: 'zk', visible: 'kF', title: 'wRt', titleSanitizer: 'AF', storeRequest: 'gRt' },
   41407: { hook: 'dgn', impl: 'pgn', registry: 'WV', query: 'vM', react: 'KV', subscribe: 'ngn', combine: 'tgn', timestamps: 'PD', summary: 'nO', visible: 'bot', title: 'wRt', titleSanitizer: 'AF', storeRequest: 'mnt' },
   31338: { hook: 'NPn', impl: 'FPn', registry: 'fG', query: 'HN', react: 'mG', subscribe: 'wPn', combine: 'CPn', timestamps: 'cA', summary: 'jk', visible: 'udt', title: '$j', titleSanitizer: 'sA', storeRequest: 'Cdt', titleCall: '(t=>{let n=$j(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=sw(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=$j(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:sA(i,60)})(r)' },
+  41705: { hook: 'qPn', impl: 'YPn', registry: 'vG', query: 'IN', react: 'bG', subscribe: 'RPn', combine: 'LPn', timestamps: 'SA', summary: 'bdt', visible: 'ddt', title: 'vM', titleSanitizer: 'xA', storeRequest: 'wdt', titleCall: '(t=>{let n=vM(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=$C(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=vM(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:xA(i,60)})(r)' },
+};
+const PROJECT_HISTORY_265818_41705_RECENT_THREADS = {
+  native: 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}',
+  scoped: 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==PT}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:a},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}',
 };
 
 function codex265810Build(context) {
@@ -1371,7 +1437,11 @@ function patchSafeHeader265810(text, context, file) {
   next = patchSafeHeader265810ThreadSummary(next, context, variant);
   next = patchSafeHeader265810MenuLayout(next, context, variant);
   next = patchSafeHeaderProjectRowsView(next, context);
-  return finishSafeHeader265810(next, context, variant);
+  next = finishSafeHeader265810(next, context, variant);
+  if (context.codexBuild === '41705' && !headerSemanticImports26581841705Hold(next, file)) {
+    context.errors.push('header 26.5818: semantic imports 不完整');
+  }
+  return next;
 }
 
 function patchSafeHeader265810ProjectScope(text, context, variant) {
@@ -1382,8 +1452,8 @@ function patchSafeHeader265810ProjectScope(text, context, variant) {
 }
 
 function patchSafeHeader265810ThreadSummary(text, context, variant) {
-  const original = '(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
-  const patched = '(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
+  const original = variant.rowOriginal || '(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
+  const patched = variant.rowPatched || '(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})';
   return replaceOnce(text, original, patched, context, `header ${codex26581xLabel(context)} project history row summary`);
 }
 
@@ -1398,6 +1468,7 @@ function patchSafeHeader265810MenuLayout(text, context, variant) {
 
 function finishSafeHeader265810(text, context, variant) {
   const label = codex26581xLabel(context);
+  if (context.codexBuild === '41705') return finishSafeHeader26581841705(text, context, variant);
   const current = 't[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?';
   const row = '(c=(0,Z.jsx)(' + variant.rowComponent + ',{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c';
   const fixed = 't[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e||t[24]!==n.conversation.title?';
@@ -1406,6 +1477,18 @@ function finishSafeHeader265810(text, context, variant) {
   next = replaceOnce(next, 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),', 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),', context, `header ${label} local row cache size`);
   next = next.replace(/codexLocalGroupsHeaderSafePatchVersion=(?:6|8)/, 'codexLocalGroupsHeaderSafe265810PatchVersion=1');
   if (!safeHeader265810PostconditionsHold(next, context.codexBuild)) context.errors.push(`header ${label}: 补丁后置条件不完整`);
+  return patchOpenedConversationTitle265810(next, context);
+}
+
+function finishSafeHeader26581841705(text, context, variant) {
+  const current = 't[17]!==i||t[18]!==r.conversation.hostId||t[19]!==r.conversation.id||t[20]!==o||t[21]!==a||t[22]!==e?';
+  const row = '(n=(0,Z.jsx)(xe,{conversationId:r.conversation.id,hostId:r.conversation.hostId,threadSummary:r.conversation,isActive:i,metaContent:e,onClick:a,onActiveArchiveStart:o}),t[17]=i,t[18]=r.conversation.hostId,t[19]=r.conversation.id,t[20]=o,t[21]=a,t[22]=e,t[23]=n):n=t[23],n';
+  const fixed = 't[17]!==i||t[18]!==r.conversation.hostId||t[19]!==r.conversation.id||t[20]!==o||t[21]!==a||t[22]!==e||t[24]!==r.conversation.title?';
+  const nextRow = row.replace('threadSummary:r.conversation,', 'threadSummary:r.conversation,titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0,').replace('t[22]=e,t[23]=n', 't[22]=e,t[24]=r.conversation.title,t[23]=n');
+  let next = replaceOnce(text, current + row, fixed + nextRow, context, 'header 26.5818 local title row');
+  next = replaceOnce(next, 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),', 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),', context, 'header 26.5818 local row cache size');
+  next = next.replace(/codexLocalGroupsHeaderSafePatchVersion=(?:6|8)/, 'codexLocalGroupsHeaderSafe265810PatchVersion=1');
+  if (!safeHeader265810PostconditionsHold(next, context.codexBuild)) context.errors.push('header 26.5818: 补丁后置条件不完整');
   return patchOpenedConversationTitle265810(next, context);
 }
 
@@ -1456,6 +1539,16 @@ function safeHeader265810PostconditionsHold(text, build) {
   const variant = HEADER_265810_VARIANTS[build];
   if (!variant) return false;
   const view = 'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,Dn.useState)(0);return(0,Dn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}';
+  if (build === '41705') return countMatches(text, 'codexLocalGroupsHeaderSafe265810PatchVersion=1') === 1
+    && text.includes(variant.historySourcePost) && text.includes(variant.conversationFilterPost)
+    && text.includes(variant.taskFilterPost) && text.includes(variant.rowsViewPost) && text.includes(view)
+    && headerTitleOverride26581841705Holds(text) && text.includes('contentStyle:{height:`600px`,overflow:`hidden`}')
+    && text.includes('vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1')
+    && text.includes('function codexLocalGroupsGroupLimit') && text.includes('codex-local-groups-visible-counts-v1')
+    && text.includes('codexLocalGroupsSetGroupLimit(e.projectRoot,i.label,Math.min(i.items.length,d+10))')
+    && text.includes('className:`sticky top-0 z-10 bg-token-dropdown-background')
+    && text.includes('function codexLocalGroupsScopeProjectRoot(e)') && headerMetadata265814PostconditionsHold(text)
+    && !text.includes('codex-local-groups-current-root-v1') && !text.includes('project-more-');
   return countMatches(text, 'codexLocalGroupsHeaderSafe265810PatchVersion=1') === 1
     && text.includes(variant.historySourcePost)
     && text.includes(variant.conversationFilterPost)
@@ -1472,6 +1565,17 @@ function safeHeader265810PostconditionsHold(text, build) {
     && text.includes('function codexLocalGroupsScopeProjectRoot(e)')
     && ((build !== '41407' && build !== '31338') || headerMetadata265814PostconditionsHold(text))
     && !text.includes('codex-local-groups-current-root-v1') && !text.includes('project-more-');
+}
+
+function headerTitleOverride26581841705Holds(text) {
+  const rowStart = countMatches(text, 'An=(0,Dn.memo)(function(e){') === 1 ? text.indexOf('An=(0,Dn.memo)(function(e){') : -1;
+  const row = rowStart < 0 ? '' : minifiedBlockScope(text, text.indexOf('{', rowStart));
+  const kind = minifiedNestedBlock(row, [['switch(r.kind){', 1], ['case`local`:{', 1]]);
+  const props = minifiedAnchoredBlock(kind, '(n=(0,Z.jsx)(xe,{', 1);
+  const direct = minifiedCodeAtDepth(kind, 1);
+  return minifiedCodeAtDepth(props, 1).includes('threadSummary:r.conversation,titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,):void 0')
+    && direct.includes('t[24]!==r.conversation.title?') && direct.includes('t[24]=r.conversation.title,t[23]=n')
+    && row.includes('(0,En.c)(25)');
 }
 
 function headerTitleOverride265818Holds(text) {
@@ -1893,6 +1997,11 @@ function patchCodexUi265810(text, context) {
 function xznSummary265810Holds(text, build) {
   const variant = COMPOSER_265810_VARIANTS[build];
   if (!variant) return false;
+  if (build === '41705') {
+    const body = minifiedTopLevelFunctionScope(text, variant.panel);
+    const summary = minifiedAnchoredBlock(body, 'm=l.formatMessage({', 4);
+    return minifiedCodeAtDepth(summary, 1).startsWith('id:`composer.backgroundSubagents.summary`,');
+  }
   const start = text.indexOf('function ' + variant.panel + '(e){');
   if (start < 0) return false;
   const next = text.indexOf('function ', start + 1);
@@ -1903,20 +2012,35 @@ function xznSummary265810Holds(text, build) {
 function codexUi265810PostconditionsHold(text, build) {
   const chain = composer265810Chain(build);
   const variant = COMPOSER_265810_VARIANTS[build];
-  const scopedChain = build === '31338' ? composer265818ChainHolds(text, variant) : true;
-  const persistence = build === '31338' ? solPersistence265818Holds(text) : text.includes('model_reasoning_effort??null') && text.includes('model_reasoning_effort:t');
-  const currentComposer = build !== '41407' && build !== '31338' || composer265814ScopeHolds(text, variant);
+  const scopedChain = build === '31338' ? composer265818ChainHolds(text, variant) : build === '41705' ? composer26581841705ChainHolds(text, variant) : true;
+  const persistence = build === '31338' ? solPersistence265818Holds(text) : build === '41705' ? solPersistence26581841705Holds(text) : text.includes('model_reasoning_effort??null') && text.includes('model_reasoning_effort:t');
+  const currentComposer = build === '41705' ? composer26581841705ComposerHolds(text, variant) : build !== '41407' && build !== '31338' || composer265814ScopeHolds(text, variant);
   if (!chain) return false;
   return countMatches(text, 'codexLocalGroupsCodexUi265810PatchVersion=1') === 1
-    && (build === '31338' ? solValidation265818Holds(text) : text.includes('i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)'))
+    && (build === '31338' ? solValidation265818Holds(text) : build === '41705' ? solValidation26581841705Holds(text) : text.includes('i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)'))
     && /isBackgroundSubagentsEnabled:[A-Za-z_$][\w$]*=!0/.test(text)
     && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6000}?case`collabAgentToolCall`:\{if\(![A-Za-z_$][\w$]*\|\|\1\.tool===`wait`\)break;let ([A-Za-z_$][\w$]*)=\{type:`multi-agent-action`,id:\1\.id(?:,[^{}]{0,500})?\};[A-Za-z_$][\w$]*\.push\(\2\);break\}/.test(text)
     && /switch\((?:[^{}]{0,240},)?([A-Za-z_$][\w$]*)\.type\)\{[\s\S]{0,6500}?case`subAgentActivity`:if\(![A-Za-z_$][\w$]*\)break;[A-Za-z_$][\w$]*\.push\(\{type:`subagent-activity`,id:\1\.id(?:,[^{}]{0,300})?\}\);break;?/.test(text)
-    && (build === '31338' ? scopedChain : chain.every((item) => item.test(text)))
+    && ((build === '31338' || build === '41705') ? scopedChain : chain.every((item) => item.test(text)) )
     && currentComposer
     && xznSummary265810Holds(text, build)
     && persistence
     && !text.includes('1221508807');
+}
+
+function solValidation26581841705Holds(text) {
+  return minifiedCodeAtDepth(minifiedTopLevelFunctionScope(text, 'F7e'), 1).includes('a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort');
+}
+
+function solPersistence26581841705Holds(text) {
+  const read = minifiedCodeAtDepth(minifiedTopLevelFunctionScope(text, 'K7e'), 1);
+  const write = minifiedTopLevelFunctionScope(text, 'X7e');
+  const setter = minifiedAnchoredBlock(write, 'oe=async(e,t)=>{', 1);
+  const work = minifiedAnchoredBlock(setter, 'try{', 1);
+  const direct = minifiedCodeAtDepth(work, 1);
+  return read.includes('o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null')
+    && work.includes('o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}))')
+    && direct.includes('o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),));let s=await Ce(a,c).setDefaultModelConfig(e,t,w.profile)');
 }
 
 function solValidation265818Holds(text) {
@@ -1933,6 +2057,53 @@ function solPersistence265818Holds(text) {
   return read.includes('o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null')
     && work.includes('o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}))')
     && direct.includes('o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),));let s=await Vi(a,c).setDefaultModelConfig(e,t,x.profile)');
+}
+
+function composer26581841705ChainHolds(text, v) {
+  if (!v) return false;
+  const producer = minifiedTopLevelFunctionScope(text, v.producer);
+  const activity = minifiedAnchoredBlock(producer, 'if(e.type===`subAgentActivity`){', 2);
+  const spawn = minifiedAnchoredBlock(producer, 'if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){', 2);
+  const aggregator = minifiedTopLevelFunctionScope(text, v.aggregator);
+  const storeInit = minifiedAnchoredBlock(text, 'BX=e((()=>{', 0);
+  const selector = minifiedAnchoredBlock(storeInit, v.store + '=ti($,(e,{get:t})=>{', 1);
+  const directSelector = minifiedCodeAtDepth(selector, 1, false);
+  const selection = minifiedCodeAtDepth(minifiedAnchoredBlock(selector, 'v=WWn({', 1), 1, false);
+  const hook = minifiedTopLevelFunctionScope(text, v.hook);
+  const directHook = minifiedCodeAtDepth(hook, 1, false);
+  const rows = minifiedCodeAtDepth(minifiedAnchoredBlock(hook, 'if(t[0]!==n||t[1]!==i||t[2]!==a){', 1), 1, false);
+  const result = minifiedCodeAtDepth(minifiedAnchoredBlock(hook, 'u={', 1), 1, false);
+  const directAggregator = minifiedCodeAtDepth(aggregator, 1, false);
+  const directProducer = minifiedCodeAtDepth(producer, 1, false);
+  const directActivity = minifiedCodeAtDepth(activity, 1, false);
+  const directSpawn = minifiedCodeAtDepth(spawn, 1, false);
+  const activityRow = minifiedCodeAtDepth(minifiedAnchoredBlock(activity, 'i.set(r,{', 1), 1, false);
+  const spawnRow = minifiedCodeAtDepth(minifiedAnchoredBlock(spawn, 'i.set(e,{', 1), 1, false);
+  const exports = minifiedCodeAtDepth(minifiedBlockScope(text, text.lastIndexOf('export{') + 6), 1);
+  return directActivity.includes('let r=ks(e.agentThreadId)') && directActivity.includes('i.set(r,)')
+    && activityRow.includes('conversationId:r') && activityRow.includes('parentConversationId:t')
+    && directSpawn.includes('let e=ks(r)') && directSpawn.includes('i.has(e)||i.set(e,)')
+    && spawnRow.includes('conversationId:e') && spawnRow.includes('parentConversationId:t')
+    && directProducer.includes('return Array.from(i.values())')
+    && /=GWn\(t,a,c,n\)(?:\.map\(e=>\))?/.test(directAggregator)
+    && directSelector.includes('let n=typeof e==?e:e.conversationId')
+    && selection.includes('cachedConversations:m,conversationTurns:l,')
+    && selection.includes('parentConversationId:n') && /(?:^|,)zX as DS(?:,|$)/.test(exports)
+    && directHook.includes('Bc(zX,r?n:null)') && rows.includes('parentConversationId===n')
+    && rows.includes('.filter(Kqr)') && rows.includes('.filter(Wqr)')
+    && result.includes('rows:a,visibleRows:c');
+}
+
+function composer26581841705ComposerHolds(text, v) {
+  const scope = minifiedTopLevelFunctionScope(text, v.composer);
+  const body = scope.slice(scope.indexOf('){') + 1);
+  const direct = minifiedCodeAtDepth(body, 1, false);
+  const hook = minifiedCodeAtDepth(minifiedAnchoredBlock(body, 'Uqr({', 1), 1, false);
+  const layout = minifiedCodeAtDepth(minifiedAnchoredBlock(body, 'Iqn({', 1), 1, false);
+  const panel = minifiedCodeAtDepth(minifiedAnchoredBlock(body, 'Cn?(0,A6.jsx)(yer,{', 4), 1, false);
+  return hook.includes('activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0')
+    && direct.includes(v.panelFlagExpr) && layout.includes('subagentsPanel:Cn')
+    && panel.includes('agentCount:Math.max(st.length,Bt)') && panel.includes('rows:st');
 }
 
 function composer265818ChainHolds(text, v) {
@@ -2044,7 +2215,7 @@ function patchCodexReasoningMenu265810(text, context, v) {
 function codexPower265810PostconditionsHold(text, build) {
   const v = POWER_265810_VARIANTS[build];
   if (!v) return false;
-  const scoped = build !== '31338' || codexPower265818ScopesHold(text);
+  const scoped = build !== '31338' && build !== '41705' || codexPower265818ScopesHold(text, build);
   return countMatches(text, 'codexLocalGroupsPower265810PatchVersion=1') === 1
     && text.includes('gpt-5.6-sol:max')
     && text.includes('gpt-5.6-sol:ultra')
@@ -2057,7 +2228,8 @@ function codexPower265810PostconditionsHold(text, build) {
     && !text.includes(v.filterFn + '((t?[...' + v.powersArray + ',' + v.ultraObject + ']:' + v.powersArray + ').filter');
 }
 
-function codexPower265818ScopesHold(text) {
+function codexPower265818ScopesHold(text, build) {
+  if (build === '41705') return codexPower26581841705ScopesHold(text);
   const filter = minifiedFunctionScope(text, 'ogn');
   const menus = minifiedExactFunctionScopes(text, 'function v$(e,t){').filter((scope) => scope.includes('supportedReasoningEfforts'));
   const sliders = minifiedExactFunctionScopes(text, 'function $hn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){');
@@ -2075,6 +2247,24 @@ function codexPower265818ScopesHold(text) {
     && directMenu.endsWith(',r');
 }
 
+
+function codexPower26581841705ScopesHold(text) {
+  const filter = minifiedTopLevelFunctionScope(text, 'bCn');
+  const menus = minifiedExactFunctionScopes(text, 'function y$(e,t){').filter((scope) => scope.includes('supportedReasoningEfforts'));
+  const sliders = minifiedExactFunctionScopes(text, 'function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){');
+  if (menus.length !== 1 || sliders.length !== 1) return false;
+  const menu = menus[0];
+  const directMenu = minifiedCodeAtDepth(menu, 1);
+  const sliderBody = sliders[0].slice(sliders[0].indexOf('){') + 1);
+  return minifiedCodeAtDepth(sliderBody, 1).startsWith('let r=bCn([...SCn,CCn].filter(')
+    && filter.includes('e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)')
+    && directMenu.includes('let n=e?.find(e=>e.model===t),r=n==null?J8e.map')
+    && directMenu.includes('n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))')
+    && directMenu.includes('return t===`gpt-5.6-sol`&&')
+    && menu.includes('r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`})')
+    && menu.includes('r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})')
+    && directMenu.endsWith(',r');
+}
 
 function composerSubagentPanel265803PostconditionsHold(text) {
   const render = /xn\?(?:\(0,[A-Za-z_$][\w$]*\.jsx\)|jsx)\(_Rt,\{agentCount:Math\.max\(Xe\.length,Pt\)[\s\S]{0,500}?rows:Xe\}\):null/.test(text);
@@ -2457,6 +2647,31 @@ function addVscodeMessengerImport(text, context, file) {
   if (!vscodeImport) { context.errors.push(/import\{[^}]+\}from"\.\/app-initial-[^"]+\.js";/.test(text) ? 'header: app-initial 未导出 qQ messenger' : 'header: 找不到 vscode-api import 插入点'); return text; }
   const importText = `import{f as codexLocalGroupsMessengerImport}from"${vscodeImport[1]}";`;
   return `${text.slice(0, vscodeImport.index + vscodeImport[0].length)}${importText}${text.slice(vscodeImport.index + vscodeImport[0].length)}`;
+}
+
+function headerSemanticImports26581841705Hold(text, file) {
+  const imports = matchingAppInitialImports(text, file, semanticMain26581841705Holds);
+  if (imports.length !== 1) return false;
+  return /(?:^|[,{}])Z1 as codexUseExecutionTarget(?:,|})/.test(imports[0].importText)
+    && /(?:^|[,{}])Jlt as codexLocalGroupsMessengerImport(?:,|})/.test(imports[0].importText);
+}
+
+function semanticMain26581841705Holds(text) {
+  const messenger = minifiedAnchoredBlock(text, 'ju=e((()=>{', 0);
+  const messengerClass = minifiedAnchoredBlock(messenger, 'ku=class e{', 1);
+  const dispatch = minifiedAnchoredBlock(messengerClass, 'dispatchMessage(e,t){', 1);
+  const post = minifiedCodeAtDepth(minifiedAnchoredBlock(dispatch, 'Tu.postMessage({', 1), 1, false);
+  const hostDispatch = minifiedCodeAtDepth(minifiedAnchoredBlock(messengerClass, 'dispatchHostMessage(e){', 1), 1, false);
+  const relay = minifiedCodeAtDepth(minifiedAnchoredBlock(messenger, 'V_e((e,t)=>{', 1), 1, false);
+  const target = minifiedTopLevelFunctionScope(text, 'Bw');
+  const targetResult = minifiedCodeAtDepth(minifiedAnchoredBlock(target, '_={', 1), 1, false);
+  const exports = minifiedCodeAtDepth(minifiedBlockScope(text, text.lastIndexOf('export{') + 6), 1);
+  const direct = minifiedCodeAtDepth(messenger, 1, false);
+  return /(?:^|[,;])Au=ku\.getInstance\(\),V_e\(\(e,t\)=>\)(?:[,;]|$)/.test(direct)
+    && post === '...t,type:e' && hostDispatch === 'this.deliverMessage(e.type,e)'
+    && relay === 'Au.dispatchMessage(e,t)'
+    && targetResult === 'activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p'
+    && /(?:^|,)Au as Jlt(?:,|$)/.test(exports) && /(?:^|,)Bw as Z1(?:,|$)/.test(exports);
 }
 
 function findVscodeMessengerExports(text) {
@@ -2881,26 +3096,38 @@ function patchProjectHistory265810(text, context) {
   const v = HISTORY_265810_VARIANTS[codex265810Build(context)];
   const label = codex26581xLabel(context);
   if (text.includes(marker)) {
-    if (!projectHistory265810PostconditionsHold(text, context.codexBuild)) context.errors.push(`${label} project history: 补丁标记不完整`);
+    if (projectHistory265810PostconditionsHold(text, context.codexBuild)) return text;
+    if (context.codexBuild === '41705'
+      && projectHistory26581841705RecentThreadsHolds(text, false)
+      && projectHistory26581841705LoadOptionsHold(text, false)) {
+      const migrated = text
+        .replace(PROJECT_HISTORY_265818_41705_RECENT_THREADS.native, PROJECT_HISTORY_265818_41705_RECENT_THREADS.scoped)
+        .replace('e.listRecentThreads({cursor:i,limit:100,background:!0})', 'e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0})');
+      if (projectHistory265810PostconditionsHold(migrated, context.codexBuild)) return migrated;
+    }
+    context.errors.push(`${label} project history: 补丁标记不完整`);
     return text;
   }
   if (!v) return text;
   const hook = 'function ' + v.hook + '(){return ' + v.impl + '(`recent-conversations`)}';
   const store = 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return ' + v.storeRequest + '({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads()';
   const manager = 'async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads()';
-  if (countMatches(text, hook) !== 1 || countMatches(text, store) !== 1 || countMatches(text, manager) !== 1) {
+  const recentThreadsReady = context.codexBuild !== '41705' || projectHistory26581841705RecentThreadsHolds(text, false);
+  if (countMatches(text, hook) !== 1 || countMatches(text, store) !== 1 || countMatches(text, manager) !== 1 || !recentThreadsReady) {
     context.errors.push(`${label} project history: 找不到唯一原生注入点`);
     return text;
   }
   let next = text.replace(store, store.replace('async listArchivedThreads()', 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}async listArchivedThreads()'));
   next = next.replace(manager, manager.replace('async listArchivedThreads()', 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}async listArchivedThreads()'));
-  next = next.replace(hook, projectHistory265810Helper(v));
+  if (context.codexBuild === '41705') next = next.replace(PROJECT_HISTORY_265818_41705_RECENT_THREADS.native, PROJECT_HISTORY_265818_41705_RECENT_THREADS.scoped);
+  next = next.replace(hook, projectHistory265810Helper(v, context.codexBuild));
   if (!projectHistory265810PostconditionsHold(next, context.codexBuild)) context.errors.push(`${label} project history: 补丁后置条件不完整`);
   return next;
 }
 
-function projectHistory265810Helper(v) {
-  return 'var codexLocalGroupsProjectHistory265810PatchVersion=1;function codexLocalGroupsProjectHistoryPath265810(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265810(e,t){let n=codexLocalGroupsProjectHistoryPath265810(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265810(e,t){t=codexLocalGroupsProjectHistoryPath265810(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&' + v.timestamps + '(i).updatedAt>' + v.timestamps + '(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(' + v.summary + '(s))}o!=null&&r.add(o),i=o}while(i!=null);return n}function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function ' + v.hook + '(e,t,n){let r=arguments.length>0,i=' + v.impl + '(`recent-conversations`),a=' + v.registry + '(),o=codexLocalGroupsProjectHistoryPath265810(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=' + v.query + '({enabled:s,queryKey:[`codex-local-groups-project-history-265810-v1`,c,o],staleTime:3e4,' + projectHistory265810Query(v) + '}),u=l.refetch;(0,' + v.react + '.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=' + v.subscribe + '({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?' + v.combine + '([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:{...l,data:[]}:i}';
+function projectHistory265810Helper(v, build) {
+  const stateDbOnly = build === '41705' ? ',useStateDbOnly:!0' : '';
+  return 'var codexLocalGroupsProjectHistory265810PatchVersion=1;function codexLocalGroupsProjectHistoryPath265810(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265810(e,t){let n=codexLocalGroupsProjectHistoryPath265810(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265810(e,t){t=codexLocalGroupsProjectHistoryPath265810(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0' + stateDbOnly + '}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&' + v.timestamps + '(i).updatedAt>' + v.timestamps + '(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(' + v.summary + '(s))}o!=null&&r.add(o),i=o}while(i!=null);return n}function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function ' + v.hook + '(e,t,n){let r=arguments.length>0,i=' + v.impl + '(`recent-conversations`),a=' + v.registry + '(),o=codexLocalGroupsProjectHistoryPath265810(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=' + v.query + '({enabled:s,queryKey:[`codex-local-groups-project-history-265810-v1`,c,o],staleTime:3e4,' + projectHistory265810Query(v) + '}),u=l.refetch;(0,' + v.react + '.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=' + v.subscribe + '({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?' + v.combine + '([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:{...l,data:[]}:i}';
 }
 
 function projectHistory265810Query(v) {
@@ -2911,7 +3138,7 @@ function projectHistory265810Query(v) {
 function projectHistory265810PostconditionsHold(text, build) {
   const v = HISTORY_265810_VARIANTS[build];
   if (!v) return false;
-  const title = build !== '31338' || projectHistory265818TitleHolds(text, v);
+  const title = build === '31338' ? projectHistory265818TitleHolds(text, v) : build === '41705' ? projectHistory26581841705TitleHolds(text, v) : true;
   return countMatches(text, 'codexLocalGroupsProjectHistory265810PatchVersion=1') === 1
     && countMatches(text, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}') === 1
     && countMatches(text, 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}') === 1
@@ -2924,8 +3151,64 @@ function projectHistory265810PostconditionsHold(text, build) {
     && text.includes('typeof e.listProjectConversations===`function`')
     && text.includes('typeof e.listAllThreads!==`function`')
     && text.includes('l.isError&&l.data==null?[]')
+    && (build !== '41705' || projectHistory26581841705RecentThreadsHolds(text, true)
+      && projectHistory26581841705LoadOptionsHold(text, true))
     && title
     && !text.includes('Number.MAX_SAFE_INTEGER');
+}
+
+function projectHistory26581841705RecentThreadsHolds(text, scoped) {
+  const anchor = scoped
+    ? 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==PT}){'
+    : 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){';
+  const store = projectHistory26581841705StoreScope(text);
+  const method = minifiedAnchoredBlock(store, anchor, 1);
+  const request = minifiedAnchoredBlock(method, 'let r={', 1);
+  const direct = minifiedCodeAtDepth(request, 1, false);
+  const value = scoped ? 'a' : 'this.params.hostId!==PT';
+  return direct === 'limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:' + value;
+}
+
+function projectHistory26581841705LoadOptionsHold(text, stateDbOnly) {
+  const loads = minifiedExactFunctionScopes(text, 'function codexLocalGroupsLoadProjectConversations265810(e,t){');
+  const load = loads.length === 1 ? loads[0] : '';
+  const loop = minifiedAnchoredBlock(load, 'do{', 1);
+  const options = minifiedAnchoredBlock(loop, 'e.listRecentThreads({', 1);
+  const expected = stateDbOnly
+    ? 'cursor:i,limit:100,background:!0,useStateDbOnly:!0'
+    : 'cursor:i,limit:100,background:!0';
+  return minifiedCodeAtDepth(options, 1, false) === expected;
+}
+
+function projectHistory26581841705StoreScope(text) {
+  const patched = 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265810(this,e)}async listArchivedThreads(){';
+  const clean = 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return wdt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){';
+  const member = countMatches(text, patched) === 1 ? patched : clean;
+  if (countMatches(text, member) !== 1) return '';
+  const memberIndex = text.indexOf(member);
+  let classIndex = memberIndex;
+  while ((classIndex = text.lastIndexOf('=class{', classIndex - 1)) >= 0) {
+    const open = classIndex + 6;
+    const scope = minifiedBlockScope(text, open);
+    if (scope && open + scope.length > memberIndex && minifiedAnchoredBlock(scope, member, 1)) return scope;
+  }
+  return '';
+}
+
+function projectHistory26581841705TitleHolds(text, v) {
+  const loads = minifiedExactFunctionScopes(text, 'function codexLocalGroupsLoadProjectConversations265810(e,t){');
+  const merges = minifiedExactFunctionScopes(text, 'function codexLocalGroupsMergeProjectConversations265810(e,t,n){');
+  const hooks = minifiedExactFunctionScopes(text, 'function qPn(e,t,n){');
+  if (loads.length !== 1 || merges.length !== 1 || hooks.length !== 1) return false;
+  const [load] = loads, [merge] = merges, [hook] = hooks;
+  const query = minifiedNestedBlock(hook, [['IN({', 1], ['queryFn:async()=>{', 1]]);
+  const loop = minifiedAnchoredBlock(query, 'for(let r of await e.listAllThreads({modelProviders:null})){', 1);
+  const summary = minifiedAnchoredBlock(loop, 'n.push(bdt({', 1);
+  return load.includes('codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(bdt(s))')
+    && merge.includes('codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e)')
+    && loop.includes('!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue')
+    && hook.includes('codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)')
+    && summary.includes('title:' + v.titleCall + ',cwd:r.cwd||null');
 }
 
 function projectHistory265818TitleHolds(text, v) {

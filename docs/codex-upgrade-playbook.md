@@ -1,9 +1,9 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-08-21
-> 适配目标 Codex：`openai.chatgpt@26.5818.31338`
-> 当前 active Codex：`openai.chatgpt@26.5818.31338`
-> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.60`
+> 基线日期：2026-08-24
+> 适配目标 Codex：`openai.chatgpt@26.5818.41705`
+> 当前 active Codex：`openai.chatgpt@26.5818.41705`
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.61`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -26,6 +26,7 @@ Codex 升级后，应该恢复成以下状态：
 13. 启动时只读检查，不在多窗口启动阶段后台改写 Codex bundle。
 14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
 15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` 使用版本限定的 `120s` 看门狗。`26.5810` 必须改 `jP`，`26.5814` 必须改 `YI`，`26.5818` 必须改唯一真实 `QP`；不能退回旧 `onTimeout()},3e4`，也不能用字符串 decoy 冒充真实看门狗。
+16. 每次升级必须先读相关 OpenSpec change 和本手册，严格按全量矩阵调研、实现、验证和留证。主线程负责常规 Reload/UI/性能验收，不把检查清单交给用户；发现遗漏先补 requirement、失败测试和 verifier 负例，再改实现并重跑全部适用项。
 
 ## 2. 当前调用链
 
@@ -62,7 +63,7 @@ CLI 入口 `scripts/plan-patches.js` / `apply-patches.js` / `repair-codex-ui.js`
 
 ```text
 Header 读取 activeWorkspaceRoot
-  -> root ready 时调用对应版本扩展后的项目历史 Hook（26.721 `e6e` / 26.727 `Xtt` / 26.5730 `FJe` / 26.5803 `_Xe` / 26.5810 `ssn` / 26.5814 `dgn` / 26.5818 `NPn`）
+  -> root ready 时调用对应版本扩展后的项目历史 Hook（26.721 `e6e` / 26.727 `Xtt` / 26.5730 `FJe` / 26.5803 `_Xe` / 26.5810 `ssn` / 26.5814 `dgn` / 26.5818 `NPn` / `qPn`（依 exact build））
   -> App Server manager 独立分页历史查询
   -> 按 root / root 子目录过滤
   -> 合并原生 recent query 已有项
@@ -75,7 +76,7 @@ Header 读取 activeWorkspaceRoot
 
 ```text
 Header 操作
-  -> 语义定位的 VSCode messenger singleton（26.5814 导出 `Vst`；26.5818 真实导出 `Flt`）
+  -> 语义定位的 VSCode messenger singleton（26.5814 导出 `Vst`；26.5818 真实导出 `Flt` / `Jlt`（依 exact build））
   -> out/extension.js 中的 codexLocalGroupsHandleWebviewMessage()
   -> ~/.codex/codex-vscode-conversation-meta.json
   -> metadataSaved 回传 Header
@@ -117,14 +118,14 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 ## 3. 当前 bundle 与目标契约
 
-当前 `26.5818.31338` 为 Header `header-D92QSxKa.js`，app main/statsig/Power/composer `app-initial-CYlXrWdX.js`，server/history `app-initial-D5LtbkHB.js`。`26.5810.41047` / `52044` 与 `26.5814.41407` 的历史拓扑和变体仍保留在回归中。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
+已验证 `26.5818.31338` 为 Header `header-D92QSxKa.js`、Main `app-initial-CYlXrWdX.js`、Server `app-initial-D5LtbkHB.js`；`26.5818.41705` 为 Header `header-DtxiyEJb.js`、Main `app-initial-DqGfhkM8.js`、Server `app-initial-BGrXbXCc.js`。`26.5810.41047` / `52044` 与 `26.5814.41407` 的历史拓扑和变体仍保留在回归中。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
 
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
-| `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` + `timeoutMs:12e4` | 注入 metadata 消息桥；对 `26.5818` 的唯一真实 `QP` Webview 看门狗把 30 秒延长到 120 秒；`nY` 回调边界必须绑定真实四入口和 `metadataSaved`。 |
-| `header-D92QSxKa.js` | `recentTasksMenu` + `Search recent chats/tasks` + `zn` | `codexLocalGroupsHeaderSafe265810PatchVersion=1` + `codexLocalGroupsOpenedTitle265810PatchVersion=1` | 当前项目严格隔离、每组 5/+10/15/5、600px 菜单和标题双消费；真实 messenger / execution-target 导出必须是 `Flt` / `c0`，不能误用碰撞的 `Vst` / `U$`。 |
-| `app-initial-CYlXrWdX.js` | `conversation.title` + `W7e` + `Wzn/Uzn/Pq as sw` | `codexLocalGroupsCodexUi265810PatchVersion=1` + `codexLocalGroupsPower265810PatchVersion=1` | 仅对 `gpt-5.6-sol` 保留 Max/Ultra 的校验、Power、菜单、回读和写入；完整绑定 V1/V2 membership、parent selector、原生 guard 和 `$4n` 面板，不 patch `canInteract`。 |
-| `app-initial-D5LtbkHB.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265810PatchVersion=1` | 独立项目历史查询；隔离 load/merge/fallback/return；标题 fallback 绑定 `$j/sw/sA`。 |
+| `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` + `timeoutMs:12e4` | 注入 metadata 消息桥；对 `26.5818` 的唯一真实 `QP` Webview 看门狗把 30 秒延长到 120 秒；31338 的 `nY` 与 41705 的 `oY` 回调边界都必须绑定真实四入口和 `metadataSaved`。 |
+| Header（31338 `header-D92QSxKa.js`；41705 `header-DtxiyEJb.js`） | `recentTasksMenu` + `Search recent chats/tasks` + `zn` | `codexLocalGroupsHeaderSafe265810PatchVersion=1` + `codexLocalGroupsOpenedTitle265810PatchVersion=1` | 当前项目严格隔离、每组 5/+10/15/5、600px 菜单和标题双消费；31338 真实 messenger / execution-target 为 `Flt` / `c0`，41705 为 `Jlt` / `Z1`，不能误用碰撞导出。 |
+| Main（31338 `app-initial-CYlXrWdX.js`；41705 `app-initial-DqGfhkM8.js`） | `conversation.title` + exact build composer chain | `codexLocalGroupsCodexUi265810PatchVersion=1` + `codexLocalGroupsPower265810PatchVersion=1` | 仅对 `gpt-5.6-sol` 保留 Max/Ultra 的校验、Power、菜单、回读和写入；31338 使用 `W7e/Wzn/Uzn/Pq/JKr/$4n`，41705 使用 `F7e/GWn/WWn/zX/Uqr/yer`，均完整绑定 V1/V2、parent selector、原生 guard 和真实面板，不 patch `canInteract`。 |
+| Server（31338 `app-initial-D5LtbkHB.js`；41705 `app-initial-BGrXbXCc.js`） | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265810PatchVersion=1` | 独立项目历史查询；隔离 load/merge/fallback/return；31338 标题 fallback 绑定 `$j/sw/sA`，41705 绑定 `vM/$C/xA`。 |
 
 当前 locator 允许 `appMainPath` / `appStatsigPath` / `appServerManagerSignalsPath` 指向同一文件。`CodexPatchEngine.plan()` 必须对合包和分包都只规划一次写入。
 
@@ -148,7 +149,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 ### 4.2 `src/patchEngine.js::CodexPatchEngine.plan()`
 
-当前明确支持 `26.721`、`26.727`、`26.5730`、`26.5803`、`26.5810`、精确 build `26.5814.41407` 和 `26.5818.31338`。其他 minor/build 会报：
+当前明确支持 `26.721`、`26.727`、`26.5730`、`26.5803`、`26.5810`、精确 build `26.5814.41407`、`26.5818.31338` 和 `26.5818.41705`。其他 minor/build 会报：
 
 ```text
 不支持的 Codex 扩展版本
@@ -249,7 +250,7 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 
 项目历史的最终实现是 marker v4。新版适配时必须保留：
 
-1. worker store 有 `listProjectConversations(root)` 时，先完成 hydration，再使用 `listRecentThreads({ limit: 100, background: true })` 分页读取。
+1. worker store 有 `listProjectConversations(root)` 时，先完成 hydration，再使用 `listRecentThreads({ limit: 100, background: true })` 分页读取。若新版 `thread/list` 提供 state DB / rollout repair 选项，必须先查官方 schema 并实测两种模式的完整 ID 集合和耗时；41705 的 Local Groups 项目历史还需传 `useStateDbOnly: true`，原生调用默认值保持不变。
 2. 检测重复 cursor，禁止无限分页。
 3. 根据实际 thread cwd 匹配 root / root 子目录。
 4. 与原生 recent query 按 conversation id 合并，按 recency 降序。
@@ -264,6 +265,7 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 
 - 启动时默认 manager 为 `null`，直接调用 `getHostId()`。
 - 把 worker manager 的生命周期监听和 `listProjectConversations()` 假定为所有 webview 代理都具备。
+- 对每一页项目历史使用会扫描 JSONL rollout 的默认模式；数据量增长后会把数十秒扫描隐藏在整面 spinner 后面。
 
 ### 4.6 `patchCodexUiFeatureGate()` 和 `patchCodexPowerAndSubagents()`
 
@@ -348,13 +350,13 @@ multi_agent_v2 = true
 
 ### 5.0 全量已知回归矩阵：一次性交付门禁
 
-每次新 build 都必须复制并完整填写下表。阶段列只能写 `PASS + 证据` 或 `N/A + 理由`，不能留空。修改 live 前，Fixture/自动、Official clean、Patched clean 三列全部完成；发布或宣称适配完成前，Live 与 Reload 人工两列全部完成。任一适用项 pending、失败或缺证据，整次适配都不能标记完成。发现遗漏时先把它加入矩阵，再重跑全部适用项，禁止只验证刚暴露的问题。
+每次新 build 都必须复制并完整填写下表。阶段列只能写 `PASS + 证据` 或 `N/A + 理由`，不能留空。修改 live 前，Fixture/自动、Official clean、Patched clean 三列全部完成；发布或宣称适配完成前，Live 与主线程验收两列全部完成。任一适用项 pending、失败或缺证据，整次适配都不能标记完成。发现遗漏时先把它加入矩阵，再重跑全部适用项，禁止只验证刚暴露的问题。常规验证由主线程执行，不得要求用户逐项试用；无法直接操作 UI 时提供确定性的 headless/runtime 等价证据，否则保持 blocked/pending。
 
-| 回归域 | 必验内容 | Fixture/自动 | Official clean | Patched clean | Live/verifier | Reload 人工 |
+| 回归域 | 必验内容 | Fixture/自动 | Official clean | Patched clean | Live/verifier | 主线程验收 |
 | --- | --- | --- | --- | --- | --- | --- |
 | 启动 | 资源加载；root render、route mount、ready、timeout 时间线 |  |  |  |  |  |
 | 定位与安全 | active registry；唯一 bundle；未知版本 fail closed；safe-mode 禁项；备份、回滚、语法、幂等 |  |  |  |  |  |
-| 项目历史 | root、child、跨项目、缺 cwd、root 未就绪、manager 能力、分页 cursor |  |  |  |  |  |
+| 项目历史 | root、child、跨项目、缺 cwd、root 未就绪、manager 能力、分页 cursor、state DB/repair 语义、完整 ID 集合、冷加载耗时、spinner 终止和行可点击 |  |  |  |  |  |
 | 分组列表 | 两组各 5；单组 +10；15/5 收起；active 额外保留；隐藏数；600px、scroll、sticky |  |  |  |  |  |
 | Metadata 四入口 | 设置标题、设置分组、新建分组、分组内新会话；真实 messenger、host callback、`metadataSaved` |  |  |  |  |  |
 | 标题双消费 | 同 ID 原生 A/本地 B；下拉和 `Bn` 都显示 B；空白/缺失都回退 A；即时双刷新；cleanup；不写原生标题 |  |  |  |  |  |
@@ -400,6 +402,7 @@ npm run plan-patches
 6. 跟踪 Sol Reasoning 菜单生成、设置写入、回读和校验四条链路。
 7. 跟踪 `App Main Zmt/Xmt/Up -> App Server Cen/Een/wen -> visibleRows -> xn -> _Rt`；不能以 transcript 可见代替 composer 面板验证。
 8. 先补新版 fixture 和失败测试，再修 patch anchor。
+9. 读取新版 app-server 生成的 protocol JSON schema，核对 `thread/list` 的新增参数；用同一真实数据分别跑完整分页，记录页数、唯一 ID、集合差异和总耗时，不能只看单页或 SQLite 查询耗时。
 
 ### 步骤 3：按影响范围修代码
 
@@ -435,6 +438,7 @@ git diff --check
 - 生成的 extension script 和 ESM bundle 语法通过。
 - apply 后二次 plan 为 0。
 - 旧 live marker 可原地升级；marker 缺内容时 fail closed。
+- 若项目历史覆盖 `thread/list` 参数，验证 Local Groups 每页显式传值、原生调用仍保持上游默认值，并让 external verifier 分别拒绝“helper 未传”和“store 忽略参数”。
 - root、子目录、其他项目、缺 cwd、pending row 用例。
 - manager 空 registry、缺监听方法、缺 `listProjectConversations()` 但有 `listAllThreads()` 用例。
 - 两个需求分组默认各 5 条，一组 +10 不影响另一组。
@@ -496,12 +500,12 @@ code --install-extension ./vscode-codex-groups-<version>.vsix --force
 5. 若 Remote CLI 长时无返回，先同时观察 VSCode Server 安装子进程、目标目录和 `extensions.json`；服务端任务可能在 shell 静默时继续安装，不得立即停止或覆盖目录。只有任务完全退出且没有有效安装时，才能在已备份 registry 的前提下使用手工兜底：解压 VSIX 中 `extension/` 到独立版本目录，校验 publisher/name/version，原子更新唯一 extension registry 记录，保留旧版目录直到新版验收完成。
 6. 从已安装目录再跑 compile / plan / verifier，确认安装产物与仓库源码一致。
 
-### 步骤 8：Reload 后人工验收
+### 步骤 8：Reload 后主线程验收
 
-必须执行 `Developer: Reload Window`，然后按以下顺序验收：
+主线程必须执行或驱动 `Developer: Reload Window` 并按以下顺序验收，不得把清单交给用户。若当前环境不能直接驱动 VSCode UI，必须为本次实际改动提供确定性的 headless/runtime 等价验证，并记录输入数据、耗时、返回集合及生成契约；无法取得任何一种证据时标记 blocked，不得宣称完成。
 
 1. Codex UI 打开无 `Oops, an error has occurred`。
-2. 最近会话下拉不为空。
+2. 最近会话下拉的 spinner 必须结束，记录从打开到项目行出现的耗时；至少点击一行确认可打开。`app routes mounted/ready` 不能替代这项门禁。
 3. 当前窗口只有当前项目，根目录和子目录会话都在。
 4. 开两个需求分组，默认各 5 条。
 5. 只点第一组“展开更多”，第一组变 15，第二组仍为 5。
@@ -992,3 +996,44 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - live Codex：`/root/.vscode-server/extensions/openai.chatgpt-26.5818.31338`；active registry/package 均为 `26.5818.31338`，四文件最终 apply 后 plan 0、语法和 verifier 通过。
 - Local Groups `0.0.60` VSIX：`vscode-codex-groups-0.0.60.vsix`，SHA-256 `c7ab3bc568db83a2ee44118221b44511750d18bacb493d4bc3cdd3d162df4c34`；active 为 `/root/.vscode-server/extensions/xinghezhiyuan.vscode-codex-groups-0.0.60`，patchEngine、locator、verifier 与 worktree 哈希一致。
 - Reload 人工验收：**pending**；完成前不得写 UI PASS。
+
+## 18. Codex 26.5818.41705 适配记录
+
+### 获取、安装与上游变化
+
+- Marketplace linux-x64 预发布版为 `26.5818.41705`，发布时间 `2026-08-22`。官方 VSIX 为 `228793737` bytes，SHA-256 `ddb771ccf0ec79cdddfa0c48a4b193e176c289749965c6555aee502de5ebda03`；ZIP 与 package 校验通过。
+- Marketplace API 的 `vspackage` 响应不可靠：Range 续传未按预期生效，gzip 传输在约 `151969792 / 227405099` bytes 中断。改用官方 Gallery CDN 的可续传地址后取得完整 VSIX。下次必须先校验最终文件大小、SHA-256、ZIP 和 package，残件不得作为 clean 基线。
+- official clean：`/tmp/codex-upgrade-5818-41705-20260824-092910/official-41705/extracted/extension`。Header 为 `header-DtxiyEJb.js`，Main/Statsig/Request 为 `app-initial-DqGfhkM8.js`，Server/History 为 `app-initial-BGrXbXCc.js`。
+- 同一 `26.5818` minor 仍发生全量重压缩。`31338` 的原生符号名不能复用，但 Local Groups 的 metadata、分组、备份、原子写入、回滚和 fail-closed 管线继续复用。
+
+### 最终语义映射
+
+- Host：`QP` Webview 看门狗保持不变，capn parser 从 `nY` 变为 `oY`。
+- Header：rows `N/v/i/u/An`、row `xe` 的局部字段 `r/i/a/o`、trigger `G`、打开页 `zn/Wn/In/a/o/l`。真实 messenger / execution-target 导出改为 `Jlt` / `Z1`。
+- Main：`GWn → WWn → zX(ti, export DS) → Uqr(Bc) → SZr(Cn) → yer`，filters 为 `Kqr/Wqr`。Sol 校验/回读/写入为 `F7e/K7e/X7e`。
+- Power：`bCn/SCn/CCn/pCn/y$/dw/J8e`。仅对 `gpt-5.6-sol` 补齐 Max/Ultra 消费链，不影响其他模型。
+- History：`qPn/YPn/vG/IN/bG/RPn/LPn/wdt`，timestamp/summary/visible/title 为 `SA/bdt/ddt/vM/$C/xA`。
+
+### 本次阻碍、根因与防复发
+
+1. 新 build 原本被 exact-build 白名单正确拒绝。只新增 `26.5818.41705` variant；未知 build、未来 minor 和 `26.5818.41705.1` 在规划、backup 恢复或写入前继续 fail closed。
+2. 41705 的 `zX` 不是自由顶层赋值，而在真实 `BX=e((()=>{...}))` initializer 内。只按文件级 `includes` 搜 `zX=ti(...)` 会被 nested/string decoy 假绿；必须先绑定唯一 `BX` initializer，再取 depth 1 的 `zX` selector。
+3. `GWn/WWn/yer/SZr` 的有效调用位于不同 brace depth。首轮检查可被同名 nested function、内部 fake return、template string 或 FakePanel 冒充。最终 engine/verifier 使用 41705 专用 top-level scope、direct-depth、去 literal 和真实参数对象门禁；`GWn` 的 activity/spawn `i.set`、`WWn` 聚合、`yer` summary 和 `SZr` panel props 分别绑定。
+4. 不能只验证 Header 文本含 `Jlt` / `Z1`。真实导出必须回绑 Main 的 `ju/ku/Au/V_e` messenger singleton 和 `Bw` execution target；导入项使用边界正则，`AZ1 as ...` 不得误命中 `Z1 as ...`。
+5. 对通用 scope helper 做全局“加强”会使已支持的 5814 fixture 回归。最终保留旧 build 的既有行为，只让 41705 的新门禁使用 direct-depth/去 literal 参数。新增安全检查不得借适配新 build 改变旧 build 契约。
+6. Remote `code --install-extension` 输出可能比安装事务晚约两分钟。必须观察 `remoteagent.log` 的最终 `Extension installed successfully`、active registry、目标目录和残留进程；安装事务结束后再 apply，并重新执行 plan 0/verifier，避免异步安装覆盖已 patch bundle。
+7. 用户 `config.toml` 仅作只读门禁。前后 SHA-256 均为 `d064a25eed2c56360ebd9a906dec04f4e58280b32fa3ee1dae932888aeef3005`，mtime_ns 均为 `1787386744925792241`；未切换 Multi-Agent、provider、model 或 reasoning，未 patch `canInteract`。
+8. 首次修复后只以 `app routes mounted/ready` 判断启动成功，遗漏了最近会话仍显示整面 spinner。41705 的 `ThreadListParams.useStateDbOnly=false` 会在每页读取时扫描 JSONL rollout 修复 metadata；项目历史的完整分页把这项成本重复了 6 次。真实 app-server 同一数据集基准为 6 页、511 个唯一会话：默认模式 `33397ms`，state DB 模式 `992ms`，ID 集合完全一致。
+9. 最终只给 Local Groups 的项目历史分页传 `useStateDbOnly:true`，并给真实 `listRecentThreads` 增加可选参数；未显式传参的原生调用继续使用 `hostId!==PT`。engine 支持旧 marker 原位迁移，postcondition/verifier 同时绑定 helper 传参与 store 消费，缺任一端都 fail closed。不得用删除 spinner、timeout 或全局强制 state DB 掩盖慢查询。
+10. 首轮 state DB 门禁仍使用全文件文本命中，可被 comment、template string 或 fake top-level class 假绿。最终先用唯一 `listAllThreads/listProjectConversations → listArchivedThreads` 相邻成员找到真实 Store class，只在该 class depth 1 验证 method/request；loader 同时绑定唯一函数、`do` 循环和 options 对象。engine/verifier 都必须保留三类 decoy 负例。
+
+### 验证证据
+
+- 自动化：compile 24 files、lint 24 files、324 tests、`git diff --check` 与 OpenSpec strict validation 通过；新增 state DB helper/store 双端正负例、旧 marker 迁移及 comment/template-string/fake-class decoy 门禁。
+- 最终 patched clean：`/tmp/codex-upgrade-5818-41705-20260824-092910/fresh-reviewed-final-1787544200`；plan 4、apply 4、syntax 5、幂等通过、二次 plan 0、external verifier 通过。
+- 两轴独立 Review：Standards 与 Spec 最终均为 Critical 0、Important 0、Minor 0。Review 检出的 `zX/WWn/yer`、`GWn` 内部 decoy 和 `AZ1` import 假阳性均已有 engine/verifier 负例。
+- live Codex：`/root/.vscode-server/extensions/openai.chatgpt-26.5818.41705`；四个预期文件已备份并应用，最终 plan 0、语法和 verifier 通过。
+- Local Groups `0.0.61` active：`/root/.vscode-server/extensions/xinghezhiyuan.vscode-codex-groups-0.0.61`；`patchEngine.js`、locator、verifier 与 worktree 哈希一致，安装目录 plan 0/verifier 通过。
+- 慢加载修复 clean：`/tmp/clg-41705-fast-final.uBTFC9` 完成 plan 4、apply 4、syntax 5、二次 plan 0，41705 scoped verifier 通过。live 旧 marker 原位迁移 1 个 Server/History bundle后 plan 0/verifier 通过，`config.toml` SHA-256 不变。
+- state DB 独立 Review 首轮检出 decoy 假绿；真实 Store scope 双侧加固后复查为 Critical 0、Important 0、Minor 0。
+- 主线程 release acceptance：本次后续性能修复只改变 Server/History 的 `thread/list` 参数，不改变 Header、标题、分组、Sol 或子 agent 渲染。真实 41705 app-server 对同一 511 会话数据完成 6 页全分页，`33397ms → 992ms` 且 ID 集合一致；生成 Header/Server 契约、324 tests、clean/live verifier 与独立 Review 共同作为确定性等价证据，不要求用户执行检查清单。

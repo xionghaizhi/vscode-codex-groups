@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.0.61 - 2026-08-24
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5818.41705`；仅放行三段版本 `26.5818.41705`，未知 build、未来 minor 和带后缀版本在规划、backup 恢复或写入前继续 fail closed。
+- 按真实调用链更新 Host `oY`、Header `Jlt`/`Z1` 与 `r/i/a/o` row、Main `GWn → WWn → zX → Uqr → SZr → yer`、Sol `F7e/K7e/X7e`、Power `bCn/pCn/y$/dw/J8e` 和 History `qPn/YPn/IN/bdt/ddt/vM/$C/xA`。
+- 修复 41705 项目历史每页触发 JSONL rollout repair 导致最近会话长时间 spinner：仅 Local Groups 全分页显式使用 state DB，原生调用继续保留上游默认值；真实 511 会话、6 页基准由 `33397ms` 降至 `992ms`，ID 集合一致。
+- engine/verifier 绑定真实 Store class、loader 和 options，支持旧 marker 原位迁移，并拒绝 comment、template string、nested 和 fake-class decoy。
+- 将“严格执行 OpenSpec 全量矩阵”和“主线程负责常规 Reload/UI/性能验收”固化为发布契约；不得以 routes ready 代替功能门禁，也不得让用户逐项发现遗漏。
+- official clean 与 live 均已验证 plan/apply/plan 0、语法和 verifier；324 tests、OpenSpec strict、config 只读门禁和独立 Review 通过。
+
 ## v0.0.60 - 2026-08-21
 
 - 适配官方 linux-x64 预发布版 `openai.chatgpt@26.5818.31338`；只放行精确三段版本，未知 minor/build 在任何规划、备份恢复或写入前 fail closed。
