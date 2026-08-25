@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.62 - 2026-08-24
+
+- 修复 Codex `26.5818.41705` 最近会话显示 `No chats yet`：项目历史不再把 `ThreadSummary` 直接传给真实 `bdt({ thread, ... })`，load 与 fallback 都按原生 mapper 契约传入 raw thread。
+- 支持从 v0.0.61 的错误 mapper marker 和更早的非 state-DB marker 原位迁移；迁移范围包含完整 `var` 声明，语法、幂等和旧 marker 回归覆盖。
+- 41705 fixture、engine 后置条件和 external verifier 绑定真实 `bdt` producer 及两处 consumer；ID 集合一致不再被视为最近会话 UI 等价证据。
+- fallback 同步保留 `workspaceKind` 与 `hasUnreadTurn`；producer 门禁使用唯一完整签名 scope，避免整份压缩 bundle 的 brace-depth 误判，也拒绝 nested/string 假 producer。
+
 ## v0.0.61 - 2026-08-24
 
 - 精确适配官方 linux-x64 `openai.chatgpt@26.5818.41705`；仅放行三段版本 `26.5818.41705`，未知 build、未来 minor 和带后缀版本在规划、backup 恢复或写入前继续 fail closed。

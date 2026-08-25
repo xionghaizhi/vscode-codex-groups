@@ -3,7 +3,7 @@
 > 基线日期：2026-08-24
 > 适配目标 Codex：`openai.chatgpt@26.5818.41705`
 > 当前 active Codex：`openai.chatgpt@26.5818.41705`
-> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.61`
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.62`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -1026,10 +1026,13 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 8. 首次修复后只以 `app routes mounted/ready` 判断启动成功，遗漏了最近会话仍显示整面 spinner。41705 的 `ThreadListParams.useStateDbOnly=false` 会在每页读取时扫描 JSONL rollout 修复 metadata；项目历史的完整分页把这项成本重复了 6 次。真实 app-server 同一数据集基准为 6 页、511 个唯一会话：默认模式 `33397ms`，state DB 模式 `992ms`，ID 集合完全一致。
 9. 最终只给 Local Groups 的项目历史分页传 `useStateDbOnly:true`，并给真实 `listRecentThreads` 增加可选参数；未显式传参的原生调用继续使用 `hostId!==PT`。engine 支持旧 marker 原位迁移，postcondition/verifier 同时绑定 helper 传参与 store 消费，缺任一端都 fail closed。不得用删除 spinner、timeout 或全局强制 state DB 掩盖慢查询。
 10. 首轮 state DB 门禁仍使用全文件文本命中，可被 comment、template string 或 fake top-level class 假绿。最终先用唯一 `listAllThreads/listProjectConversations → listArchivedThreads` 相邻成员找到真实 Store class，只在该 class depth 1 验证 method/request；loader 同时绑定唯一函数、`do` 循环和 options 对象。engine/verifier 都必须保留三类 decoy 负例。
+11. v0.0.61 的性能验收只比较分页 ID，fixture 又把真实 `bdt({thread,...})` 错写成宽松的 `bdt(e)`，因此 `n.push(bdt(s))` 假绿。真实 41705 mapper 会执行 `SA(s.thread)` 并抛 `undefined.createdAt`，而 hook 把 query error 的空 data 呈现为 `No chats yet`。41705 门禁现在同时绑定真实 `bdt` producer、load 的 raw thread + summary metadata consumer、fallback 的 raw thread consumer，并用生产形态 mapper runtime 断言非空 conversation；只比较 ID 集合不得再判 UI 等价。
+12. 首次原位迁移修复 mapper 时，替换从 marker 文本而非前置 `var ` 开始，生成 `var var`；live 语法检查拒绝并自动回滚。迁移必须用完整 `var codexLocalGroupsProjectHistory...` 作为替换边界，回归同时断言无重复 `var`、生成语法和二次 plan 0。
+13. mapper 修复完成后，engine 曾用全文件 brace depth 判断真实 `bdt` 是否顶层；41705 live 压缩 bundle 在该位置被扫描为 depth `-1`，使有效旧 marker 迁移被错误拒绝。41705 的 producer 门禁改为“全文件只有一个 `function bdt(` + 完整真实签名可提取唯一函数 scope”；真实 producer 漂移后追加 nested/string 假 producer必须失败。不得把适用于小 fixture 的 top-level 扫描直接套到整份生产 bundle。
 
 ### 验证证据
 
-- 自动化：compile 24 files、lint 24 files、324 tests、`git diff --check` 与 OpenSpec strict validation 通过；新增 state DB helper/store 双端正负例、旧 marker 迁移及 comment/template-string/fake-class decoy 门禁。
+- 自动化：compile 24 files、lint 24 files、325 tests、`git diff --check` 与 OpenSpec strict validation 通过；新增真实 mapper runtime、load/fallback/producer 正负例、错误 mapper/旧 state-DB marker 迁移及 `var var` 回归。
 - 最终 patched clean：`/tmp/codex-upgrade-5818-41705-20260824-092910/fresh-reviewed-final-1787544200`；plan 4、apply 4、syntax 5、幂等通过、二次 plan 0、external verifier 通过。
 - 两轴独立 Review：Standards 与 Spec 最终均为 Critical 0、Important 0、Minor 0。Review 检出的 `zX/WWn/yer`、`GWn` 内部 decoy 和 `AZ1` import 假阳性均已有 engine/verifier 负例。
 - live Codex：`/root/.vscode-server/extensions/openai.chatgpt-26.5818.41705`；四个预期文件已备份并应用，最终 plan 0、语法和 verifier 通过。
@@ -1037,3 +1040,6 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - 慢加载修复 clean：`/tmp/clg-41705-fast-final.uBTFC9` 完成 plan 4、apply 4、syntax 5、二次 plan 0，41705 scoped verifier 通过。live 旧 marker 原位迁移 1 个 Server/History bundle后 plan 0/verifier 通过，`config.toml` SHA-256 不变。
 - state DB 独立 Review 首轮检出 decoy 假绿；真实 Store scope 双侧加固后复查为 Critical 0、Important 0、Minor 0。
 - 主线程 release acceptance：本次后续性能修复只改变 Server/History 的 `thread/list` 参数，不改变 Header、标题、分组、Sol 或子 agent 渲染。真实 41705 app-server 对同一 511 会话数据完成 6 页全分页，`33397ms → 992ms` 且 ID 集合一致；生成 Header/Server 契约、324 tests、clean/live verifier 与独立 Review 共同作为确定性等价证据，不要求用户执行检查清单。
+- v0.0.62 mapper hotfix：真实 live bundle 抽取 `SA`、`bdt` 和 patched loader，对当前 app-server state DB 的 513 条 thread 执行同一转换；`/home/project/vscode/yuxi` 匹配 51 条并产出 51 条含 `id/cwd/turns/title` 的 conversation。live Server 迁移后语法、plan 0、external verifier 通过。
+- 最终 live mapper runtime：当前 app-server 返回 173 条 thread，当前 root 匹配 16 条并产出 16 条 conversation；`id/cwd/title/hostId/workspaceKind/hasUnreadTurn` 均保留。全量 325 tests、compile、lint、diff-check、OpenSpec strict、live plan 0/verifier 和两轮针对性 Review 均通过。
+- Local Groups `0.0.62` 最终 VSIX：`/tmp/vscode-codex-groups-0.0.62-hotfix-20260824173101.vsix`，SHA-256 `cf6cdd1ceed0ac35c67b4f1f275e7d1720e164679df5c6fe3d1102bc049a9675`；active 为 `/root/.vscode-server/extensions/xinghezhiyuan.vscode-codex-groups-0.0.62`，patchEngine/verifier 与 worktree 哈希一致，安装目录 plan 0/verifier 通过。`config.toml` SHA-256 仍为只读基线。

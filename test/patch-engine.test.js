@@ -412,7 +412,7 @@ function configure26581841705Features(target) {
   ].join('');
   const server = [
     'var PT=`local`,CE=[],Store=class{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return wdt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}};class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}}',
-    'function qPn(){return YPn(`recent-conversations`)}function YPn(e){return{data:[]}}function SA(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function bdt(e){return{id:e.conversationId??e.id,cwd:e.cwd}}function ddt(){return!0}function vM(e){return String(e||``).trim()}function xA(e,t){return String(e).slice(0,t)}function $C(e){return null}function vG(){return{getDefault:()=>({getHostId:()=>`local`}),getForHostId:()=>null}}function IN(e){return e}function LPn(e){return()=>{for(let t of e)t()}}function RPn(){return()=>{}}var bG={useEffect(){}};',
+    'function qPn(){return YPn(`recent-conversations`)}function YPn(e){return{data:[]}}function SA(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function bdt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=SA(e);return{id:n,hostId:t,turns:r,createdAt:d,updatedAt:f,recencyAt:p??f,title:i,cwd:e.cwd,workspaceKind:s,hasUnreadTurn:u??!1}}function ddt(){return!0}function vM(e){return String(e||``).trim()}function xA(e,t){return String(e).slice(0,t)}function $C(e){return null}function vG(){return{getDefault:()=>({getHostId:()=>`local`}),getForHostId:()=>globalThis.projectHistoryManager??null}}function IN(e){return e}function LPn(e){return()=>{for(let t of e)t()}}function RPn(){return()=>{}}var bG={useEffect(){}};',
   ].join('');
   fs.writeFileSync(target.extensionJsPath, extensionText.replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=oY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})').replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + webviewTimeout265818Text);
   fs.writeFileSync(target.headerPath, header);
@@ -1569,14 +1569,18 @@ module.exports = {
         const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(plan.errors, []);
         const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
-        const script = `${server};(async()=>{let pages={first:{data:[{id:'root',cwd:'/project',updatedAt:3}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',updatedAt:1}],nextCursor:null}},projectRequests=[],projectStore={threadsById:new Map,listRecentThreads:e=>(projectRequests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:e=>({conversationId:e.id,cwd:e.cwd,updatedAt:e.updatedAt}),shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265810(projectStore,'/project'),nativeRequests=[],nativeStore=Object.create(Store.prototype);nativeStore.params={hostId:'local',requestClient:{getCompatibleThreadSortKey:e=>e,sendRequest:(e,t)=>(nativeRequests.push(t),Promise.resolve({data:[],nextCursor:null}))}},nativeStore.recentConversationSortKey='recency_at';await nativeStore.listRecentThreads({cursor:null,limit:1});await nativeStore.listRecentThreads({cursor:null,limit:1,useStateDbOnly:true});console.log(JSON.stringify({project:project.map(e=>e.id),projectFlags:projectRequests.map(e=>e.useStateDbOnly),nativeFlags:nativeRequests.map(e=>e.useStateDbOnly)}))})()`;
+        const script = `${server};(async()=>{let root={id:'root',cwd:'/project',name:'Root title',createdAt:1,updatedAt:3,workspaceKind:'project',hasUnreadTurn:true},other={id:'other',cwd:'/project2',name:'Other title',createdAt:1,updatedAt:2},child={id:'child',cwd:'/project/sub',name:'Child title',createdAt:1,updatedAt:1,workspaceKind:'project',hasUnreadTurn:false},pages={first:{data:[root,other],nextCursor:'next'},next:{data:[child],nextCursor:null}},projectRequests=[],summary=e=>({conversationId:e.id,hostId:'local',title:e.name,cwd:e.cwd,workspaceKind:e.workspaceKind??'project',hasUnreadTurn:e.hasUnreadTurn??false}),projectStore={threadsById:new Map,listRecentThreads:e=>(projectRequests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:summary,shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265810(projectStore,'/project');globalThis.projectHistoryManager={listAllThreads:()=>Promise.resolve([root,other,child]),getRecentConversations:()=>[]};let fallback=await qPn('/project','local',true).queryFn(),nativeRequests=[],nativeStore=Object.create(Store.prototype);nativeStore.params={hostId:'local',requestClient:{getCompatibleThreadSortKey:e=>e,sendRequest:(e,t)=>(nativeRequests.push(t),Promise.resolve({data:[],nextCursor:null}))}},nativeStore.recentConversationSortKey='recency_at';await nativeStore.listRecentThreads({cursor:null,limit:1});await nativeStore.listRecentThreads({cursor:null,limit:1,useStateDbOnly:true});let fields=e=>e.map(({id,cwd,title,hostId,workspaceKind,hasUnreadTurn})=>({id,cwd,title,hostId,workspaceKind,hasUnreadTurn}));console.log(JSON.stringify({project:fields(project),fallback:fields(fallback),projectFlags:projectRequests.map(e=>e.useStateDbOnly),nativeFlags:nativeRequests.map(e=>e.useStateDbOnly)}))})()`;
         const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
         assert.strictEqual(result.status, 0, result.stderr);
-        assert.deepStrictEqual(JSON.parse(result.stdout), { project: ['root', 'child'], projectFlags: [true, true], nativeFlags: [false, true] });
+        const rows = [
+          { id: 'root', cwd: '/project', title: 'Root title', hostId: 'local', workspaceKind: 'project', hasUnreadTurn: true },
+          { id: 'child', cwd: '/project/sub', title: 'Child title', hostId: 'local', workspaceKind: 'project', hasUnreadTurn: false },
+        ];
+        assert.deepStrictEqual(JSON.parse(result.stdout), { project: rows, fallback: rows, projectFlags: [true, true], nativeFlags: [false, true] });
       },
     },
     {
-      name: 'migrates the previous Codex 26.5818.41705 project history marker once',
+      name: 'migrates the broken mapper and previous Codex 26.5818.41705 project history marker once',
       run() {
         const target = createTarget();
         configure26581841705Features(target);
@@ -1584,7 +1588,27 @@ module.exports = {
         assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
         const file = target.appServerManagerSignalsPath;
         const patched = fs.readFileSync(file, 'utf8');
-        const legacy = patched
+        const titleCall = '(t=>{let n=vM(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=$C(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=vM(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:xA(i,60)})(r)';
+        const loaded = 'bdt({thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn})';
+        const fallback = 'bdt({thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + titleCall + ',resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:r.workspaceKind??`project`,hasUnreadTurn:r.hasUnreadTurn??!1})';
+        const previousFallback = 'bdt({thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + titleCall + ',resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}}})';
+        const oldFallback = 'bdt({conversationId:i,hostId:c,createdAt:s,updatedAt:l,recencyAt:u,title:' + titleCall + ',cwd:r.cwd||null,gitInfo:r.gitInfo,historyMode:r.historyMode,modelProvider:r.modelProvider,parentThreadId:r.parentThreadId,mode:r.mode,threadStartKind:r.threadStartKind,source:r.source,threadSource:r.threadSource,threadRuntimeStatus:r.status})';
+        fs.writeFileSync(file, patched.replace(fallback, previousFallback));
+        const previousMapperPlan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(previousMapperPlan.errors, []);
+        assert.deepStrictEqual(previousMapperPlan.changes.map((change) => change.path), [file]);
+        assert.ok(previousMapperPlan.changes[0].nextText.includes('workspaceKind:r.workspaceKind??`project`,hasUnreadTurn:r.hasUnreadTurn??!1'));
+        assert.ok(!previousMapperPlan.changes[0].nextText.includes('var var codexLocalGroupsProjectHistory'));
+        const brokenMapper = patched
+          .replace(loaded, 'bdt(s)')
+          .replace('n.push(' + fallback + ')', 'let{createdAt:s,updatedAt:l,recencyAt:u}=SA(r);n.push(' + oldFallback + ')');
+        fs.writeFileSync(file, brokenMapper);
+        const brokenMapperPlan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(brokenMapperPlan.errors, []);
+        assert.deepStrictEqual(brokenMapperPlan.changes.map((change) => change.path), [file]);
+        assert.ok(brokenMapperPlan.changes[0].nextText.includes('thread:a,hostId:s.hostId'));
+        assert.ok(!brokenMapperPlan.changes[0].nextText.includes('var var codexLocalGroupsProjectHistory'));
+        const legacy = brokenMapper
           .replace('async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==PT})', 'async listRecentThreads({cursor:e,limit:t,background:n=!1})')
           .replace('sourceKinds:CE,useStateDbOnly:a}', 'sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT}')
           .replace('background:!0,useStateDbOnly:!0})', 'background:!0})');
@@ -1620,6 +1644,32 @@ module.exports = {
         const native = 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}';
         const fakeClass = fs.readFileSync(file, 'utf8').replace(method, native) + `class FakeStateDbDecoy{${method}}`;
         fs.writeFileSync(file, fakeClass);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5818 project history: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'rejects Codex 26.5818.41705 project history mapper drift',
+      run() {
+        const target = createTarget();
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const replacements = [
+          ['thread:a,hostId:s.hostId', 'thread:s,hostId:s.hostId'],
+          ['thread:r,hostId:c', 'thread:broken,hostId:c'],
+          ['function bdt({thread:e,hostId:t', 'function bdt({summary:e,hostId:t'],
+        ];
+        for (const [before, after] of replacements) {
+          configure26581841705Features(target);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+          const file = target.appServerManagerSignalsPath;
+          fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace(before, after));
+          assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5818 project history: 补丁标记不完整'), before);
+        }
+        configure26581841705Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const file = target.appServerManagerSignalsPath;
+        const fakeProducer = 'function fakeMapper(){function bdt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`}){return e}}';
+        const drifted = fs.readFileSync(file, 'utf8').replace('function bdt({thread:e,hostId:t', 'function bdt({summary:e,hostId:t') + fakeProducer;
+        fs.writeFileSync(file, drifted);
         assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5818 project history: 补丁标记不完整'));
       },
     },

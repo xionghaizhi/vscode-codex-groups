@@ -762,12 +762,20 @@ function verifyProjectHistory265818(serverPath, build = '31338') {
     const [load] = loads, [merge] = merges, [hook] = hooks;
     const query = minifiedNestedBlock(hook, [['IN({', 1], ['queryFn:async()=>{', 1]]);
     const loop = minifiedAnchoredBlock(query, 'for(let r of await e.listAllThreads({modelProviders:null})){', 1);
-    const summary = minifiedAnchoredBlock(loop, 'n.push(bdt({', 1);
-    const isolated = load.includes('codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(bdt(s))')
+    const rows = minifiedNestedBlock(load, [['do{', 1], ['for(let r of a.data){', 1]]);
+    const loaded = minifiedAnchoredBlock(rows, 'n.push(bdt({', 1);
+    const fallback = minifiedAnchoredBlock(loop, 'n.push(bdt({', 1);
+    const loadedContract = '{thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn}';
+    const fallbackContract = '{thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + HISTORY_265818_41705_TITLE_CALL + ',resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:r.workspaceKind??`project`,hasUnreadTurn:r.hasUnreadTurn??!1}';
+    const producer = 'function bdt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){';
+    const isolated = loaded === loadedContract && fallback === fallbackContract
       && merge.includes('codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e)')
       && loop.includes('!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue')
-      && hook.includes('codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)');
-    if (!isolated || !summary.includes('title:' + HISTORY_265818_41705_TITLE_CALL + ',cwd:r.cwd||null')) throw new Error(`缺少补丁契约：${serverPath} 26.5818.41705 project history 隔离与标题`);
+      && hook.includes('codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)')
+      && text.indexOf('function bdt(') === text.lastIndexOf('function bdt(')
+      && minifiedExactFunctionScopes(text, producer).length === 1
+      && !load.includes('bdt(s)');
+    if (!isolated) throw new Error(`缺少补丁契约：${serverPath} 26.5818.41705 project history 隔离、标题与 mapper`);
     if (!projectHistory26581841705StateDbHolds(text)) {
       throw new Error(`缺少补丁契约：${serverPath} 26.5818.41705 project history state DB`);
     }

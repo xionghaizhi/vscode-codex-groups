@@ -3098,11 +3098,20 @@ function patchProjectHistory265810(text, context) {
   if (text.includes(marker)) {
     if (projectHistory265810PostconditionsHold(text, context.codexBuild)) return text;
     if (context.codexBuild === '41705'
-      && projectHistory26581841705RecentThreadsHolds(text, false)
-      && projectHistory26581841705LoadOptionsHold(text, false)) {
-      const migrated = text
-        .replace(PROJECT_HISTORY_265818_41705_RECENT_THREADS.native, PROJECT_HISTORY_265818_41705_RECENT_THREADS.scoped)
-        .replace('e.listRecentThreads({cursor:i,limit:100,background:!0})', 'e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0})');
+      && (projectHistory26581841705LegacyMapperHolds(text) || projectHistory26581841705PreviousMapperHolds(text))) {
+      const nativeHistory = projectHistory26581841705RecentThreadsHolds(text, false)
+        && projectHistory26581841705LoadOptionsHold(text, false);
+      const scopedHistory = projectHistory26581841705RecentThreadsHolds(text, true)
+        && projectHistory26581841705LoadOptionsHold(text, true);
+      let migrated = nativeHistory
+        ? text.replace(PROJECT_HISTORY_265818_41705_RECENT_THREADS.native, PROJECT_HISTORY_265818_41705_RECENT_THREADS.scoped)
+        : text;
+      const hook = minifiedExactFunctionScopes(migrated, 'function qPn(e,t,n){');
+      const start = migrated.indexOf('var ' + marker);
+      const end = hook.length === 1 ? migrated.indexOf(hook[0], start) + hook[0].length : -1;
+      if ((nativeHistory || scopedHistory) && start >= 0 && end > start) {
+        migrated = migrated.slice(0, start) + projectHistory265810Helper(v, context.codexBuild) + migrated.slice(end);
+      }
       if (projectHistory265810PostconditionsHold(migrated, context.codexBuild)) return migrated;
     }
     context.errors.push(`${label} project history: 补丁标记不完整`);
@@ -3127,11 +3136,17 @@ function patchProjectHistory265810(text, context) {
 
 function projectHistory265810Helper(v, build) {
   const stateDbOnly = build === '41705' ? ',useStateDbOnly:!0' : '';
-  return 'var codexLocalGroupsProjectHistory265810PatchVersion=1;function codexLocalGroupsProjectHistoryPath265810(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265810(e,t){let n=codexLocalGroupsProjectHistoryPath265810(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265810(e,t){t=codexLocalGroupsProjectHistoryPath265810(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0' + stateDbOnly + '}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&' + v.timestamps + '(i).updatedAt>' + v.timestamps + '(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(' + v.summary + '(s))}o!=null&&r.add(o),i=o}while(i!=null);return n}function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function ' + v.hook + '(e,t,n){let r=arguments.length>0,i=' + v.impl + '(`recent-conversations`),a=' + v.registry + '(),o=codexLocalGroupsProjectHistoryPath265810(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=' + v.query + '({enabled:s,queryKey:[`codex-local-groups-project-history-265810-v1`,c,o],staleTime:3e4,' + projectHistory265810Query(v) + '}),u=l.refetch;(0,' + v.react + '.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=' + v.subscribe + '({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?' + v.combine + '([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:{...l,data:[]}:i}';
+  const conversation = build === '41705'
+    ? 'bdt({thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn})'
+    : v.summary + '(s)';
+  return 'var codexLocalGroupsProjectHistory265810PatchVersion=1;function codexLocalGroupsProjectHistoryPath265810(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265810(e,t){let n=codexLocalGroupsProjectHistoryPath265810(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265810(e,t){t=codexLocalGroupsProjectHistoryPath265810(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0' + stateDbOnly + '}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&' + v.timestamps + '(i).updatedAt>' + v.timestamps + '(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(' + conversation + ')}o!=null&&r.add(o),i=o}while(i!=null);return n}function codexLocalGroupsMergeProjectConversations265810(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function ' + v.hook + '(e,t,n){let r=arguments.length>0,i=' + v.impl + '(`recent-conversations`),a=' + v.registry + '(),o=codexLocalGroupsProjectHistoryPath265810(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=' + v.query + '({enabled:s,queryKey:[`codex-local-groups-project-history-265810-v1`,c,o],staleTime:3e4,' + projectHistory265810Query(v, build) + '}),u=l.refetch;(0,' + v.react + '.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=' + v.subscribe + '({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?' + v.combine + '([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)}:{...l,data:[]}:i}';
 }
 
-function projectHistory265810Query(v) {
+function projectHistory265810Query(v, build) {
   const title = v.titleCall || (v.title + '(r,' + v.titleSanitizer + ')');
+  if (build === '41705') {
+    return 'queryFn:async()=>{let e=a.getForHostId(c);if(e==null)return[];if(typeof e.listProjectConversations===`function`)return e.listProjectConversations(o);if(typeof e.listAllThreads!==`function`)return[];let t=new Map;for(let n of typeof e.getRecentConversations===`function`?e.getRecentConversations():[])t.set(n.id,n);let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!' + v.visible + '(r)||!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue;let i=r.id,a=t.get(i);if(a!=null){n.push(a);continue}n.push(bdt({thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + title + ',resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:r.workspaceKind??`project`,hasUnreadTurn:r.hasUnreadTurn??!1}))}return n}';
+  }
   return 'queryFn:async()=>{let e=a.getForHostId(c);if(e==null)return[];if(typeof e.listProjectConversations===`function`)return e.listProjectConversations(o);if(typeof e.listAllThreads!==`function`)return[];let t=new Map;for(let n of typeof e.getRecentConversations===`function`?e.getRecentConversations():[])t.set(n.id,n);let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!' + v.visible + '(r)||!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue;let i=r.id,a=t.get(i);if(a!=null){n.push(a);continue}let{createdAt:s,updatedAt:l,recencyAt:u}=' + v.timestamps + '(r);n.push(' + v.summary + '({conversationId:i,hostId:c,createdAt:s,updatedAt:l,recencyAt:u,title:' + title + ',cwd:r.cwd||null,gitInfo:r.gitInfo,historyMode:r.historyMode,modelProvider:r.modelProvider,parentThreadId:r.parentThreadId,mode:r.mode,threadStartKind:r.threadStartKind,source:r.source,threadSource:r.threadSource,threadRuntimeStatus:r.status}))}return n}';
 }
 
@@ -3203,12 +3218,47 @@ function projectHistory26581841705TitleHolds(text, v) {
   const [load] = loads, [merge] = merges, [hook] = hooks;
   const query = minifiedNestedBlock(hook, [['IN({', 1], ['queryFn:async()=>{', 1]]);
   const loop = minifiedAnchoredBlock(query, 'for(let r of await e.listAllThreads({modelProviders:null})){', 1);
-  const summary = minifiedAnchoredBlock(loop, 'n.push(bdt({', 1);
-  return load.includes('codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(bdt(s))')
+  const rows = minifiedNestedBlock(load, [['do{', 1], ['for(let r of a.data){', 1]]);
+  const loaded = minifiedAnchoredBlock(rows, 'n.push(bdt({', 1);
+  const fallback = minifiedAnchoredBlock(loop, 'n.push(bdt({', 1);
+  const loadedContract = '{thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn}';
+  const fallbackContract = '{thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + v.titleCall + ',resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:r.workspaceKind??`project`,hasUnreadTurn:r.hasUnreadTurn??!1}';
+  const producer = 'function bdt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){';
+  return countMatches(text, 'function bdt(') === 1
+    && minifiedExactFunctionScopes(text, producer).length === 1
+    && loaded === loadedContract
+    && fallback === fallbackContract
     && merge.includes('codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e)')
     && loop.includes('!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue')
     && hook.includes('codexLocalGroupsMergeProjectConversations265810(l.data,i.data,o)')
+    && !load.includes('bdt(s)');
+}
+
+function projectHistory26581841705LegacyMapperHolds(text) {
+  const v = HISTORY_265810_VARIANTS[41705];
+  const loads = minifiedExactFunctionScopes(text, 'function codexLocalGroupsLoadProjectConversations265810(e,t){');
+  const hooks = minifiedExactFunctionScopes(text, 'function qPn(e,t,n){');
+  if (loads.length !== 1 || hooks.length !== 1) return false;
+  const query = minifiedNestedBlock(hooks[0], [['IN({', 1], ['queryFn:async()=>{', 1]]);
+  const loop = minifiedAnchoredBlock(query, 'for(let r of await e.listAllThreads({modelProviders:null})){', 1);
+  const summary = minifiedAnchoredBlock(loop, 'n.push(bdt({', 1);
+  return loads[0].includes('codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(bdt(s))')
     && summary.includes('title:' + v.titleCall + ',cwd:r.cwd||null');
+}
+
+function projectHistory26581841705PreviousMapperHolds(text) {
+  const v = HISTORY_265810_VARIANTS[41705];
+  const loads = minifiedExactFunctionScopes(text, 'function codexLocalGroupsLoadProjectConversations265810(e,t){');
+  const hooks = minifiedExactFunctionScopes(text, 'function qPn(e,t,n){');
+  if (loads.length !== 1 || hooks.length !== 1) return false;
+  const rows = minifiedNestedBlock(loads[0], [['do{', 1], ['for(let r of a.data){', 1]]);
+  const loaded = minifiedAnchoredBlock(rows, 'n.push(bdt({', 1);
+  const query = minifiedNestedBlock(hooks[0], [['IN({', 1], ['queryFn:async()=>{', 1]]);
+  const loop = minifiedAnchoredBlock(query, 'for(let r of await e.listAllThreads({modelProviders:null})){', 1);
+  const fallback = minifiedAnchoredBlock(loop, 'n.push(bdt({', 1);
+  const loadedContract = '{thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn}';
+  const fallbackContract = '{thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + v.titleCall + ',resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}}}';
+  return loaded === loadedContract && fallback === fallbackContract;
 }
 
 function projectHistory265818TitleHolds(text, v) {

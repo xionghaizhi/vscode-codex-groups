@@ -8,7 +8,7 @@
 
 - 仅新增精确三段版本 `26.5818.41705` 支持，并保持未知 build/minor fail closed。
 - 以官方 clean bundle 的真实 Host、Header、Main/Power、History 调用链更新 variant 和强后置条件。
-- 将 Local Groups 提升到 `0.0.61`，补齐 locator、engine、verifier、decoy 和回归测试。
+- 将 Local Groups 提升到 `0.0.62`，补齐 locator、engine、verifier、decoy、真实 mapper、回归测试和测试临时目录强制清理门禁。
 - 固化 OpenSpec 强制执行和主线程自验收：升级适配必须先读规格、按完整矩阵留证，不把常规 Reload/UI 回归交给用户，也不再采用“用户发现一项再补一项”的交付方式。
 
 ## 非目标
