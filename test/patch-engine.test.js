@@ -407,7 +407,7 @@ function configure26581841705Features(target) {
     'function nativeState(m,t){let{isBackgroundSubagentsEnabled:s=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:s,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:{if(!o||n.tool===`wait`)break;let e={type:`multi-agent-action`,id:n.id};d.push(e);break}case`subAgentActivity`:if(!o)break;d.push({type:`subagent-activity`,id:n.id});break}}',
     'function ks(e){return String(e)}function GWn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ks(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ks(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}function WWn({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=GWn(t,a,c,n);return d}function ti(e,t){return t}var zX,BX=e((()=>{zX=ti($,(e,{get:t})=>{if(e==null)return[];let n=typeof e==`string`?e:e.conversationId,l=t(store,n),m=[],v=WWn({cachedConversations:m,conversationTurns:l,parentConversationId:n});return v})}));',
     'function Bc(e,t){return[]}function Uqr(e){let t={},n=e.activeConversationId,r=e.enabled,i=e.includeMentionItems,a=Bc(zX,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e=e=>e.parentConversationId===n,r=a.filter(e).filter(Kqr);o=i?r:[],s=r.filter(Wqr)}let c=s,l=null,u={rows:a,visibleRows:c,mentionItems:o,firstApproval:l};return u}function Wqr(e){return e.isCurrentParentTurn}function Kqr(e){return e.canInteract&&e.displayName.trim().length>0}function yer(e){let{rows:n,agentCount:r}=e,l={formatMessage(){}};if(a){if(b){if(c){let m=l.formatMessage({id:`composer.backgroundSubagents.summary`,defaultMessage:`summary`,description:`summary`},{count:r??n.length});return m}}}return null}function Iqn(e){return e}function SZr(){let {rows:st,visibleRows:Vt}=Uqr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0}),Bt=0,ht=!1,bn=!1,yt=!1,_t=!1,Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;let layout=Iqn({subagentsPanel:Cn});if(a){if(b){if(c){return Cn?(0,A6.jsx)(yer,{agentCount:Math.max(st.length,Bt),rows:st}):null}}}return null}',
-    'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var SCn=[{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],CCn={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},wCn=[];function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=bCn((t?[...SCn,CCn]:SCn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function dw(){return!0}var J8e=[];function y$(e,t){let n=e?.find(e=>e.model===t);return n==null?J8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))}',
+    'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var SCn=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:low`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`low`},{id:`gpt-5.6-sol:medium`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`medium`},{id:`gpt-5.6-sol:high`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`high`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],CCn={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},wCn=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-terra:medium`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`medium`},{id:`gpt-5.6-terra:high`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`high`},{id:`gpt-5.6-terra:xhigh`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`xhigh`}];function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=bCn((t?[...SCn,CCn]:SCn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=bCn(wCn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function dw(){return!0}var J8e=[];function y$(e,t){let n=e?.find(e=>e.model===t);return n==null?J8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))}',
     'export{Au as Jlt,Bw as Z1,zX as DS,mtt as U$,jd as Vst};',
   ].join('');
   const server = [
@@ -1539,6 +1539,72 @@ module.exports = {
         const again = engine.plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(again.errors, []);
         assert.deepStrictEqual(again.changes, []);
+      },
+    },
+    {
+      name: 'keeps the 26.5818.41705 compact model selector on the native power list',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const power = main.slice(main.indexOf('function bCn'), main.indexOf('export{'));
+        const models = [{ model: 'gpt-5.6-sol', supportedReasoningEfforts: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'].map((reasoningEffort) => ({ reasoningEffort })) }];
+        const script = `${power};console.log(JSON.stringify({compact:pCn(${JSON.stringify(models)}).map(e=>e.reasoningEffort),expanded:pCn(${JSON.stringify(models)},{includeUltraInSlider:true}).map(e=>e.reasoningEffort),menu:y$(${JSON.stringify(models)},'gpt-5.6-sol').map(e=>e.reasoningEffort)}))`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), {
+          compact: ['low', 'medium', 'high', 'xhigh'],
+          expanded: ['low', 'medium', 'high', 'xhigh', 'ultra'],
+          menu: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'],
+        });
+      },
+    },
+    {
+      name: 'migrates the previous 26.5818.41705 expanded power patch once',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const legacy = main
+          .replace('codexLocalGroupsPower265810PatchVersion=2', 'codexLocalGroupsPower265810PatchVersion=1')
+          .replace('{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],CCn=', '{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`},{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}],CCn=')
+          .replace('function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}', 'function bCn(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}')
+          .replace('bCn((t?[...SCn,CCn]:SCn).filter', 'bCn([...SCn,CCn].filter');
+        fs.writeFileSync(target.appMainPath, legacy);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [target.appMainPath]);
+        const migrated = plan.changes[0].nextText;
+        assert.ok(migrated.includes('codexLocalGroupsPower265810PatchVersion=2'));
+        assert.ok(migrated.includes('bCn((t?[...SCn,CCn]:SCn).filter'));
+        assert.ok(!migrated.includes('gpt-5.6-sol:max'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'rejects incomplete 26.5818.41705 power v2 markers',
+      run() {
+        const target = createTarget();
+        configure26581841705Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const drifts = [
+          main.replace('if(r.length>=3)return r;', 'r.push({reasoningEffort:`max`});if(r.length>=3)return r;'),
+          main.replace('var codexLocalGroupsPower265810PatchVersion=2;', 'var codexLocalGroupsPower265810PatchVersion=1;var codexLocalGroupsPower265810PatchVersion=2;'),
+        ];
+        for (const drift of drifts) {
+          fs.writeFileSync(target.appMainPath, drift);
+          const plan = engine.plan(target, { version: 1, conversations: {} });
+          assert.ok(plan.errors.includes('Codex power 26.5818.41705: 补丁标记不完整'));
+          assert.deepStrictEqual(plan.changes, []);
+        }
       },
     },
     {

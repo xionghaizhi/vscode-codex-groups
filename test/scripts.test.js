@@ -190,7 +190,7 @@ const openedTitle26581841705Header = [
   'o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o;return o}',
 ].join('');
 const dropdownTitle26581841705Header = 'var An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),{item:r,isActive:i,onClose:a,onActiveArchiveStart:o}=e;switch(r.kind){case`local`:{let e,n;return t[17]!==i||t[18]!==r.conversation.hostId||t[19]!==r.conversation.id||t[20]!==o||t[21]!==a||t[22]!==e||t[24]!==r.conversation.title?(n=(0,Z.jsx)(xe,{conversationId:r.conversation.id,hostId:r.conversation.hostId,threadSummary:r.conversation,titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0,isActive:i,metaContent:e,onClick:a,onActiveArchiveStart:o}),t[17]=i,t[18]=r.conversation.hostId,t[19]=r.conversation.id,t[20]=o,t[21]=a,t[22]=e,t[24]=r.conversation.title,t[23]=n):n=t[23],n}}});';
-const power26581841705Bundle = 'function bCn(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model)?[{...e,powerSettingIndex:n}]:[])}function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=bCn([...SCn,CCn].filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function y$(e,t){let n=e?.find(e=>e.model===t),r=n==null?J8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
+const power26581841705Bundle = 'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=bCn((t?[...SCn,CCn]:SCn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=bCn(wCn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function y$(e,t){let n=e?.find(e=>e.model===t),r=n==null?J8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
 const historyTitle26581841705Call = '(t=>{let n=vM(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=$C(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=vM(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:xA(i,60)})(r)';
 const projectHistory26581841705StateDbMethod = 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==PT}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:a},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}';
 const projectHistory26581841705NativeMethod = 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:CE,useStateDbOnly:this.params.hostId!==PT},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(ddt)}}';
@@ -305,6 +305,7 @@ module.exports = {
         assert.ok(verify.includes('codexLocalGroupsProjectHistory265810PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsCodexUi265810PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsPower265810PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsPower265810PatchVersion=2'));
         assert.ok(verify.includes('timeoutMs:12e4})},12e4)'));
         assert.ok(verify.includes('collabAgentToolCall'));
         assert.ok(verify.includes('multi-agent-action'));
@@ -661,8 +662,16 @@ module.exports = {
       run() {
         const title = dropdownTitle26581841705Header.replace('titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0', 'titleOverride:void 0') + 'function nested(){let n=(0,Z.jsx)(xe,{threadSummary:r.conversation,titleOverride:codexLocalGroupsLocalTitle(r)?(0,Z.jsx)(Z.Fragment,{children:r.conversation.title}):void 0});return n}';
         assert.throws(() => verifyHeaderTitleOverride265818(writeHeader(title), '41705'), /下拉会话标题/);
-        const power = power26581841705Bundle.replace('e.reasoningEffort===`max`||e.reasoningEffort===`ultra`', 'e.reasoningEffort===`broken`') + 'function nested(){function bCn(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model)?[{...e,powerSettingIndex:n}]:[])}}';
-        assert.throws(() => verifyPower265818(writeBundle(power, 'power.js'), '41705'), /Sol Max Ultra/);
+        const forcedSlider = power26581841705Bundle.replace('(t?[...SCn,CCn]:SCn)', '[...SCn,CCn]');
+        assert.throws(() => verifyPower265818(writeBundle(forcedSlider, 'power.js'), '41705'), /Sol Max Ultra/);
+        const forcedTail = power26581841705Bundle.replace('if(r.length>=3)return r;', 'r.push({reasoningEffort:`max`});if(r.length>=3)return r;');
+        assert.throws(() => verifyPower265818(writeBundle(forcedTail, 'power.js'), '41705'), /Sol Max Ultra/);
+        const sliderDecoy = forcedSlider + 'function nested(){' + power26581841705Bundle.slice(power26581841705Bundle.indexOf('function pCn'), power26581841705Bundle.indexOf('function y$')) + '}';
+        assert.throws(() => verifyPower265818(writeBundle(sliderDecoy, 'power.js'), '41705'), /Sol Reasoning menu/);
+        const forcedFilter = power26581841705Bundle.replace('return e.flatMap((e,n)=>t?.some(', 'return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(');
+        assert.throws(() => verifyPower265818(writeBundle(forcedFilter, 'power.js'), '41705'), /Sol Max Ultra/);
+        const staticMax = power26581841705Bundle + 'var decoy={id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}';
+        assert.throws(() => verifyPower265818(writeBundle(staticMax, 'power.js'), '41705'), /Sol Max Ultra/);
         const slowHistory = projectHistory26581841705Bundle.replace('background:!0,useStateDbOnly:!0', 'background:!0');
         assert.throws(() => verifyProjectHistory265818(writeBundle(slowHistory, 'server.js'), '41705'), /state DB/);
         const nativeHistory = projectHistory26581841705Bundle.replace('useStateDbOnly:a}', 'useStateDbOnly:this.params.hostId!==PT}');

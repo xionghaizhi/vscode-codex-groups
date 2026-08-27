@@ -25,6 +25,7 @@ engine 与 external verifier 均使用既有 minified scope/depth helper，绑�
 - 项目历史必须先用唯一 `listAllThreads/listProjectConversations → listArchivedThreads` 相邻成员定位真实 Store class，再绑定该 class depth 1 的 `listRecentThreads` 参数和请求对象：Local Groups 分页每页传 `useStateDbOnly: true`；方法未显式传参时继续使用上游 `hostId !== PT`，不得全局强制 state DB。comment、template string 或 fake class 中的完整方法都不得通过。
 - 41705 的 `bdt` 输入是 hydration 形态 `{ thread, hostId, conversationId, turns, threadTitle, ... }`，不是 `ThreadSummary`。load 必须把原始 thread 与 summary metadata 组合后传入，fallback 必须把 `listAllThreads` 的原始 thread 传入；fixture、engine 和 verifier 都绑定真实 producer 签名及两处 consumer，禁止用接受任意对象的假 mapper 掩盖契约错误。
 - 真实压缩 bundle 的全文件 brace-depth 扫描会在 `bdt` 位置得到 depth `-1`，不能据此断言 producer 不是顶层。41705 必须改用“同名 producer 仅一个 + 完整签名唯一 scope”门禁；真实 producer 漂移后追加 nested/string 假 producer仍必须拒绝。
+- 41705 app-server 的 `model/list` 已原生返回 Sol `max/ultra`。紧凑模型按钮必须保留上游 `pCn` 的 `includeUltraInSlider` 分支和 `bCn` metadata 过滤，不得静态插入 Max、强制 Ultra 或绕过模型能力；`y$` 展开菜单继续兜底补齐 Max/Ultra。旧 Power marker v1 必须原位迁移为 v2，并恢复原生紧凑列表。
 - clean、旧 marker 原位迁移和 external verifier 都必须拒绝缺少上述任一端的补丁，防止 helper 传参被静默忽略。
 - direct-depth/去 literal 只用于 41705 新 variant；不得改变 5814、31338 等旧 build 的 helper 行为。
 
@@ -36,6 +37,18 @@ engine 与 external verifier 均使用既有 minified scope/depth helper，绑�
 - `app routes mounted/ready` 只证明路由启动，不能证明最近会话可用。主线程必须单独记录下拉从打开到项目行出现、spinner 结束和行可点击；无法直接驱动 UI 时，必须用相同 app-server、相同完整数据集的全分页耗时、ID 集合与生成 Header/Server 契约作为确定性等价证据。
 - 2026-08-24 的失败证明“全分页耗时 + ID 集合 + 生成文本”不足以替代 mapper runtime：旧 fixture 的 `bdt(e)` 错误接受 summary，真实 41705 `bdt({thread:e,...})` 会读取 `undefined.createdAt`，React Query 再把错误显示成 `No chats yet`。以后确定性等价必须覆盖真实 producer/consumer 参数和非空 UI conversation 输出。
 - 最终 live runtime 再次从真实 bundle 抽取 mapper 并执行当前 app-server 数据：173 条 thread 中当前 root 匹配 16 条，产出 16 条 conversation，且保留标题、host、workspace kind 与未读状态；该门禁直接覆盖用户看到的空列表症状。
+
+## 模型选择器根因与验收
+
+- 2026-08-27 点击紧凑模型按钮后，Host 日志在同一秒连续记录 24 次 `ResizeObserver loop completed with undelivered notifications`，随后 Webview/Extension Host 重建；故障真实存在。
+- 旧 Power 补丁把 `pCn((t?[...SCn,CCn]:SCn))` 改为无条件 `[...SCn,CCn]`，同时静态加入 Max 并让 `bCn` 绕过 metadata，导致紧凑按钮从上游受控列表扩成六档。41705 已不需要这三处覆盖，因为真实 `model/list` 自带 Max/Ultra。
+- 自动验收必须执行 patched `pCn`：`includeUltraInSlider=false` 不出现 Max/Ultra，`true` 只按上游加入 Ultra；展开 `y$` 菜单仍包含 Max/Ultra。external verifier 同时拒绝强制 slider、强制 filter、静态 Max 和 nested decoy。
+
+### 升级遗漏结论
+
+- 这是 41705 升级适配遗漏，不是无关的上游随机崩溃。升级时复用了旧 build 的 `patchCodexPower265810` 三处强制逻辑，却没有根据 41705 clean bundle 和真实 `model/list` 重新判断这些覆盖是否仍有必要。
+- 当时的 41705 fixture 简化了真实 `SCn/wCn/pCn`，external verifier 又明确要求强制 slider、强制 metadata bypass 和静态 Max，导致实现、fixture、verifier 对同一错误契约共同假绿；`plan 0`、语法检查和旧测试因此都没有暴露问题。
+- 后续 Codex 升级只要 Power/model selector 任一符号或数据源变化，必须同时核对 clean 函数完整 body、app-server `model/list`、紧凑/展开两种运行输出和旧 marker 迁移。禁止只换压缩符号后沿用旧补丁，也禁止用简化 fixture 代替真实 fallback 分支。
 
 ## OpenSpec 执行与验收责任
 

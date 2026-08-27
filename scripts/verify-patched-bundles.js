@@ -44,7 +44,7 @@ const CODEX_265818_VERIFIER_VARIANTS = {
     projectRowsView: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N,activeId:v,onClose:i,row:An,onActiveArchiveStart:u}',
     messengerImport: 'Jlt as codexLocalGroupsMessengerImport',
     executionTargetImport: 'Z1 as codexUseExecutionTarget',
-    powerUltraCall: 'bCn([...SCn,CCn].filter',
+    powerUltraCall: 'bCn((t?[...SCn,CCn]:SCn).filter',
   },
 };
 const HISTORY_265818_TITLE_CALL = '(t=>{let n=$j(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=sw(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=$j(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:sA(i,60)})(r)';
@@ -413,8 +413,11 @@ function main() {
     assertNotContains(target.appServerManagerSignalsPath, 'Number.MAX_SAFE_INTEGER');
     assertContains(target.appMainPath, 'codexLocalGroupsCodexUi265810PatchVersion=1');
     assertContains(target.appMainPath, 'r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)');
-    assertContains(target.appStatsigPath, 'codexLocalGroupsPower265810PatchVersion=1');
-    assertContains(target.appStatsigPath, 'gpt-5.6-sol:max');
+    assertContains(target.appStatsigPath, is265818 && codex265818Build === '41705' ? 'codexLocalGroupsPower265810PatchVersion=2' : 'codexLocalGroupsPower265810PatchVersion=1');
+    if (is265818 && codex265818Build === '41705') {
+      assertNotContains(target.appStatsigPath, 'codexLocalGroupsPower265810PatchVersion=1');
+      assertNotContains(target.appStatsigPath, '{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}');
+    } else assertContains(target.appStatsigPath, 'gpt-5.6-sol:max');
     assertContains(target.appStatsigPath, 'gpt-5.6-sol:ultra');
     assertContains(target.appStatsigPath, v26581x.powerUltraCall);
     assertContains(target.appStatsigPath, 'r.some(e=>e.reasoningEffort===`max`)');
@@ -835,10 +838,12 @@ function verifyPower265818(statsigPath, build = '31338') {
     const menu = menus[0];
     const direct = minifiedCodeAtDepth(menu, 1);
     const slider = minifiedCodeAtDepth(sliders[0].slice(sliders[0].indexOf('){') + 1), 1);
-    const options = 'e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)';
+    const nativeSlider = 'let r=bCn((t?[...SCn,CCn]:SCn).filter(()=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=bCn(wCn.filter(()=>!n||e!==`xhigh`),e);return i.length>=3?i:[]';
+    const nativeFilter = 'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}';
+    const staticMax = '{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}';
     const max = 'r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`})';
     const ultra = 'r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})';
-    if (!slider.startsWith('let r=bCn([...SCn,CCn].filter(') || !filter.includes(options) || !direct.includes('let n=e?.find(e=>e.model===t),r=n==null?J8e.map') || !direct.includes('n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))') || !direct.includes('return t===`gpt-5.6-sol`&&') || !menu.includes(max) || !menu.includes(ultra) || !direct.endsWith(',r')) {
+    if (slider !== nativeSlider || filter !== nativeFilter || text.includes(staticMax) || !direct.includes('let n=e?.find(e=>e.model===t),r=n==null?J8e.map') || !direct.includes('n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))') || !direct.includes('return t===`gpt-5.6-sol`&&') || !menu.includes(max) || !menu.includes(ultra) || !direct.endsWith(',r')) {
       throw new Error(`缺少补丁契约：${statsigPath} 26.5818.41705 Sol Max Ultra`);
     }
     return;

@@ -9,6 +9,7 @@
 - [x] 7. 主线程安装 live Codex/Local Groups，重新验证 plan/apply/plan 0、verifier，并核对 config 只读门禁。
 - [x] 7.1 复现并修复 41705 项目历史每页重复扫描 JSONL 导致的最近会话慢加载，补旧 marker 迁移、native 默认值和 external verifier 回归。
 - [x] 7.2 修复 41705 项目历史把 `ThreadSummary` 误传给真实 `bdt({thread,...})` 导致 query 失败并显示 `No chats yet`；补真实 mapper fixture、load/fallback/producer 门禁与旧 marker 迁移。
+- [ ] 7.3 修复 41705 紧凑模型按钮强制展开 Max/Ultra 导致 ResizeObserver 崩溃；恢复原生 `pCn/bCn/SCn`，仅保留 `y$` 展开菜单兜底，并迁移 Power marker v1 到 v2。
 - [x] 8. 主线程重新完成 agent-owned release acceptance；真实 mapper runtime 已产生非空项目 conversation，live plan/verifier、原生行输出字段与点击组件契约均通过确定性等价门禁。
 - [ ] 9. 实现测试与升级工作流的全量临时产物所有权登记和 finally 强制清理，覆盖 `tempDir()`、direct `mkdtempSync()`、official/rollback/VSIX/npm-cache/review/probe/log/helper、pass/fail/no-match/throw；补运行前后零新增产物回归，禁止只清理用户点名的前缀。
 
@@ -32,6 +33,12 @@
 - 最终 live runtime：同一真实 bundle 与 app-server 当前返回 173 条 thread，当前 root 匹配 16 条并成功产出 16 条含 `id/cwd/title/hostId/workspaceKind/hasUnreadTurn` 的 conversation；样例标题与现有历史一致。该非空输出、原生 row 组件契约和点击路径测试共同作为本次确定性 UI 等价证据。
 - 最终 Review：mapper fallback 字段、producer decoy、runtime load/fallback 三项复查，以及真实 bundle producer-scope 调整复查，均为 Critical 0、Important 0、Minor 0。
 - Local Groups `0.0.62` active；最终 VSIX `/tmp/vscode-codex-groups-0.0.62-hotfix-20260824173101.vsix`，SHA-256 `cf6cdd1ceed0ac35c67b4f1f275e7d1720e164679df5c6fe3d1102bc049a9675`。安装目录 patchEngine/verifier 与 worktree 哈希一致，安装目录 plan 0/verifier 通过。config SHA-256 仍为 `d064a25eed2c56360ebd9a906dec04f4e58280b32fa3ee1dae932888aeef3005`。
+- 模型选择器复现：点击后同一 Host 在 5 秒内连续记录 24 次 `ResizeObserver loop completed with undelivered notifications`，随后 Webview/Extension Host 重建；旧 Power v1 的紧凑 `pCn` 实测输出 `xhigh/max/ultra`，失败回归先红后绿。
+- 升级遗漏结论：41705 适配只更新了 Power 压缩符号，未重新核对 clean `SCn/wCn/pCn` 和真实 `model/list`；简化 fixture 与旧 verifier 又把强制 slider、metadata bypass、静态 Max 固化成错误验收标准，形成共同假绿。后续升级门禁已补入 `design.md`。
+- 模型选择器修复：41705 Power v1 已原位迁移到 v2；live bundle 为 native `bCn`、native 完整 `pCn`、静态 Max 0、展开 `y$` Max/Ultra 各 1。repo 与安装目录均为 plan 0，external verifier 和五个 bundle 语法检查通过；迁移备份为 `.codex-patches/app-initial-DqGfhkM8.js.before-codex-local-groups-20260827082316961-502401.bak`。
+- 模型选择器自动化：`npm test` exit `0`（`328 tests`）；compile、lint、`git diff --check`、OpenSpec strict 通过。测试专用 `TMPDIR` 在命令结束后自动回收。
+- 模型选择器 Review：首次发现完整 `pCn` 尾部和双 marker 可假绿；补完整 direct body、v1=0 门禁及 forced slider/tail/filter/static Max/nested decoy 负例后，复查 Critical 0、Important 0、Minor 0。
+- 模型选择器 live runtime：磁盘补丁已生效，当前 Webview 仍需 Reload 才会加载新 bundle；Reload 后点击回归完成前，任务 7.3 保持未完成。
 - OpenSpec 执行责任：后续升级必须先按本 change 与升级手册完整矩阵调研、实现和自验收；常规 Reload/UI 回归由主线程负责，禁止以 routes ready、ID 集合或宽松 fixture 代替真实 producer/consumer 与非空列表门禁，也禁止把逐项试错交给用户。
 - 临时目录根因：`test/test-utils.js::tempDir()` 只创建不删除，`test/run-tests.js` 没有测试结束清理；完整测试约产生 300 个目录，重复运行可累积到数万个。抽样 `codex-patch` 目录约 48K，另有 `/tmp/codex-upgrade-*` 约 4.21G；总占用不能只按单目录样本推断。任务 9 完成前，不得再把测试通过或升级适配标记为最终完成。
 - 2026-08-24 手工清理：删除本仓库测试前缀目录 75,796 个（`codex-meta` 7,324、`codex-config` 329、`codex-patch` 49,159、`codex-locator` 3,778、`codex-status` 543、`codex-manage` 903、`codex-groups-verify` 13,760），另删除 `codex-upgrade` 4 个、`clg-41705` 2 个及 80 个已确认归属本项目的诊断/VSIX/日志残件；删除错误为 0。目标前缀复查均为 0，`/tmp` 从 99%（可用 600M）降至 85%（可用 5.7G），inode 使用率从 57% 降至 7%。该手工结果不替代任务 9 的自动 finally 清理。

@@ -2186,8 +2186,9 @@ function composer265814ScopeHolds(text, variant) {
 }
 
 function patchCodexPower265810(text, context) {
-  const marker = 'codexLocalGroupsPower265810PatchVersion=1';
   const v = POWER_265810_VARIANTS[codex265810Build(context)];
+  if (context.codexBuild === '41705') return patchCodexPower26581841705(text, context, v);
+  const marker = 'codexLocalGroupsPower265810PatchVersion=1';
   const label = codex26581xLabel(context);
   if (text.includes(marker)) {
     if (!codexPower265810PostconditionsHold(text, context.codexBuild)) context.errors.push(`Codex power ${label}: 补丁标记不完整`);
@@ -2205,6 +2206,34 @@ function patchCodexPower265810(text, context) {
   return next;
 }
 
+function patchCodexPower26581841705(text, context, v) {
+  const marker = 'codexLocalGroupsPower265810PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsPower265810PatchVersion=1';
+  const nativeMax = '{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],' + v.ultraObject + '=';
+  const legacyMax = '{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`},{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}],' + v.ultraObject + '=';
+  const nativeFilter = 'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}';
+  const legacyFilter = 'function bCn(e,t){return e.flatMap((e,n)=>e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)||t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}';
+  const nativeSlider = 'bCn((t?[...SCn,CCn]:SCn).filter';
+  const legacySlider = 'bCn([...SCn,CCn].filter';
+  if (text.includes(marker)) {
+    if (!codexPower265810PostconditionsHold(text, '41705')) context.errors.push('Codex power 26.5818.41705: 补丁标记不完整');
+    return text;
+  }
+  if (text.includes(legacyMarker)) {
+    if (!codexPower26581841705LegacyPostconditionsHold(text)) {
+      context.errors.push('Codex power 26.5818.41705: 旧补丁标记不完整');
+      return text;
+    }
+    const migrated = text.replace(legacyMax, nativeMax).replace(legacyFilter, nativeFilter).replace(legacySlider, nativeSlider).replace(legacyMarker, marker);
+    if (!codexPower265810PostconditionsHold(migrated, '41705')) context.errors.push('Codex power 26.5818.41705: 旧补丁迁移不完整');
+    return migrated;
+  }
+  let next = patchCodexReasoningMenu265810(text, context, v);
+  next = replaceOnce(next, 'function pCn(e,{includeUltraInSlider:', `var ${marker};function pCn(e,{includeUltraInSlider:`, context, 'Codex power 26.5818.41705 marker');
+  if (!codexPower265810PostconditionsHold(next, '41705')) context.errors.push('Codex power 26.5818.41705: 补丁后置条件不完整');
+  return next;
+}
+
 function patchCodexReasoningMenu265810(text, context, v) {
   const fallback = v.menuFallback ?? 'e4e';
   const original = 'function ' + v.menuFn + '(e,t){let n=e?.find(e=>e.model===t);return n==null?' + fallback + '.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>' + v.menuFilter + '(e.reasoningEffort))}';
@@ -2215,6 +2244,16 @@ function patchCodexReasoningMenu265810(text, context, v) {
 function codexPower265810PostconditionsHold(text, build) {
   const v = POWER_265810_VARIANTS[build];
   if (!v) return false;
+  if (build === '41705') {
+    return countMatches(text, 'codexLocalGroupsPower265810PatchVersion=2') === 1
+      && countMatches(text, 'codexLocalGroupsPower265810PatchVersion=1') === 0
+      && countMatches(text, '{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}') === 0
+      && countMatches(text, '{id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`}') === 1
+      && text.includes('bCn((t?[...SCn,CCn]:SCn).filter')
+      && text.includes('r.some(e=>e.reasoningEffort===`max`)')
+      && text.includes('r.some(e=>e.reasoningEffort===`ultra`)')
+      && codexPower26581841705ScopesHold(text);
+  }
   const scoped = build !== '31338' && build !== '41705' || codexPower265818ScopesHold(text, build);
   return countMatches(text, 'codexLocalGroupsPower265810PatchVersion=1') === 1
     && text.includes('gpt-5.6-sol:max')
@@ -2256,14 +2295,29 @@ function codexPower26581841705ScopesHold(text) {
   const menu = menus[0];
   const directMenu = minifiedCodeAtDepth(menu, 1);
   const sliderBody = sliders[0].slice(sliders[0].indexOf('){') + 1);
-  return minifiedCodeAtDepth(sliderBody, 1).startsWith('let r=bCn([...SCn,CCn].filter(')
-    && filter.includes('e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)')
+  const slider = 'let r=bCn((t?[...SCn,CCn]:SCn).filter(()=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=bCn(wCn.filter(()=>!n||e!==`xhigh`),e);return i.length>=3?i:[]';
+  return minifiedCodeAtDepth(sliderBody, 1) === slider
+    && filter === 'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}'
     && directMenu.includes('let n=e?.find(e=>e.model===t),r=n==null?J8e.map')
     && directMenu.includes('n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))')
     && directMenu.includes('return t===`gpt-5.6-sol`&&')
     && menu.includes('r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`})')
     && menu.includes('r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})')
     && directMenu.endsWith(',r');
+}
+
+function codexPower26581841705LegacyPostconditionsHold(text) {
+  const max = '{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`max`}';
+  const filter = minifiedTopLevelFunctionScope(text, 'bCn');
+  const sliders = minifiedExactFunctionScopes(text, 'function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){');
+  const slider = 'let r=bCn([...SCn,CCn].filter(()=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=bCn(wCn.filter(()=>!n||e!==`xhigh`),e);return i.length>=3?i:[]';
+  return countMatches(text, 'codexLocalGroupsPower265810PatchVersion=1') === 1
+    && countMatches(text, max) === 1
+    && sliders.length === 1
+    && minifiedCodeAtDepth(sliders[0].slice(sliders[0].indexOf('){') + 1), 1) === slider
+    && filter.includes('e.model===`gpt-5.6-sol`&&(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`)')
+    && text.includes('r.some(e=>e.reasoningEffort===`max`)')
+    && text.includes('r.some(e=>e.reasoningEffort===`ultra`)');
 }
 
 function composerSubagentPanel265803PostconditionsHold(text) {
