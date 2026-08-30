@@ -2,7 +2,7 @@
   "name": "vscode-codex-groups",
   "displayName": "Codex Local Groups",
   "description": "Local Codex conversation titles and requirement groups with native-history-safe patching.",
-  "version": "0.0.62",
+  "version": "0.0.63",
   "publisher": "xinghezhiyuan",
   "license": "MIT",
   "engines": {
@@ -102,6 +102,7 @@
     "compile": "node scripts/check-js.js",
     "lint": "node scripts/lint.js",
     "test": "node test/run-tests.js",
+    "with-upgrade-workspace": "node scripts/with-upgrade-workspace.js --",
     "apply-patches": "node scripts/apply-patches.js",
     "plan-patches": "node scripts/plan-patches.js",
     "verify-patched-bundles": "node scripts/verify-patched-bundles.js",

@@ -72,7 +72,7 @@ const header265730Text = [
 ].join('');
 const split265730AppMainText = 'class Messenger{static getInstance(){return new Messenger}dispatchMessage(){}dispatchHostMessage(){}}var pu=Messenger.getInstance();function useMessenger(){pu.dispatchMessage(`native`,{}),pu.dispatchHostMessage({type:`native`})}function XS(e){return{activeWorkspaceRoot:`/project`,isActiveWorkspaceRootLoading:!1}}function IRe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function nativeState(m,t){let{isBackgroundSubagentsEnabled:o=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:o,type:`subagent-activity`,w,n}}var app=`conversation.title supportedReasoningEfforts defaultReasoningEffort safeGet makeRequest OAI-Language title:t(Bi,e) turns:t(Ote,e)`;export{pu as N$,XS as wB};';
 const split265730AppServerText = 'var stats=`networkConfig:{api:j,logEventUrl:k,sdkExceptionUrl:m,networkOverrideFunc:n}`;class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return vIe({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads(){return{data:[],nextCursor:null}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return this.threadStore.listArchivedThreads()}}function FJe(){return IJe(`recent-conversations`)}function cQ(e,t){let n=e?.find(e=>e.model===t);return n==null?pYe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>JD(e.reasoningEffort))}function mOt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=vOt((t?[...Dq,bOt]:Dq).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return r}function vOt(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var Dq=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],bOt={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`};var subagents={isBackgroundSubagentsEnabled:!0,subagentsPanel:!0};var recentConversationsSortKey=1,threadList=`thread/list`;export{Store as Store};';
-const webviewTimeout265730Text = 'var JP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;start(){this.disposed||this.timeout!=null||(this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout()},3e4))}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};';
+const webviewTimeout265730Text = 'var JP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;start(){this.disposed||this.timeout!=null||(this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout()},3e4))}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};var SCe=require("node:child_process");';
 const header265803Text = [
   'import{$D as r}from"./app-initial-server265803.js";import{$1 as m,LV as x}from"./app-initial-main265803.js";',
   'function Mn(e){let l=ie(),{authMethod:u}=te(),d=B(),f=se(Ln),p=se(Rn),{data:m}=r(),h=Ve(),g=null;return m}',
@@ -160,7 +160,7 @@ function configure265803Features(target, version = '26.5803.41515', appMainText 
   fs.writeFileSync(path.join(assets, 'app-initial-server265803.js'), split265803AppServerText);
 }
 
-const webviewTimeout265810Text = 'var jP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;receivedWebviewMessage=!1;start(){if(this.disposed||this.timeout!=null)return;let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}markMessageReceived(){this.receivedWebviewMessage=!0}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};';
+const webviewTimeout265810Text = 'var jP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;receivedWebviewMessage=!1;start(){if(this.disposed||this.timeout!=null)return;let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}markMessageReceived(){this.receivedWebviewMessage=!0}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};var SCe=require("node:child_process");';
 const header26581041047Text = [
   'import{KZ as x,Oat as m}from"./app-initial-main265810.js";',
   'function Mn(e){let s=a===void 0||a,c=g(),{authMethod:l}=m(),u=n(),d=E(Ln),f=E(Rn),{data:p}=j(),h=ke(),z=null;return p}',
@@ -247,7 +247,7 @@ const split26581052044AppServerText = [
   'function Qon({appServerRegistry:e,onStoreChange:t,subscribeToManager:n}){return()=>{}}',
   'var PV={useEffect(){}};var recentConversationsSortKey=1,threadList=`thread/list`;',
 ].join('');
-const webviewTimeout265814Text = 'var YI=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;receivedWebviewMessage=!1;start(){if(this.disposed||this.timeout!=null)return;let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}markMessageReceived(){this.receivedWebviewMessage=!0}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};';
+const webviewTimeout265814Text = 'var YI=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;receivedWebviewMessage=!1;start(){if(this.disposed||this.timeout!=null)return;let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}markMessageReceived(){this.receivedWebviewMessage=!0}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};var SCe=require("node:child_process");';
 const header26581441407Text = [
   'import{U$ as x,Vst as m}from"./app-initial-main265814.js";',
   'function Mn(e){let s=o===void 0||o,c=y(),{authMethod:l}=i(),u=P(),d=v(Ln),{data:f}=n(),p=it(),z=null;return f}',
@@ -326,7 +326,7 @@ function configure265814Features(target) {
 }
 
 
-const webviewTimeout265818Text = 'var QP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;receivedWebviewMessage=!1;start(){if(this.disposed||this.timeout!=null)return;let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}markMessageReceived(){this.receivedWebviewMessage=!0}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};';
+const webviewTimeout265818Text = 'var QP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;receivedWebviewMessage=!1;start(){if(this.disposed||this.timeout!=null)return;let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}markMessageReceived(){this.receivedWebviewMessage=!0}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};var SCe=require("node:child_process");';
 const header26581831338Text = [
   'import{U$ as decoyExec,Vst as decoyMsg}from"./app-initial-main265818.js";',
   'function Mn(e){let s=i===void 0||i,c=_(),{authMethod:l}=ee(),u=w(),d=N(Ln),{data:f}=a(),p=st(),z=null;return f}',
@@ -405,6 +405,7 @@ function configure26581841705Features(target) {
     'function F7e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
     'function K7e(){let o={},_=null,T=null,M=T==null?o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null;return M}function X7e(){let w={profile:null},o={setQueryData(){}},n={},a=null,c=null,oe=async(e,t)=>{try{o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}));let s=await Ce(a,c).setDefaultModelConfig(e,t,w.profile)}catch{}};return oe}',
     'function nativeState(m,t){let{isBackgroundSubagentsEnabled:s=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:s,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:{if(!o||n.tool===`wait`)break;let e={type:`multi-agent-action`,id:n.id};d.push(e);break}case`subAgentActivity`:if(!o)break;d.push({type:`subagent-activity`,id:n.id});break}}',
+    'function jbr(e){return[...e]}',
     'function ks(e){return String(e)}function GWn(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ks(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ks(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}function WWn({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=GWn(t,a,c,n);return d}function ti(e,t){return t}var zX,BX=e((()=>{zX=ti($,(e,{get:t})=>{if(e==null)return[];let n=typeof e==`string`?e:e.conversationId,l=t(store,n),m=[],v=WWn({cachedConversations:m,conversationTurns:l,parentConversationId:n});return v})}));',
     'function Bc(e,t){return[]}function Uqr(e){let t={},n=e.activeConversationId,r=e.enabled,i=e.includeMentionItems,a=Bc(zX,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e=e=>e.parentConversationId===n,r=a.filter(e).filter(Kqr);o=i?r:[],s=r.filter(Wqr)}let c=s,l=null,u={rows:a,visibleRows:c,mentionItems:o,firstApproval:l};return u}function Wqr(e){return e.isCurrentParentTurn}function Kqr(e){return e.canInteract&&e.displayName.trim().length>0}function yer(e){let{rows:n,agentCount:r}=e,l={formatMessage(){}};if(a){if(b){if(c){let m=l.formatMessage({id:`composer.backgroundSubagents.summary`,defaultMessage:`summary`,description:`summary`},{count:r??n.length});return m}}}return null}function Iqn(e){return e}function SZr(){let {rows:st,visibleRows:Vt}=Uqr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0}),Bt=0,ht=!1,bn=!1,yt=!1,_t=!1,Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;let layout=Iqn({subagentsPanel:Cn});if(a){if(b){if(c){return Cn?(0,A6.jsx)(yer,{agentCount:Math.max(st.length,Bt),rows:st}):null}}}return null}',
     'function bCn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var SCn=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-sol:low`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`low`},{id:`gpt-5.6-sol:medium`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`medium`},{id:`gpt-5.6-sol:high`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`high`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],CCn={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},wCn=[{id:`gpt-5.6-terra:low`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`low`},{id:`gpt-5.6-terra:medium`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`medium`},{id:`gpt-5.6-terra:high`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`high`},{id:`gpt-5.6-terra:xhigh`,model:`gpt-5.6-terra`,modelLabel:`5.6 Terra`,reasoningEffort:`xhigh`}];function pCn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=bCn((t?[...SCn,CCn]:SCn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=bCn(wCn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function dw(){return!0}var J8e=[];function y$(e,t){let n=e?.find(e=>e.model===t);return n==null?J8e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>dw(e.reasoningEffort))}',
@@ -421,6 +422,47 @@ function configure26581841705Features(target) {
   fs.writeFileSync(path.join(assets, 'app-initial-main265818.js'), main);
   fs.writeFileSync(path.join(assets, 'app-initial-server265818.js'), server);
 }
+
+const webviewTimeout265825Text = 'var yP=class{constructor(e){this.onTimeout=e}timeout;disposed=!1;receivedWebviewMessage=!1;start(){if(this.disposed||this.timeout!=null)return;let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}markMessageReceived(){this.receivedWebviewMessage=!0}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){this.disposed=!0,this.timeout!=null&&(clearTimeout(this.timeout),this.timeout=void 0)}};var SCe=require("node:child_process");';
+
+function configure265825Features(target) {
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5825.32147';
+  target.appMainPath = path.join(assets, 'app-initial-DraLrsJK.js');
+  target.appStatsigPath = target.appMainPath;
+  target.appServerManagerSignalsPath = path.join(assets, 'app-initial-DOdr0yAB.js');
+  const header = [
+    'import{Xu as _pt,BS as w8}from"./app-initial-DraLrsJK.js";',
+    'function bn(e){let t=(0,Tn.c)(34),{cloudtasksQuery:n,localConversations:r,onClose:o,autoFocusSearch:s,showFilters:c}=e,l=s!==void 0&&s,d=c===void 0||c,f=E(We),p=u(),m=qe(),{authMethod:h}=a(),g=ee(It)??`recent`,_=ee(Lt)??null,v=d?g:`recent`,y=null,w=null;let D=r.filter(T),O=mn(n.data,r,w),L=O,H=L.map(e=>(0,Z.jsx)(On,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:o,onActiveArchiveStart:m},e.key));return H}',
+    'function An(e){let t=(0,Nn.c)(61),n;e[0]===e?n=e[1]:(n=e===void 0?{}:e,e[0]=e,e[1]=n);let{label:r,showFilters:o}=n,s=o===void 0||o,c=u(),{authMethod:l}=a(),d=S(),p=ee(Fn),{data:m}=M(),h=Pe(),g=void 0;return m}',
+    'function xn(e){return e.kind===`remote`}function Sn(e){return e}',
+    'var On=(0,En.memo)(function(e){let t=(0,Tn.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(Ze,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
+    'const nativeMenu=(0,Q.jsx)(m,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:K,open:g,onOpenChange:_,children:ce});',
+    'const nativeScrollHeight={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`},recentMenuHeight={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
+    'function Ln(e){let t=(0,Hn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e,l=n!==void 0&&n;return o}function Vn(){}',
+  ].join('');
+  const main = [
+    'var Yu,Xu,Zu=e((()=>{Yu=class e{static getInstance(){return new e}dispatchMessage(){}dispatchHostMessage(){}},Xu=Yu.getInstance(),aSe((e,t)=>{Xu.dispatchMessage(e,t)}),Xu.dispatchHostMessage({type:`native`})}));function BS(e){let t=e;return{activeWorkspaceRoot:t,isActiveWorkspaceRootLoading:!1,hostConfig:null,cwd:t,hostId:`local`}}',
+    'function t4e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function f4e(){let g={model_reasoning_effort:null};return g?.model_reasoning_effort??null}function g4e(){let o={setQueryData(){}},i={},a=null,c=null,C={profile:null},oe=async(e,t,n)=>{try{o.setQueryData(i,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}));let r=await Bu(a,c).setDefaultModelConfig(e,t,C.profile);return r}catch{return!1}};return oe}',
+    'function nativeState(m,t){let{isBackgroundSubagentsEnabled:s=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:s,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:{if(!o||n.tool===`wait`)break;let e={type:`multi-agent-action`,id:n.id};d.push(e);break}case`subAgentActivity`:if(!o)break;d.push({type:`subagent-activity`,id:n.id});break}}',
+    'function jbr(e){return[...e]}function ba(e){return String(e)}function Mbr(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ba(e.agentThreadId);i.set(r,{conversationId:r,displayName:`agent`,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ba(r);i.has(e)||i.set(e,{conversationId:e,displayName:`agent`,parentConversationId:t})}}return Array.from(i.values())}function Nbr({cachedConversationById:e,hasSubAgentActivity:t,parentConversationId:n,parentMemberships:r,sourceLinkedThreadsById:i,threadSummaryById:a}){return[]}function Abr({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=Mbr(t,a,null,n).map(e=>e);return d}function Ee(e,t){return t}var p4Base=0,p4=Ee($,(e,{get:t})=>{if(e==null)return[];let n=typeof e===`string`?e:e.conversationId,l=t(store,n),v=Abr({cachedConversations:[],conversationTurns:l,parentConversationId:n});return v});function fu(e,t){return[]}function gMr(e){let t={},n=e.activeConversationId,r=e.enabled,i=e.includeMentionItems,a=fu(p4,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e=e=>e.parentConversationId===n,r=a.filter(e).filter(yMr);o=i?r.map(vMr):[],s=r.filter(_Mr)}let c=s;return{rows:a,visibleRows:c,mentionItems:o}}function _Mr(e){return e.isCurrentParentTurn}function vMr(e){return e}function yMr(e){return e.canInteract&&e.displayName.trim().length>0}function a8n(e){let{rows:n,agentCount:r}=e,l={formatMessage(){}};if(a){if(b){if(c){let m=l.formatMessage({id:`composer.backgroundSubagents.summary`,defaultMessage:`summary`},{count:r??n.length});return m}}}return null}function EHn(e){return e}function uIr(){let {rows:mt,visibleRows:qt}=gMr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0}),St=!1,Dn=!1,Dt=!1,wt=!1,jn=(mt.length>0||qt)&&!St&&!Dn&&!Dt&&!wt;let layout=EHn({subagentsPanel:jn});if(a){if(b){if(c){return jn?(0,B3.jsx)(a8n,{agentCount:mt.length,rows:mt}):null}}}return null}',
+    'function mEn(){}function hEn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var gEn,_En,vEn,yEn,PK=void 0;_En=[{id:`gpt-5.6-sol:low`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`low`},{id:`gpt-5.6-sol:medium`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`medium`},{id:`gpt-5.6-sol:high`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`high`},{id:`gpt-5.6-sol:xhigh`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`xhigh`}],vEn={id:`gpt-5.6-sol:ultra`,model:`gpt-5.6-sol`,modelLabel:`5.6 Sol`,reasoningEffort:`ultra`},yEn=[];function uEn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=hEn((t?[..._En,vEn]:_En).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=hEn(yEn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function $x(){return!0}var e1e=[];function B$(e,t){let n=e?.find(e=>e.model===t);return n==null?e1e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort))}',
+    'export{Xu as _pt,BS as w8,p4 as Rm};',
+  ].join('');
+  const server = [
+    'var WD=`local`,RO=[];class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return HCt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:RO,useStateDbOnly:this.params.hostId!==WD},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(Mdt)}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}}',
+    'function zun(){return Vun(`recent-conversations`)}function Vun(e){return{data:[]}}function zP(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=zP(e);return{id:n,sessionId:e.sessionId,hostId:t,title:i,cwd:e.cwd,createdAt:d,updatedAt:f,recencyAt:p??f,workspaceKind:s,hasUnreadTurn:u??!1}}var zCt=void 0;function Mdt(){return!0}function IP(e){return String(e||``).trim()}function LP(e,t){return String(e).slice(0,t)}function qT(){return null}function sG(){return{getDefault:()=>({getHostId:()=>`local`}),getForHostId:()=>globalThis.projectHistoryManager??null}}function pR(e){return e}function Aun(){return()=>{}}function kun(){return()=>{}}var lG={useEffect(){}};',
+  ].join('');
+  fs.writeFileSync(target.extensionJsPath, extensionText
+    .replace('var Dle=require("path");W();$t();', 'var dRe=require("path");D();NC();IN();Ot();')
+    .replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=DY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})')
+    .replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + webviewTimeout265825Text + 'var codexHost=0,Cd=class t{async initializeWebview(e,r,n,o){let s=new yP(()=>{});this.registerClientCoordinationForWebview(e,n,s)}createClientCoordinationSession(e,r,n){let o={};return this.registerAppHostSessionForWebview(e,r,o,n)}registerAppHostSessionForWebview(e,r,n,o){return{startup:{reach:a=>o.handleStartupPhase(a)}}}};');
+  fs.writeFileSync(target.headerPath, header);
+  fs.writeFileSync(target.appMainPath, main);
+  fs.writeFileSync(target.appServerManagerSignalsPath, server);
+}
+
+
 
 function restoreSafe26721Layout(text) {
   return text
@@ -1539,6 +1581,248 @@ module.exports = {
         const again = engine.plan(target, { version: 1, conversations: {} });
         assert.deepStrictEqual(again.errors, []);
         assert.deepStrictEqual(again.changes, []);
+      },
+    },
+    {
+      name: 'adapts the exact Codex 26.5825.32147 host, header, composer, power and history contracts',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 4);
+        const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        assert.ok(bundles[target.extensionJsPath].includes('let o=DY(n)'));
+        assert.ok(bundles[target.extensionJsPath].includes('timeoutMs:12e4})},12e4)'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265825PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('w8 as codexUseExecutionTarget'));
+        assert.ok(bundles[target.headerPath].includes('_pt as codexLocalGroupsMessengerImport'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265825PatchVersion=1'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsPower265825PatchVersion=1'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265825PatchVersion=1'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('useStateDbOnly:!0'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+
+    {
+      name: 'keeps the 26.5825 compact model selector on the native power list',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        assert.ok(main.includes('hEn((t?[..._En,vEn]:_En).filter'));
+        assert.ok(!main.includes('{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`'));
+        assert.ok(main.includes('r.some(e=>e.reasoningEffort===`max`)'));
+        assert.ok(main.includes('r.some(e=>e.reasoningEffort===`ultra`)'));
+      },
+    },
+    {
+      name: 'executes 26.5825 project history and Sol Max Ultra without widening compact power',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const modelCode = main.slice(main.indexOf('function t4e('), main.indexOf('function ba('));
+        const powerCode = main.slice(main.indexOf('function hEn('), main.indexOf('export{'));
+        const mainScript = `${modelCode}${powerCode};let efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),powerModels=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['low','medium','high','xhigh','ultra'])}],menuModels=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh'])},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low'])}],reasoning=e=>t4e({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:e,listModelsData:{models:menuModels}}).reasoningEffort;console.log(JSON.stringify({max:reasoning('max'),ultra:reasoning('ultra'),read:nativeState({model_reasoning_effort:'ultra'},'max').w,write:nativeState({},'ultra').n.model_reasoning_effort,compact:uEn(powerModels).map(e=>e.reasoningEffort),expanded:uEn(powerModels,{includeUltraInSlider:true}).map(e=>e.reasoningEffort),menu:B$(menuModels,'gpt-5.6-sol').map(e=>e.reasoningEffort),terra:B$(menuModels,'gpt-5.6-terra').map(e=>e.reasoningEffort)}))`;
+        const mainResult = childProcess.spawnSync(resolveNodePath(), ['-e', mainScript], { encoding: 'utf8' });
+        assert.strictEqual(mainResult.status, 0, mainResult.stderr);
+        assert.deepStrictEqual(JSON.parse(mainResult.stdout), { max: 'max', ultra: 'ultra', read: 'ultra', write: 'ultra', compact: ['low', 'medium', 'high', 'xhigh'], expanded: ['low', 'medium', 'high', 'xhigh', 'ultra'], menu: ['xhigh', 'max', 'ultra'], terra: ['low'] });
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        const serverScript = `${server};(async()=>{let root={id:'root',sessionId:'root',cwd:'/project',name:'Root title',createdAt:1,updatedAt:3,workspaceKind:'project',hasUnreadTurn:true},other={id:'other',sessionId:'other',cwd:'/project2',name:'Other title',createdAt:1,updatedAt:2},child={id:'child',sessionId:'child',cwd:'/project/sub',name:'Child title',createdAt:1,updatedAt:1,workspaceKind:'project',hasUnreadTurn:false},pages={first:{data:[root,other],nextCursor:'next'},next:{data:[child],nextCursor:null}},projectRequests=[],summary=e=>({conversationId:e.id,hostId:'local',title:e.name,cwd:e.cwd,workspaceKind:e.workspaceKind??'project',hasUnreadTurn:e.hasUnreadTurn??false}),projectStore={threadsById:new Map,listRecentThreads:e=>(projectRequests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:summary,shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265825(projectStore,'/project');globalThis.projectHistoryManager={listAllThreads:()=>Promise.resolve([root,other,child]),getRecentConversations:()=>[]};let fallback=await zun('/project','local',true).queryFn(),nativeRequests=[],nativeStore=Object.create(Store.prototype);nativeStore.params={hostId:'local',requestClient:{getCompatibleThreadSortKey:e=>e,sendRequest:(e,t)=>(nativeRequests.push(t),Promise.resolve({data:[],nextCursor:null}))}},nativeStore.recentConversationSortKey='recency_at';await nativeStore.listRecentThreads({cursor:null,limit:1});await nativeStore.listRecentThreads({cursor:null,limit:1,useStateDbOnly:true});let fields=e=>e.map(({id,cwd,title,hostId,workspaceKind,hasUnreadTurn})=>({id,cwd,title,hostId,workspaceKind,hasUnreadTurn}));console.log(JSON.stringify({project:fields(project),fallback:fields(fallback),projectFlags:projectRequests.map(e=>e.useStateDbOnly),nativeFlags:nativeRequests.map(e=>e.useStateDbOnly)}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        const rows = [{ id: 'root', cwd: '/project', title: 'Root title', hostId: 'local', workspaceKind: 'project', hasUnreadTurn: true }, { id: 'child', cwd: '/project/sub', title: 'Child title', hostId: 'local', workspaceKind: 'project', hasUnreadTurn: false }];
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { project: rows, fallback: rows, projectFlags: [true, true], nativeFlags: [false, true] });
+      },
+    },
+    {
+      name: 'executes 26.5825 grouped rows and matching dropdown and opened titles',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const items = Array.from({ length: 25 }, (_, index) => ({ kind: 'local', key: `id${index + 1}`, conversation: { id: `id${index + 1}`, hostId: 'local', cwd: '/project', title: `原生${index + 1}` } }));
+        const metadata = { version: 1, conversations: Object.fromEntries(items.map((item) => [item.conversation.id, { title: item.conversation.id === 'id1' ? '本地标题' : '', group: '需求A', projectRoot: '/project' }])) };
+        const rows = runHeaderRows(header, 'id1', { items, metadata, currentRoot: '/project', includeStorage: true, toggleMore: true, toggleMoreTwice: true });
+        const states = [rows.rows, rows.expandedRows, rows.fullRows, rows.collapsedRows].map((value) => JSON.stringify(value));
+        assert.deepStrictEqual(states.map((state) => (state.match(/原生/g) || []).length), [4, 14, 24, 4]);
+        assert.ok(states[0].includes('本地标题'));
+        assert.deepStrictEqual(run265730HeaderActions(header), {
+          dispatched: [
+            { channel: 'codex-local-groups', message: { action: 'promptConversationTitle', conversationId: 'abc', title: '标题', projectRoot: '/project' } },
+            { channel: 'codex-local-groups', message: { action: 'promptConversationGroup', conversationId: 'abc', projectRoot: '/project' } },
+            { channel: 'codex-local-groups', message: { action: 'setPendingGroup', projectRoot: '/project', group: '需求A', startedAtMs: 123 } },
+            { channel: 'codex-local-groups', message: { action: 'promptNewGroup', projectRoot: '/project' } },
+          ],
+          hostMessages: [{ type: 'new-chat' }],
+        });
+        const page = header.slice(header.indexOf('function Ln(e){'), header.indexOf('function Vn()', header.indexOf('function Ln(e){')));
+        const script = `const listeners={},window={addEventListener:(n,f)=>listeners[n]=f,removeEventListener:(n,f)=>listeners[n]===f&&delete listeners[n]},codexLocalGroupsLocalTitle=({conversation})=>conversation.id==='id1'?'本地标题':null,Pn={useState:()=>[0,f=>globalThis.refresh=f(0)],useEffect:f=>globalThis.cleanup=f()},Hn={c:()=>[]};${page};let values=['id1','missing'].map(id=>Ln({desktopDeepLinkConversationId:id,title:'原生标题'}));listeners['codex-local-groups-refresh']();cleanup();console.log(JSON.stringify([...values,refresh,listeners['codex-local-groups-refresh']??null]))`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), ['本地标题', '原生标题', 1, null]);
+      },
+    },
+    {
+      name: 'executes both 26.5825 subagent activity chains and the composer panel',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const agentCode = main.slice(main.indexOf('function nativeItems('), main.indexOf('function hEn(')).replace('function fu(e,t){return[]}', 'function fu(e,t){return globalRows}');
+        const script = `var $={},store={},oe='parent',rt=true,at={ui:{active:true}},a=true,b=true,c=true,B3={jsx:(type,props)=>({type:type.name,props})},globalRows=[{conversationId:'v1',parentConversationId:'parent',canInteract:true,displayName:'V1',isCurrentParentTurn:true},{conversationId:'hidden',parentConversationId:'parent',canInteract:false,displayName:'Hidden',isCurrentParentTurn:true}];${agentCode};let turns=new Map([[0,{items:[{type:'subAgentActivity',agentThreadId:'v2'},{type:'collabAgentToolCall',tool:'spawnAgent',receiverThreadIds:['v1']}]}]]),members=Mbr(turns,'parent',null,null),transcript=[];nativeItems({type:'collabAgentToolCall',tool:'spawnAgent',id:'v1'},true,transcript);nativeItems({type:'subAgentActivity',id:'v2'},true,transcript);let hook=gMr({activeConversationId:'parent',enabled:true,includeMentionItems:true}),panel=uIr();console.log(JSON.stringify({members:members.map(e=>[e.conversationId,e.parentConversationId]),transcript:transcript.map(e=>e.type),visible:hook.visibleRows.map(e=>e.conversationId),panelRows:panel.props.rows.map(e=>e.conversationId),agentCount:panel.props.agentCount}))`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), { members: [['v2', 'parent'], ['v1', 'parent']], transcript: ['multi-agent-action', 'subagent-activity'], visible: ['v1'], panelRows: ['v1', 'hidden'], agentCount: 2 });
+      },
+    },
+    {
+      name: 'rejects 26.5825 producer and consumer decoys instead of patching a later scope',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const composer = main.replace('jn=(mt.length>0||qt)&&!St&&!Dn&&!Dt&&!wt', 'jn=!1') + 'function laterComposerDecoy(){let jn=(mt.length>0||qt)&&!St&&!Dn&&!Dt&&!wt;return jn?(0,B3.jsx)(a8n,{rows:mt}):null}';
+        fs.writeFileSync(target.appMainPath, composer);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const history = fs.readFileSync(target.appServerManagerSignalsPath, 'utf8');
+        fs.writeFileSync(target.appServerManagerSignalsPath, history.replace('sourceKinds:RO,useStateDbOnly:a', 'sourceKinds:RO,useStateDbOnly:broken') + 'var historyDecoy=`sourceKinds:RO,useStateDbOnly:a`;');
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5825 project history: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const host = fs.readFileSync(target.extensionJsPath, 'utf8')
+          .replace('startup:{reach:a=>o.handleStartupPhase(a)}', 'startup:{reach:a=>o.brokenStartupPhase(a)}')
+          + 'var rawReadyDecoy=`startup:{reach:a=>o.handleStartupPhase(a)}`;function laterReady(){return`handleStartupPhase(e){e===\"renderer_ready\"&&this.dispose()}`}' ;
+        fs.writeFileSync(target.extensionJsPath, host);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('extension host 26.5825: 启动看门狗链不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const unreachableStartup = fs.readFileSync(target.extensionJsPath, 'utf8').replace(
+          'return{startup:{reach:a=>o.handleStartupPhase(a)}}',
+          'if(!1){let x={startup:{reach:a=>o.handleStartupPhase(a)}}}return{brokenStartup:{reach:a=>o.handleStartupPhase(a)}}',
+        );
+        fs.writeFileSync(target.extensionJsPath, unreachableStartup);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('extension host 26.5825: 启动看门狗链不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const server = fs.readFileSync(target.appServerManagerSignalsPath, 'utf8');
+        const producerStart = server.indexOf('function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){');
+        const producerEnd = server.indexOf('function Mdt', producerStart);
+        const producer = server.slice(producerStart, producerEnd);
+        fs.writeFileSync(target.appServerManagerSignalsPath, server.slice(0, producerStart) + `var producerDecoy=${JSON.stringify(producer)};` + server.slice(producerEnd));
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5825 project history: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        fs.writeFileSync(target.appServerManagerSignalsPath, server.slice(0, producerStart) + server.slice(producerEnd) + `function nestedProducer(){0;${producer}}`);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('26.5825 project history: 补丁标记不完整'));
+      },
+    },
+    {
+      name: 'rejects 26.5825 literal and nested anchors plus altered Sol guards',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const mbrStart = main.indexOf('function Mbr(e,t,n,r){');
+        const mbrEnd = main.indexOf('function Nbr(', mbrStart);
+        const mbr = main.slice(mbrStart, mbrEnd);
+        fs.writeFileSync(target.appMainPath, main.slice(0, mbrStart) + `var mbrDecoy=${JSON.stringify(mbr)};` + main.slice(mbrEnd));
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        fs.writeFileSync(target.appMainPath, main.slice(0, mbrStart) + main.slice(mbrEnd) + `function nestedMbr(){${mbr}}`);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const memberships = fs.readFileSync(target.appMainPath, 'utf8');
+        const membershipsStart = memberships.indexOf('function Mbr(e,t,n,r){');
+        const membershipsEnd = memberships.indexOf('function Abr(', membershipsStart);
+        const membershipChunk = memberships.slice(membershipsStart, membershipsEnd);
+        fs.writeFileSync(target.appMainPath, memberships.slice(0, membershipsStart) + memberships.slice(membershipsEnd) + `function wrapper(){0;${membershipChunk}}`);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const hEnStart = main.indexOf('function hEn(e,t){');
+        const hEnEnd = main.indexOf('var gEn,', hEnStart);
+        const hEn = main.slice(hEnStart, hEnEnd);
+        fs.writeFileSync(target.appMainPath, main.slice(0, hEnStart) + `var hEnDecoy=${JSON.stringify(hEn)};` + main.slice(hEnEnd));
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex power 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const power = fs.readFileSync(target.appMainPath, 'utf8');
+        const powerStart = power.indexOf('function hEn(e,t){');
+        const powerEnd = power.indexOf('function uEn(', powerStart);
+        const powerChunk = power.slice(powerStart, powerEnd);
+        fs.writeFileSync(target.appMainPath, power.slice(0, powerStart) + power.slice(powerEnd) + `function wrapper(){0;${powerChunk}}`);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex power 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const interactions = fs.readFileSync(target.appMainPath, 'utf8')
+          .replace('function yMr(e){return e.canInteract&&e.displayName.trim().length>0}', 'function yMr(e){return e.displayName.trim().length>0}')
+          + 'var yMrDecoy="function yMr(e){return e.canInteract&&e.displayName.trim().length>0}";';
+        fs.writeFileSync(target.appMainPath, interactions);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const p4 = fs.readFileSync(target.appMainPath, 'utf8').replace('parentConversationId:n});return v', 'parentConversationId:a});return v');
+        fs.writeFileSync(target.appMainPath, p4);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex UI 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const wrongModel = fs.readFileSync(target.appMainPath, 'utf8').replace('return t===`gpt-5.6-sol`&&', 'return t===`gpt-5.6-terra`&&');
+        fs.writeFileSync(target.appMainPath, wrongModel);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('Codex power 26.5825: 补丁标记不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const watchdog = fs.readFileSync(target.extensionJsPath, 'utf8')
+          .replace('timeoutMs:12e4})},12e4)', 'timeoutMs:3e4})},3e4)')
+          .replace('markMessageReceived(){', 'timeoutDecoy="this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:12e4})},12e4)";markMessageReceived(){');
+        fs.writeFileSync(target.extensionJsPath, watchdog);
+        assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.includes('extension host 26.5825: 启动看门狗链不完整'));
+        configure265825Features(target);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const emptyRelay = fs.readFileSync(target.appMainPath, 'utf8')
+          .replace('aSe((e,t)=>{Xu.dispatchMessage(e,t)})', 'aSe((e,t)=>{})')
+          + 'function wrapper(){0;aSe((e,t)=>{Xu.dispatchMessage(e,t)})}';
+        fs.writeFileSync(target.appMainPath, emptyRelay);
+        const relayErrors = engine.plan(target, { version: 1, conversations: {} }).errors;
+        assert.ok(relayErrors.includes('header 26.5825: semantic imports 不完整'), JSON.stringify(relayErrors));
+      },
+    },
+    {
+      name: 'writes nothing before rejecting unknown or suffixed Codex 26.5825 builds',
+      run() {
+        for (const version of ['26.5825.99999', '26.5825.32147.1', '26.5826.1']) {
+          const target = createTarget();
+          configure265825Features(target);
+          target.version = version;
+          const before = fs.readFileSync(target.headerPath, 'utf8');
+          const mtime = fs.statSync(target.headerPath).mtimeMs;
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+          assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), before);
+          assert.strictEqual(fs.statSync(target.headerPath).mtimeMs, mtime);
+        }
       },
     },
     {
@@ -4831,8 +5115,9 @@ console.log(JSON.stringify({dispatched:dispatched.filter(item=>item.message.acti
 }
 
 function run265730HeaderActions(header) {
-  const start = header.indexOf('function Sn(e){return e.kind===`remote`}');
-  const end = header.indexOf('function Cn', start);
+  const current265825 = header.includes('function xn(e){return e.kind===`remote`}');
+  const start = header.indexOf(current265825 ? 'function xn(e){return e.kind===`remote`}' : 'function Sn(e){return e.kind===`remote`}');
+  const end = header.indexOf(current265825 ? 'function Sn' : 'function Cn', start);
   const script = `
 const vm=require('vm'),dispatched=[],hostMessages=[],storage={};
 const messenger={dispatchMessage(channel,message){dispatched.push({channel,message})},dispatchHostMessage(message){hostMessages.push(message)}};
@@ -4849,10 +5134,11 @@ console.log(JSON.stringify({dispatched:dispatched.filter(item=>item.message.acti
 }
 
 function runHeaderRows(header, activeId, options = {}) {
+  const current265825 = header.includes('function xn(e){return e.kind===`remote`}');
   const current265730 = header.includes('function Sn(e){return e.kind===`remote`}');
   const latest = header.includes('function Bn(e){return e.kind===`remote`}');
-  const startMarker = current265730 ? 'function Sn(e){return e.kind===`remote`}' : latest ? 'function Bn(e){return e.kind===`remote`}' : 'function Ke(e){return e.kind===`remote`}';
-  const endMarker = current265730 ? 'function Cn' : latest ? 'function Vn' : 'var qe=Je';
+  const startMarker = current265825 ? 'function xn(e){return e.kind===`remote`}' : current265730 ? 'function Sn(e){return e.kind===`remote`}' : latest ? 'function Bn(e){return e.kind===`remote`}' : 'function Ke(e){return e.kind===`remote`}';
+  const endMarker = current265825 ? 'function Sn' : current265730 ? 'function Cn' : latest ? 'function Vn' : 'var qe=Je';
   const start = header.indexOf(startMarker);
   const end = header.indexOf(endMarker, start);
   const items = Object.prototype.hasOwnProperty.call(options, 'items') ? options.items : headerRowsItems();

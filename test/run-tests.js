@@ -1,25 +1,32 @@
-const tests = [
-  require('./metadata-store.test'),
-  require('./codex-config.test'),
-  require('./locator.test'),
-  require('./package-json.test'),
-  require('./extension.test'),
-  require('./patch-engine.test'),
-  require('./scripts.test'),
-  require('./run-tests-runner.test'),
-];
-const grepText = grepArgument(process.argv.slice(2));
-const grep = grepText ? new RegExp(grepText) : null;
+const { cleanupTemporaryPaths } = require('./test-utils');
 
-(async () => {
+runTests();
+
+async function runTests() {
+  try {
+    await runSelectedTests();
+  } catch (error) {
+    console.error(error && error.stack ? error.stack : error);
+    process.exitCode = 1;
+  } finally {
+    try {
+      cleanupTemporaryPaths();
+    } catch (error) {
+      console.error(error && error.stack ? error.stack : error);
+      process.exitCode = 1;
+    }
+  }
+}
+
+async function runSelectedTests() {
+  const grepText = grepArgument(process.argv.slice(2));
+  const grep = grepText ? new RegExp(grepText) : null;
   let passed = 0;
   let matched = 0;
-  for (const suite of tests) {
+  for (const suite of testSuites()) {
     for (const test of suite.tests) {
       const name = `${suite.name} - ${test.name}`;
-      if (grep && !grep.test(name)) {
-        continue;
-      }
+      if (grep && !grep.test(name)) continue;
       matched += 1;
       try {
         await test.run();
@@ -27,9 +34,7 @@ const grep = grepText ? new RegExp(grepText) : null;
         passed += 1;
       } catch (error) {
         console.error(`FAIL ${name}`);
-        console.error(error && error.stack ? error.stack : error);
-        process.exitCode = 1;
-        return;
+        throw error;
       }
     }
   }
@@ -39,10 +44,17 @@ const grep = grepText ? new RegExp(grepText) : null;
     return;
   }
   console.log(`PASS ${passed} tests`);
-})().catch((error) => {
-  console.error(error && error.stack ? error.stack : error);
-  process.exit(1);
-});
+}
+
+function testSuites() {
+  return [
+    require('./metadata-store.test'), require('./codex-config.test'),
+    require('./locator.test'), require('./package-json.test'),
+    require('./extension.test'), require('./patch-engine.test'),
+    require('./scripts.test'), require('./upgrade-workspace.test'),
+    require('./run-tests-runner.test'),
+  ];
+}
 
 function grepArgument(args) {
   const index = args.indexOf('--grep');

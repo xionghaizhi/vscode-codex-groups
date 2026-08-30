@@ -52,5 +52,11 @@ module.exports = {
         assert.strictEqual(packageJson.scripts['restore-codex-ui'], 'node scripts/restore-codex-ui.js');
       },
     },
+    {
+      name: 'provides an ownership-scoped upgrade workspace command',
+      run() {
+        assert.strictEqual(packageJson.scripts['with-upgrade-workspace'], 'node scripts/with-upgrade-workspace.js --');
+      },
+    },
   ],
 };

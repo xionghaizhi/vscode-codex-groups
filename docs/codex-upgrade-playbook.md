@@ -1,9 +1,9 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-08-24
-> 适配目标 Codex：`openai.chatgpt@26.5818.41705`
-> 当前 active Codex：`openai.chatgpt@26.5818.41705`
-> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.62`
+> 基线日期：2026-08-30
+> 适配目标 Codex：`openai.chatgpt@26.5825.32147`
+> 当前 active Codex：`openai.chatgpt@26.5825.32147`
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.63`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -14,7 +14,7 @@ Codex 升级后，应该恢复成以下状态：
 1. 最近会话只显示当前窗口 `activeWorkspaceRoot` 根目录及其子目录。
 2. 子目录会话归入当前工作区根项目，不产生第二个项目标题。
 3. 不扩大共享 recent store，不给共享 `thread/list` 注入 `cwd` / `cwds`。
-4. Codex `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` 通过独立项目历史查询分页读取会话，再在本地严格过滤根目录和子目录。
+4. Codex `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` / `26.5825` 通过独立项目历史查询分页读取会话，再在本地严格过滤根目录和子目录。
 5. 工作区 root 未就绪、查询失败或项目归属不可确认时 fail closed，不用其他项目数据兜底。
 6. 页面结构为“项目 > 需求分组 > 会话”，项目标题在内层滚动区粘性置顶。
 7. **每个需求分组独立**默认显示最近 5 条，“展开更多”每次 +10，不是整个项目共享 5 条。
@@ -22,10 +22,10 @@ Codex 升级后，应该恢复成以下状态：
 9. 当前 active 会话即使在分组上限之后也必须额外保留；“还有 N 条”只统计实际隐藏行。
 10. 最近会话菜单使用实际 `600px` 高度，列表区独立滚动，矮窗口继续受 Radix 可用高度约束。
 11. 保留本地标题、设置分组、新建分组、在分组中新建会话、搜索会话和 Manage Groups。同一会话 ID 在最近会话下拉与打开页左上角必须显示一致：本地非空标题优先，本地标题缺失或为空时回退 Codex 原生标题；只覆盖展示，不写 Codex 原生 thread title。
-12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` 保留原生子 agent 活动面板；必须同时保留 V1 `collabAgentToolCall` 和 V2 `subAgentActivity` 的 transcript、membership 与 composer 消费链，并按用户当前配置如实验证 composer 面板。不得为让面板出现而切换用户 V1/V2 配置。`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
+12. Codex `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` / `26.5825` 保留原生子 agent 活动面板；必须同时保留 V1 `collabAgentToolCall` 和 V2 `subAgentActivity` 的 transcript、membership 与 composer 消费链，并按用户当前配置如实验证 composer 面板。不得为让面板出现而切换用户 V1/V2 配置。`gpt-5.6-sol` 实际 Reasoning 菜单及持久化链路都要支持 `Max` / `Ultra`。
 13. 启动时只读检查，不在多窗口启动阶段后台改写 Codex bundle。
 14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
-15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` 使用版本限定的 `120s` 看门狗。`26.5810` 必须改 `jP`，`26.5814` 必须改 `YI`，`26.5818` 必须改唯一真实 `QP`；不能退回旧 `onTimeout()},3e4`，也不能用字符串 decoy 冒充真实看门狗。
+15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` / `26.5825` 使用版本限定的 `120s` 看门狗。`26.5810` 必须改 `jP`，`26.5814` 必须改 `YI`，`26.5818` 必须改唯一真实 `QP`，`26.5825` 必须改唯一真实 `yP` 并绑定 `Cd.registerAppHostSessionForWebview -> new kI({startup}) -> renderer_ready`；不能退回旧锚点，也不能用字符串、不可达对象或 nested decoy 冒充真实看门狗。
 16. 每次升级必须先读相关 OpenSpec change 和本手册，严格按全量矩阵调研、实现、验证和留证。主线程负责常规 Reload/UI/性能验收，不把检查清单交给用户；发现遗漏先补 requirement、失败测试和 verifier 负例，再改实现并重跑全部适用项。
 
 ## 2. 当前调用链
@@ -63,7 +63,7 @@ CLI 入口 `scripts/plan-patches.js` / `apply-patches.js` / `repair-codex-ui.js`
 
 ```text
 Header 读取 activeWorkspaceRoot
-  -> root ready 时调用对应版本扩展后的项目历史 Hook（26.721 `e6e` / 26.727 `Xtt` / 26.5730 `FJe` / 26.5803 `_Xe` / 26.5810 `ssn` / 26.5814 `dgn` / 26.5818 `NPn` / `qPn`（依 exact build））
+  -> root ready 时调用对应版本扩展后的项目历史 Hook（26.721 `e6e` / 26.727 `Xtt` / 26.5730 `FJe` / 26.5803 `_Xe` / 26.5810 `ssn` / 26.5814 `dgn` / 26.5818 `NPn` / `qPn`（依 exact build）/ 26.5825 `zun`）
   -> App Server manager 独立分页历史查询
   -> 按 root / root 子目录过滤
   -> 合并原生 recent query 已有项
@@ -76,7 +76,7 @@ Header 读取 activeWorkspaceRoot
 
 ```text
 Header 操作
-  -> 语义定位的 VSCode messenger singleton（26.5814 导出 `Vst`；26.5818 真实导出 `Flt` / `Jlt`（依 exact build））
+  -> 语义定位的 VSCode messenger singleton（26.5814 导出 `Vst`；26.5818 真实导出 `Flt` / `Jlt`（依 exact build）；26.5825 导出 `_pt`）
   -> out/extension.js 中的 codexLocalGroupsHandleWebviewMessage()
   -> ~/.codex/codex-vscode-conversation-meta.json
   -> metadataSaved 回传 Header
@@ -93,7 +93,7 @@ Header 操作
   -> 本地非空标题 / Codex 原生标题回退
 
 /local/:conversationId lazy conversation
-  -> Header 标题组件（26.5810 `Bn` / 26.5814、26.5818 `zn`）({ desktopDeepLinkConversationId, title })
+  -> Header 标题组件（26.5810 `Bn` / 26.5814、26.5818 `zn` / 26.5825 `Ln`）({ desktopDeepLinkConversationId, title })
   -> codexLocalGroupsLocalTitle({ kind: "local", conversation: { id } })
   -> 本地非空标题 / 传入的 Codex 原生 title 回退
 ```
@@ -103,29 +103,29 @@ Header 操作
 ### 2.6 子 agent 双展示链
 
 ```text
-App Main membership producer / aggregator（26.5814 `SNn` / `xNn`；26.5818 `Wzn` / `Uzn`）
+App Main membership producer / aggregator（26.5814 `SNn` / `xNn`；26.5818 `Wzn` / `Uzn`；26.5825 `Mbr` / `Abr`）
   -> V1 collabAgentToolCall / V2 subAgentActivity transcript 聚合
-  -> membership store 导出（26.5814 `lX as IC`；26.5818 `Pq as sw`）
-  -> composer hook（26.5814 `zBr`；26.5818 `JKr`）
-  -> canInteract/displayName 过滤（26.5814 `HBr`；26.5818 `ZKr`）
-  -> isCurrentParentTurn 过滤（26.5814 `BBr`；26.5818 `YKr`）
+  -> membership store 导出（26.5814 `lX as IC`；26.5818 `Pq as sw`；26.5825 `p4 as Rm`）
+  -> composer hook（26.5814 `zBr`；26.5818 `JKr`；26.5825 `gMr`）
+  -> canInteract/displayName 过滤（26.5814 `HBr`；26.5818 `ZKr`；26.5825 `yMr`）
+  -> isCurrentParentTurn 过滤（26.5814 `BBr`；26.5818 `YKr`；26.5825 `_Mr`）
   -> visibleRows
-  -> 原生 guard（26.5814 `yn`；26.5818 `xn`）(subagentsPanel)
-  -> 真实 composer 面板（26.5814 `RQn`；26.5818 `$4n`）
+  -> 原生 guard（26.5814 `yn`；26.5818 `xn`；26.5825 `jn`）(subagentsPanel)
+  -> 真实 composer 面板（26.5814 `RQn`；26.5818 `$4n`；26.5825 `a8n`）
 ```
 
 transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5803.61601` 中为 `canInteract=false`，会被 `Een` 排除，因此 transcript 有活动样式不能证明顶部面板可见。用户当前正式配置为 `multi_agent=true, multi_agent_v2=true`；这是用户选择，不是 Local Groups 可以纠正的“漂移”。不得切换 V1/V2，也不得通过 patch `canInteract` 改变 Codex 的交互语义。
 
 ## 3. 当前 bundle 与目标契约
 
-已验证 `26.5818.31338` 为 Header `header-D92QSxKa.js`、Main `app-initial-CYlXrWdX.js`、Server `app-initial-D5LtbkHB.js`；`26.5818.41705` 为 Header `header-DtxiyEJb.js`、Main `app-initial-DqGfhkM8.js`、Server `app-initial-BGrXbXCc.js`。`26.5810.41047` / `52044` 与 `26.5814.41407` 的历史拓扑和变体仍保留在回归中。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
+已验证 `26.5825.32147` 为 Header `header-BE8_0Va3.js`、Main/Power/Subagent `app-initial-DraLrsJK.js`、Server/History `app-initial-DOdr0yAB.js`。`26.5818.31338` / `41705`、`26.5810.41047` / `52044` 与 `26.5814.41407` 的历史拓扑和变体仍保留在回归中。下一版 Vite hash、分包和压缩符号可以变，功能契约不能变。
 
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
-| `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` + `timeoutMs:12e4` | 注入 metadata 消息桥；对 `26.5818` 的唯一真实 `QP` Webview 看门狗把 30 秒延长到 120 秒；31338 的 `nY` 与 41705 的 `oY` 回调边界都必须绑定真实四入口和 `metadataSaved`。 |
-| Header（31338 `header-D92QSxKa.js`；41705 `header-DtxiyEJb.js`） | `recentTasksMenu` + `Search recent chats/tasks` + `zn` | `codexLocalGroupsHeaderSafe265810PatchVersion=1` + `codexLocalGroupsOpenedTitle265810PatchVersion=1` | 当前项目严格隔离、每组 5/+10/15/5、600px 菜单和标题双消费；31338 真实 messenger / execution-target 为 `Flt` / `c0`，41705 为 `Jlt` / `Z1`，不能误用碰撞导出。 |
-| Main（31338 `app-initial-CYlXrWdX.js`；41705 `app-initial-DqGfhkM8.js`） | `conversation.title` + exact build composer chain | `codexLocalGroupsCodexUi265810PatchVersion=1` + `codexLocalGroupsPower265810PatchVersion=1` | 仅对 `gpt-5.6-sol` 保留 Max/Ultra 的校验、Power、菜单、回读和写入；31338 使用 `W7e/Wzn/Uzn/Pq/JKr/$4n`，41705 使用 `F7e/GWn/WWn/zX/Uqr/yer`，均完整绑定 V1/V2、parent selector、原生 guard 和真实面板，不 patch `canInteract`。 |
-| Server（31338 `app-initial-D5LtbkHB.js`；41705 `app-initial-BGrXbXCc.js`） | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265810PatchVersion=1` | 独立项目历史查询；隔离 load/merge/fallback/return；31338 标题 fallback 绑定 `$j/sw/sA`，41705 绑定 `vM/$C/xA`。 |
+| `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` + `timeoutMs:12e4` | 注入 metadata 消息桥；对 `26.5825` 的唯一真实 `yP` Webview 看门狗把 30 秒延长到 120 秒；`DY` 回调、`Cd` Host、`new kI({startup})` 与 `renderer_ready` 必须形成真实调用链。 |
+| Header `header-BE8_0Va3.js` | `recentTasksMenu` + `Search recent chats/tasks` + `Ln` | `codexLocalGroupsHeaderSafe265825PatchVersion=1` + `codexLocalGroupsOpenedTitle265810PatchVersion=1` | 当前项目严格隔离、每组 5/+10/15/5、600px 菜单和标题双消费；真实 messenger / execution-target 为 `_pt` / `w8`，且 `_pt` 必须回绑 initializer 内非空 relay。 |
+| Main `app-initial-DraLrsJK.js` | `conversation.title` + exact build composer chain | `codexLocalGroupsCodexUi265825PatchVersion=1` + `codexLocalGroupsPower265825PatchVersion=1` | 仅对 `gpt-5.6-sol` 保留 Max/Ultra；完整绑定 `jbr → Mbr → Nbr → Abr → p4 → gMr → uIr/EHn → a8n`、`mEn → hEn → var gEn`，不 patch `canInteract`。 |
+| Server `app-initial-DOdr0yAB.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265825PatchVersion=1` | 独立 state DB 项目历史查询；隔离 load/merge/fallback/return；绑定 `VP/zP → RCt → var zCt` 和真实 `HCt` request，不能把 `$Ct` Store 名误当 request。 |
 
 当前 locator 允许 `appMainPath` / `appStatsigPath` / `appServerManagerSignalsPath` 指向同一文件。`CodexPatchEngine.plan()` 必须对合包和分包都只规划一次写入。
 
@@ -149,7 +149,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 ### 4.2 `src/patchEngine.js::CodexPatchEngine.plan()`
 
-当前明确支持 `26.721`、`26.727`、`26.5730`、`26.5803`、`26.5810`、精确 build `26.5814.41407`、`26.5818.31338` 和 `26.5818.41705`。其他 minor/build 会报：
+当前明确支持 `26.721`、`26.727`、`26.5730`、`26.5803`、`26.5810`、精确 build `26.5814.41407`、`26.5818.31338`、`26.5818.41705` 和 `26.5825.32147`。其他 minor/build 会报：
 
 ```text
 不支持的 Codex 扩展版本
@@ -159,7 +159,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 版本升级后检查：
 
-- safe mode 仍只规划 extension host、Header 和已确认的 `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` / `26.5814.41407` / `26.5818.31338` 特性 bundle。
+- safe mode 仍只规划 extension host、Header 和已确认的 `26.721` / `26.727` / `26.5730` / `26.5803` / `26.5810` / `26.5814.41407` / `26.5818.31338` / `26.5818.41705` / `26.5825.32147` 特性 bundle。
 - 若新协议改变 `thread/list` 字段，先查新版 App Server 类型或源码；不推测 `cwd` / `cwds`。
 - 仅当生成后契约变化时提升对应 marker。只有 hash 或 clean anchor 变化、生成结果不变时，marker 可保持。
 - marker 提升必须保留上一个 live marker 的原地升级路径和后置条件检查。
@@ -171,7 +171,7 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 
 - `patchExtensionMetadataHelper()` 生成 `codexLocalGroupsPatchVersion=17`。
 - `patchExtensionMessageHandler()` 在 Codex 原生 webview message handler 边界拦截 Local Groups 消息。
-- `patchExtensionWebviewTimeout()` 对 `26.5730` / `26.5803` 使用旧 `onTimeout()},3e4` 锚点，对 `26.5810` 的 `jP`、`26.5814` 的 `YI` 和 `26.5818` 的唯一真实 `QP` 使用版本限定语义锚点，把已确认的 `30s` 看门狗精确改为 `120s`；保留 `onTimeout()`，锚点漂移、重复或仅剩字符串 decoy 时 fail closed。
+- `patchExtensionWebviewTimeout()` 对 `26.5730` / `26.5803` 使用旧 `onTimeout()},3e4` 锚点，对 `26.5810` 的 `jP`、`26.5814` 的 `YI`、`26.5818` 的 `QP` 和 `26.5825` 的 `yP` 使用版本限定语义锚点，把已确认的 `30s` 看门狗精确改为 `120s`；保留 `onTimeout()`，锚点漂移、重复、仅剩字符串或不可达 startup decoy 时 fail closed。
 - `patchExtensionResponsesWebsocketFallback()` 仅为 `26.721.41059` 的已确认自定义 provider 追加 `supports_websockets=false` CLI 覆盖。
 - 支持 `getMetadata`、`saveConversationMeta`、`archiveConversationMeta`、`setPendingGroup`、`resetPendingGroup`。
 - 设置标题使用 `showInputBox(..., ignoreFocusOut: true)`。
@@ -1043,3 +1043,42 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - v0.0.62 mapper hotfix：真实 live bundle 抽取 `SA`、`bdt` 和 patched loader，对当前 app-server state DB 的 513 条 thread 执行同一转换；`/home/project/vscode/yuxi` 匹配 51 条并产出 51 条含 `id/cwd/turns/title` 的 conversation。live Server 迁移后语法、plan 0、external verifier 通过。
 - 最终 live mapper runtime：当前 app-server 返回 173 条 thread，当前 root 匹配 16 条并产出 16 条 conversation；`id/cwd/title/hostId/workspaceKind/hasUnreadTurn` 均保留。全量 325 tests、compile、lint、diff-check、OpenSpec strict、live plan 0/verifier 和两轮针对性 Review 均通过。
 - Local Groups `0.0.62` 最终 VSIX：`/tmp/vscode-codex-groups-0.0.62-hotfix-20260824173101.vsix`，SHA-256 `cf6cdd1ceed0ac35c67b4f1f275e7d1720e164679df5c6fe3d1102bc049a9675`；active 为 `/root/.vscode-server/extensions/xinghezhiyuan.vscode-codex-groups-0.0.62`，patchEngine/verifier 与 worktree 哈希一致，安装目录 plan 0/verifier 通过。`config.toml` SHA-256 仍为只读基线。
+
+## 19. Codex 26.5825.32147 适配记录
+
+### 获取、安装与上游变化
+
+- Marketplace linux-x64 为 `26.5825.32147`，发布时间 `2026-08-28T07:18:17.907Z`。官方 VSIX 为 `240907669` bytes，SHA-256 `f337c04eb940d53889c61704505ea3a62f6c547706ed5209a4316cba6edf158f`；ZIP 与 `extension/package.json` 校验通过。
+- official clean 为本次归属目录 `/home/project/vscode/yuxi/.codex-upgrade/26.5825.32147/extracted/extension`；Header 为 `header-BE8_0Va3.js`，Main/Power/Subagent 为 `app-initial-DraLrsJK.js`，Server/History 为 `app-initial-DOdr0yAB.js`。
+- 适配必须从本 change 和本手册的完整矩阵开始，不能只修改 locator 或让页面 route ready。官方 clean、patched clean、live、负例、配置只读和临时产物清理缺一项时保持 pending，不能把逐项发现遗漏的成本交给用户。
+
+### 最终语义映射
+
+- Host：消息解析器 `DY`；唯一看门狗 `yP`；真实 Host 为 `Cd=class t`。释放链为 `registerAppHostSessionForWebview -> new kI({startup:{reach}}) -> handleStartupPhase("renderer_ready")`。
+- Header：row `On -> Ze`，打开页标题 `Ln`，Main 的真实 messenger / execution-target 导出为 `_pt` / `w8`。`_pt` 必须回绑 `Zu` initializer 内 `aSe((e,t)=>{Xu.dispatchMessage(e,t)})` 的非空 relay。
+- Main：membership/composer 为 `jbr -> Mbr -> Nbr -> Abr -> p4 as Rm -> gMr -> uIr/EHn -> a8n`，filters 为 `yMr/_Mr`。不切换 Multi-Agent V1/V2，不 patch `canInteract`。
+- Power：`mEn -> hEn -> var gEn -> uEn` 保持原生紧凑选择器；只在 `B$` Reasoning 菜单、模型校验、回读和写入中为 `gpt-5.6-sol` 补齐 Max/Ultra，其他模型不变。
+- History：`zun/Vun` Hook，`VP/zP -> RCt -> var zCt` raw-thread mapper，真实 state-DB request 为 `HCt(...)`。`$Ct` 是 Store class，不是请求函数。
+
+### 本次阻碍、根因与防复发
+
+1. 初始符号清单把 `$Ct` 当作 History request；official clean 证明真实调用是 `HCt(...)`。下一版必须从 consumer scope 反查 producer，不能用同 bundle 的相似符号名猜测。
+2. 小 fixture 的直接 `return{startup}` 与官方 `new kI({startup})` 结构不同，且真实 Host 是 `Cd`。engine 和 verifier 必须在 exact build 的真实 `Cd.registerAppHostSessionForWebview -> new kI({` 容器内找 startup；不可达 `if(!1)`、later/string/nested startup 都必须失败。
+3. `ready` Webview 消息不等价于 RPC `renderer_ready`。120 秒只改唯一 `yP` timeout，释放条件仍严格为 `e==="renderer_ready"&&this.dispose()`。
+4. 上游紧凑 Power slider 本来不应静态加入 Max/Ultra。只修改 `B$` 菜单和对应模型链；若把 Max/Ultra 注入 `_En/uEn`，会改变原生紧凑选择器，verifier 必须拒绝。
+5. 第一轮独立 Review 发现：单个 nested/string decoy 仍可能假绿、`yMr.canInteract` 未绑定、Sol 菜单 guard 未限制模型，以及普通测试硬编码 official artifact。已补唯一 scope、`canInteract`、model-scoped guard，并移除普通测试对下载目录的依赖。
+6. 第二轮 Review 进一步发现：把完整 `Mbr+Nbr`、`hEn+var gEn`、`RCt+var zCt` 整段搬入 `function wrapper(){0;...}` 仍可能绕过单点 scope；`_pt` 的 `aSe` 空回调也未验证。最终使用双向真实邻接链，并要求 relay 直接层精确为 `Xu.dispatchMessage(e,t)`；marker 分支同样重新验证 semantic imports。
+7. 全量压缩 bundle 的全局 brace depth 在部分位置可能为 `-1`，不能把小 fixture 的 top-level depth 假设套到生产包。5825 使用唯一 code-aware scope 加前后真实语义邻接，不以文件级 raw `includes` 代替调用链。
+8. Node 24/npm 可能在测试进程退出后创建 `node-compile-cache`。所有升级命令通过 `with-upgrade-workspace` 隔离 npm cache 并禁用 child compile cache；official、patched、rollback、VSIX、review、probe、schema、log、helper 和随机临时目录统一登记并在顶层 finally 清理。
+9. `test-utils.tempDir()` 原先只创建不删除，一次全量测试约产生 300 个目录，反复执行可累积数万个。test runner 现在覆盖 pass、assertion fail、throw、no-match 和 cleanup failure；直接 `mkdtemp` 也必须登记，测试结束后递归扫描本次所有权，不能只清理已知前缀。
+10. 用户配置只读。适配、安装和验证均未改 `multi_agent`、`multi_agent_v2`、provider、model、reasoning 或 `canInteract`；`/root/.codex/config.toml` 的 size `5156`、mtime epoch `1787908129`、SHA-256 `d8edde15575b9fd915ab730d56e41d44107d533f51a8757f0cf3e5b3d7b61a88` 保持不变。
+11. 最终所有权扫描除本次 `.codex-upgrade` 外，还发现 11 个旧测试遗留 `/tmp/codex-patch-*`，均含测试夹具 `out/extension.js`，合计不足 1 MB，且无本次运行登记标记。已按精确前缀、固定 `/tmp` 父目录和夹具文件三重条件清理；清理后 `codex-upgrade-*`、`codex-patch-*`、`codex-local-groups-*`、`vscode-codex-groups-*`、`clg-*` 均为 0。不得扩大到共享 cache 或无所有权证据的目录。
+
+### 验证证据
+
+- official clean：locator 唯一；plan 4、apply 4、backup 4、syntax 5、幂等通过、二次 plan 0、external verifier 通过。
+- 自动化：5825 定向 11 tests、全量 351 tests、compile 26 files、lint 26 files、`git diff --check` 与 `openspec validate adapt-codex-265825-32147 --strict` 通过。运行期覆盖标题双消费、设置标题/分组/分组中新建会话、项目历史、V1/V2 transcript 与 composer、Sol Max/Ultra；负例覆盖不可达 startup、空 relay、完整 nested chunk 和 string/later/duplicate decoy。
+- 独立 Review：两轮需求内修复后最终 Critical 0、Important 0、Minor 0；reviewer 直接执行五个精确 mutation，engine/verifier 均 fail closed。按约定不启动第三轮修复。
+- live Codex：active registry/package 为 `/root/.vscode-server/extensions/openai.chatgpt-26.5825.32147`；四文件已备份并应用，最终 plan 0、syntax 5、external verifier 通过。
+- Local Groups `0.0.63` VSIX SHA-256 为 `a3425ec42c2042b93ce417b64bd1fe3b48188b3548c57ae399bd9004f6f0b3de`；active 为 `/root/.vscode-server/extensions/xinghezhiyuan.vscode-codex-groups-0.0.63`，`patchEngine.js`、locator、verifier 与 worktree 哈希一致，安装目录 plan 0/verifier 通过。
+- Remote 安装事务已等待 `remoteagent.log` 的两条 `Extension installed successfully` 和 CLI 退出；本次归属的 `/tmp/codex-upgrade-*` 已归零。真实 Reload 后的 UI 截图与冷加载耗时尚未产生，不以 route-ready 或静态 marker 冒充该证据。

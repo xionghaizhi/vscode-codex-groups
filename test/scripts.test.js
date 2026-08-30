@@ -2,6 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { registerTemporaryPath } = require('./test-utils');
 const {
   exactVerifierBuild,
   verifyComposerSubagentPanel265803,
@@ -18,6 +19,14 @@ const {
   verifyPower265818,
   verifyProjectHistory265818,
   verifyWatchdog265818,
+  verifyComposerSubagentPanel265825,
+  verifyExecutionTargetImport265825,
+  verifyHeaderTitleOverride265825,
+  verifyMetadata265825,
+  verifyOpenedConversationTitle265825,
+  verifyPower265825,
+  verifyProjectHistory265825,
+  verifyWatchdog265825,
 } = require('../scripts/verify-patched-bundles');
 
 const openedTitle265803Header = [
@@ -220,6 +229,47 @@ const composerSubagentPanel26581841705 = [
   'function SZr(){let {rows:st,visibleRows:Vt}=Uqr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0}),Bt=0,ht=!1,bn=!1,yt=!1,_t=!1,Cn=(st.length>0||Vt)&&!ht&&!bn&&!yt&&!_t;let layout=Iqn({subagentsPanel:Cn});if(a){if(b){if(c){return Cn?(0,A6.jsx)(yer,{agentCount:Math.max(st.length,Bt),rows:st}):null}}}return null}',
 ].join('');
 const semanticImports26581841705Main = 'var Tu={postMessage(){}},U_e=null;function V_e(e){U_e=e}var ku,Au,ju=e((()=>{ku=class e{static getInstance(){return new e}dispatchMessage(e,t){Tu.postMessage({...t,type:e})}deliverMessage(){}dispatchHostMessage(e){this.deliverMessage(e.type,e)}},Au=ku.getInstance(),V_e((e,t)=>{Au.dispatchMessage(e,t)})}));function Bw(e){let f=e,g=!1,h=null,p={},_;return _={activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p},_}export{Au as Jlt,Bw as Z1};';
+
+
+const openedTitle265825Header = [
+  'var codexLocalGroupsOpenedTitle265825PatchVersion=1,codexLocalGroupsHeaderSafe265825PatchVersion=1;',
+  'function Ln(e){let t=(0,Hn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e;',
+  'let[,codexLocalGroupsSetPageTitleRefresh]=(0,Pn.useState)(0);',
+  '(0,Pn.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),',
+  'o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o;return(0,Z.jsx)(`div`,{children:o?o:null})}',
+].join('');
+const dropdownTitle265825Header = 'var On=(0,En.memo)(function(e){let t=(0,Tn.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e,c;return c=(0,Z.jsx)(Ze,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),c}}});';
+const semanticImports265825Main = 'var Ku={postMessage(){}},ySe,bSe,Yu,Xu,Zu=e((()=>{Yu=class e{static instance=null;static getInstance(){return this.instance??=new e,this.instance}dispatchMessage(e,t){Ku.postMessage({...t,type:e})}deliverMessage(){}dispatchHostMessage(e){this.deliverMessage(e.type,e)}},Xu=Yu.getInstance(),aSe((e,t)=>{Xu.dispatchMessage(e,t)})}));function BS(e){let f=e,g=!1,h=null,p={},_;return _={activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p},_}export{Xu as _pt,BS as w8};';
+const metadata265825Host = metadata265814Host.replace('let o=Q9(n)', 'let o=DY(n)') + 'var yP=class{constructor(e){this.onTimeout=e}start(){let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:12e4})},12e4)}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){}};var codexHost=0,Cd=class t{async initializeWebview(e,r,n,o){let s=new yP(()=>{});this.registerClientCoordinationForWebview(e,n,s)}createClientCoordinationSession(e,r,n){let o={};return this.registerAppHostSessionForWebview(e,r,o,n)}registerAppHostSessionForWebview(e,r,n,o){return{startup:{reach:a=>o.handleStartupPhase(a)}}}};';
+const power265825Bundle = 'function mEn(){}function hEn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var gEn,_En,vEn,yEn,PK={};function uEn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=hEn((t?[..._En,vEn]:_En).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=hEn(wEn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function B$(e,t){let n=e?.find(e=>e.model===t),r=n==null?e1e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
+const historyTitle265825Call = '(t=>{let n=IP(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=qT(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=IP(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:LP(i,60)})(r)';
+const projectHistory265825StateDbMethod = 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==WD}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:RO,useStateDbOnly:a},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(Mdt)}}';
+const projectHistory265825Bundle = [
+  'var codexLocalGroupsProjectHistory265825PatchVersion=1,$Ct=class{async loadThreadHydrationState(){}async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265825(this,e)}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return HCt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient)},{modelProviders:e,archived:t,sourceKinds:n})}' + projectHistory265825StateDbMethod + '};',
+  'var VP=t((()=>{}));function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=zP(e);return{id:n,cwd:e.cwd}}var zCt={};',
+  'async function codexLocalGroupsLoadProjectConversations265825(e,t){let n=[],r=new Set,i=null;do{let a=e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0}),o=a.nextCursor;for(let r of a.data){let i=e.threadsById.get(r.id),a=i??r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265810(s.cwd,t)&&n.push(RCt({thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn}))}o!=null&&r.add(o),i=o}while(i!=null);return n}',
+  'function codexLocalGroupsMergeProjectConversations265825(e,t,n){let r=new Map;for(let e of t??[])codexLocalGroupsProjectHistoryMatch265810(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values())}',
+  'function zun(e,t,n){let r=arguments.length>0,i={data:[]},a={getForHostId:()=>e},o=codexLocalGroupsProjectHistoryPath265825(e),s=n===!0&&!!o,c=`local`,l=pR({enabled:s,queryKey:[`codex-local-groups-project-history-265825-v1`,c,o],queryFn:async()=>{let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!Mdt(r)||!codexLocalGroupsProjectHistoryMatch265810(r.cwd,o))continue;n.push(RCt({thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + historyTitle265825Call + ',resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:r.workspaceKind??`project`,hasUnreadTurn:r.hasUnreadTurn??!1}))}return n}});return r?s?{...l,data:codexLocalGroupsMergeProjectConversations265825(l.data,i.data,o)}:i}',
+].join('');
+const subagentMemberships265825 = [
+  'function t4e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+  'function f4e(){let o={},_=null,T=null,M=T==null?o?.modelReasoningEffort??_?.model_reasoning_effort??null:o?.modelReasoningEffort??null;return M}',
+  'function g4e(){let o={setQueryData(){}},n={},a={profile:null},c=null,l=null,oe=async(e,t,n)=>{try{o.setQueryData(n,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}));let s=await fu(c,l).setDefaultModelConfig(e,t,a.profile)}catch{}};return oe}',
+  'function jbr(e){return[...e]}',
+  'function Mbr(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ba(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ba(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}',
+  'function Nbr(){return null}',
+  'function Abr({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:a}){let d=Mbr(t,a,c,n);return d}',
+  'var p4Base=0,p4=Ee($,(e,{get:t})=>{if(e==null)return[];let n=typeof e==`string`?e:e.conversationId,l=t(store,n),m=[],v=Abr({cachedConversations:m,conversationTurns:l,getIndexedSubagentItems:null,parentConversationId:n});return v});export{p4 as Rm};var config={isBackgroundSubagentsEnabled:x=!0};',
+].join('');
+const composerSubagentPanel265825 = [
+  'function gMr(e){let t={},n=e.activeConversationId,r=e.enabled,i=e.includeMentionItems,a=fu(p4,r?n:null),o,s;if(t[0]!==n||t[1]!==i||t[2]!==a){let e=e=>e.parentConversationId===n,r=a.filter(e).filter(yMr);o=i?r:[],s=r.filter(_Mr)}let c=s,l=null,u={rows:a,visibleRows:c,mentionItems:o,firstApproval:l};return u}',
+  'function _Mr(e){return e.isCurrentParentTurn}',
+  'function vMr(){return null}',
+  'function yMr(e){return e.canInteract&&e.displayName.trim().length>0}',
+  'var bMr,xMr,SMr={};',
+  'function a8n(e){let{rows:n,agentCount:r}=e,l={formatMessage(){}};return l.formatMessage({id:`composer.backgroundSubagents.summary`},{count:r??n.length})}',
+  'function uIr(){let {rows:st,visibleRows:mt}=gMr({activeConversationId:oe,enabled:rt,includeMentionItems:at.ui?.active===!0}),qt=!0,Kt=1,St=!1,Dn=!1,Dt=!1,wt=!1,jn=(mt.length>0||qt)&&!St&&!Dn&&!Dt&&!wt;let layout=EHn({portalContent:null,subagentsPanel:jn});return jn?(0,B3.jsx)(a8n,{agentCount:Math.max(mt.length,Kt),canStopAll:qt,rows:mt}):null}',
+].join('');
 
 const SCRIPTS_265810_VARIANTS = [
   {
@@ -647,6 +697,115 @@ module.exports = {
       },
     },
     {
+      name: 'verifies the exact 26.5825.32147 scoped contracts',
+      run() {
+        const header = writeHeader(openedTitle265825Header + dropdownTitle265825Header + metadata265814Header + 'import{zx as M}from"./app-initial-DOdr0yAB.js";import{_pt as codexLocalGroupsMessengerImport,w8 as codexUseExecutionTarget}from"./app-initial-DraLrsJK.js";');
+        const host = writeBundle(metadata265825Host, 'extension.js');
+        const main = writeBundle(semanticImports265825Main + subagentMemberships265825 + composerSubagentPanel265825, 'app-main.js');
+        assert.strictEqual(exactVerifierBuild('26.5825.32147', '26.5825', { 32147: {} }), '32147');
+        assert.doesNotThrow(() => verifyOpenedConversationTitle265825(header));
+        assert.doesNotThrow(() => verifyHeaderTitleOverride265825(header));
+        assert.doesNotThrow(() => verifyExecutionTargetImport265825(header, main));
+        assert.doesNotThrow(() => verifyMetadata265825(host, header));
+        assert.doesNotThrow(() => verifyWatchdog265825(host));
+        assert.doesNotThrow(() => verifyPower265825(writeBundle(power265825Bundle, 'power.js')));
+        assert.doesNotThrow(() => verifyProjectHistory265825(writeBundle(projectHistory265825Bundle, 'server.js')));
+        assert.doesNotThrow(() => verifyComposerSubagentPanel265825(main));
+      },
+    },
+    {
+      name: 'rejects 26.5825.32147 scoped strings nested later duplicates and fake panels',
+      run() {
+        assert.throws(() => exactVerifierBuild('26.5825.32147.1', '26.5825', { 32147: {} }), /不支持的 Codex 26\.5825 build/);
+        assert.throws(() => exactVerifierBuild('26.5825.99999', '26.5825', { 32147: {} }), /不支持的 Codex 26\.5825 build/);
+        const title = openedTitle265825Header.replace('o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o', 'o=`broken`') + 'function later(){return`o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o`}';
+        assert.throws(() => verifyOpenedConversationTitle265825(writeHeader(title)), /已打开会话标题/);
+        const duplicateTitle = openedTitle265825Header + openedTitle265825Header;
+        assert.throws(() => verifyOpenedConversationTitle265825(writeHeader(duplicateTitle)), /已打开会话标题/);
+        const dropdown = dropdownTitle265825Header.replace('titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0', 'titleOverride:void 0') + 'function nested(){return(0,Z.jsx)(Ze,{threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0})}';
+        assert.throws(() => verifyHeaderTitleOverride265825(writeHeader(dropdown)), /下拉会话标题/);
+        const header = writeHeader('import{zx as M}from"./app-initial-DOdr0yAB.js";import{bad as codexLocalGroupsMessengerImport,w8 as codexUseExecutionTarget}from"./app-initial-DraLrsJK.js";');
+        const main = writeBundle(semanticImports265825Main, 'app-main.js');
+        assert.throws(() => verifyExecutionTargetImport265825(header, main), /semantic imports/);
+        const driftedMain = semanticImports265825Main.replace('Xu as _pt', 'Xu as broken') + 'function nested(){return`Xu as _pt`}';
+        const goodHeader = writeHeader('import{zx as M}from"./app-initial-DOdr0yAB.js";import{_pt as codexLocalGroupsMessengerImport,w8 as codexUseExecutionTarget}from"./app-initial-DraLrsJK.js";');
+        assert.throws(() => verifyExecutionTargetImport265825(goodHeader, writeBundle(driftedMain, 'app-main.js')), /semantic imports/);
+        const brokenMessenger = semanticImports265825Main.replace('Xu=Yu.getInstance()', 'Xu=null') + 'function later(){let Xu=Yu.getInstance();return`Xu=Yu.getInstance()`}';
+        assert.throws(() => verifyExecutionTargetImport265825(goodHeader, writeBundle(brokenMessenger, 'app-main.js')), /semantic imports/);
+        const emptyRelay = semanticImports265825Main.replace('aSe((e,t)=>{Xu.dispatchMessage(e,t)})', 'aSe((e,t)=>{})') + 'function wrapper(){0;aSe((e,t)=>{Xu.dispatchMessage(e,t)})}';
+        assert.throws(() => verifyExecutionTargetImport265825(goodHeader, writeBundle(emptyRelay, 'app-main.js')), /semantic imports/);
+        const brokenMetadata = metadata265825Host.replace('e.action==="promptNewGroup"', 'e.action==="brokenNewGroup"');
+        assert.throws(() => verifyMetadata265825(writeBundle(brokenMetadata, 'extension.js'), writeHeader(metadata265814Header)), /Metadata Host/);
+        const watchdog = metadata265825Host.replace('timeoutMs:12e4})},12e4)', 'timeoutMs:3e4})},3e4)');
+        assert.throws(() => verifyWatchdog265825(writeBundle(watchdog, 'extension.js')), /看门狗/);
+        const rawReady = metadata265825Host.replace('e==="renderer_ready"&&this.dispose()', 'String(e).includes(`renderer_ready`)');
+        assert.throws(() => verifyWatchdog265825(writeBundle(rawReady, 'extension.js')), /renderer_ready/);
+        const unreachableStartup = metadata265825Host.replace(
+          'return{startup:{reach:a=>o.handleStartupPhase(a)}}',
+          'if(!1){let x={startup:{reach:a=>o.handleStartupPhase(a)}}}return{brokenStartup:{reach:a=>o.handleStartupPhase(a)}}',
+        );
+        assert.throws(() => verifyWatchdog265825(writeBundle(unreachableStartup, 'extension.js')), /看门狗/);
+        const forcedSlider = power265825Bundle.replace('(t?[..._En,vEn]:_En)', '[..._En,vEn]');
+        assert.throws(() => verifyPower265825(writeBundle(forcedSlider, 'power.js')), /Sol Max Ultra/);
+        const staticMax = power265825Bundle + 'var decoy={id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`,reasoningEffort:`max`}';
+        assert.throws(() => verifyPower265825(writeBundle(staticMax, 'power.js')), /Sol Max Ultra/);
+        const weakMenu = power265825Bundle.replace('r.some(e=>e.reasoningEffort===`ultra`)||r.push', 'r.some(e=>e.reasoningEffort===`ultra`)||brokenPush');
+        assert.throws(() => verifyPower265825(writeBundle(weakMenu, 'power.js')), /Sol Max Ultra/);
+        const powerStart = power265825Bundle.indexOf('function hEn(e,t){');
+        const powerEnd = power265825Bundle.indexOf('function uEn(', powerStart);
+        const powerChunk = power265825Bundle.slice(powerStart, powerEnd);
+        const nestedPower = power265825Bundle.slice(0, powerStart) + power265825Bundle.slice(powerEnd) + `function wrapper(){0;${powerChunk}}`;
+        assert.throws(() => verifyPower265825(writeBundle(nestedPower, 'power.js')), /Sol Max Ultra/);
+        const noStateDb = projectHistory265825Bundle.replace('sourceKinds:RO,useStateDbOnly:a', 'sourceKinds:RO,useStateDbOnly:!1');
+        assert.throws(() => verifyProjectHistory265825(writeBundle(noStateDb, 'server.js')), /state DB/);
+        const nativeHost = projectHistory265825Bundle.replace('useStateDbOnly:a=this.params.hostId!==WD', 'useStateDbOnly:a=this.params.hostId!==broken');
+        assert.throws(() => verifyProjectHistory265825(writeBundle(nativeHost, 'server.js')), /state DB/);
+        const wrongRequest = projectHistory265825Bundle.replace('return HCt(', 'return $Ct(') + 'function HCt(){return`decoy`}';
+        assert.throws(() => verifyProjectHistory265825(writeBundle(wrongRequest, 'server.js')), /state DB/);
+        const brokenMapper = projectHistory265825Bundle.replace('thread:a,hostId:s.hostId', 'thread:s,hostId:s.hostId');
+        assert.throws(() => verifyProjectHistory265825(writeBundle(brokenMapper, 'server.js')), /mapper/);
+        const brokenProducer = projectHistory265825Bundle.replace('workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u', 'workspaceBrowserRoot:c,hasUnreadTurn:u') + 'function nested(){return`function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=\\`project\\`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){`}' + 'var fake=`let{createdAt:d,updatedAt:f,recencyAt:p}=zP(e);cwd:e.cwd`';
+        assert.throws(() => verifyProjectHistory265825(writeBundle(brokenProducer, 'server.js')), /mapper/);
+        const mapperStart = projectHistory265825Bundle.indexOf('function RCt(');
+        const mapperEnd = projectHistory265825Bundle.indexOf('async function codexLocalGroupsLoadProjectConversations265825', mapperStart);
+        const mapperChunk = projectHistory265825Bundle.slice(mapperStart, mapperEnd);
+        const nestedMapper = projectHistory265825Bundle.slice(0, mapperStart) + projectHistory265825Bundle.slice(mapperEnd) + `function wrapper(){0;${mapperChunk}}`;
+        assert.throws(() => verifyProjectHistory265825(writeBundle(nestedMapper, 'server.js')), /mapper/);
+        const fakeStoreClass = projectHistory265825Bundle.replace('$Ct=class{', 'brokenStore=class{') + 'var fake=`$Ct=class{async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265825(this,e)}}`';
+        assert.throws(() => verifyProjectHistory265825(writeBundle(fakeStoreClass, 'server.js')), /state DB/);
+        const fakeStore = projectHistory265825Bundle.replace(projectHistory265825StateDbMethod, projectHistory265825StateDbMethod.replace('useStateDbOnly:a', 'useStateDbOnly:!1')) + 'class FakePanel{' + projectHistory265825StateDbMethod + '}';
+        assert.throws(() => verifyProjectHistory265825(writeBundle(fakeStore, 'server.js')), /state DB/);
+        const base = subagentMemberships265825 + composerSubagentPanel265825;
+        const validation = base.replace('r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)', 'r?.model===`broken`') + 'function nested(){function t4e(){return`gpt-5.6-sol`}}';
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(validation, 'app-main.js')), /Sol reasoning validation/);
+        const producer = base.replace('e.type===`subAgentActivity`', 'e.type===`brokenActivity`') + 'function nested(){function Mbr(){return`subAgentActivity`}}';
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(producer, 'app-main.js')), /membership/);
+        const selector = base.replace('p4=Ee(', 'p4=broken(') + 'function later(){let p4=Ee($,(e,{get:t})=>Abr({conversationTurns:t(store,e)}));return p4}';
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(selector, 'app-main.js')), /membership/);
+        const panel = base.replace('jn=(mt.length>0||qt)&&!St&&!Dn&&!Dt&&!wt', 'jn=!1') + 'function FakePanel(){let jn=(mt.length>0||qt)&&!St&&!Dn&&!Dt&&!wt;return jn?(0,B3.jsx)(a8n,{rows:mt}):null}';
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(panel, 'app-main.js')), /子 agent membership 或面板/);
+        const titleTemplate = openedTitle265825Header.replace('function Ln', 'function brokenLn') + 'var decoy="function Ln(e){let t=(0,Hn.c)(64),{desktopDeepLinkConversationId:a,title:o}=e;o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o;return(0,Z.jsx)(`div`,{children:o?o:null})}"';
+        assert.throws(() => verifyOpenedConversationTitle265825(writeHeader(titleTemplate)), /已打开会话标题/);
+        const onlyTemplateMbr = base.replace('function Mbr', 'function brokenMbr') + 'var decoy="function Mbr(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ba(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ba(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}"';
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(onlyTemplateMbr, 'app-main.js')), /membership/);
+        const nestedMbr = base.replace('function Mbr', 'function brokenMbr') + 'function wrapper(){function Mbr(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=ba(e.agentThreadId),a=n?.get(r);i.set(r,{conversationId:r,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=ba(r),a=n?.get(e);i.has(e)||i.set(e,{conversationId:e,parentConversationId:t})}}return Array.from(i.values())}}';
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(nestedMbr, 'app-main.js')), /membership/);
+        const membershipStart = base.indexOf('function Mbr(e,t,n,r){');
+        const membershipEnd = base.indexOf('function Abr(', membershipStart);
+        const membershipChunk = base.slice(membershipStart, membershipEnd);
+        const nestedMemberships = base.slice(0, membershipStart) + base.slice(membershipEnd) + `function wrapper(){0;${membershipChunk}}`;
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(nestedMemberships, 'app-main.js')), /membership/);
+        const passiveFilter = base.replace('function yMr(e){return e.canInteract&&e.displayName.trim().length>0}', 'function yMr(e){return!0}');
+        assert.throws(() => verifyComposerSubagentPanel265825(writeBundle(passiveFilter, 'app-main.js')), /membership/);
+        const onlyTemplatePower = power265825Bundle.replace('function hEn', 'function brokenHEn') + 'var decoy="function hEn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}"';
+        assert.throws(() => verifyPower265825(writeBundle(onlyTemplatePower, 'power.js')), /Sol Max Ultra/);
+        const wrongModel = power265825Bundle.replace('return t===`gpt-5.6-sol`&&', 'return t===`gpt-5.6-terra`&&');
+        assert.throws(() => verifyPower265825(writeBundle(wrongModel, 'power.js')), /Sol Max Ultra/);
+        const onlyTemplateMapper = projectHistory265825Bundle.replace('function RCt', 'function brokenRCt') + 'var decoy="function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=zP(e);return{id:n,cwd:e.cwd}}var zCt="';
+        assert.throws(() => verifyProjectHistory265825(writeBundle(onlyTemplateMapper, 'server.js')), /mapper/);
+      },
+    },
+    {
       name: 'verifies the exact 26.5818.41705 scoped contracts',
       run() {
         assert.doesNotThrow(() => verifyOpenedConversationTitle265818(writeHeader(openedTitle26581841705Header), '41705'));
@@ -905,7 +1064,7 @@ function writeHeader(text) {
 }
 
 function writeBundle(text, filename) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-groups-verify-'));
+  const dir = registerTemporaryPath(fs.mkdtempSync(path.join(os.tmpdir(), 'codex-groups-verify-')));
   const bundlePath = path.join(dir, filename);
   fs.writeFileSync(bundlePath, text);
   return bundlePath;

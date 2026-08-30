@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.0.63 - 2026-08-30
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5825.32147`；未知 5825 build、带后缀版本和未来 minor 在恢复备份或写入前继续 fail closed。
+- 按真实调用链更新 Host `DY/yP/Cd/new kI`、Header `_pt/w8/On/Ze/Ln`、Main `Mbr/Abr/p4/gMr/uIr/a8n`、Power `hEn/uEn/B$` 与 History `zun/Vun/RCt/HCt`。
+- 保留标题双消费、设置分组、在分组中新建会话、项目历史、V1/V2 transcript 与 composer 面板、以及仅限 `gpt-5.6-sol` 的 Max/Ultra；不修改用户 Multi-Agent 配置或 `canInteract`。
+- engine 与 external verifier 同时拒绝 string、later、不可达 startup、空 messenger relay，以及被整体移入 nested wrapper 的 membership、Power、History 代码块。
+- 新增测试和升级工作区的归属清理：pass、fail、throw、no-match 都回收临时目录，npm/Node compile cache、official、patched、rollback、VSIX、review、probe 和 log 产物由命令级 finally 清理。
+
 ## v0.0.62 - 2026-08-24
 
 - 修复 Codex `26.5818.41705` 最近会话显示 `No chats yet`：项目历史不再把 `ThreadSummary` 直接传给真实 `bdt({ thread, ... })`，load 与 fallback 都按原生 mapper 契约传入 raw thread。
