@@ -47,7 +47,16 @@ const CODEX_265818_VERIFIER_VARIANTS = {
     powerUltraCall: 'bCn((t?[...SCn,CCn]:SCn).filter',
   },
 };
-const CODEX_265825_VERIFIER_VARIANTS = { 32147: {} };
+const CODEX_265825_VERIFIER_VARIANTS = {
+  32147: {
+    serverAsset: 'app-initial-DOdr0yAB.js', mainAsset: 'app-initial-DraLrsJK.js', parser: 'DY', childProcess: 'SCe',
+    rowsView: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:L,activeId:y,onClose:o,row:On,onActiveArchiveStart:m}',
+  },
+  51511: {
+    serverAsset: 'app-initial-DzcK9AhZ.js', mainAsset: 'app-initial-yrsrisSW.js', parser: 'NY', childProcess: 'wCe',
+    rowsView: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:L,activeId:b,onClose:a,row:On,onActiveArchiveStart:m}',
+  },
+};
 const HISTORY_265818_TITLE_CALL = '(t=>{let n=$j(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=sw(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=$j(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:sA(i,60)})(r)';
 const HISTORY_265818_41705_TITLE_CALL = '(t=>{let n=vM(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=$C(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=vM(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:xA(i,60)})(r)';
 
@@ -258,6 +267,7 @@ function main() {
   const v265810 = CODEX_265810_VERIFIER_VARIANTS[codex265810Build] || null;
   const v265814 = CODEX_265814_VERIFIER_VARIANTS[codex265814Build] || null;
   const v265818 = CODEX_265818_VERIFIER_VARIANTS[codex265818Build] || null;
+  const v265825 = CODEX_265825_VERIFIER_VARIANTS[codex265825Build] || null;
   const v26581x = v265818 || v265814 || v265810;
   const emptyMetadata = 'var codexLocalGroupsInitialMeta={"version":1,"conversations":{}}';
   assertContains(target.extensionJsPath, 'codexLocalGroupsPatchVersion=17');
@@ -278,7 +288,7 @@ function main() {
   } else if (fallbacks.length) {
     throw new Error(`存在过期 Responses WebSocket fallback：${target.extensionJsPath}`);
   }
-  const headerMarker = is265825 ? 'codexLocalGroupsHeaderSafe265825PatchVersion=1' : is265810 || is265814 || is265818 ? 'codexLocalGroupsHeaderSafe265810PatchVersion=1' : is265803 ? 'codexLocalGroupsHeaderSafe265803PatchVersion=1' : `codexLocalGroupsHeaderSafePatchVersion=${is265730 ? 16 : is26727 ? 15 : 14}`;
+  const headerMarker = is265825 ? 'codexLocalGroupsHeaderSafe265825PatchVersion=2' : is265810 || is265814 || is265818 ? 'codexLocalGroupsHeaderSafe265810PatchVersion=1' : is265803 ? 'codexLocalGroupsHeaderSafe265803PatchVersion=1' : `codexLocalGroupsHeaderSafePatchVersion=${is265730 ? 16 : is26727 ? 15 : 14}`;
   const rowMarker = is265825 ? 'On=(0,En.memo)(function(e){let t=(0,Tn.c)(25),' : is265810 || is265814 || is265818 || is265803 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(25),' : is265730 ? 'An=(0,Dn.memo)(function(e){let t=(0,En.c)(24),' : is26727 ? 'qn=(0,Wn.memo)(function(e){let t=(0,Un.c)(24),' : 'Jn=(0,Gn.memo)(function(e){let t=(0,Wn.c)(24),';
   const titleSlot = is265810 || is265814 || is265818 || is265803 ? 24 : 23;
   const rowConversation = codex265818Build === '41705' ? 'r' : 'n';
@@ -329,9 +339,9 @@ function main() {
   assertContains(target.headerPath, '收起到最近 15 条');
   assertContains(target.headerPath, '收起到最近 5 条');
   assertContains(target.headerPath, '展开更多');
-  const projectRowsViewRuntime = is265825 ? '$' : is265810 || is265814 || is265818 || is265803 || is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
+  const projectRowsViewRuntime = is265825 ? 'Pn' : is265810 || is265814 || is265818 || is265803 || is265730 ? 'Dn' : is26727 ? 'Wn' : 'Gn';
   assertContains(target.headerPath, `function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,${projectRowsViewRuntime}.useState)(0);return(0,${projectRowsViewRuntime}.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(\`codex-local-groups-refresh\`,e),()=>window.removeEventListener(\`codex-local-groups-refresh\`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}`);
-  const projectRowsView = is265825 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:L,activeId:y,onClose:o,row:On,onActiveArchiveStart:m}' : is265810 || is265814 || is265818 ? v26581x.projectRowsView : is265803 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N' : is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
+  const projectRowsView = is265825 ? v265825.rowsView : is265810 || is265814 || is265818 ? v26581x.projectRowsView : is265803 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:N' : is265730 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:P' : is26727 ? '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:te' : '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F';
   assertContains(target.headerPath, projectRowsView);
   assertNotContains(target.headerPath, 'project-more-');
   assertNotContains(target.headerPath, 'codex-local-groups-expanded-projects-v1');
@@ -427,15 +437,14 @@ function main() {
   }
 
   if (is265825) {
-    if (codex265825Build !== '32147') throw new Error(`不支持的 Codex 26.5825 build：${target.version}`);
-    verifyOpenedConversationTitle265825(target.headerPath);
-    verifyHeaderTitleOverride265825(target.headerPath);
-    verifyComposerSubagentPanel265825(target.appMainPath);
-    verifyWatchdog265825(target.extensionJsPath);
-    verifyExecutionTargetImport265825(target.headerPath, target.appMainPath);
-    verifyProjectHistory265825(target.appServerManagerSignalsPath);
-    verifyPower265825(target.appStatsigPath);
-    verifyMetadata265825(target.extensionJsPath, target.headerPath);
+    verifyOpenedConversationTitle265825(target.headerPath, codex265825Build);
+    verifyHeaderTitleOverride265825(target.headerPath, codex265825Build);
+    verifyComposerSubagentPanel265825(target.appMainPath, codex265825Build);
+    verifyWatchdog265825(target.extensionJsPath, codex265825Build);
+    verifyExecutionTargetImport265825(target.headerPath, target.appMainPath, codex265825Build);
+    verifyProjectHistory265825(target.appServerManagerSignalsPath, codex265825Build);
+    verifyPower265825(target.appStatsigPath, codex265825Build);
+    verifyMetadata265825(target.extensionJsPath, target.headerPath, codex265825Build);
     assertContains(target.appMainPath, 'codexLocalGroupsCodexUi265825PatchVersion=1');
     assertContains(target.appStatsigPath, 'codexLocalGroupsPower265825PatchVersion=1');
     assertContains(target.appServerManagerSignalsPath, 'codexLocalGroupsProjectHistory265825PatchVersion=1');
@@ -1046,76 +1055,84 @@ function subagentMembership265818Holds(text) {
 }
 
 
-function verifyOpenedConversationTitle265825(headerPath) {
+function verifyOpenedConversationTitle265825(headerPath, build = '32147') {
   const text = fs.readFileSync(headerPath, 'utf8');
   const scopes = minifiedExactCodeFunctionScopes(text, 'function Ln(e){');
   const scope = scopes.length === 1 ? scopes[0] : '';
   const expected = 'o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o';
   if (!text.includes('codexLocalGroupsOpenedTitle265825PatchVersion=1') || !scope.includes('desktopDeepLinkConversationId:a,title:o') || !scope.includes(expected) || !scope.includes('children:o?')) {
-    throw new Error(`缺少补丁契约：${headerPath} 26.5825.32147 已打开会话标题刷新`);
+    throw new Error(`缺少补丁契约：${headerPath} 26.5825.${build} 已打开会话标题刷新`);
   }
 }
 
-function verifyHeaderTitleOverride265825(headerPath) {
+function verifyHeaderTitleOverride265825(headerPath, build = '32147') {
   const text = fs.readFileSync(headerPath, 'utf8');
   const rows = minifiedExactCodeFunctionScopes(text, 'On=(0,En.memo)(function(e){');
   const row = rows.length === 1 ? rows[0] : '';
+  const views = minifiedExactCodeFunctionScopes(text, 'function codexLocalGroupsProjectRowsView(');
+  const view = views.length === 1 ? views[0] : '';
   const local = minifiedNestedBlock(row, [['switch(n.kind){', 1], ['case`local`:{', 1]]);
   const props = minifiedAnchoredBlock(local, '(0,Z.jsx)(Ze,{', 1);
   const direct = minifiedCodeAtDepth(props, 1, false);
   const expected = 'conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,):void 0';
-  if (!text.includes('codexLocalGroupsHeaderSafe265825PatchVersion=1') || !direct.includes(expected)) {
-    throw new Error(`缺少补丁契约：${headerPath} 26.5825.32147 下拉会话标题`);
+  if (!text.includes('codexLocalGroupsHeaderSafe265825PatchVersion=2') || !direct.includes(expected) || !view.includes('(0,Pn.useState)(0)') || !view.includes('(0,Pn.useEffect)(')) {
+    throw new Error(`缺少补丁契约：${headerPath} 26.5825.${build} 下拉会话标题`);
   }
 }
 
-function verifyExecutionTargetImport265825(headerPath, appMainPath) {
+function verifyExecutionTargetImport265825(headerPath, appMainPath, build = '32147') {
+  const v = CODEX_265825_VERIFIER_VARIANTS[build];
   const header = fs.readFileSync(headerPath, 'utf8');
-  const server = [...header.matchAll(/import\{([^}]+)\}from"\.\/app-initial-DOdr0yAB\.js";/g)];
-  const main = [...header.matchAll(/import\{([^}]+)\}from"\.\/app-initial-DraLrsJK\.js";/g)];
+  const server = [...header.matchAll(new RegExp(`import\\{([^}]+)\\}from"\\./${v.serverAsset.replace('.', '\\.')}";`, 'g'))];
+  const main = [...header.matchAll(new RegExp(`import\\{([^}]+)\\}from"\\./${v.mainAsset.replace('.', '\\.')}";`, 'g'))];
   const serverBindings = server.length === 1 ? server[0][1] : '';
   const mainBindings = main.length === 1 ? main[0][1] : '';
   const hasServerHook = /(?:^|,)zx as M(?:,|$)/.test(serverBindings);
   const hasMessenger = /(?:^|,)_pt as codexLocalGroupsMessengerImport(?:,|$)/.test(mainBindings);
   const hasTarget = /(?:^|,)w8 as codexUseExecutionTarget(?:,|$)/.test(mainBindings);
   const mainText = appMainPath && fs.existsSync(appMainPath) ? fs.readFileSync(appMainPath, 'utf8') : '';
-  if (!hasServerHook || !hasMessenger || !hasTarget || !semanticMain265825Holds(mainText)) {
-    throw new Error(`缺少补丁契约：${headerPath} 26.5825.32147 Header semantic imports`);
+  if (!hasServerHook || !hasMessenger || !hasTarget || !semanticMain265825Holds(mainText, build)) {
+    throw new Error(`缺少补丁契约：${headerPath} 26.5825.${build} Header semantic imports`);
   }
 }
 
-function semanticMain265825Holds(text) {
-  const exports = minifiedExactCodeFunctionScopes(text, 'export{').filter((scope) => scope.includes('Xu as _pt') || scope.includes('BS as w8'));
-  const initializerScopes = minifiedExactCodeFunctionScopes(text, 'Zu=e((()=>{');
-  const targets = minifiedExactCodeFunctionScopes(text, 'function BS(e){');
+function semanticMain265825Holds(text, build) {
+  const current = build === '51511';
+  const className = current ? 'nd' : 'Yu', singleton = current ? 'rd' : 'Xu';
+  const initializerName = current ? 'id' : 'Zu', relayName = current ? 'tSe' : 'aSe', targetName = current ? 'KS' : 'BS';
+  const exports = minifiedExactCodeFunctionScopes(text, 'export{').filter((scope) => scope.includes(`${singleton} as _pt`) || scope.includes(`${targetName} as w8`));
+  const initializerScopes = minifiedExactCodeFunctionScopes(text, `${initializerName}=e((()=>{`);
+  const targets = minifiedExactCodeFunctionScopes(text, `function ${targetName}(e){`);
   const bindings = exports.length === 1 ? exports[0] : '';
   const initializer = initializerScopes.length === 1 ? initializerScopes[0] : '';
-  const messenger = minifiedAnchoredBlock(initializer, 'Yu=class e{', 1);
+  const messenger = minifiedAnchoredBlock(initializer, `${className}=class e{`, 1);
   const dispatch = minifiedAnchoredBlock(messenger, 'dispatchMessage(e,t){', 1);
-  const relay = minifiedAnchoredBlock(initializer, 'aSe((e,t)=>{', 1);
+  const relay = minifiedAnchoredBlock(initializer, `${relayName}((e,t)=>{`, 1);
   const hostDispatch = minifiedCodeAtDepth(minifiedAnchoredBlock(messenger, 'dispatchHostMessage(e){', 1), 1, false);
   const target = targets.length === 1 ? targets[0] : '';
   const targetResult = minifiedCodeAtDepth(minifiedAnchoredBlock(target, '_={', 1), 1, false);
   const direct = minifiedCodeAtDepth(initializer, 1, false);
-  return bindings.includes('Xu as _pt') && bindings.includes('BS as w8') && direct.includes('Xu=Yu.getInstance(),aSe((e,t)=>)')
-    && minifiedCodeAtDepth(relay, 1, false) === 'Xu.dispatchMessage(e,t)'
-    && dispatch.includes('Ku.postMessage({...t,type:e})') && hostDispatch === 'this.deliverMessage(e.type,e)'
+  return bindings.includes(`${singleton} as _pt`) && bindings.includes(`${targetName} as w8`) && direct.includes(`${singleton}=${className}.getInstance(),${relayName}((e,t)=>)`)
+    && minifiedCodeAtDepth(relay, 1, false) === `${singleton}.dispatchMessage(e,t)`
+    && dispatch.includes('postMessage({...t,type:e})') && hostDispatch === 'this.deliverMessage(e.type,e)'
     && targetResult === 'activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p';
 }
 
-function verifyMetadata265825(extensionPath, headerPath) {
+function verifyMetadata265825(extensionPath, headerPath, build = '32147') {
   const header = fs.readFileSync(headerPath, 'utf8');
   const host = fs.readFileSync(extensionPath, 'utf8');
   const headerAnchors = ['function codexLocalGroupsPromptTitle(e,t,n){', 'function codexLocalGroupsPromptGroup(e,t){', 'function codexLocalGroupsPromptNewGroup(e){', 'function codexLocalGroupsStartConversationInGroup(e,t){'];
   const hostAnchors = ['function codexLocalGroupsPromptConversation(e,t){', 'function codexLocalGroupsSavePromptGroup(e,t,r,n,o){', 'function codexLocalGroupsPromptNewGroup(e,t){', 'function codexLocalGroupsHandleWebviewMessage(e,t){'];
   const headerUnique = headerAnchors.every((anchor) => minifiedExactCodeFunctionScopes(header, anchor).length === 1);
   const hostUnique = hostAnchors.every((anchor) => minifiedExactCodeFunctionScopes(host, anchor).length === 1);
-  if (!headerUnique || !hostUnique || !headerMetadata265814Holds(header) || !hostMetadata265814Holds(host, 'DY')) {
-    throw new Error(`缺少补丁契约：${extensionPath} 26.5825.32147 Metadata Host 回调`);
+  const parser = CODEX_265825_VERIFIER_VARIANTS[build]?.parser;
+  if (!headerUnique || !hostUnique || !headerMetadata265814Holds(header) || !hostMetadata265814Holds(host, parser)) {
+    throw new Error(`缺少补丁契约：${extensionPath} 26.5825.${build} Metadata Host 回调`);
   }
 }
 
-function verifyWatchdog265825(extensionPath) {
+function verifyWatchdog265825(extensionPath, build = '32147') {
+  const v = CODEX_265825_VERIFIER_VARIANTS[build];
   const text = fs.readFileSync(extensionPath, 'utf8');
   const watchdogAnchor = 'var yP=class{';
   const hostAnchor = 'Cd=class t{';
@@ -1131,70 +1148,86 @@ function verifyWatchdog265825(extensionPath) {
   const startup = minifiedExactCodeFunctionScopes(hostData, 'startup:{', 1);
   const direct = ready.length === 1 ? minifiedCodeAtDepth(ready[0], 1) : '';
   const unique = text.split(watchdogAnchor).length === 2 && text.split(hostAnchor).length === 2;
-  if (!unique || !/[};]/.test(text[watchdogIndex - 1]) || text[hostIndex - 1] !== ',' || !watchdog.includes('timeoutMs:12e4})},12e4)') || watchdog.includes('timeoutMs:3e4})},3e4)') || startup.length !== 1 || startup[0] !== 'startup:{reach:a=>o.handleStartupPhase(a)}' || direct !== 'e==="renderer_ready"&&this.dispose()') {
-    throw new Error(`缺少补丁契约：${extensionPath} 26.5825.32147 yP 看门狗或 renderer_ready 调用链`);
+  const adjacent = text.includes(watchdog + `;var ${v.childProcess}=require("node:child_process")`);
+  if (!unique || !adjacent || !/[};]/.test(text[watchdogIndex - 1]) || text[hostIndex - 1] !== ',' || !watchdog.includes('timeoutMs:12e4})},12e4)') || watchdog.includes('timeoutMs:3e4})},3e4)') || startup.length !== 1 || startup[0] !== 'startup:{reach:a=>o.handleStartupPhase(a)}' || direct !== 'e==="renderer_ready"&&this.dispose()') {
+    throw new Error(`缺少补丁契约：${extensionPath} 26.5825.${build} yP 看门狗或 renderer_ready 调用链`);
   }
 }
 
-function verifyPower265825(statsigPath) {
+function verifyPower265825(statsigPath, build = '32147') {
+  const current = build === '51511';
   const text = fs.readFileSync(statsigPath, 'utf8');
-  const picker = minifiedFunctionScope(text, 'mEn');
-  const filters = minifiedExactCodeFunctionScopes(text, 'function hEn(e,t){');
-  const sliders = minifiedExactCodeFunctionScopes(text, 'function uEn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){');
+  const pickerName = current ? 'mJ' : 'mEn', filterName = current ? 'Nwn' : 'hEn', sliderName = current ? 'Own' : 'uEn';
+  const powers = current ? 'Fwn' : '_En', ultraObject = current ? 'Iwn' : 'vEn';
+  const menuFallback = current ? 'z$e' : 'e1e', menuFilter = current ? 'gS' : '$x';
+  const pickers = minifiedExactCodeFunctionScopes(text, `function ${pickerName}(`);
+  const filters = minifiedExactCodeFunctionScopes(text, `function ${filterName}(e,t){`);
+  const sliders = minifiedExactCodeFunctionScopes(text, `function ${sliderName}(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){`);
   const menus = minifiedExactCodeFunctionScopes(text, 'function B$(e,t){');
   const filter = filters.length === 1 ? filters[0] : '';
   const slider = sliders.length === 1 ? sliders[0] : '';
   const menu = menus.length === 1 ? menus[0] : '';
-  const native = 'function hEn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}';
+  const native = `function ${filterName}(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}`;
   const max = 'r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`})';
   const ultra = 'r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})';
   const afterFilter = text.slice(text.indexOf(filter) + filter.length);
+  const initializer = current ? 'var Pwn,Fwn,Iwn,Lwn,vJ=' : 'var gEn,_En,vEn,yEn,PK=';
   const guard = 'return t===`gpt-5.6-sol`&&(' + max + ',' + ultra + '),r';
-  if (text.split('function mEn(').length !== 2 || !text.includes(picker + filter) || filter !== native || !afterFilter.startsWith('var gEn,_En,vEn,yEn,PK=') || !slider.includes('hEn((t?[..._En,vEn]:_En).filter') || slider.includes('gpt-5.6-sol') || !menu.includes('n==null?e1e.map') || !menu.includes('n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort))') || !menu.includes(guard) || text.includes('{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`')) {
-    throw new Error(`缺少补丁契约：${statsigPath} 26.5825.32147 Sol Max Ultra`);
+  const nativeChain = current ? pickers.length === 1 : text.includes(pickers[0] + filter);
+  if (!nativeChain || filter !== native || !afterFilter.startsWith(initializer) || !slider.includes(`${filterName}((t?[...${powers},${ultraObject}]:${powers}).filter`) || slider.includes('gpt-5.6-sol') || !menu.includes(`n==null?${menuFallback}.map`) || !menu.includes(`n.supportedReasoningEfforts.filter(e=>${menuFilter}(e.reasoningEffort))`) || !menu.includes(guard) || text.includes('{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`')) {
+    throw new Error(`缺少补丁契约：${statsigPath} 26.5825.${build} Sol Max Ultra`);
   }
 }
 
-function verifyProjectHistory265825(serverPath) {
+function verifyProjectHistory265825(serverPath, build = '32147') {
+  const current = build === '51511';
   const text = fs.readFileSync(serverPath, 'utf8');
-  const mapperAnchor = 'function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){';
+  const mapperName = current ? 'BCt' : 'RCt', hookName = current ? 'Vun' : 'zun';
+  const storeClass = current ? 'twt' : '$Ct', hostConstant = current ? 'UD' : 'WD';
+  const sourceKinds = current ? 'LO' : 'RO', visible = current ? 'Pdt' : 'Mdt';
+  const queryName = current ? 'fR' : 'pR', requestName = current ? 'WCt' : 'HCt';
+  const timestamps = current ? 'RP' : 'zP', predecessor = current ? 'var BP=t((()=>{}));' : 'var VP=t((()=>{}));';
+  const successor = current ? 'var VCt=' : 'var zCt=';
+  const mapperAnchor = `function ${mapperName}({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=\`project\`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){`;
   const loads = minifiedExactCodeFunctionScopes(text, 'async function codexLocalGroupsLoadProjectConversations265825(e,t){');
   const merges = minifiedExactCodeFunctionScopes(text, 'function codexLocalGroupsMergeProjectConversations265825(e,t,n){');
-  const hooks = minifiedExactCodeFunctionScopes(text, 'function zun(e,t,n){');
+  const hooks = minifiedExactCodeFunctionScopes(text, `function ${hookName}(e,t,n){`);
   const mapperScopes = minifiedExactCodeFunctionScopes(text, mapperAnchor);
-  const scope = projectHistory265825StoreScope(text);
-  const recent = minifiedAnchoredBlock(scope, 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==WD}){', 1);
+  const scope = projectHistory265825StoreScope(text, storeClass);
+  const recent = minifiedAnchoredBlock(scope, `async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==${hostConstant}}){`, 1);
   const request = minifiedAnchoredBlock(recent, 'let r={', 1);
   const all = minifiedAnchoredBlock(scope, 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){', 1);
   const load = loads.length === 1 ? loads[0] : '';
   const hook = hooks.length === 1 ? hooks[0] : '';
   const mapperScope = mapperScopes.length === 1 ? mapperScopes[0] : '';
   const rows = minifiedNestedBlock(load, [['do{', 1], ['for(let r of a.data){', 1]]);
-  const loaded = minifiedAnchoredBlock(rows, 'n.push(RCt({', 1);
-  const query = minifiedNestedBlock(hook, [['pR({', 1], ['queryFn:async()=>{', 1]]);
+  const loaded = minifiedAnchoredBlock(rows, `n.push(${mapperName}({`, 1);
+  const query = minifiedNestedBlock(hook, [[`${queryName}({`, 1], ['queryFn:async()=>{', 1]]);
   const loop = minifiedAnchoredBlock(query, 'for(let r of await e.listAllThreads({modelProviders:null})){', 1);
-  const fallback = minifiedAnchoredBlock(loop, 'n.push(RCt({', 1);
+  const fallback = minifiedAnchoredBlock(loop, `n.push(${mapperName}({`, 1);
   const title = '(t=>{let n=IP(String(t.name??``).trim())||String(t.name??``).trim()||null;if(n)return n;let r=qT(String(t.preview??``));if(r==null&&String(t.preview??``).trimStart().startsWith(`<codex_delegation>`))return null;let i=IP(String(r?.input??t.preview??``).trim())||String(r?.input??t.preview??``).trim()||null;return i==null?null:LP(i,60)})(r)';
-  const stateDb = minifiedCodeAtDepth(request, 1, false) === 'limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:RO,useStateDbOnly:a';
+  const titleCall = current ? 'zCt(r,FP)' : title;
+  const stateDb = minifiedCodeAtDepth(request, 1, false) === `limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:${sourceKinds},useStateDbOnly:a`;
   const afterMapper = text.slice(text.indexOf(mapperScope) + mapperScope.length);
-  const timestamp = minifiedFunctionScope(text, 'zP');
-  const mapperParent = text.includes('var VP=t((()=>{}));' + mapperScope) || text.split('function zP(').length === 2 && text.includes(timestamp + mapperScope);
-  const mapper = mapperParent && mapperScope.includes('let{createdAt:d,updatedAt:f,recencyAt:p}=zP(e)') && mapperScope.includes('cwd:e.cwd') && afterMapper.startsWith('var zCt=') && loaded.includes('thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title') && fallback.includes('thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + title);
+  const mapperParent = text.includes(predecessor + mapperScope);
+  const mapper = mapperParent && mapperScope.includes(`let{createdAt:d,updatedAt:f,recencyAt:p}=${timestamps}(e)`) && mapperScope.includes('cwd:e.cwd') && afterMapper.startsWith(successor) && loaded.includes('thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title') && fallback.includes('thread:r,hostId:c,conversationId:i,turns:[],threadTitle:' + titleCall);
   const isolated = load.includes('e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0})') && hook.includes('o=codexLocalGroupsProjectHistoryPath265825(e),s=n===!0&&!!o') && hook.includes('enabled:s,queryKey:[`codex-local-groups-project-history-265825-v1`,c,o]') && hook.includes('codexLocalGroupsMergeProjectConversations265825(l.data,i.data,o)');
-  if (!text.includes('codexLocalGroupsProjectHistory265825PatchVersion=1') || merges.length !== 1 || !scope || !stateDb || !minifiedCodeAtDepth(all, 1, false).includes('return HCt(')) {
-    throw new Error(`缺少补丁契约：${serverPath} 26.5825.32147 project history state DB`);
+  const visibility = loop.includes(`if(!${visible}(r)||!codexLocalGroupsProjectHistoryMatch265825(r.cwd,o))continue`);
+  if (!text.includes('codexLocalGroupsProjectHistory265825PatchVersion=1') || merges.length !== 1 || !scope || !stateDb || !minifiedCodeAtDepth(all, 1, false).includes(`return ${requestName}(`) || !visibility) {
+    throw new Error(`缺少补丁契约：${serverPath} 26.5825.${build} project history state DB`);
   }
-  if (!mapper || !isolated || mapperScopes.length !== 1) throw new Error(`缺少补丁契约：${serverPath} 26.5825.32147 project history mapper`);
+  if (!mapper || !isolated || mapperScopes.length !== 1) throw new Error(`缺少补丁契约：${serverPath} 26.5825.${build} project history mapper`);
 }
 
-function projectHistory265825StoreScope(text) {
-  const scopes = minifiedExactCodeFunctionScopes(text, '$Ct=class{');
+function projectHistory265825StoreScope(text, storeClass = '$Ct') {
+  const scopes = minifiedExactCodeFunctionScopes(text, `${storeClass}=class{`);
   const scope = scopes.length === 1 ? scopes[0] : '';
   const patched = 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265825(this,e)}';
   return scope && scope.includes(patched) ? scope : '';
 }
 
-function verifyComposerSubagentPanel265825(appMainPath) {
+function verifyComposerSubagentPanel265825(appMainPath, build = '32147') {
+  if (build === '51511') return verifyComposerSubagentPanel26582551511(appMainPath);
   const text = fs.readFileSync(appMainPath, 'utf8');
   const selectorAnchor = 'p4=Ee($,(e,{get:t})=>{';
   const selectors = minifiedExactFunctionScopes(text, selectorAnchor);
@@ -1225,13 +1258,50 @@ function verifyComposerSubagentPanel265825(appMainPath) {
   const afterTurn = text.slice(text.indexOf(turnFilter) + turnFilter.length);
   const afterInteract = text.slice(text.indexOf(interactFilter) + interactFilter.length);
   const exports = minifiedExactCodeFunctionScopes(text, 'export{');
-  verifySolContracts265825(text, appMainPath);
+  verifySolContracts265825(text, appMainPath, build);
   if (!activityDirect.includes('ba(e.agentThreadId)') || !activityDirect.includes('i.set(r,)') || !spawnDirect.includes('ba(r)') || !spawnDirect.includes('i.has(e)||i.set(e,)') || !producerDirect.includes('return Array.from(i.values())') || text.split('function jbr(').length !== 2 || !text.includes(sorter + producer) || !afterProducer.startsWith('function Nbr(') || !aggregator.includes('Mbr(t,') || text[selectorIndex - 1] !== ',' || !selector.includes('Abr({cachedConversations:m,conversationTurns:l') || !selector.includes('parentConversationId:n') || !exports.some((scope) => scope.includes('p4 as Rm')) || !hook.includes('fu(p4,r?n:null)') || !hook.includes('.filter(yMr)') || !hook.includes('.filter(_Mr)') || !afterHook.startsWith('function _Mr(') || minifiedCodeAtDepth(turnFilter, 1, false) !== 'return e.isCurrentParentTurn' || !afterTurn.startsWith('function vMr(') || minifiedCodeAtDepth(interactFilter, 1, false) !== 'return e.canInteract&&e.displayName.trim().length>0' || !afterInteract.startsWith('var bMr,xMr,SMr=') || !composer.includes('jn=(mt.length>0||qt)&&!St&&!Dn&&!Dt&&!wt') || !composer.includes('EHn({') || !composer.includes('subagentsPanel:jn') || !composer.includes('jn?(0,B3.jsx)(a8n,{') || !composer.includes('agentCount:Math.max(mt.length,Kt)') || !composer.includes('canStopAll:qt') || !composer.includes('rows:mt') || !panel.includes('composer.backgroundSubagents.summary') || !/isBackgroundSubagentsEnabled:[A-Za-z_$][\w$]*=!0/.test(text)) {
     throw new Error(`缺少补丁契约：${appMainPath} 26.5825.32147 子 agent membership 或面板`);
   }
 }
 
-function verifySolContracts265825(text, appMainPath) {
+function verifyComposerSubagentPanel26582551511(appMainPath) {
+  const text = fs.readFileSync(appMainPath, 'utf8');
+  const selectors = minifiedExactFunctionScopes(text, 'p4=zo($,(e,{get:t})=>{');
+  const producers = minifiedExactCodeFunctionScopes(text, 'function Pbr(e,t,n,r){');
+  const sorter = minifiedFunctionScope(text, 'Nbr');
+  const aggregators = minifiedExactCodeFunctionScopes(text, 'function Mbr(');
+  const hooks = minifiedExactCodeFunctionScopes(text, 'function vMr(e){');
+  const turnFilters = minifiedExactCodeFunctionScopes(text, 'function yMr(e){');
+  const interactFilters = minifiedExactCodeFunctionScopes(text, 'function xMr(e){');
+  const composers = minifiedExactCodeFunctionScopes(text, 'function fIr({animateRadius:');
+  const panels = minifiedExactCodeFunctionScopes(text, 'function s8n(e){');
+  const selector = selectors.length === 1 ? selectors[0] : '', producer = producers.length === 1 ? producers[0] : '';
+  const aggregator = aggregators.length === 1 ? aggregators[0] : '', hook = hooks.length === 1 ? hooks[0] : '';
+  const turn = turnFilters.length === 1 ? turnFilters[0] : '', interact = interactFilters.length === 1 ? interactFilters[0] : '';
+  const composer = composers.length === 1 ? composers[0] : '', panel = panels.length === 1 ? panels[0] : '';
+  const activity = minifiedAnchoredBlock(producer, 'if(e.type===`subAgentActivity`){', 2);
+  const spawn = minifiedAnchoredBlock(producer, 'if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){', 2);
+  const exports = minifiedExactCodeFunctionScopes(text, 'export{');
+  verifySolContracts265825(text, appMainPath, '51511');
+  const membership = minifiedCodeAtDepth(activity, 1, false).includes('let r=le(e.agentThreadId)')
+    && minifiedCodeAtDepth(spawn, 1, false).includes('let e=le(r)')
+    && minifiedCodeAtDepth(producer, 1, false).includes('return Array.from(i.values())');
+  const consumer = aggregator.includes('Pbr(t,') && aggregator.includes('Fbr({cachedConversationById:')
+    && selector.includes('Mbr({cachedConversations:') && selector.includes('parentConversationId:n')
+    && hook.includes('Qs(p4,r?n:null)') && hook.includes('.filter(xMr)') && hook.includes('.filter(yMr)');
+  const panelChain = composer.includes('jn=(pt.length>0||qt)&&!xt&&!Dn&&!Et&&!Ct') && composer.includes('tHn({')
+    && composer.includes('subagentsPanel:jn') && composer.includes('jn?(0,B3.jsx)(s8n,{')
+    && composer.includes('agentCount:Math.max(pt.length,Kt)') && composer.includes('canStopAll:qt') && composer.includes('rows:pt');
+  if (!membership || !text.includes(sorter + producer) || !consumer || !exports.some((scope) => scope.includes('p4 as Rm'))
+    || turn !== 'function yMr(e){return e.isCurrentParentTurn}'
+    || interact !== 'function xMr(e){return e.canInteract&&e.displayName.trim().length>0}'
+    || !panelChain || !panel.includes('composer.backgroundSubagents.summary')) {
+    throw new Error(`缺少补丁契约：${appMainPath} 26.5825.51511 子 agent membership 或面板`);
+  }
+}
+
+function verifySolContracts265825(text, appMainPath, build = '32147') {
+  if (build === '51511') return verifySolContracts26582551511(text, appMainPath);
   const validations = minifiedExactCodeFunctionScopes(text, 'function t4e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
   const reads = minifiedExactCodeFunctionScopes(text, 'function f4e(');
   const writes = minifiedExactCodeFunctionScopes(text, 'function g4e(');
@@ -1246,5 +1316,17 @@ function verifySolContracts265825(text, appMainPath) {
   if (!persisted || !work.includes('setQueryData') || !work.includes('model_reasoning_effort:t') || !work.includes('.setDefaultModelConfig(e,t,')) {
     throw new Error(`缺少补丁契约：${appMainPath} 26.5825.32147 Sol reasoning persistence`);
   }
+}
+
+function verifySolContracts26582551511(text, appMainPath) {
+  const validations = minifiedExactCodeFunctionScopes(text, 'function Z2e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
+  const settings = minifiedExactCodeFunctionScopes(text, 'function f4e(e,t){');
+  const validation = validations.length === 1 ? validations[0] : '';
+  const modelSettings = settings.length === 1 ? settings[0] : '';
+  const valid = minifiedCodeAtDepth(validation, 1).includes('r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)');
+  const persisted = modelSettings.includes('settings.reasoning_effort??null') && modelSettings.includes('model_reasoning_effort:t')
+    && modelSettings.includes('setDefaultModelConfig(e,t,');
+  if (!valid) throw new Error(`缺少补丁契约：${appMainPath} 26.5825.51511 Sol reasoning validation`);
+  if (!persisted) throw new Error(`缺少补丁契约：${appMainPath} 26.5825.51511 Sol reasoning persistence`);
 }
 module.exports = { exactVerifierBuild, verifyComposerSubagentPanel265803, verifyComposerSubagentPanel265810, verifyComposerSubagentPanel265814, verifyComposerSubagentPanel265818, verifyComposerSubagentPanel265825, verifyExecutionTargetImport265818, verifyExecutionTargetImport265825, verifyHeaderTitleOverride265818, verifyHeaderTitleOverride265825, verifyMetadata265814, verifyMetadata265825, verifyOpenedConversationTitle265803, verifyOpenedConversationTitle265810, verifyOpenedConversationTitle265814, verifyOpenedConversationTitle265818, verifyOpenedConversationTitle265825, verifyPower265818, verifyPower265825, verifyProjectHistory265818, verifyProjectHistory265825, verifySubagentMembershipProducer265818, verifyWatchdog265818, verifyWatchdog265825 };

@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.65 - 2026-08-31
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5825.51511`，保留 `26.5825.32147`；未知 5825 build、带后缀版本和未来版本继续在恢复或写入前 fail closed。
+- 同步 51511 的 Host、Header、History、子 agent 和 Sol 压缩契约；完整运行最近会话 public wrapper、标题/分组/分组中新建会话、项目历史、子 agent 双展示和 Sol Max/Ultra 回归，不修改用户 Multi-Agent 配置。
+- 强制执行 official clean、patched clean、独立 review、VSIX 安装目录哈希/compile/plan/verifier、Reload/确定性等价和归属临时产物清理门禁。
+
+## v0.0.64 - 2026-08-30
+
+- 修复最近会话下拉首次点击触发错误边界：5825 Header wrapper 改用真实 React runtime `Pn`，并支持已安装 v1/$ 补丁原位迁移到 v2/Pn；新增 wrapper 实际执行与错误别名负例。
+- 修正修复后 Reload 误报“当前 Codex 扩展版本不兼容、补丁未应用”：发布并安装包含 Header v2 迁移逻辑的 Local Groups，避免已修复的 live bundle 被旧引擎当成未知结构。
+
 ## v0.0.63 - 2026-08-30
 
 - 精确适配官方 linux-x64 `openai.chatgpt@26.5825.32147`；未知 5825 build、带后缀版本和未来 minor 在恢复备份或写入前继续 fail closed。

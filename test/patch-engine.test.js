@@ -451,12 +451,50 @@ function configure265825Features(target) {
   ].join('');
   const server = [
     'var WD=`local`,RO=[];class Store{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return HCt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:RO,useStateDbOnly:this.params.hostId!==WD},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(Mdt)}}}class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}}',
-    'function zun(){return Vun(`recent-conversations`)}function Vun(e){return{data:[]}}function zP(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=zP(e);return{id:n,sessionId:e.sessionId,hostId:t,title:i,cwd:e.cwd,createdAt:d,updatedAt:f,recencyAt:p??f,workspaceKind:s,hasUnreadTurn:u??!1}}var zCt=void 0;function Mdt(){return!0}function IP(e){return String(e||``).trim()}function LP(e,t){return String(e).slice(0,t)}function qT(){return null}function sG(){return{getDefault:()=>({getHostId:()=>`local`}),getForHostId:()=>globalThis.projectHistoryManager??null}}function pR(e){return e}function Aun(){return()=>{}}function kun(){return()=>{}}var lG={useEffect(){}};',
+    'function zun(){return Vun(`recent-conversations`)}function Vun(e){return{data:[]}}function zP(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}var VP=t((()=>{}));function RCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=zP(e);return{id:n,sessionId:e.sessionId,hostId:t,title:i,cwd:e.cwd,createdAt:d,updatedAt:f,recencyAt:p??f,workspaceKind:s,hasUnreadTurn:u??!1}}var zCt=void 0;function Mdt(){return!0}function IP(e){return String(e||``).trim()}function LP(e,t){return String(e).slice(0,t)}function qT(){return null}function sG(){return{getDefault:()=>({getHostId:()=>`local`}),getForHostId:()=>globalThis.projectHistoryManager??null}}function pR(e){return e}function Aun(){return()=>{}}function kun(){return()=>{}}var lG={useEffect(){}};',
   ].join('');
   fs.writeFileSync(target.extensionJsPath, extensionText
     .replace('var Dle=require("path");W();$t();', 'var dRe=require("path");D();NC();IN();Ot();')
     .replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=DY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})')
     .replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + webviewTimeout265825Text + 'var codexHost=0,Cd=class t{async initializeWebview(e,r,n,o){let s=new yP(()=>{});this.registerClientCoordinationForWebview(e,n,s)}createClientCoordinationSession(e,r,n){let o={};return this.registerAppHostSessionForWebview(e,r,o,n)}registerAppHostSessionForWebview(e,r,n,o){return{startup:{reach:a=>o.handleStartupPhase(a)}}}};');
+  fs.writeFileSync(target.headerPath, header);
+  fs.writeFileSync(target.appMainPath, main);
+  fs.writeFileSync(target.appServerManagerSignalsPath, server);
+}
+
+function configure26582551511Features(target) {
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5825.51511';
+  target.appMainPath = path.join(assets, 'app-initial-yrsrisSW.js');
+  target.appStatsigPath = target.appMainPath;
+  target.appServerManagerSignalsPath = path.join(assets, 'app-initial-DzcK9AhZ.js');
+  const header = [
+    'import{zx as M}from"./app-initial-DzcK9AhZ.js";import{rd as _pt,KS as w8}from"./app-initial-yrsrisSW.js";',
+    'function bn(e){let t=(0,Tn.c)(34),{cloudtasksQuery:n,localConversations:r,onClose:a,autoFocusSearch:o,showFilters:s}=e,c=o!==void 0&&o,l=s===void 0||s,f=v(We),p=u(),m=qe(),{authMethod:h}=i(),g=ee(It)??`recent`,_=ee(Lt)??null,y=l?g:`recent`,b=null,w=null;let D=r.filter(E),O=mn(n.data,r,T),L=O,H=L.map(e=>(0,Z.jsx)(On,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&b===e.conversation.id,onClose:a,onActiveArchiveStart:m},e.key));return H}',
+    'function An(e){let t=(0,Nn.c)(61),n=e===void 0?{}:e,{label:r,showFilters:a}=n,o=a===void 0||a,s=u(),{authMethod:c}=i(),l=w(),f=ee(Fn),{data:p}=M(),h=Pe(),g=0;return p}',
+    'function xn(e){return e.kind===`remote`}function Sn(e){return e}',
+    'var On=(0,En.memo)(function(e){let t=(0,Tn.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(Ze,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
+    'const nativeMenu=(0,Q.jsx)(Ce,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:K,open:g,onOpenChange:_,children:ae});const nativeScrollHeight={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`},recentMenuHeight={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
+    'function Ln(e){let t=(0,Hn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e,l=n!==void 0&&n;return o}function Vn(){}',
+  ].join('');
+  const main = [
+    'var Qu={postMessage(){}},nd,rd,id=e((()=>{nd=class e{static getInstance(){return new e}dispatchMessage(e,t){Qu.postMessage({...t,type:e})}deliverMessage(){}dispatchHostMessage(e){this.deliverMessage(e.type,e)}},rd=nd.getInstance(),tSe((e,t)=>{rd.dispatchMessage(e,t)}),rd.dispatchHostMessage({type:`native`})}));function KS(e){let f=e,g=!1,h=null,p={},_;return _={activeWorkspaceRoot:f,isActiveWorkspaceRootLoading:g,hostConfig:h,...p},_}',
+    'function Z2e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function f4e(e,t){let P={settings:{reasoning_effort:null}},R=P?.settings.reasoning_effort??null,o={setQueryData(){}},i={},a=null,c=null,C={profile:null},oe=async(e,t)=>{o.setQueryData(i,n=>n==null?n:Object.assign(structuredClone(n),{model:e,model_reasoning_effort:t}));return Gu(a,c).setDefaultModelConfig(e,t,C.profile)};return{R,oe}}',
+    'function nativeState(m,t){let{isBackgroundSubagentsEnabled:s=!0}={},w=m?.model_reasoning_effort??null,n={model_reasoning_effort:t};return{isBackgroundSubagentsEnabled:s,w,n}}function nativeItems(n,o,d){switch(n.type){case`collabAgentToolCall`:d.push({type:`multi-agent-action`,id:n.id});break;case`subAgentActivity`:d.push({type:`subagent-activity`,id:n.id});break}}',
+    'var Abr=0;function Mbr({cachedConversations:e,conversationTurns:t,getIndexedSubagentItems:n,parentConversationId:i}){let d=Pbr(t,i,null,n).map(e=>e),f=Fbr({cachedConversationById:new Map,hasSubAgentActivity:d.length>0,parentConversationId:i,parentMemberships:d,sourceLinkedThreadsById:null,threadSummaryById:new Map});return[...d,...f]}function Nbr(e){return[...e].sort((e,t)=>0)}function Pbr(e,t,n,r){let i=new Map;for(let[a,o]of e.entries())for(let e of r?.(t,o,a)??o.items){if(e.type===`subAgentActivity`){let r=le(e.agentThreadId);i.set(r,{conversationId:r,displayName:`agent`,parentConversationId:t});continue}if(!(e.type!==`collabAgentToolCall`||e.tool!==`spawnAgent`))for(let r of e.receiverThreadIds){let e=le(r);i.has(e)||i.set(e,{conversationId:e,displayName:`agent`,parentConversationId:t})}}return Array.from(i.values())}function Fbr(){return[]}function zo(e,t){return t},p4=zo($,(e,{get:t})=>{if(e==null)return[];let n=typeof e===`string`?e:e.conversationId,l=t(store,n);return Mbr({cachedConversations:[],conversationTurns:l,parentConversationId:n})});function Qs(e,t){return[]}function vMr(e){let t={},n=e.activeConversationId,r=e.enabled,i=e.includeMentionItems,a=Qs(p4,r?n:null),o,s;if(t[0]!==n){let e=e=>e.parentConversationId===n,u=a.filter(e).filter(xMr);o=i?u:[],s=u.filter(yMr)}return{rows:a,visibleRows:s,mentionItems:o}}function yMr(e){return e.isCurrentParentTurn}function xMr(e){return e.canInteract&&e.displayName.trim().length>0}',
+    'function s8n(e){let{rows:n,agentCount:r}=e,l={formatMessage(){}};return l.formatMessage({id:`composer.backgroundSubagents.summary`},{count:r??n.length})}function tHn(e){return e}function fIr({animateRadius:e}){let{rows:pt,visibleRows:qt}=vMr({activeConversationId:oe,enabled:rt,includeMentionItems:!0}),Kt=0,xt=!1,Dn=!1,Et=!1,Ct=!1,jn=(pt.length>0||qt)&&!xt&&!Dn&&!Et&&!Ct;let layout=tHn({subagentsPanel:jn});return jn?(0,B3.jsx)(s8n,{agentCount:Math.max(pt.length,Kt),canStopAll:qt,rows:pt}):null}',
+    'function mJ(e){}function hJ(e){}function Own(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1}={}){let r=Nwn((t?[...Fwn,Iwn]:Fwn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);if(r.length>=3)return r;let i=Nwn(Lwn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e);return i.length>=3?i:[]}function Nwn(e,t){return e.flatMap((e,n)=>t?.some(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort))?[{...e,powerSettingIndex:n}]:[])}var Pwn,Fwn,Iwn,Lwn,vJ=void 0;Fwn=[],Iwn={},Lwn=[];function gS(){return!0}var z$e=[];function B$(e,t){let n=e?.find(e=>e.model===t);return n==null?z$e.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>gS(e.reasoningEffort))}',
+    'export{rd as _pt,KS as w8,p4 as Rm};',
+  ].join('');
+  const server = [
+    'var UD=`local`,LO=[];var twt=class{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return WCt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey)},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:LO,useStateDbOnly:this.params.hostId!==UD},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(Pdt)}}};class Manager{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}}',
+    'function Vun(){return Uun(`recent-conversations`)}function Uun(e){return{data:[]}}function zCt(e,t){return t(e.name)}function RP(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function zP(e){return e}var BP=t((()=>{}));function BCt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=RP(e);return{id:n,sessionId:e.sessionId,hostId:t,title:i,cwd:e.cwd,createdAt:d,updatedAt:f,recencyAt:p??f,workspaceKind:s,hasUnreadTurn:u??!1}}var VCt=void 0;function Pdt(){return!0}function FP(e){return String(e||``).trim()}function oG(){return{getDefault:()=>({getHostId:()=>`local`}),getForHostId:()=>globalThis.projectHistoryManager??null}}function fR(e){return e}function Mun(){return()=>{}}function jun(){return()=>{}}var cG={useEffect(){}};',
+  ].join('');
+  const hostWatchdog = webviewTimeout265825Text.replace('SCe', 'wCe');
+  fs.writeFileSync(target.extensionJsPath, extensionText
+    .replace('var Dle=require("path");W();$t();', 'var pRe=require("path");D();NC();IN();Ot();')
+    .replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=NY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})')
+    .replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + hostWatchdog + 'var codexHost=0,Cd=class t{async initializeWebview(e,r,n,o){let s=new yP(()=>{});this.registerClientCoordinationForWebview(e,n,s)}createClientCoordinationSession(e,r,n){let o={};return this.registerAppHostSessionForWebview(e,r,o,n)}registerAppHostSessionForWebview(e,r,n,o){if(e){return new kI({startup:{reach:a=>o.handleStartupPhase(a)}})}}};');
   fs.writeFileSync(target.headerPath, header);
   fs.writeFileSync(target.appMainPath, main);
   fs.writeFileSync(target.appServerManagerSignalsPath, server);
@@ -1595,13 +1633,116 @@ module.exports = {
         const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
         assert.ok(bundles[target.extensionJsPath].includes('let o=DY(n)'));
         assert.ok(bundles[target.extensionJsPath].includes('timeoutMs:12e4})},12e4)'));
-        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265825PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265825PatchVersion=2'));
         assert.ok(bundles[target.headerPath].includes('w8 as codexUseExecutionTarget'));
         assert.ok(bundles[target.headerPath].includes('_pt as codexLocalGroupsMessengerImport'));
         assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265825PatchVersion=1'));
         assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsPower265825PatchVersion=1'));
         assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265825PatchVersion=1'));
         assert.ok(bundles[target.appServerManagerSignalsPath].includes('useStateDbOnly:!0'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'adapts the exact Codex 26.5825.51511 drift without changing user multi-agent settings',
+      run() {
+        const target = createTarget();
+        configure26582551511Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 4);
+        const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        assert.ok(bundles[target.extensionJsPath].includes('let o=NY(n)'));
+        assert.ok(bundles[target.extensionJsPath].includes('timeoutMs:12e4})},12e4)'));
+        assert.ok(bundles[target.headerPath].includes('items:L,activeId:b,onClose:a,row:On'));
+        assert.ok(bundles[target.appMainPath].includes('function xMr(e){return e.canInteract&&e.displayName.trim().length>0}'));
+        assert.ok(bundles[target.appMainPath].includes('jn?(0,B3.jsx)(s8n,'));
+        assert.ok(bundles[target.appMainPath].includes('Nwn((t?[...Fwn,Iwn]:Fwn).filter'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('return WCt('));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('if(!Pdt(r)'));
+        assert.ok(!bundles[target.appMainPath].includes('multi_agent='));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'executes 26.5825.51511 grouped entry points and matching titles',
+      run() {
+        const target = createTarget();
+        configure26582551511Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const items = Array.from({ length: 6 }, (_, index) => ({ kind: 'local', key: `id${index + 1}`, conversation: { id: `id${index + 1}`, hostId: 'local', cwd: '/project', title: `原生${index + 1}` } }));
+        const metadata = { version: 1, conversations: Object.fromEntries(items.map((item) => [item.conversation.id, { title: item.conversation.id === 'id1' ? '本地标题' : '', group: '需求A', projectRoot: '/project' }])) };
+        const rows = runHeaderRows(header, 'id1', { items, metadata, currentRoot: '/project', includeStorage: true, renderProjectRowsView: true });
+        assert.ok(JSON.stringify(rows.rows).includes('本地标题'));
+        assert.deepStrictEqual(run265730HeaderActions(header).dispatched.map((item) => item.message.action), ['promptConversationTitle', 'promptConversationGroup', 'setPendingGroup', 'promptNewGroup']);
+        const page = header.slice(header.indexOf('function Ln(e){'), header.indexOf('function Vn()', header.indexOf('function Ln(e){')));
+        const script = `const codexLocalGroupsLocalTitle=({conversation})=>conversation.id==='id1'?'本地标题':null,Pn={useState:()=>[0,()=>{}],useEffect:()=>{}},Hn={c:()=>[]};${page};console.log(JSON.stringify([Ln({desktopDeepLinkConversationId:'id1',title:'原生标题'}),Ln({desktopDeepLinkConversationId:'missing',title:'原生标题'})]))`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), ['本地标题', '原生标题']);
+      },
+    },
+    {
+      name: 'executes 26.5825.51511 project history and Sol Max Ultra contracts',
+      run() {
+        const target = createTarget();
+        configure26582551511Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const modelCode = main.slice(main.indexOf('function Z2e('), main.indexOf('function nativeState('))
+          .replace('let P={settings:{reasoning_effort:null}}', 'let P=globalSettings')
+          .replace('o={setQueryData(){}}', 'o=queryClient');
+        const powerCode = main.slice(main.indexOf('function Own('), main.indexOf('export{'));
+        const mainScript = `let writes=[],defaults=[],globalSettings={settings:{reasoning_effort:'ultra'}},queryClient={setQueryData(e,t){writes.push(t({settings:{}}))}};function Gu(){return{setDefaultModelConfig(e,t){defaults.push([e,t]);return Promise.resolve(!0)}}}${modelCode}${powerCode};(async()=>{let efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh']),defaultReasoningEffort:'xhigh'},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low']),defaultReasoningEffort:'low'}],reasoning=(model,effort)=>Z2e({userSavedModelString:model,userSavedReasoningEffort:effort,listModelsData:{models}}).reasoningEffort,power=e=>({id:e,model:'gpt-5.6-sol',reasoningEffort:e});Fwn=['low','medium','high','xhigh'].map(power),Iwn=power('ultra'),Lwn=[];let settings=f4e();await settings.oe('gpt-5.6-sol','ultra');let sliderModels=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['low','medium','high','xhigh','ultra'])}];console.log(JSON.stringify({max:reasoning('gpt-5.6-sol','max'),ultra:reasoning('gpt-5.6-sol','ultra'),terraFallback:reasoning('gpt-5.6-terra','max'),menu:B$(models,'gpt-5.6-sol').map(e=>e.reasoningEffort),terra:B$(models,'gpt-5.6-terra').map(e=>e.reasoningEffort),read:settings.R,write:writes[0].model_reasoning_effort,defaults,compact:Own(sliderModels).map(e=>e.reasoningEffort),expanded:Own(sliderModels,{includeUltraInSlider:true}).map(e=>e.reasoningEffort)}))})()`;
+        const mainResult = childProcess.spawnSync(resolveNodePath(), ['-e', mainScript], { encoding: 'utf8' });
+        assert.strictEqual(mainResult.status, 0, mainResult.stderr);
+        assert.deepStrictEqual(JSON.parse(mainResult.stdout), { max: 'max', ultra: 'ultra', terraFallback: 'low', menu: ['xhigh', 'max', 'ultra'], terra: ['low'], read: 'ultra', write: 'ultra', defaults: [['gpt-5.6-sol', 'ultra']], compact: ['low', 'medium', 'high', 'xhigh'], expanded: ['low', 'medium', 'high', 'xhigh', 'ultra'] });
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        const serverScript = `const t=e=>e();${server};(async()=>{let pages={first:{data:[{id:'root',sessionId:'root',cwd:'/project',name:'Root',createdAt:1,updatedAt:3},{id:'other',sessionId:'other',cwd:'/other',name:'Other',createdAt:1,updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',sessionId:'child',cwd:'/project/sub',name:'Child',createdAt:1,updatedAt:1}],nextCursor:null}},requests=[],store={threadsById:new Map,listRecentThreads:e=>(requests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:e=>({conversationId:e.id,hostId:'local',title:e.name,cwd:e.cwd,workspaceKind:'project',hasUnreadTurn:false}),shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265825(store,'/project');console.log(JSON.stringify({ids:project.map(e=>e.id),titles:project.map(e=>e.title),flags:requests.map(e=>e.useStateDbOnly)}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { ids: ['root', 'child'], titles: ['Root', 'Child'], flags: [true, true] });
+      },
+    },
+    {
+      name: 'executes both 26.5825.51511 subagent display chains',
+      run() {
+        const target = createTarget();
+        configure26582551511Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const agentCode = main.slice(main.indexOf('function nativeItems('), main.indexOf('function mJ('))
+          .replace('function zo(e,t){return t},p4=', 'function zo(e,t){return t}var p4=')
+          .replace('function Qs(e,t){return[]}', 'function Qs(e,t){return globalRows}');
+        const script = `var $={},store={},oe='parent',rt=true,B3={jsx:(type,props)=>({type:type.name,props})},globalRows=[{conversationId:'v1',parentConversationId:'parent',canInteract:true,displayName:'V1',isCurrentParentTurn:true},{conversationId:'hidden',parentConversationId:'parent',canInteract:false,displayName:'Hidden',isCurrentParentTurn:true},{conversationId:'stale',parentConversationId:'parent',canInteract:true,displayName:'Stale',isCurrentParentTurn:false}],le=e=>String(e);${agentCode};let turns=new Map([[0,{items:[{type:'subAgentActivity',agentThreadId:'v2'},{type:'collabAgentToolCall',tool:'spawnAgent',receiverThreadIds:['v1']}]}]]),members=Pbr(turns,'parent',null,null),transcript=[];nativeItems({type:'collabAgentToolCall',id:'v1'},true,transcript);nativeItems({type:'subAgentActivity',id:'v2'},true,transcript);let hook=vMr({activeConversationId:'parent',enabled:true,includeMentionItems:true}),panel=fIr({});console.log(JSON.stringify({members:members.map(e=>e.conversationId),transcript:transcript.map(e=>e.type),visible:hook.visibleRows.map(e=>e.conversationId),panelRows:panel.props.rows.map(e=>e.conversationId),agentCount:panel.props.agentCount}))`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), { members: ['v2', 'v1'], transcript: ['multi-agent-action', 'subagent-activity'], visible: ['v1'], panelRows: ['v1', 'hidden', 'stale'], agentCount: 3 });
+      },
+    },
+
+    {
+      name: 'migrates the 26.5825 dropdown wrapper from the v1 React alias',
+      run() {
+        const target = createTarget();
+        configure265825Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const v2 = 'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,Pn.useState)(0);return(0,Pn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}';
+        const v1 = v2.replaceAll('(0,Pn.', '(0,$.');
+        const header = fs.readFileSync(target.headerPath, 'utf8')
+          .replace(v2, v1)
+          .replace('codexLocalGroupsHeaderSafe265825PatchVersion=2', 'codexLocalGroupsHeaderSafe265825PatchVersion=1');
+        fs.writeFileSync(target.headerPath, header);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 1);
+        assert.ok(plan.changes[0].nextText.includes(v2));
+        assert.ok(plan.changes[0].nextText.includes('codexLocalGroupsHeaderSafe265825PatchVersion=2'));
         assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
         assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
       },
@@ -1637,7 +1778,7 @@ module.exports = {
         assert.strictEqual(mainResult.status, 0, mainResult.stderr);
         assert.deepStrictEqual(JSON.parse(mainResult.stdout), { max: 'max', ultra: 'ultra', read: 'ultra', write: 'ultra', compact: ['low', 'medium', 'high', 'xhigh'], expanded: ['low', 'medium', 'high', 'xhigh', 'ultra'], menu: ['xhigh', 'max', 'ultra'], terra: ['low'] });
         const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
-        const serverScript = `${server};(async()=>{let root={id:'root',sessionId:'root',cwd:'/project',name:'Root title',createdAt:1,updatedAt:3,workspaceKind:'project',hasUnreadTurn:true},other={id:'other',sessionId:'other',cwd:'/project2',name:'Other title',createdAt:1,updatedAt:2},child={id:'child',sessionId:'child',cwd:'/project/sub',name:'Child title',createdAt:1,updatedAt:1,workspaceKind:'project',hasUnreadTurn:false},pages={first:{data:[root,other],nextCursor:'next'},next:{data:[child],nextCursor:null}},projectRequests=[],summary=e=>({conversationId:e.id,hostId:'local',title:e.name,cwd:e.cwd,workspaceKind:e.workspaceKind??'project',hasUnreadTurn:e.hasUnreadTurn??false}),projectStore={threadsById:new Map,listRecentThreads:e=>(projectRequests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:summary,shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265825(projectStore,'/project');globalThis.projectHistoryManager={listAllThreads:()=>Promise.resolve([root,other,child]),getRecentConversations:()=>[]};let fallback=await zun('/project','local',true).queryFn(),nativeRequests=[],nativeStore=Object.create(Store.prototype);nativeStore.params={hostId:'local',requestClient:{getCompatibleThreadSortKey:e=>e,sendRequest:(e,t)=>(nativeRequests.push(t),Promise.resolve({data:[],nextCursor:null}))}},nativeStore.recentConversationSortKey='recency_at';await nativeStore.listRecentThreads({cursor:null,limit:1});await nativeStore.listRecentThreads({cursor:null,limit:1,useStateDbOnly:true});let fields=e=>e.map(({id,cwd,title,hostId,workspaceKind,hasUnreadTurn})=>({id,cwd,title,hostId,workspaceKind,hasUnreadTurn}));console.log(JSON.stringify({project:fields(project),fallback:fields(fallback),projectFlags:projectRequests.map(e=>e.useStateDbOnly),nativeFlags:nativeRequests.map(e=>e.useStateDbOnly)}))})()`;
+        const serverScript = `const t=e=>e();${server};(async()=>{let root={id:'root',sessionId:'root',cwd:'/project',name:'Root title',createdAt:1,updatedAt:3,workspaceKind:'project',hasUnreadTurn:true},other={id:'other',sessionId:'other',cwd:'/project2',name:'Other title',createdAt:1,updatedAt:2},child={id:'child',sessionId:'child',cwd:'/project/sub',name:'Child title',createdAt:1,updatedAt:1,workspaceKind:'project',hasUnreadTurn:false},pages={first:{data:[root,other],nextCursor:'next'},next:{data:[child],nextCursor:null}},projectRequests=[],summary=e=>({conversationId:e.id,hostId:'local',title:e.name,cwd:e.cwd,workspaceKind:e.workspaceKind??'project',hasUnreadTurn:e.hasUnreadTurn??false}),projectStore={threadsById:new Map,listRecentThreads:e=>(projectRequests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:summary,shouldSurfaceThreadSummary:()=>true},project=await codexLocalGroupsLoadProjectConversations265825(projectStore,'/project');globalThis.projectHistoryManager={listAllThreads:()=>Promise.resolve([root,other,child]),getRecentConversations:()=>[]};let fallback=await zun('/project','local',true).queryFn(),nativeRequests=[],nativeStore=Object.create(Store.prototype);nativeStore.params={hostId:'local',requestClient:{getCompatibleThreadSortKey:e=>e,sendRequest:(e,t)=>(nativeRequests.push(t),Promise.resolve({data:[],nextCursor:null}))}},nativeStore.recentConversationSortKey='recency_at';await nativeStore.listRecentThreads({cursor:null,limit:1});await nativeStore.listRecentThreads({cursor:null,limit:1,useStateDbOnly:true});let fields=e=>e.map(({id,cwd,title,hostId,workspaceKind,hasUnreadTurn})=>({id,cwd,title,hostId,workspaceKind,hasUnreadTurn}));console.log(JSON.stringify({project:fields(project),fallback:fields(fallback),projectFlags:projectRequests.map(e=>e.useStateDbOnly),nativeFlags:nativeRequests.map(e=>e.useStateDbOnly)}))})()`;
         const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
         assert.strictEqual(serverResult.status, 0, serverResult.stderr);
         const rows = [{ id: 'root', cwd: '/project', title: 'Root title', hostId: 'local', workspaceKind: 'project', hasUnreadTurn: true }, { id: 'child', cwd: '/project/sub', title: 'Child title', hostId: 'local', workspaceKind: 'project', hasUnreadTurn: false }];
@@ -1654,7 +1795,7 @@ module.exports = {
         const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
         const items = Array.from({ length: 25 }, (_, index) => ({ kind: 'local', key: `id${index + 1}`, conversation: { id: `id${index + 1}`, hostId: 'local', cwd: '/project', title: `原生${index + 1}` } }));
         const metadata = { version: 1, conversations: Object.fromEntries(items.map((item) => [item.conversation.id, { title: item.conversation.id === 'id1' ? '本地标题' : '', group: '需求A', projectRoot: '/project' }])) };
-        const rows = runHeaderRows(header, 'id1', { items, metadata, currentRoot: '/project', includeStorage: true, toggleMore: true, toggleMoreTwice: true });
+        const rows = runHeaderRows(header, 'id1', { items, metadata, currentRoot: '/project', includeStorage: true, renderProjectRowsView: true, toggleMore: true, toggleMoreTwice: true });
         const states = [rows.rows, rows.expandedRows, rows.fullRows, rows.collapsedRows].map((value) => JSON.stringify(value));
         assert.deepStrictEqual(states.map((state) => (state.match(/原生/g) || []).length), [4, 14, 24, 4]);
         assert.ok(states[0].includes('本地标题'));
@@ -1811,7 +1952,7 @@ module.exports = {
     {
       name: 'writes nothing before rejecting unknown or suffixed Codex 26.5825 builds',
       run() {
-        for (const version of ['26.5825.99999', '26.5825.32147.1', '26.5826.1']) {
+        for (const version of ['26.5825.99999', '26.5825.32147.1', '26.5825.51511.1', '26.5826.1']) {
           const target = createTarget();
           configure265825Features(target);
           target.version = version;
@@ -5158,6 +5299,7 @@ const messenger = { dispatchMessage(channel, message) { dispatched.push({ channe
 const context = {
   ${latest ? '' : 'Q: { jsx, jsxs: jsx },'}
   Z: { jsx, jsxs: jsx },
+  Pn: { useState: () => [0, () => {}], useEffect: effect => effect() },
   Je: 'Je',
   b: messenger,
   a: messenger,
@@ -5175,7 +5317,7 @@ const sourceItems = ${JSON.stringify(items)};
 const currentRoot = ${JSON.stringify(currentRoot)};
 const filteredItems = currentRoot == null ? sourceItems : context.codexRecentTaskFilter(sourceItems, currentRoot);
 const filteredConversations = currentRoot == null ? null : context.codexRecentConversationFilter(sourceItems.map((item) => item.conversation), currentRoot);
-const rows = context.codexRecentTaskProjectRows(filteredItems, ${JSON.stringify(activeId)}, () => {}, CodexRow);
+const rows = ${options.renderProjectRowsView === true ? 'context.codexLocalGroupsProjectRowsView({ items: filteredItems, activeId: ' + JSON.stringify(activeId) + ', onClose() {}, row: CodexRow })' : 'context.codexRecentTaskProjectRows(filteredItems, ' + JSON.stringify(activeId) + ', () => {}, CodexRow)'};
 function findButton(nodes, label) { for (const node of nodes) { if (node == null || typeof node !== 'object') continue; if (node.type === 'button' && String(node.props?.children ?? '').includes(label)) return node; let child = findButton(Array.isArray(node.props?.children) ? node.props.children : [node.props?.children], label); if (child) return child; } return null; }
 let expandedRows = null, fullRows = null, collapsedRows = null;
 if (${options.toggleMore === true}) {

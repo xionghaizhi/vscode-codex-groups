@@ -1,9 +1,9 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-08-30
-> 适配目标 Codex：`openai.chatgpt@26.5825.32147`
-> 当前 active Codex：`openai.chatgpt@26.5825.32147`
-> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.63`
+> 基线日期：2026-08-31
+> 适配目标 Codex：`openai.chatgpt@26.5825.51511`
+> 当前 active Codex：`openai.chatgpt@26.5825.51511`
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.65`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -123,9 +123,11 @@ transcript 与 composer 面板是两个消费点。V2 membership 在当前 `26.5
 | 当前目标 | 定位方式 | 当前 marker | 应改成什么 |
 | --- | --- | --- | --- |
 | `out/extension.js` | 固定路径 | `codexLocalGroupsPatchVersion=17` + `timeoutMs:12e4` | 注入 metadata 消息桥；对 `26.5825` 的唯一真实 `yP` Webview 看门狗把 30 秒延长到 120 秒；`DY` 回调、`Cd` Host、`new kI({startup})` 与 `renderer_ready` 必须形成真实调用链。 |
-| Header `header-BE8_0Va3.js` | `recentTasksMenu` + `Search recent chats/tasks` + `Ln` | `codexLocalGroupsHeaderSafe265825PatchVersion=1` + `codexLocalGroupsOpenedTitle265810PatchVersion=1` | 当前项目严格隔离、每组 5/+10/15/5、600px 菜单和标题双消费；真实 messenger / execution-target 为 `_pt` / `w8`，且 `_pt` 必须回绑 initializer 内非空 relay。 |
+| Header `header-BE8_0Va3.js` | `recentTasksMenu` + `Search recent chats/tasks` + `Ln` | `codexLocalGroupsHeaderSafe265825PatchVersion=2` + `codexLocalGroupsOpenedTitle265810PatchVersion=1` | 当前项目严格隔离、每组 5/+10/15/5、600px 菜单和标题双消费；下拉 wrapper 必须使用该 build 的 React runtime `Pn`；真实 messenger / execution-target 为 `_pt` / `w8`，且 `_pt` 必须回绑 initializer 内非空 relay。 |
 | Main `app-initial-DraLrsJK.js` | `conversation.title` + exact build composer chain | `codexLocalGroupsCodexUi265825PatchVersion=1` + `codexLocalGroupsPower265825PatchVersion=1` | 仅对 `gpt-5.6-sol` 保留 Max/Ultra；完整绑定 `jbr → Mbr → Nbr → Abr → p4 → gMr → uIr/EHn → a8n`、`mEn → hEn → var gEn`，不 patch `canInteract`。 |
 | Server `app-initial-DOdr0yAB.js` | `recentConversationsSortKey` + `thread/list` | `codexLocalGroupsProjectHistory265825PatchVersion=1` | 独立 state DB 项目历史查询；隔离 load/merge/fallback/return；绑定 `VP/zP → RCt → var zCt` 和真实 `HCt` request，不能把 `$Ct` Store 名误当 request。 |
+
+`26.5825.51511` 不得复用上表压缩符号。其 official clean 精确契约为：Host `pRe/NY/yP/wCe/Cd/new kI`；Header `header-DapYxSvQ.js` 的 rows `L/b/a/On` 与 React runtime `Pn`；Main `app-initial-yrsrisSW.js` 的导出 `_pt/w8`、内部 relay/target `rd/KS`、子 agent `Pbr → Mbr → p4 → vMr → fIr/tHn → s8n`、Power `Nwn/Own/B$`；Server `app-initial-DzcK9AhZ.js` 的 history `Vun/Uun/twt/WCt/BCt/RP/Pdt/zCt(r,FP)`。`HCt` 在该 build 是 hydration decoy，不能作为 history request。
 
 当前 locator 允许 `appMainPath` / `appStatsigPath` / `appServerManagerSignalsPath` 指向同一文件。`CodexPatchEngine.plan()` 必须对合包和分包都只规划一次写入。
 
@@ -499,12 +501,15 @@ code --install-extension ./vscode-codex-groups-<version>.vsix --force
 
 5. 若 Remote CLI 长时无返回，先同时观察 VSCode Server 安装子进程、目标目录和 `extensions.json`；服务端任务可能在 shell 静默时继续安装，不得立即停止或覆盖目录。只有任务完全退出且没有有效安装时，才能在已备份 registry 的前提下使用手工兜底：解压 VSIX 中 `extension/` 到独立版本目录，校验 publisher/name/version，原子更新唯一 extension registry 记录，保留旧版目录直到新版验收完成。
 6. 从已安装目录再跑 compile / plan / verifier，确认安装产物与仓库源码一致。
+7. 生成契约或 marker 变更时，必须逐一比对仓库与 active 安装目录的 `patchEngine.js` 和 `verify-patched-bundles.js` 哈希。仅在仓库运行成功、或仅用仓库引擎修改 Codex live bundle，不得标记完成。
+8. 安装后必须 Reload 启动新的 Extension Host，检查 `Codex Local Groups` 输出不含“版本不兼容”或“补丁未应用”，并实际执行本次受影响的 UI 入口。安装目录 plan 0/verifier 不得代替 Reload 后检查。
 
 ### 步骤 8：Reload 后主线程验收
 
 主线程必须执行或驱动 `Developer: Reload Window` 并按以下顺序验收，不得把清单交给用户。若当前环境不能直接驱动 VSCode UI，必须为本次实际改动提供确定性的 headless/runtime 等价验证，并记录输入数据、耗时、返回集合及生成契约；无法取得任何一种证据时标记 blocked，不得宣称完成。
 
 1. Codex UI 打开无 `Oops, an error has occurred`。
+   - 同时确认 `Codex Local Groups` 输出无“当前 Codex 扩展版本不兼容、补丁未应用”；该项只能在最终 Local Groups VSIX 安装并 Reload 后验收。
 2. 最近会话下拉的 spinner 必须结束，记录从打开到项目行出现的耗时；至少点击一行确认可打开。`app routes mounted/ready` 不能替代这项门禁。
 3. 当前窗口只有当前项目，根目录和子目录会话都在。
 4. 开两个需求分组，默认各 5 条。
@@ -1073,12 +1078,46 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 9. `test-utils.tempDir()` 原先只创建不删除，一次全量测试约产生 300 个目录，反复执行可累积数万个。test runner 现在覆盖 pass、assertion fail、throw、no-match 和 cleanup failure；直接 `mkdtemp` 也必须登记，测试结束后递归扫描本次所有权，不能只清理已知前缀。
 10. 用户配置只读。适配、安装和验证均未改 `multi_agent`、`multi_agent_v2`、provider、model、reasoning 或 `canInteract`；`/root/.codex/config.toml` 的 size `5156`、mtime epoch `1787908129`、SHA-256 `d8edde15575b9fd915ab730d56e41d44107d533f51a8757f0cf3e5b3d7b61a88` 保持不变。
 11. 最终所有权扫描除本次 `.codex-upgrade` 外，还发现 11 个旧测试遗留 `/tmp/codex-patch-*`，均含测试夹具 `out/extension.js`，合计不足 1 MB，且无本次运行登记标记。已按精确前缀、固定 `/tmp` 父目录和夹具文件三重条件清理；清理后 `codex-upgrade-*`、`codex-patch-*`、`codex-local-groups-*`、`vscode-codex-groups-*`、`clg-*` 均为 0。不得扩大到共享 cache 或无所有权证据的目录。
+12. 初版 5825 分组 helper 为新的 `xn` 分支落入了通用 React 别名默认值 `$`，但真实 Header 的 React runtime 是 `Pn`。该 wrapper 只在点击最近会话下拉时执行，因此页面能启动也会在点击时以 `ReferenceError: $ is not defined` 进入错误边界。修复将 marker 升为 v2，精确绑定 `Pn`，并从 v1/$ 原位迁移。后续每次升级必须实际执行 `codexLocalGroupsProjectRowsView`，不得只调用内层 `codexRecentTaskProjectRows` 冒充下拉验收；verifier 必须绑定 wrapper 的版本专属 React alias。
+13. 仅用仓库新引擎修改 Codex live bundle 不算完成；如果 active Local Groups VSIX 仍是旧引擎，Reload 后它会把新 marker 误报为“版本不兼容、补丁未应用”。任何生成契约或 marker hotfix 都必须提升 Local Groups 版本、打包覆盖安装，再从 active 安装目录比对 engine/verifier 哈希并执行 compile、plan 0 和 verifier。
 
 ### 验证证据
 
 - official clean：locator 唯一；plan 4、apply 4、backup 4、syntax 5、幂等通过、二次 plan 0、external verifier 通过。
-- 自动化：5825 定向 11 tests、全量 351 tests、compile 26 files、lint 26 files、`git diff --check` 与 `openspec validate adapt-codex-265825-32147 --strict` 通过。运行期覆盖标题双消费、设置标题/分组/分组中新建会话、项目历史、V1/V2 transcript 与 composer、Sol Max/Ultra；负例覆盖不可达 startup、空 relay、完整 nested chunk 和 string/later/duplicate decoy。
+- 自动化：5825 定向与下拉 wrapper 运行回归、全量 352 tests、compile 26 files、lint 26 files、`git diff --check` 与 `openspec validate adapt-codex-265825-32147 --strict` 通过。运行期覆盖标题双消费、设置标题/分组/分组中新建会话、项目历史、V1/V2 transcript 与 composer、Sol Max/Ultra；负例覆盖不可达 startup、空 relay、完整 nested chunk、错误 React alias 和 string/later/duplicate decoy。
 - 独立 Review：两轮需求内修复后最终 Critical 0、Important 0、Minor 0；reviewer 直接执行五个精确 mutation，engine/verifier 均 fail closed。按约定不启动第三轮修复。
 - live Codex：active registry/package 为 `/root/.vscode-server/extensions/openai.chatgpt-26.5825.32147`；四文件已备份并应用，最终 plan 0、syntax 5、external verifier 通过。
 - Local Groups `0.0.63` VSIX SHA-256 为 `a3425ec42c2042b93ce417b64bd1fe3b48188b3548c57ae399bd9004f6f0b3de`；active 为 `/root/.vscode-server/extensions/xinghezhiyuan.vscode-codex-groups-0.0.63`，`patchEngine.js`、locator、verifier 与 worktree 哈希一致，安装目录 plan 0/verifier 通过。
 - Remote 安装事务已等待 `remoteagent.log` 的两条 `Extension installed successfully` 和 CLI 退出；本次归属的 `/tmp/codex-upgrade-*` 已归零。真实 Reload 后的 UI 截图与冷加载耗时尚未产生，不以 route-ready 或静态 marker 冒充该证据。
+- 下拉 hotfix live：`Codex.log` 错误边界栈定位到 `codexLocalGroupsProjectRowsView`；修复前执行真实 live wrapper 复现 `ReferenceError: $ is not defined`，修复后执行同一 wrapper 通过。live 只迁移 Header 一个文件，二次 plan 0、syntax 5 和 external verifier 通过；`config.toml` size/mtime/SHA-256 仍为 `5156` / `1787908129` / `d8edde15575b9fd915ab730d56e41d44107d533f51a8757f0cf3e5b3d7b61a88`。Reload 后点击下拉的人工 UI 验收仍需用户确认。
+- Local Groups hotfix：`0.0.64` VSIX SHA-256 为 `b5ac1b971fb2ff6cd651cbae99f9fb43b38e5a43ead08c27425a0b168be67036`；Remote 日志记录 `Extension installed successfully`，active registry 指向 `/root/.vscode-server/extensions/xinghezhiyuan.vscode-codex-groups-0.0.64`。安装目录的 `patchEngine.js` 和 verifier 与仓库 SHA-256 逐一一致，从该目录执行 compile、plan 0、syntax 5 和 external verifier 通过；归属临时目录已归零。
+- Reload 人工门禁：用户确认 `0.0.64` 加载后本次问题已解决，不再出现“Codex 版本不兼容/补丁未应用”误报。根因为上一轮只用仓库新引擎迁移了 Codex Header，但 active Local Groups 仍是只认 v1 的 `0.0.63`；后续必须把“仓库→VSIX→active registry→安装目录哈希/plan/verifier→Reload 日志→受影响 UI”作为不可拆分的完整测试链。
+
+## 20. Codex 26.5825.51511 适配记录
+
+### 获取与精确语义映射
+
+- Marketplace linux-x64 为 `26.5825.51511`，更新时间 `2026-08-30T01:31:19.993Z`。官方 VSIX 为 `242073433` bytes，SHA-256 `557e8059809647893bf5fc86fba1515528c1611afe31d56279266c2fcde2a204`。
+- official clean bundle：Host `out/extension.js`；Header `header-DapYxSvQ.js`；Main/Power/Subagent `app-initial-yrsrisSW.js`；Server/History `app-initial-DzcK9AhZ.js`。
+- Host：`pRe/NY/yP/wCe/Cd/new kI`；Header rows 为 `L/b/a/On`，React runtime 仍为 `Pn`，Main 语义导出仍为 `_pt/w8`，内部变为 `nd/rd/id/tSe/KS`。
+- 子 agent：`Pbr → Mbr → p4 → vMr → fIr/tHn → s8n`，filters 为 `xMr/yMr`；正文 activity 与顶部 composer panel 是两个独立消费链，禁止修改用户 Multi-Agent 配置或 `canInteract`。
+- Power：`Nwn/Own/B$`；slider 保持原生，Max/Ultra 只补 Sol menu/validation/persistence。History：`Vun/Uun/twt/WCt/BCt/RP/Pdt/zCt(r,FP)`；`HCt` 是 hydration decoy。
+
+### 本次阻碍、根因与防复发
+
+1. 51511 的压缩漂移横跨 Host、Header、Main、Power、Subagent 与 History；只把 build 加白名单或只改 locator 必然漏功能。每个 build 必须从 official clean 重新绑定 producer/consumer 和前后邻接。
+2. settings 读取已并入 `f4e` 的 `settings.reasoning_effort`。旧版单独 `g4e` 契约不能复用；runtime 必须执行 read、query cache write 和 `setDefaultModelConfig`。
+3. 首版 51511 自动化只验证 semantic Host/Power，Sol runtime 也只执行 validation/menu。独立 review 发现后，已补完整 external verifier 正例、title/history/subagent/Sol/Power decoy，以及 `f4e` persistence、`Own` compact/expanded slider、非 Sol fallback。
+4. 新 OpenSpec change 初次 strict validate 因漏建 capability delta 失败。以后 `proposal/design/tasks/specs/**/spec.md` 必须同时创建，修改 live 前先 strict validate。
+5. Remote CLI 安装仍可能长时间没有 stdout；必须等待进程退出，并以 `remoteagent.log` 的 extract/rename/`Extension installed successfully`、active registry 和安装目录共同确认，不能因沉默重复安装。
+6. 新 Extension Host 的 app routes 在 `48153ms` 后挂载。启动前出现一次 persisted-atom legacy fallback，随后正常 ready；Statsig 网络失败也未阻止 route/ready。该耗时与网络错误作为上游观察保留，不能拿 route-ready 替代最近下拉和各业务入口的 runtime 门禁。
+
+### 验证证据
+
+- official/patched clean：plan/apply 4 files、backup 4、syntax 5、幂等、external verifier、二次 plan 0 全部通过。
+- 自动化：51511 定向 7 tests、全量 359 tests、compile/lint、diff-check、OpenSpec strict 通过；public rows wrapper、标题双消费、标题/分组/分组中新建会话、非空 state-DB history、subagent 双展示、Sol persistence/menu/slider 均有实际执行证据。
+- 独立 Review：首轮 2 个 Important 已修复，针对性复查 Critical/Important/Minor 均为 0。
+- live：Codex `26.5825.51511` 与 Local Groups `0.0.65` 均为唯一 active registry/CLI 版本；live 与安装目录 plan 0、syntax 5、external verifier 通过。Local Groups 输出为空，不含“不兼容/补丁未应用”；新 Extension Host 未出现资源加载失败或错误边界。
+- Local Groups `0.0.65` VSIX SHA-256 `892e195f47d2715c378d3874c086eafc5a3bbe13dcf01ec65812fbe5c134ec70`。仓库/安装目录 engine SHA-256 均为 `107ff9d4be5c420adc10cd5ccc3a4012fc583592411c5aa1258cb4069668242f`，verifier 均为 `1a7686ad387fdfc41adfe45e720a63ee363b28024735536e4a205a34af28835e`。
+- 配置只读：`config.toml` size/mtime/SHA-256 保持 `5156` / `1787908129` / `d8edde15575b9fd915ab730d56e41d44107d533f51a8757f0cf3e5b3d7b61a88`。
+- 最终清理：本次 `.codex-upgrade` 的 official、patched、rollback、VSIX/extracted 与 Marketplace probe 全部删除；另清理两个有明确 Local Groups 所有权的旧测试/review 日志。`codex-upgrade-*`、`codex-patch-*`、`codex-local-groups-*`、`vscode-codex-groups-*`、`clg-*` 已归零；无本次所有权证据的共享 lock/skill 诊断文件保留。

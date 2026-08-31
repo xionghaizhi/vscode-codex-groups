@@ -10,6 +10,9 @@
 - [ ] 8. 安装 live Codex 与 Local Groups，重新验证 active registry、plan 0、verifier、真实数据/UI 等价、启动/冷加载耗时和 config 只读。（安装、registry、plan 0、verifier、确定性 runtime 与 config 已通过；Reload 后 UI 截图和冷加载耗时尚无证据。）
 - [x] 9. 启动新的独立子 agent review；最多两轮需求内修复，第三轮停止并汇报。
 - [x] 10. 更新 OpenSpec 证据、升级手册、README、CHANGELOG 和版本号；清理全部本次临时产物并提交当前分支。
+- [x] 11. 修复 5825 最近会话下拉 wrapper 误用 React 别名 `$` 的运行时崩溃；将 Header marker 升为 v2，支持已安装 v1 原位迁移，并把 wrapper 实际执行加入回归与 external verifier。
+- [x] 12. 将含 v2 迁移逻辑的 Local Groups `0.0.64` 打包覆盖安装，防止 Reload 后修复前的 `0.0.63` 引擎将 Header v2 误报为不兼容。
+- [x] 13. Reload 后用户确认 `0.0.64` 不再弹出“Codex 版本不兼容/补丁未应用”误报；将最终 VSIX、active registry、安装目录哈希、安装目录 plan/verifier、Reload 日志和受影响 UI 入口统一列为下次升级强制门禁。
 
 ## Evidence
 
@@ -22,3 +25,6 @@
 - Review：第一轮修复 sole nested/string、`canInteract`、Sol model guard 与硬编码 official artifact；第二轮修复完整 nested chunk、不可达 startup 和空 relay。最终 Critical/Important/Minor 均为 0，五个精确 mutation 均被 engine/verifier 拒绝。
 - Live：active Codex `26.5825.32147`、Local Groups `0.0.63`；live plan 0/verifier 与安装文件哈希一致。VSIX SHA-256 `a3425ec42c2042b93ce417b64bd1fe3b48188b3548c57ae399bd9004f6f0b3de`；`config.toml` size/mtime/SHA-256 保持 `5156` / `1787908129` / `d8edde15575b9fd915ab730d56e41d44107d533f51a8757f0cf3e5b3d7b61a88`。
 - 最终清理：删除本次 `/home/project/vscode/yuxi/.codex-upgrade`，归属 wrapper 自动回收全部 `/tmp/codex-upgrade-*`；另按精确夹具证据清理 11 个旧 `/tmp/codex-patch-*`。已知项目临时前缀递归扫描为 0，未删除共享 cache 或无所有权证据的目录。
+- 下拉 hotfix：真实 `Codex.log` 错误边界指向 `codexLocalGroupsProjectRowsView`；直接执行 live wrapper 稳定复现 `ReferenceError: $ is not defined`。实际 Header React runtime 为 `Pn`；修复后 v1/$ 原位迁移为 v2/Pn，全量 352 tests、compile/lint、live plan 0、external verifier 和 live wrapper 执行通过；`config.toml` size/mtime/SHA-256 不变。
+- 安装包闭环：Reload 误报时，active Local Groups `0.0.63` 的 `patchEngine.js` 仍只识别 Header v1，与仓库 v2 引擎哈希不同。已打包并安装 `0.0.64`（VSIX SHA-256 `b5ac1b971fb2ff6cd651cbae99f9fb43b38e5a43ead08c27425a0b168be67036`）；active registry 指向 `xinghezhiyuan.vscode-codex-groups-0.0.64`，安装目录 engine/verifier 与仓库哈希一致，从安装目录执行 compile、plan 0 和 verifier 均通过。
+- 人工确认：用户在安装 `0.0.64` 并 Reload 后确认本次问题已解决，不再出现“当前 Codex 扩展版本不兼容、补丁未应用”的两条误报。该确认只覆盖本次误报和相关入口，不冒充冷启动耗时或其他未单独观察的 UI 证据。

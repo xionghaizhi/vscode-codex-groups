@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.63-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.65-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.63
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.65
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.63
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.65
 ```
 
 然后在 VSCode 中执行：
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.63.vsix
+code --install-extension vscode-codex-groups-0.0.65.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -209,7 +209,7 @@ Codex Local Groups: Reload Window
 也可在终端验证：
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.63
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.65
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -254,7 +254,8 @@ npm run verify-patched-bundles
 - Codex `26.5814.41407` 升级后分组、标题或项目历史消失：升级到 v0.0.63，执行 `Apply Patches` 后 Reload Window。该版看门狗为 `YI`、消息解析器为 `Q9`，旧 5810 压缩锚点不能复用。
 - Codex `26.5818.31338` 升级后分组、标题、Sol 档位、项目历史或子 agent 面板链失效：升级到 v0.0.63，执行 `Apply Patches` 后 Reload Window。该版看门狗为 `QP`、消息解析器为 `nY`，Header 真实 messenger / execution-target 导出为 `Flt` / `c0`；旧 `Vst` / `U$` 在新包中已是无关导出。
 - Codex `26.5818.41705` 升级后分组、标题、Sol 档位、项目历史、子 agent 面板链失效，最近会话长时间显示 spinner 或显示 `No chats yet`：升级到 v0.0.63，执行 `Apply Patches` 后 Reload Window。该版仍使用 `QP` 看门狗，消息解析器为 `oY`，Header 真实 messenger / execution-target 导出为 `Jlt` / `Z1`；项目历史使用 state DB 分页，并按真实 `bdt({ thread, ... })` 契约转换会话。
-- Codex `26.5825.32147` 升级后无法启动，或分组、标题、项目历史、子 agent 面板、Sol Max/Ultra 任一链路失效：升级到 v0.0.63，执行 `Apply Patches` 后 Reload Window。该版 Host 使用 `DY/yP/Cd/new kI`，Header 的真实 messenger / execution-target 导出为 `_pt` / `w8`，项目历史使用 `RCt/HCt`；v0.0.63 同时拒绝字符串、不可达函数和整段 nested decoy，避免补丁假绿。
+- Codex `26.5825.32147` 升级后无法启动，点击最近会话下拉出现错误边界，或分组、标题、项目历史、子 agent 面板、Sol Max/Ultra 任一链路失效：升级到 v0.0.64，执行 `Apply Patches` 后 Reload Window。该版 Host 使用 `DY/yP/Cd/new kI`，Header 的真实 messenger / execution-target 导出为 `_pt` / `w8`，项目历史使用 `RCt/HCt`；v0.0.64 精确绑定下拉 wrapper 的 React runtime `Pn`，并拒绝字符串、不可达函数和整段 nested decoy。
+- Codex `26.5825.51511` 升级后上述任一链路失效：升级到 v0.0.65，执行 `Apply Patches` 后 Reload Window。该 build 的 Host 漂移为 `pRe/NY/wCe`，子 agent 链为 `Pbr/Mbr/p4/vMr/fIr/s8n`，项目历史真实请求与 mapper 为 `WCt/BCt`；不得复用 32147 的压缩符号，也不得改用户的 Multi-Agent 配置来制造通过。
 - Codex `26.5803.61601` 启动仍超过 30 秒：本次 Reload 在 `66,081ms` 挂载 route，19ms 后 ready，UI 和分组功能正常。120 秒补丁只避免 30 秒误杀，不会让 Webview 必须等待 120 秒，也不会缩短上游 bundle 加载和 React route mount；该延迟仍作为上游性能观察项。
 - Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
 - 禁用/卸载本扩展后 Codex 仍异常：先执行 `Codex Local Groups: Restore Original Codex UI`，或终端运行 `npm run restore-codex-ui`，再 Reload Window。禁用扩展不会自动还原已 patch 的 Codex bundle。

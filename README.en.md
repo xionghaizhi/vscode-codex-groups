@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.63-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.65-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.63
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.65
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.63
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.65
 ```
 
 Then in VSCode:
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.63.vsix
+code --install-extension vscode-codex-groups-0.0.65.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -209,7 +209,7 @@ Codex Local Groups: Reload Window
 Terminal verification:
 
 ```bash
-cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.63
+cd ~/.vscode-server/extensions/vscode-codex-groups-0.0.65
 npm run plan-patches
 npm run apply-patches
 npm run repair-codex-ui
@@ -254,7 +254,8 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 - If Codex `26.5814.41407` loses groups, local titles, or project history after upgrading, install v0.0.63, run `Apply Patches`, then Reload Window. This build uses the `YI` watchdog and `Q9` message parser; the old 5810 minified anchors cannot be reused.
 - If Codex `26.5818.31338` loses groups, titles, Sol reasoning levels, project history, or the subagent panel chain after upgrading, install v0.0.63, run `Apply Patches`, then Reload Window. This build uses the `QP` watchdog and `nY` message parser; the real Header messenger/execution-target exports are `Flt`/`c0`, while the old `Vst`/`U$` names now point to unrelated exports.
 - If Codex `26.5818.41705` loses groups, titles, Sol reasoning levels, project history, the subagent panel chain, leaves the recent menu on a long-running spinner, or shows `No chats yet`, install v0.0.63, run `Apply Patches`, then Reload Window. This build still uses the `QP` watchdog, its message parser is `oY`, and the real Header messenger/execution-target exports are `Jlt`/`Z1`; project-history pagination uses the state database and converts rows through the real `bdt({ thread, ... })` contract.
-- If Codex `26.5825.32147` fails to start, or loses groups, titles, project history, the subagent panel, or Sol Max/Ultra, install v0.0.63, run `Apply Patches`, then Reload Window. This build uses `DY/yP/Cd/new kI` in the Host, `_pt`/`w8` as the real Header messenger/execution-target exports, and `RCt/HCt` for project history. v0.0.63 also rejects string, unreachable-function, and whole-chunk nested decoys instead of accepting a false-green patch.
+- If Codex `26.5825.32147` fails to start, clicking the recent-chats dropdown opens the error boundary, or groups, titles, project history, the subagent panel, or Sol Max/Ultra disappear, install v0.0.64, run `Apply Patches`, then Reload Window. This build uses `DY/yP/Cd/new kI` in the Host, `_pt`/`w8` as the real Header messenger/execution-target exports, and `RCt/HCt` for project history. v0.0.64 binds the dropdown wrapper to the exact React runtime `Pn` and rejects string, unreachable-function, and whole-chunk nested decoys.
+- If any of those paths fail after upgrading to Codex `26.5825.51511`, install v0.0.65, run `Apply Patches`, then Reload Window. This build moves the Host contracts to `pRe/NY/wCe`, the subagent chain to `Pbr/Mbr/p4/vMr/fIr/s8n`, and the real project-history request and mapper to `WCt/BCt`; do not reuse 32147 minified symbols or change the user's Multi-Agent configuration to force a pass.
 - Codex `26.5803.61601` still takes more than 30 seconds to open: this Reload mounted routes after `66,081ms` and reached ready 19ms later, while the UI and grouping features worked normally. The 120-second patch only prevents a premature timeout; it neither forces a 120-second wait nor shortens upstream bundle loading and React route mounting. The delay remains an upstream performance observation.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - Codex is still broken after disabling/uninstalling this extension: run `Codex Local Groups: Restore Original Codex UI`, or run `npm run restore-codex-ui`, then Reload Window. Disabling the extension does not automatically revert patched Codex bundles.
