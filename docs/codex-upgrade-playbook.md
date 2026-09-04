@@ -622,6 +622,8 @@ npm run restore-codex-ui
 | v0.0.55 | `26.5803.61601` 只重压缩 app-main，模型选择函数由 `tBe` 变为 `iBe`，硬编码 marker 锚点失效 | marker 必须围绕唯一业务签名定位；同一 minor 的新 build 也要跑 official clean plan/apply/plan、live verifier 和 Reload 人工门禁。 |
 | v0.0.56 | 同一 ID 的下拉标题已读 Local Groups metadata，打开页左上角仍读 Codex 原生 title | 标题有 dropdown 与 `Header Bn` 两个消费点；本地非空优先、空缺回退原生，只改展示不写原生 title；自动、verifier、clean/live 和 Reload 都必须验双处。 |
 | v0.0.56 | `multi_agent_v2=true` 时 transcript 有子 agent 样式，顶部 composer 面板缺失 | V2 membership 的 `canInteract=false` 会被 `Een` 过滤；只记录上游行为，不改用户配置、不 patch 交互语义；每次升级验证完整双展示链。 |
+| v0.0.66 | `26.5901` 拆为五个业务 bundle，首次 Reload 的 opened-title 注入误把 JSX runtime `$` 当作 hooks runtime，导致 `Bn` error boundary | 每个 Header 注入点必须分别确认 JSX 与 hooks runtime；`Bn` 必须在真实 `Ln.useState/useEffect` 中注册且清理 refresh listener。clean plan、语法和 marker verifier 不足，必须执行该组件的运行时回归并在 live 发现错误后 Repair→重新验收。 |
+| v0.0.67 | `26.5901` 打开页已随 metadata refresh 更新本地标题，但下拉 row 的 Main `yMt` 改为原生 title 优先，旧非字符串 `titleOverride` 被忽略 | 标题门禁必须跨 Header 与实际 row resolver：Header 仅传唯一 Local Groups marker，Main 仅解该 marker；普通 override 保持原生优先。每次升级都要执行即时回显、清空回退、旧 patch 原位迁移和缺 resolver fail-closed 回归。 |
 
 ## 9. Codex 26.727.40816 适配记录
 
@@ -706,7 +708,7 @@ npm run restore-codex-ui
 
 1. 不能只放行版本：Header row、项目 Hook、Power 和模型校验锚点都已漂移，否则项目隔离、三个 metadata 入口和 Sol 档位会同时退化。
 2. `$1` 是合法上游导出名，但把含 `$1` 的 `binding` 作为 `String.replace()` replacement string 会触发捕获组替换，二次 plan 生成 `, as codexLocalGroupsMessengerImport`。必须使用 replacement callback 返回字面文本。
-3. Header 必须把 `hostId`、conversation id、标题都纳入 cache 依赖，传递 `threadSummary` 和非字符串 `titleOverride`；不能沿用 26.5730 的 24 槽模板。
+3. Header 必须把 `hostId`、conversation id、标题都纳入 cache 依赖并传递 `threadSummary`。`26.5901.22334` 的实际 row resolver 已不再接受非字符串 `titleOverride` 覆盖原生标题，必须使用 Header marker 与 Main decoder 的双 bundle 门禁；不能沿用 26.5730 的 24 槽模板。
 4. 三个入口回归必须执行 helper，断言 `promptConversationTitle`、`promptConversationGroup`、`setPendingGroup` 和 `new-chat`；marker 存在不等于功能可用。
 5. locator 必须优先 active registry；失败安装残留的高版本目录不能劫持 plan、apply 或 verifier。
 
@@ -1121,3 +1123,35 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - Local Groups `0.0.65` VSIX SHA-256 `892e195f47d2715c378d3874c086eafc5a3bbe13dcf01ec65812fbe5c134ec70`。仓库/安装目录 engine SHA-256 均为 `107ff9d4be5c420adc10cd5ccc3a4012fc583592411c5aa1258cb4069668242f`，verifier 均为 `1a7686ad387fdfc41adfe45e720a63ee363b28024735536e4a205a34af28835e`。
 - 配置只读：`config.toml` size/mtime/SHA-256 保持 `5156` / `1787908129` / `d8edde15575b9fd915ab730d56e41d44107d533f51a8757f0cf3e5b3d7b61a88`。
 - 最终清理：本次 `.codex-upgrade` 的 official、patched、rollback、VSIX/extracted 与 Marketplace probe 全部删除；另清理两个有明确 Local Groups 所有权的旧测试/review 日志。`codex-upgrade-*`、`codex-patch-*`、`codex-local-groups-*`、`vscode-codex-groups-*`、`clg-*` 已归零；无本次所有权证据的共享 lock/skill 诊断文件保留。
+
+## 21. Codex 26.5901.22334 适配记录
+
+### 获取、拓扑与精确映射
+
+- 官方 linux-x64 prerelease 为 `openai.chatgpt@26.5901.22334`，VSIX SHA-256 为 `cd9cd06c5bfcc8e18972587d04ac9d08b04152ebf6de426233ddc812b05933ff`。CDN 单连接可截断，必须在 ZIP 完整性和 package version 通过后才作为 clean 证据。
+- 本 build 的 Host、Header、Main、Power、Server/History 分为五个目标 bundle。Host 为 `NCe/J9/GI/Dd/tI/HTe`；Header 为 `Nn/Cn/jn/D/Bn`；Main 为 `Hd -> Ttt`、`rE+iE -> BJ`、`eAn/Qkn/wAn -> Po`；Power 为 `JNn/$Nn/i3/I7n`，History hook 在 Power、真实 request/store 在 Server。
+- exact-build 白名单只放行 `26.5901.22334`。未知 build、带后缀和未来 minor 在恢复 backup 或写入前 fail closed；不能因为新 build 又合包或拆包而扩宽这条边界。
+
+### 本次阻碍、根因与防复发
+
+1. 初始实现沿用 Header 的 `$` JSX runtime 写入 `Bn` 的 `useState/useEffect`。首个新 Extension Host 虽完成 route mount/ready，却在 `Bn` 记录 error boundary；这证明语法、plan 0、静态 marker 与 route-ready 都不能代替被修改组件的运行时门禁。
+2. clean Header 证明真实 hooks runtime 是 `Ln`，`$` 只提供 JSX。最终 `Bn` 注入、engine postcondition 和 external verifier 全部精确要求 `Ln.useState/useEffect`；执行级 fixture 让 `$` 只提供 JSX、`Ln` 才提供 hooks，因此误用 `$` 会实际报错。
+3. refresh listener 必须在同一个 effect 中配对 `addEventListener/removeEventListener`。首轮独立 review 发现只校验 subscribe 会泄漏 listener；删除 cleanup 现在让 plan、apply 和 verifier 都 fail closed、零写入。
+4. 已存在错误 `$` marker 时普通 Apply 只报告不完整且不写入；必须经 `Repair Codex UI` 恢复 clean backup 后再注入正确 `Ln` 版本，不能只改 marker。每次 live runtime 发现 Header error boundary，都先记录精确栈、恢复 clean、fresh clean 重跑，再重新安装 active Local Groups VSIX。
+5. 项目历史的 query hook 与真实 Store 分包，`listRecentThreads` 的 hydration-like 字符串不是注入点；fixture、external verifier 和 clean gate 必须同时绑定 Power hook 与 Server Store。子 agent transcript、Main membership、Power composer 与 lazy consumer 也必须彼此独立验收。
+6. Remote CLI 不一定能驱动已经存在的用户窗口 Reload。无直接 UI 控制时，必须如实记录该限制，提供运行时等价执行证据，不能把旧 Host 的 error 或 route-ready 写成修复后的 UI PASS；下次真正 Reload/打开窗口必须重新检查 Codex 日志和受影响 UI。
+7. 用户实测 opened title 已即时显示本地标题、recent dropdown 仍显示原生标题。根因不是 metadataSaved 或 Header refresh 丢失，而是 Main `$T/yMt` 先返回 native `title`，使旧版非字符串 `titleOverride` 失效。Header 只能发送 `__codexLocalGroupsTitle265901:` 前缀，Main resolver 只能在此前缀存在时解出本地标题；不得改写普通 titleOverride 或原生 title 优先级。
+
+### v0.0.67 下拉标题即时回显门禁
+
+- 必须同时检查 `codexLocalGroupsDecoratedItem()`、项目 row helper、Header row 的 marker 和 Main `yMt` resolver；decorator 和项目 row function declaration 必须 top-level 唯一且 code-aware，不能被同名 duplicate/later/nested decoy 满足。项目 row helper 的 consumer 还必须绑定真实 `u.map` 渲染 callback，不能只用局部 `includes`；本轮达到两次修复上限时只记录此项，下次升级前先补齐。只修 Header、只存在 refresh listener 或只存在 metadataSaved 都不算修复。
+- 清空本地标题时 Header 不传 marker，Main 必须继续显示原生 title；普通字符串 override 仍按上游 native-first 行为处理。
+- 已安装旧版 0.0.66 patch 时，Apply 仅可原位迁移 Header 与 Main 两个 bundle；第二次 plan 必须为 0。缺 marker、缺 decoder 或 decoder 非精确契约必须 fail closed、零写入。
+- 回归必须实际执行 decorator、row resolver，覆盖“native title + 本地 marker”“本地标题清空”和“普通 override”三条路径；external verifier 也必须检查 producer/use 与两个跨 bundle 契约。
+
+### 最终验证与状态
+
+- 自动化：370 tests、compile 26 files、lint、strict OpenSpec、diff check 通过；独立 review 两轮均无阻断 finding。
+- fresh official clean：plan 5、apply 5、语法 6、external verifier、幂等与二次 plan 0 通过；unknown/suffix 零写入、标题双消费、真实分页 History、两条子 agent 消费链、Sol-only Power 与 native slider 均覆盖。
+- live：官方 Codex VSIX 已安装并对 5 bundle 执行 Repair；active Local Groups `0.0.66` 的 engine/verifier 与仓库一致，安装目录 compile、plan 0、verifier 通过。`config.toml` 的 SHA-256/mtime 未变化；所有本次归属的 `.codex-upgrade` 与 `/tmp/codex-*`/`clg-*` 临时产物已清理。
+- Reload：首次 host 的 `$` hooks error 已作为失败证据保留；修复后 live Header 为 `Ln` hooks、`$` 不含 hooks，并有执行级 runtime 等价验证。当前 remote CLI 无法向既有用户窗口发送 `Developer: Reload Window`，因此真实 UI Reload 结果保持 pending，不得写为 PASS。

@@ -500,6 +500,69 @@ function configure26582551511Features(target) {
   fs.writeFileSync(target.appServerManagerSignalsPath, server);
 }
 
+function configure26590122334Features(target) {
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5901.22334';
+  target.headerPath = path.join(assets, 'header-f427a7169f39.js');
+  target.appMainPath = path.join(assets, 'app-initial-d8588f3b7d3f.js');
+  target.appStatsigPath = path.join(assets, 'app-initial-2e80ba27d368.js');
+  target.appServerManagerSignalsPath = path.join(assets, 'app-initial-c518b37afd45.js');
+  target.requestPath = target.appMainPath;
+  target.localTitlePath = null;
+  const header = [
+    'import{a as q}from"./app-initial-d8588f3b7d3f.js";',
+    'function Nn(){let x=0,s=m(),{authMethod:c}=rt(),l=E(),u=g(Rn),{data:d}=ct(),f=Oe(),y=0;return d}',
+    'function Cn(e){let c=a!==void 0&&a,l=s===void 0||s,u=b(pe),f=m(),p=q(),{authMethod:h}=rt(),r=e.r,n=e.n,ee=null;let T=r.filter(te),E=_n(n.data,r,ee),F=E,x=null,i=null;return F.map(e=>(0,Z.jsx)(jn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&x===e.conversation.id,onClose:i,onActiveArchiveStart:p},e.key))}',
+    'function wn(e){return e.kind===`remote`}function Tn(e){return e}',
+    'jn=(0,kn.memo)(function(e){let t=(0,On.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(D,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
+    'const menu=(0,Z.jsx)(Menu,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:G,open:!0});',
+    'const outer={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
+    'const scroll={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`};',
+    'function Bn(e){let t=(0,Gn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e,l=n!==void 0&&n;return o}',
+  ].join('');
+  const main = [
+    'var nativeUserSettings={multi_agent:!0,multi_agent_v2:!0,canInteract:!0,provider:`native`,model:`native`,reasoning:`native`};',
+    'var Ld={postMessage(){}},Vd,Hd;Vd=class e{static getInstance(){return new e}dispatchMessage(e,t){if(Ld==null)return;Ld.postMessage({...t,type:e})}deliverOrBufferMessage(){}dispatchHostMessage(e){this.deliverOrBufferMessage(e)}};Hd=Vd.getInstance(),KEe((e,t)=>{Hd.dispatchMessage(e,t)});Hd.dispatchHostMessage({type:`native`});',
+    'function rE(e){return Ja(iE,e===void 0?null:e)}iE=xr(Q,(e,{get:t})=>{let n=e;return{activeWorkspaceRoot:n,isActiveWorkspaceRootLoading:!1,hostConfig:null}});',
+    'function kQe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+    'function VQe(e){return e?.model_reasoning_effort??null}',
+    'function GQe(e,t){let P={settings:{reasoning_effort:null}},R=P?.settings.reasoning_effort??null,T={profile:null},a={query:{fetch:(...e)=>globalThis.readbacks.push(e)}},c=`local`,b=`/project`,o={setQueryData:(e,n)=>globalThis.writes.push(n({}))};async function save(){o.setQueryData([],n=>({...n,model_reasoning_effort:t}));await Gu().setDefaultModelConfig(e,t,T.profile);await re(),await a.query.fetch(Oc,{hostId:c,cwd:b})}return{R,save}}',
+    'function yMt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}',
+    'function by(e,t,n){let{isBackgroundSubagentsEnabled:l=!0}={};return l?[{type:`multi-agent-action`},{type:`subagent-activity`}]:[]}',
+    'function eAn(e,t,n,r){let i=[];for(let e of r??[])if(e.type===`subAgentActivity`)i.push({parentConversationId:t});else if(!(e.tool!==`spawnAgent`))i.push({parentConversationId:t});return i}',
+    'function Qkn(e,t,i,c,n){return eAn(t,i,c,n)}wAn=xr(Q,(e,{get:t})=>{let n=e;return Qkn({cachedConversations:[],conversationTurns:[],parentConversationId:n})});',
+    'export{Hd as Ttt,rE as BJ,wAn as Po};',
+  ].join('');
+  const power = [
+    'import{Po as Kd}from"./app-initial-d8588f3b7d3f.js";',
+    'function $Nn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Um(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}',
+    'var nPn=[],rPn={},aPn=[];function JNn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){return $Nn((t?[...nPn,rPn]:nPn).filter(e=>!n||e.reasoningEffort!==`xhigh`),e,i)}',
+    'var TKe=[];function av(){return!0}function i3(e,t){let n=e?.find(e=>e.model===t);return n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort))}',
+    'function z7n(e){return e.canInteract&&e.displayName.trim().length>0}function L7n(e){return e.isCurrentParentTurn}',
+    'function I7n(e){let r=e.enabled,n=e.activeConversationId,a=il(Kd,r?n:null),o=a.filter(z7n),s=o.filter(L7n);return{rows:a,visibleRows:s}}',
+    'function rWn(e){return e.formatMessage(`composer.backgroundSubagents.summary`)}function Wtr(e){let{rows:t,visibleRows:n}=I7n({activeConversationId:e.id,enabled:!0}),Bn=t.length>0,layout={subagentsPanel:Bn};return Bn?(0,u5.jsx)(rWn,{rows:n}):layout}',
+    'function Sat(){return Cat(`recent-conversations`)}',
+  ].join('');
+  const server = [
+    'var wR=`local`,uz=[];function RG(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function yVt(e){return e.ephemeral!==!0&&e.threadSource!==`ambient_suggestions`}',
+    'var BG=t((()=>{}));function mUt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){return{id:n,hostId:t,title:i,cwd:e.cwd}}',
+    'async function vUt(e,t){return[]}',
+    'var $H=class{},kUt=class{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return vUt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),useStateDbOnly:this.params.hostId!==wR},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:uz,useStateDbOnly:this.params.hostId!==wR},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(yVt)}}};',
+    'var z0t=class extends $H{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}};',
+  ].join('');
+  const watchdog = 'var GI=class{constructor(e){this.onTimeout=e}start(){let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){}};var HTe=require("node:child_process");';
+  const host = 'Dd=class t{async initializeWebview(e,r,n,o){let s=new GI(()=>{});this.registerClientCoordinationForWebview(e,n,s)}createClientCoordinationSession(e,r,n){let o={};return this.registerAppHostSessionForWebview(e,r,o,n)}registerAppHostSessionForWebview(e,r,n,o){return{appView:new tI({startup:{reach:a=>o.handleStartupPhase(a)}})}}};';
+  fs.writeFileSync(target.extensionJsPath, extensionText
+    .replace('var Dle=require("path");W();$t();', 'var NCe=require("path");D();oA();QN();Bt();')
+    .replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=J9(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})')
+    .replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + watchdog + host);
+  fs.writeFileSync(target.headerPath, header);
+  fs.writeFileSync(target.appMainPath, main);
+  fs.writeFileSync(target.appStatsigPath, power);
+  fs.writeFileSync(target.appServerManagerSignalsPath, server);
+  fs.writeFileSync(path.join(assets, 'local-conversation-subagents-panel-tab-e3e8ef5b32c6.js'), 'import{Po as g}from"./app-initial-d8588f3b7d3f.js";function f(e,t){return[]}function L(e){let{conversationId:a,onOpenBackgroundAgent:h}=e,l=a;let u=f(g,l),p=u.every(e=>e.canInteract);return{canInteract:p,conversationId:a,onOpenBackgroundAgent:h}}');
+}
+
 
 
 function restoreSafe26721Layout(text) {
@@ -1645,6 +1708,22 @@ module.exports = {
       },
     },
     {
+      name: 'rejects a 26.5901.22334 hydration decoy outside the real history store',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const original = fs.readFileSync(target.appServerManagerSignalsPath, 'utf8');
+        const native = 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:uz,useStateDbOnly:this.params.hostId!==wR},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(yVt)}}';
+        const broken = original.replace(native, native.replace('useStateDbOnly:this.params.hostId!==wR', 'useStateDbOnly:!1')) + `class HydrationDecoy{${native}}`;
+        fs.writeFileSync(target.appServerManagerSignalsPath, broken);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('26.5901 project history store: 找不到唯一原生注入点'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+        assert.strictEqual(fs.readFileSync(target.appServerManagerSignalsPath, 'utf8'), broken);
+      },
+    },
+    {
       name: 'adapts the exact Codex 26.5825.51511 drift without changing user multi-agent settings',
       run() {
         const target = createTarget();
@@ -1964,6 +2043,230 @@ module.exports = {
           assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), before);
           assert.strictEqual(fs.statSync(target.headerPath).mtimeMs, mtime);
         }
+      },
+    },
+    {
+      name: 'writes nothing before rejecting unknown or suffixed Codex 26.5901 builds',
+      run() {
+        for (const version of ['26.5901.99999', '26.5901.22334.1', '26.5901.22334-insider', '26.5902.1']) {
+          const target = createTarget();
+          target.version = version;
+          const before = fs.readFileSync(target.headerPath, 'utf8');
+          const mtime = fs.statSync(target.headerPath).mtimeMs;
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+          assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), before);
+          assert.strictEqual(fs.statSync(target.headerPath).mtimeMs, mtime);
+        }
+      },
+    },
+    {
+      name: 'adapts the exact Codex 26.5901.22334 split topology without widening native contracts',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [
+          target.extensionJsPath,
+          target.headerPath,
+          target.appMainPath,
+          target.appStatsigPath,
+          target.appServerManagerSignalsPath,
+        ]);
+        const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        assert.ok(bundles[target.extensionJsPath].includes('codexLocalGroupsPatchVersion=17'));
+        assert.ok(bundles[target.extensionJsPath].includes('var GI=class{'));
+        assert.ok(bundles[target.extensionJsPath].includes('timeoutMs:12e4})},12e4)'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265901PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsOpenedTitle265901PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('(0,Ln.useState)(0);(0,Ln.useEffect)'));
+        assert.ok(!bundles[target.headerPath].includes('(0,$.useState)(0);(0,$.useEffect)'));
+        assert.ok(bundles[target.headerPath].includes('threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265901:`+n.conversation.title:void 0'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265901PatchVersion=1'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsDropdownTitle265901PatchVersion=1'));
+        assert.ok(bundles[target.appMainPath].includes('r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)'));
+        assert.ok(bundles[target.appMainPath].includes('var nativeUserSettings={multi_agent:!0,multi_agent_v2:!0,canInteract:!0,provider:`native`,model:`native`,reasoning:`native`};'));
+        assert.ok(bundles[target.appMainPath].includes('function by(e,t,n){let{isBackgroundSubagentsEnabled:l=!0}={}'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265901PatchVersion=1'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsProjectHistory265901HookPatchVersion=1'));
+        assert.ok(bundles[target.appStatsigPath].includes('$Nn((t?[...nPn,rPn]:nPn).filter'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265901StorePatchVersion=1'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('useStateDbOnly:!0'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'executes 26.5901.22334 paged project history and manager fallback independently',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        const serverScript = `const t=e=>e();${server};(async()=>{let pages={first:{data:[{id:'root',cwd:'/project',name:'Root',updatedAt:3},{id:'other',cwd:'/other',name:'Other',updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',name:'Child',updatedAt:1}],nextCursor:null}},requests=[],store={threadsById:new Map,listRecentThreads:e=>(requests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:e=>({conversationId:e.id,hostId:'local',title:e.name,cwd:e.cwd,workspaceKind:'project',hasUnreadTurn:false}),shouldSurfaceThreadSummary:()=>true},rows=await codexLocalGroupsLoadProjectConversations265901(store,'/project');let repeated={...store,listRecentThreads:()=>Promise.resolve({data:[],nextCursor:'same'})},repeat='';try{await codexLocalGroupsLoadProjectConversations265901(repeated,'/project')}catch(e){repeat=e.message}console.log(JSON.stringify({ids:rows.map(e=>e.id),flags:requests.map(e=>e.useStateDbOnly),repeat}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { ids: ['root', 'child'], flags: [true, true], repeat: 'App Server repeated a thread list cursor' });
+        const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
+        const hook = power.slice(power.indexOf('var codexLocalGroupsProjectHistory265901HookPatchVersion=1'));
+        const powerScript = `let manager={listAllThreads:()=>Promise.resolve([{id:'root',cwd:'/project',name:'Root',updatedAt:3},{id:'child',cwd:'/project/sub',name:'Child',updatedAt:2},{id:'other',cwd:'/other',name:'Other',updatedAt:1}]),getRecentConversations:()=>[]};function Cat(){return{data:[{id:'native'}],native:true}}function bE(){return{getDefault:()=>({getHostId:()=>\`local\`}),getForHostId:()=>manager}}function pn(e){return{...e,data:[],isError:false,refetch(){}}}let TE={useEffect(){}},hat=()=>()=>{},mat=()=>()=>{};${hook};(async()=>{let native=Sat(),fallback=await Sat('/project','local',true).queryFn();manager={listProjectConversations:e=>Promise.resolve([{id:e,cwd:e}])};let preferred=await Sat('/project','local',true).queryFn();console.log(JSON.stringify({native:native.native,ids:fallback.map(e=>e.id),preferred:preferred.map(e=>e.id)}))})()`;
+        const powerResult = childProcess.spawnSync(resolveNodePath(), ['-e', powerScript], { encoding: 'utf8' });
+        assert.strictEqual(powerResult.status, 0, powerResult.stderr);
+        assert.deepStrictEqual(JSON.parse(powerResult.stdout), { native: true, ids: ['root', 'child'], preferred: ['/project'] });
+      },
+    },
+    {
+      name: 'fails closed when the 26.5901.22334 opened-title cleanup is removed',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const header = fs.readFileSync(target.headerPath, 'utf8');
+        const cleanup = '(0,Ln.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[])';
+        const broken = header.replace(cleanup, cleanup.replace('()=>window.removeEventListener(`codex-local-groups-refresh`,e)', '()=>{}'));
+        fs.writeFileSync(target.headerPath, broken);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('header 26.5901 opened title: 补丁标记不完整'));
+        assert.deepStrictEqual(plan.changes, []);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+        assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), broken);
+      },
+    },
+    {
+      name: 'executes 26.5901.22334 dropdown and opened titles with empty alias fallback',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        const header = plan.changes.find((change) => change.path === target.headerPath).nextText;
+        const items = [
+          { kind: 'local', key: 'local', conversation: { id: 'local', hostId: 'local', cwd: '/project', title: 'Native local' } },
+          { kind: 'local', key: 'blank', conversation: { id: 'blank', hostId: 'local', cwd: '/project', title: 'Native blank' } },
+        ];
+        const metadata = { version: 1, conversations: { local: { title: 'Local title', group: '需求A', projectRoot: '/project' }, blank: { title: '   ', group: '需求A', projectRoot: '/project' } } };
+        const rows = JSON.stringify(runHeaderRows(header, 'local', { items, metadata, currentRoot: '/project', renderProjectRowsView: true }));
+        assert.ok(rows.includes('Local title'));
+        assert.ok(rows.includes('Native blank'));
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const resolver = main.match(/function yMt\(\{title:e,titleOverride:t\}\)\{[^}]+\}/)?.[0];
+        const resolverScript = `${resolver};console.log(JSON.stringify([yMt({title:'Native local',titleOverride:'__codexLocalGroupsTitle265901:Local title'}),yMt({title:'Native blank',titleOverride:void 0}),yMt({title:'Native local',titleOverride:'Native fallback'}),yMt({title:null,titleOverride:'Native fallback'})]));`;
+        const resolverResult = childProcess.spawnSync(resolveNodePath(), ['-e', resolverScript], { encoding: 'utf8' });
+        assert.strictEqual(resolverResult.status, 0, resolverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(resolverResult.stdout), ['Local title', 'Native blank', 'Native local', 'Native fallback']);
+        const opened = header.slice(header.indexOf('function Bn(e){'));
+        const script = `let titles={local:'Local title',blank:'   '},listeners=[],$={jsx(){}},Ln={useState:()=>[0,()=>{}],useEffect:e=>e()},Gn={c:()=>[]},window={addEventListener:(e,t)=>listeners.push(t),removeEventListener(){}},codexLocalGroupsLocalTitle=e=>{let t=titles[e.conversation.id];return typeof t==='string'&&t.trim()?t.trim():null};${opened};console.log(JSON.stringify([Bn({desktopDeepLinkConversationId:'local',title:'Native local'}),Bn({desktopDeepLinkConversationId:'blank',title:'Native blank'}),listeners.length]))`;
+        const result = childProcess.spawnSync(resolveNodePath(), ['-e', script], { encoding: 'utf8' });
+        assert.strictEqual(result.status, 0, result.stderr);
+        assert.deepStrictEqual(JSON.parse(result.stdout), ['Local title', 'Native blank', 2]);
+      },
+    },
+    {
+      name: 'migrates the 26.5901.22334 title contract from v0.0.66 without rewriting other bundles',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const first = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(first.errors, []);
+        for (const change of first.changes) fs.writeFileSync(change.path, change.nextText);
+        const oldOverride = 'titleOverride:codexLocalGroupsLocalTitle(n)?(0,Z.jsx)(Z.Fragment,{children:n.conversation.title}):void 0,';
+        const newOverride = 'titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265901:`+n.conversation.title:void 0,';
+        const oldResolver = 'function yMt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+        const newResolver = 'var codexLocalGroupsDropdownTitle265901PatchVersion=1;function yMt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265901:`))return t.slice(`__codexLocalGroupsTitle265901:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+        const header = fs.readFileSync(target.headerPath, 'utf8').replace(newOverride, oldOverride);
+        const main = fs.readFileSync(target.appMainPath, 'utf8').replace(newResolver, oldResolver);
+        fs.writeFileSync(target.headerPath, header);
+        fs.writeFileSync(target.appMainPath, main);
+        const migration = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(migration.errors, []);
+        assert.deepStrictEqual(migration.changes.map((change) => change.path), [target.headerPath, target.appMainPath]);
+        for (const change of migration.changes) fs.writeFileSync(change.path, change.nextText);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'fails closed when the 26.5901.22334 dropdown resolver is removed',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const resolver = 'function yMt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265901:`))return t.slice(`__codexLocalGroupsTitle265901:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+        fs.writeFileSync(target.appMainPath, main.replace(resolver, 'function yMt({title:e}){return e}') + 'var resolverDecoy=`' + resolver + '`;');
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5901: 补丁标记不完整'));
+        assert.deepStrictEqual(plan.changes, []);
+      },
+    },
+    {
+      name: 'fails closed when the 26.5901.22334 dropdown title metadata producer drifts',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const header = fs.readFileSync(target.headerPath, 'utf8');
+        const decorator = 'function codexLocalGroupsDecoratedItem(e){let t=codexLocalGroupsLocalTitle(e);return t?{...e,conversation:{...e.conversation,title:t}}:e}';
+        for (const broken of [
+          header.replace(decorator, 'function codexLocalGroupsDecoratedItem(e){return e}'),
+          header + decorator,
+          header.replace(decorator, 'function codexLocalGroupsDecoratedItem(e){return e}') + `function codexLocalGroupsDecoratorDecoy(){${decorator}}`,
+        ]) {
+          fs.writeFileSync(target.headerPath, broken);
+          const plan = engine.plan(target, { version: 1, conversations: {} });
+          assert.ok(plan.errors.includes('header 26.5901: 补丁标记不完整'));
+          assert.deepStrictEqual(plan.changes, []);
+        }
+      },
+    },
+    {
+      name: 'executes the independent 26.5901.22334 transcript and top composer chains',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const producer = main.slice(main.indexOf('function by('), main.indexOf('wAn=xr('));
+        const producerScript = `${producer};let transcript=by(null,null,null).map(e=>e.type),members=eAn(null,'parent',null,[{type:'subAgentActivity'},{tool:'spawnAgent'}]);console.log(JSON.stringify({transcript,parents:members.map(e=>e.parentConversationId)}))`;
+        const producerResult = childProcess.spawnSync(resolveNodePath(), ['-e', producerScript], { encoding: 'utf8' });
+        assert.strictEqual(producerResult.status, 0, producerResult.stderr);
+        assert.deepStrictEqual(JSON.parse(producerResult.stdout), { transcript: ['multi-agent-action', 'subagent-activity'], parents: ['parent', 'parent'] });
+        const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
+        const composer = power.slice(power.indexOf('function z7n('), power.indexOf('var codexLocalGroupsProjectHistory265901HookPatchVersion=1'));
+        const composerScript = `let Kd={},rows=[{conversationId:'visible',parentConversationId:'parent',canInteract:true,displayName:'Visible',isCurrentParentTurn:true},{conversationId:'hidden',parentConversationId:'parent',canInteract:false,displayName:'Hidden',isCurrentParentTurn:true},{conversationId:'stale',parentConversationId:'parent',canInteract:true,displayName:'Stale',isCurrentParentTurn:false}],il=()=>rows,u5={jsx:(type,props)=>({type:type.name,props})};${composer};let hook=I7n({activeConversationId:'parent',enabled:true}),panel=Wtr({id:'parent'});console.log(JSON.stringify({all:hook.rows.length,visible:hook.visibleRows.map(e=>e.conversationId),panel:panel.type}))`;
+        const composerResult = childProcess.spawnSync(resolveNodePath(), ['-e', composerScript], { encoding: 'utf8' });
+        assert.strictEqual(composerResult.status, 0, composerResult.stderr);
+        assert.deepStrictEqual(JSON.parse(composerResult.stdout), { all: 3, visible: ['visible'], panel: 'rWn' });
+        const lazy = fs.readFileSync(path.join(path.dirname(target.appMainPath), 'local-conversation-subagents-panel-tab-e3e8ef5b32c6.js'), 'utf8');
+        assert.ok(lazy.includes('Po as g'));
+        assert.ok(lazy.includes('let u=f(g,l)'));
+        assert.ok(lazy.includes('canInteract:p'));
+      },
+    },
+    {
+      name: 'executes 26.5901.22334 Sol-only efforts through native settings and Power slider',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const settings = main.slice(main.indexOf('function kQe('), main.indexOf('function by('));
+        const settingsScript = `let writes=[],defaults=[],readbacks=[],Oc={},re=()=>Promise.resolve(),Gu=()=>({setDefaultModelConfig:(...e)=>(defaults.push(e),Promise.resolve())});globalThis.writes=writes,globalThis.readbacks=readbacks;${settings};(async()=>{let efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh']),defaultReasoningEffort:'xhigh'},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low']),defaultReasoningEffort:'low'}],sol=e=>kQe({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:e,listModelsData:{models}}).reasoningEffort,terra=kQe({userSavedModelString:'gpt-5.6-terra',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort,setting=GQe('gpt-5.6-sol','ultra');await setting.save();console.log(JSON.stringify({max:sol('max'),ultra:sol('ultra'),terra,read:VQe({model_reasoning_effort:'ultra'}),write:writes[0].model_reasoning_effort,defaults,readbacks:readbacks.length}))})()`;
+        const settingsResult = childProcess.spawnSync(resolveNodePath(), ['-e', settingsScript], { encoding: 'utf8' });
+        assert.strictEqual(settingsResult.status, 0, settingsResult.stderr);
+        assert.deepStrictEqual(JSON.parse(settingsResult.stdout), { max: 'max', ultra: 'ultra', terra: 'low', read: 'ultra', write: 'ultra', defaults: [['gpt-5.6-sol', 'ultra', null]], readbacks: 1 });
+        const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
+        const controls = power.slice(power.indexOf('function $Nn('), power.indexOf('function z7n('));
+        const controlsScript = `let Um=e=>e;${controls};let p=e=>({id:e,model:'gpt-5.6-sol',reasoningEffort:e}),efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),models=[{model:'gpt-5.6-sol',displayName:'Sol',supportedReasoningEfforts:efforts(['low','medium','high','xhigh','ultra'])},{model:'gpt-5.6-terra',displayName:'Terra',supportedReasoningEfforts:efforts(['low'])}];nPn=['low','medium','high','xhigh'].map(p),rPn=p('ultra');console.log(JSON.stringify({compact:JNn(models).map(e=>e.reasoningEffort),expanded:JNn(models,{includeUltraInSlider:true}).map(e=>e.reasoningEffort),sol:i3(models,'gpt-5.6-sol').map(e=>e.reasoningEffort),terra:i3(models,'gpt-5.6-terra').map(e=>e.reasoningEffort)}))`;
+        const controlsResult = childProcess.spawnSync(resolveNodePath(), ['-e', controlsScript], { encoding: 'utf8' });
+        assert.strictEqual(controlsResult.status, 0, controlsResult.stderr);
+        assert.deepStrictEqual(JSON.parse(controlsResult.stdout), { compact: ['low', 'medium', 'high', 'xhigh'], expanded: ['low', 'medium', 'high', 'xhigh', 'ultra'], sol: ['low', 'medium', 'high', 'xhigh', 'ultra', 'max'], terra: ['low'] });
       },
     },
     {
@@ -5256,9 +5559,10 @@ console.log(JSON.stringify({dispatched:dispatched.filter(item=>item.message.acti
 }
 
 function run265730HeaderActions(header) {
+  const current265901 = header.includes('function wn(e){return e.kind===`remote`}');
   const current265825 = header.includes('function xn(e){return e.kind===`remote`}');
-  const start = header.indexOf(current265825 ? 'function xn(e){return e.kind===`remote`}' : 'function Sn(e){return e.kind===`remote`}');
-  const end = header.indexOf(current265825 ? 'function Sn' : 'function Cn', start);
+  const start = header.indexOf(current265901 ? 'function wn(e){return e.kind===`remote`}' : current265825 ? 'function xn(e){return e.kind===`remote`}' : 'function Sn(e){return e.kind===`remote`}');
+  const end = header.indexOf(current265901 ? 'function Tn' : current265825 ? 'function Sn' : 'function Cn', start);
   const script = `
 const vm=require('vm'),dispatched=[],hostMessages=[],storage={};
 const messenger={dispatchMessage(channel,message){dispatched.push({channel,message})},dispatchHostMessage(message){hostMessages.push(message)}};
@@ -5275,11 +5579,12 @@ console.log(JSON.stringify({dispatched:dispatched.filter(item=>item.message.acti
 }
 
 function runHeaderRows(header, activeId, options = {}) {
+  const current265901 = header.includes('function wn(e){return e.kind===`remote`}');
   const current265825 = header.includes('function xn(e){return e.kind===`remote`}');
   const current265730 = header.includes('function Sn(e){return e.kind===`remote`}');
   const latest = header.includes('function Bn(e){return e.kind===`remote`}');
-  const startMarker = current265825 ? 'function xn(e){return e.kind===`remote`}' : current265730 ? 'function Sn(e){return e.kind===`remote`}' : latest ? 'function Bn(e){return e.kind===`remote`}' : 'function Ke(e){return e.kind===`remote`}';
-  const endMarker = current265825 ? 'function Sn' : current265730 ? 'function Cn' : latest ? 'function Vn' : 'var qe=Je';
+  const startMarker = current265901 ? 'function wn(e){return e.kind===`remote`}' : current265825 ? 'function xn(e){return e.kind===`remote`}' : current265730 ? 'function Sn(e){return e.kind===`remote`}' : latest ? 'function Bn(e){return e.kind===`remote`}' : 'function Ke(e){return e.kind===`remote`}';
+  const endMarker = current265901 ? 'function Tn' : current265825 ? 'function Sn' : current265730 ? 'function Cn' : latest ? 'function Vn' : 'var qe=Je';
   const start = header.indexOf(startMarker);
   const end = header.indexOf(endMarker, start);
   const items = Object.prototype.hasOwnProperty.call(options, 'items') ? options.items : headerRowsItems();
@@ -5299,6 +5604,7 @@ const messenger = { dispatchMessage(channel, message) { dispatched.push({ channe
 const context = {
   ${latest ? '' : 'Q: { jsx, jsxs: jsx },'}
   Z: { jsx, jsxs: jsx },
+  kn: { useState: () => [0, () => {}], useEffect: effect => effect() },
   Pn: { useState: () => [0, () => {}], useEffect: effect => effect() },
   Je: 'Je',
   b: messenger,

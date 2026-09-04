@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.65-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.67-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -31,7 +31,7 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 - `Check Status` 检查 Codex 扩展、patch 状态、metadata 和会话数量，并提供 Apply / Reload 快捷操作。
 - `Search Conversations` 用 VSCode QuickPick 搜索本地标题、分组、项目路径或会话 ID，并跳转到选中的 Codex 会话。
 - `Manage Groups` 用 VSCode QuickPick 批量重命名、合并、清空分组，并查看分组下会话。
-- 默认只 patch metadata 消息桥、最近会话分组渲染、Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825 独立项目历史查询及下拉固定高度，不改写共享最近会话 store、认证、插件或会话数据。
+- 默认只 patch metadata 消息桥、最近会话分组渲染、Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 独立项目历史查询及下拉固定高度，不改写共享最近会话 store、认证、插件或会话数据。
 - 自动迁移旧标题文件：
   - 旧：`~/.codex/codex-vscode-conversation-titles.json`
   - 新：`~/.codex/codex-vscode-conversation-meta.json`
@@ -44,12 +44,12 @@ Codex Local Groups 是一个独立 VSCode 扩展，用于给 OpenAI Codex VSCode
 v0.0.36 起，扩展入口统一使用 native-history safe patch：
 
 - 不给共享最近会话请求添加 `cwd` / `cwds`，避免跨窗口状态污染和精确 cwd 过滤漏掉子目录。
-- Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825 为当前窗口单独分页读取历史，再按 `activeWorkspaceRoot` 严格保留根目录及子目录会话；工作区根目录尚未就绪时列表保持空白，不展示其他项目兜底数据。
+- Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 为当前窗口单独分页读取历史，再按 `activeWorkspaceRoot` 严格保留根目录及子目录会话；工作区根目录尚未就绪时列表保持空白，不展示其他项目兜底数据。
 - 缺少真实 cwd 的项不会用 metadata 伪造项目归属；会话数据、SQLite、session 文件均不写入。
 - Header 保留 Codex 上游返回的全部输入，但每个需求分组首屏只构造最近 5 个会话行；每组展示数状态使用独立 UI localStorage，不改会话 metadata。
 - 不用 metadata 合成可点击的伪历史行；metadata 只提供标题和分组信息。
-- Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825 最近会话菜单实际高度设为 `600px`，矮窗口继续由 Radix 原生可用高度限制，列表区域独立滚动。其他版本保持原高度，不修改 React compiler cache、认证、插件或网络请求。
-- Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825 保留或启用原生子 agent 活动面板，并在 5.6 Sol 本地推理档位中保留 `Max`、`Ultra`。
+- Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 最近会话菜单实际高度设为 `600px`，矮窗口继续由 Radix 原生可用高度限制，列表区域独立滚动。其他版本保持原高度，不修改 React compiler cache、认证、插件或网络请求。
+- Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 保留或启用原生子 agent 活动面板，并在 5.6 Sol 本地推理档位中保留 `Max`、`Ultra`。
 - 若发现旧版高风险补丁，Apply 会先恢复 clean backup；无法恢复则停止，不混合新旧补丁。
 
 ## 安装
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.65
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.67
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.65
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.67
 ```
 
 然后在 VSCode 中执行：
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.65.vsix
+code --install-extension vscode-codex-groups-0.0.67.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。
@@ -256,6 +256,7 @@ npm run verify-patched-bundles
 - Codex `26.5818.41705` 升级后分组、标题、Sol 档位、项目历史、子 agent 面板链失效，最近会话长时间显示 spinner 或显示 `No chats yet`：升级到 v0.0.63，执行 `Apply Patches` 后 Reload Window。该版仍使用 `QP` 看门狗，消息解析器为 `oY`，Header 真实 messenger / execution-target 导出为 `Jlt` / `Z1`；项目历史使用 state DB 分页，并按真实 `bdt({ thread, ... })` 契约转换会话。
 - Codex `26.5825.32147` 升级后无法启动，点击最近会话下拉出现错误边界，或分组、标题、项目历史、子 agent 面板、Sol Max/Ultra 任一链路失效：升级到 v0.0.64，执行 `Apply Patches` 后 Reload Window。该版 Host 使用 `DY/yP/Cd/new kI`，Header 的真实 messenger / execution-target 导出为 `_pt` / `w8`，项目历史使用 `RCt/HCt`；v0.0.64 精确绑定下拉 wrapper 的 React runtime `Pn`，并拒绝字符串、不可达函数和整段 nested decoy。
 - Codex `26.5825.51511` 升级后上述任一链路失效：升级到 v0.0.65，执行 `Apply Patches` 后 Reload Window。该 build 的 Host 漂移为 `pRe/NY/wCe`，子 agent 链为 `Pbr/Mbr/p4/vMr/fIr/s8n`，项目历史真实请求与 mapper 为 `WCt/BCt`；不得复用 32147 的压缩符号，也不得改用户的 Multi-Agent 配置来制造通过。
+- Codex `26.5901.22334` 设置标题后左上角已更新、最近会话下拉仍显示原生标题：升级到 v0.0.67，执行 `Apply Patches` 后 Reload Window。该版补齐 Header 到 Main 行解析器的标题优先级链，保存后下拉立即回显，清空标题仍回退原生标题；不会修改你的 Multi-Agent 配置。
 - Codex `26.5803.61601` 启动仍超过 30 秒：本次 Reload 在 `66,081ms` 挂载 route，19ms 后 ready，UI 和分组功能正常。120 秒补丁只避免 30 秒误杀，不会让 Webview 必须等待 120 秒，也不会缩短上游 bundle 加载和 React route mount；该延迟仍作为上游性能观察项。
 - Codex UI 卡住或白屏：执行 `Codex Local Groups: Repair Codex UI`，或终端运行 `npm run repair-codex-ui` 后 Reload Window。
 - 禁用/卸载本扩展后 Codex 仍异常：先执行 `Codex Local Groups: Restore Original Codex UI`，或终端运行 `npm run restore-codex-ui`，再 Reload Window。禁用扩展不会自动还原已 patch 的 Codex bundle。

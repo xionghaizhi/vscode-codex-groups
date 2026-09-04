@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.0.67 - 2026-09-04
+
+- 修复 Codex `26.5901.22334` 中“设置标题后左上角已更新、最近会话下拉仍显示原生标题”的回归。该版本的行解析器先读取原生标题，原有非字符串 `titleOverride` 不再生效。
+- 仅在精确 5901 的 Header→行解析器链路使用受限标记传递本地标题；保存后既有 refresh 事件立即重渲染，下拉显示本地非空标题，清空后回退原生标题。不改写 Codex 原生 thread title。
+- 旧 v0.0.66 已 patch 的 Header/Main 会原位迁移；engine 与 external verifier 绑定 decorator→项目 row→Header 标记→Main 解析器及即时回显/回退执行回归，并拒绝 decorator 声明的 duplicate/later/nested decoy 与缺失解析器。
+
+## v0.0.66 - 2026-09-04
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5901.22334` 的五 bundle 拓扑；未知 build、带后缀版本和未来版本在 plan、恢复或写入前继续 fail closed。
+- 跟随真实 Host、Header、Main、Power 和 History 调用链，保留 metadata 四入口、下拉与打开页双标题、项目历史分页、正文与顶部子 agent 双链及仅 Sol 的 Max/Ultra；不修改 Multi-Agent、provider、模型或推理配置。
+- 修复并验证打开页标题 refresh listener 的成对注销；缺少 cleanup 时 engine 和 external verifier 都停止写入。official clean、全量测试、独立 review 与安装前门禁均已覆盖。
+
 ## v0.0.65 - 2026-08-31
 
 - 精确适配官方 linux-x64 `openai.chatgpt@26.5825.51511`，保留 `26.5825.32147`；未知 5825 build、带后缀版本和未来版本继续在恢复或写入前 fail closed。

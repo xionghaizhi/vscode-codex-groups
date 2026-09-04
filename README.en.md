@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.65-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.67-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -31,7 +31,7 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 - `Check Status` checks the Codex extension, patch status, metadata, and conversation counts, with Apply / Reload shortcuts.
 - `Search Conversations` uses VSCode QuickPick to search local titles, groups, project paths, or conversation IDs, then opens the selected Codex conversation.
 - `Manage Groups` uses VSCode QuickPick to rename, merge, clear groups, and view conversations in a group.
-- By default, patches only the metadata bridge, grouped recent-list rendering, an isolated Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825 project-history query, and the fixed menu height; it does not expand the shared recent store or write conversation data.
+- By default, patches only the metadata bridge, grouped recent-list rendering, an isolated Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 project-history query, and the fixed menu height; it does not expand the shared recent store or write conversation data.
 - Migration from:
   - Old: `~/.codex/codex-vscode-conversation-titles.json`
   - New: `~/.codex/codex-vscode-conversation-meta.json`
@@ -44,12 +44,12 @@ Codex Local Groups is an independent VSCode extension that adds local conversati
 Starting in v0.0.36, every extension and CLI entry point uses native-history safe patching:
 
 - It never adds `cwd` / `cwds` to the shared recent-list request, avoiding cross-window state leaks and exact-cwd filtering that drops child directories.
-- On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825, it pages an isolated project-history query and strictly keeps the active `activeWorkspaceRoot` plus descendants. While the workspace root is loading, it fails closed with an empty list instead of showing another project.
+- On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901, it pages an isolated project-history query and strictly keeps the active `activeWorkspaceRoot` plus descendants. While the workspace root is loading, it fails closed with an empty list instead of showing another project.
 - Items without a real cwd are not assigned to a project from metadata. SQLite, session files, and conversation data are never written.
 - The Header keeps every upstream item but initially constructs five conversation rows per requirement group. Each group's row limit uses UI-only localStorage and never changes conversation metadata.
 - It does not synthesize clickable history rows from metadata; metadata supplies titles and groups only.
-- On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825, the recent menu gets an actual `600px` height, remains clamped by Radix on short windows, and scrolls inside the list region. Other versions keep their original height; React compiler cache state, authentication, plugins, and network requests remain unchanged.
-- On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825 it preserves or enables the native subagent activity panel and keeps `Max` and `Ultra` in the local 5.6 Sol reasoning selector.
+- On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901, the recent menu gets an actual `600px` height, remains clamped by Radix on short windows, and scrolls inside the list region. Other versions keep their original height; React compiler cache state, authentication, plugins, and network requests remain unchanged.
+- On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 it preserves or enables the native subagent activity panel and keeps `Max` and `Ultra` in the local 5.6 Sol reasoning selector.
 - If a legacy high-risk patch is detected, Apply restores clean backups first and fails closed if restoration is impossible.
 
 ## Installation
@@ -64,13 +64,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.65
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.67
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.65
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.67
 ```
 
 Then in VSCode:
@@ -97,7 +97,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.65.vsix
+code --install-extension vscode-codex-groups-0.0.67.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.
@@ -256,6 +256,7 @@ Type `Codex Local Groups` in the VSCode command palette to see the extension com
 - If Codex `26.5818.41705` loses groups, titles, Sol reasoning levels, project history, the subagent panel chain, leaves the recent menu on a long-running spinner, or shows `No chats yet`, install v0.0.63, run `Apply Patches`, then Reload Window. This build still uses the `QP` watchdog, its message parser is `oY`, and the real Header messenger/execution-target exports are `Jlt`/`Z1`; project-history pagination uses the state database and converts rows through the real `bdt({ thread, ... })` contract.
 - If Codex `26.5825.32147` fails to start, clicking the recent-chats dropdown opens the error boundary, or groups, titles, project history, the subagent panel, or Sol Max/Ultra disappear, install v0.0.64, run `Apply Patches`, then Reload Window. This build uses `DY/yP/Cd/new kI` in the Host, `_pt`/`w8` as the real Header messenger/execution-target exports, and `RCt/HCt` for project history. v0.0.64 binds the dropdown wrapper to the exact React runtime `Pn` and rejects string, unreachable-function, and whole-chunk nested decoys.
 - If any of those paths fail after upgrading to Codex `26.5825.51511`, install v0.0.65, run `Apply Patches`, then Reload Window. This build moves the Host contracts to `pRe/NY/wCe`, the subagent chain to `Pbr/Mbr/p4/vMr/fIr/s8n`, and the real project-history request and mapper to `WCt/BCt`; do not reuse 32147 minified symbols or change the user's Multi-Agent configuration to force a pass.
+- If Codex `26.5901.22334` updates the opened title but leaves the recent-chats dropdown on the native title, install v0.0.67, run `Apply Patches`, then Reload Window. It repairs the Header-to-Main row title-priority path, refreshes the dropdown after save, and preserves the native-title fallback when the local title is cleared; it never changes your Multi-Agent configuration.
 - Codex `26.5803.61601` still takes more than 30 seconds to open: this Reload mounted routes after `66,081ms` and reached ready 19ms later, while the UI and grouping features worked normally. The 120-second patch only prevents a premature timeout; it neither forces a 120-second wait nor shortens upstream bundle loading and React route mounting. The delay remains an upstream performance observation.
 - Codex UI is stuck or blank: run `Codex Local Groups: Repair Codex UI`, or run `npm run repair-codex-ui` in a terminal, then Reload Window.
 - Codex is still broken after disabling/uninstalling this extension: run `Codex Local Groups: Restore Original Codex UI`, or run `npm run restore-codex-ui`, then Reload Window. Disabling the extension does not automatically revert patched Codex bundles.

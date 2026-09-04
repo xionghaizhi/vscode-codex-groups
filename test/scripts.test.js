@@ -21,9 +21,12 @@ const {
   verifyWatchdog265818,
   verifyComposerSubagentPanel265825,
   verifyExecutionTargetImport265825,
+  verifyDropdownTitleResolver265901,
   verifyHeaderTitleOverride265825,
+  verifyHeaderTitleOverride265901,
   verifyMetadata265825,
   verifyOpenedConversationTitle265825,
+  verifyOpenedConversationTitle265901,
   verifyPower265825,
   verifyProjectHistory265825,
   verifyWatchdog265825,
@@ -68,6 +71,28 @@ const openedTitle265810Header = [
   'let[,codexLocalGroupsSetPageTitleRefresh]=(0,In.useState)(0);',
   '(0,In.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),',
   'c=s==null?c:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:s}})??c;',
+].join('');
+
+const openedTitle265901Header = [
+  'var codexLocalGroupsOpenedTitle265901PatchVersion=1;',
+  'function Bn(e){let t=(0,Gn.c)(64),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e;',
+  'let[,codexLocalGroupsSetPageTitleRefresh]=(0,Ln.useState)(0);',
+  '(0,Ln.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),',
+  'o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o;',
+  'return o}',
+].join('');
+
+const dropdownTitle265901Main = [
+  'var codexLocalGroupsDropdownTitle265901PatchVersion=1;',
+  'function yMt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265901:`))return t.slice(`__codexLocalGroupsTitle265901:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}',
+].join('');
+
+const dropdownTitle265901Header = [
+  'var codexLocalGroupsHeaderSafe265901PatchVersion=1;',
+  'function codexLocalGroupsDecoratedItem(e){let t=codexLocalGroupsLocalTitle(e);return t?{...e,conversation:{...e.conversation,title:t}}:e}',
+  'function codexRecentTaskProjectRows(e){let o=codexLocalGroupsDecoratedItem(e),p=o;return p}',
+  'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,kn.useState)(0);return(0,kn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}',
+  'jn=(0,kn.memo)(function(e){let t=(0,On.c)(25),n=e.item,r=e.isActive,i=e.onClick,a=e.onActiveArchiveStart,c=(0,Z.jsx)(D,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265901:`+n.conversation.title:void 0,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a});t[24]!==n.conversation.title,t[24]=n.conversation.title;return c})',
 ].join('');
 
 const composerSubagentPanel26581041047 = [
@@ -377,6 +402,14 @@ module.exports = {
         assert.ok(verify.includes('codexLocalGroupsCodexUi265810PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsPower265810PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsPower265810PatchVersion=2'));
+        assert.ok(verify.includes('CODEX_265901_VERIFIER_VARIANTS'));
+        assert.ok(verify.includes('codexLocalGroupsHeaderSafe265901PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsOpenedTitle265901PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsProjectHistory265901StorePatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsProjectHistory265901HookPatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsCodexUi265901PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsPower265901PatchVersion=1'));
+        assert.ok(verify.includes('local-conversation-subagents-panel-tab-'));
         assert.ok(verify.includes('timeoutMs:12e4})},12e4)'));
         assert.ok(verify.includes('collabAgentToolCall'));
         assert.ok(verify.includes('multi-agent-action'));
@@ -715,6 +748,50 @@ module.exports = {
         assert.strictEqual(exactVerifierBuild('26.5818.41705', '26.5818', { 31338: {}, 41705: {} }), '41705');
         assert.throws(() => exactVerifierBuild('26.5818.31338.1', '26.5818', { 31338: {} }), /不支持的 Codex 26\.5818 build/);
         assert.throws(() => exactVerifierBuild('26.5818.41705.1', '26.5818', { 31338: {}, 41705: {} }), /不支持的 Codex 26\.5818 build/);
+      },
+    },
+    {
+      name: 'accepts only the exact Codex 26.5901.22334 verifier build',
+      run() {
+        const variants = { 22334: {} };
+        assert.strictEqual(exactVerifierBuild('26.5901.22334', '26.5901', variants), '22334');
+        assert.throws(() => exactVerifierBuild('26.5901.99999', '26.5901', variants), /不支持的 Codex 26\.5901 build/);
+        assert.throws(() => exactVerifierBuild('26.5901.22334.1', '26.5901', variants), /不支持的 Codex 26\.5901 build/);
+        assert.throws(() => exactVerifierBuild('26.5901.22334-insider', '26.5901', variants), /不支持的 Codex 26\.5901 build/);
+      },
+    },
+    {
+      name: 'rejects a 26.5901.22334 opened-title hook without cleanup',
+      run() {
+        const headerPath = writeHeader(openedTitle265901Header);
+        assert.doesNotThrow(() => verifyOpenedConversationTitle265901(headerPath));
+        fs.writeFileSync(headerPath, openedTitle265901Header.replace('()=>window.removeEventListener(`codex-local-groups-refresh`,e)', '()=>{}'));
+        assert.throws(() => verifyOpenedConversationTitle265901(headerPath), /缺少补丁契约/);
+      },
+    },
+    {
+      name: 'verifies the 26.5901.22334 dropdown title resolver contract',
+      run() {
+        const mainPath = writeBundle(dropdownTitle265901Main, 'app-main.js');
+        assert.doesNotThrow(() => verifyDropdownTitleResolver265901(mainPath));
+        fs.writeFileSync(mainPath, dropdownTitle265901Main.replace('return t.slice(`__codexLocalGroupsTitle265901:`.length);', 'return e;'));
+        assert.throws(() => verifyDropdownTitleResolver265901(mainPath), /缺少补丁契约/);
+      },
+    },
+    {
+      name: 'fails closed when the 26.5901.22334 dropdown title producer or row cache drifts',
+      run() {
+        const headerPath = writeHeader(dropdownTitle265901Header);
+        assert.doesNotThrow(() => verifyHeaderTitleOverride265901(headerPath));
+        const decorator = 'function codexLocalGroupsDecoratedItem(e){let t=codexLocalGroupsLocalTitle(e);return t?{...e,conversation:{...e.conversation,title:t}}:e}';
+        for (const broken of [
+          dropdownTitle265901Header.replace('t[24]=n.conversation.title', 't[25]=n.conversation.title'),
+          dropdownTitle265901Header.replace(decorator, 'function codexLocalGroupsDecoratedItem(e){return e}') + decorator,
+          dropdownTitle265901Header.replace(decorator, 'function codexLocalGroupsDecoratedItem(e){return e}') + `function codexLocalGroupsDecoratorDecoy(){${decorator}}`,
+        ]) {
+          fs.writeFileSync(headerPath, broken);
+          assert.throws(() => verifyHeaderTitleOverride265901(headerPath), /缺少补丁契约/);
+        }
       },
     },
     {
