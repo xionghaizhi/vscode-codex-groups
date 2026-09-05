@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.67-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.68-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -50,6 +50,7 @@ Starting in v0.0.36, every extension and CLI entry point uses native-history saf
 - It does not synthesize clickable history rows from metadata; metadata supplies titles and groups only.
 - On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901, the recent menu gets an actual `600px` height, remains clamped by Radix on short windows, and scrolls inside the list region. Other versions keep their original height; React compiler cache state, authentication, plugins, and network requests remain unchanged.
 - On Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 it preserves or enables the native subagent activity panel and keeps `Max` and `Ultra` in the local 5.6 Sol reasoning selector.
+- On Codex `26.5901.22334`, available 5.6 Sol / 6 Astra models also get `Max` and `Ultra` in the menu and compact/expanded drag sliders, using native settings persistence. Patching never selects these efforts for you or changes your Multi-Agent configuration.
 - If a legacy high-risk patch is detected, Apply restores clean backups first and fails closed if restoration is impossible.
 
 ## Installation
@@ -64,13 +65,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.67
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.68
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.67
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.68
 ```
 
 Then in VSCode:
@@ -97,7 +98,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.67.vsix
+code --install-extension vscode-codex-groups-0.0.68.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.

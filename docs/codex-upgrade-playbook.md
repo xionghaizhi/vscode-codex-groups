@@ -1,9 +1,9 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-08-31
-> 适配目标 Codex：`openai.chatgpt@26.5825.51511`
-> 当前 active Codex：`openai.chatgpt@26.5825.51511`
-> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.65`
+> 基线日期：2026-09-05
+> 适配目标 Codex：`openai.chatgpt@26.5901.22334`
+> 当前 active Codex：`openai.chatgpt@26.5901.22334`
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.68`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -27,6 +27,7 @@ Codex 升级后，应该恢复成以下状态：
 14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
 15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` / `26.5825` 使用版本限定的 `120s` 看门狗。`26.5810` 必须改 `jP`，`26.5814` 必须改 `YI`，`26.5818` 必须改唯一真实 `QP`，`26.5825` 必须改唯一真实 `yP` 并绑定 `Cd.registerAppHostSessionForWebview -> new kI({startup}) -> renderer_ready`；不能退回旧锚点，也不能用字符串、不可达对象或 nested decoy 冒充真实看门狗。
 16. 每次升级必须先读相关 OpenSpec change 和本手册，严格按全量矩阵调研、实现、验证和留证。主线程负责常规 Reload/UI/性能验收，不把检查清单交给用户；发现遗漏先补 requirement、失败测试和 verifier 负例，再改实现并重跑全部适用项。
+17. 自 2026-09-05 用户确认起，`26.5901.22334` 的 Sol/Astra Max/Ultra 必须覆盖菜单、紧凑与展开拖拽条、选中回调和保存回读；仅菜单有文字不算适配。旧版本 Sol-only 行为保留，但后续升级必须继承 Sol/Astra 的完整验收范围，不再沿用旧“滑块不扩展”约束。不修改用户默认模型、推理档位、全局偏好或 multi-agent 配置。
 
 ## 2. 当前调用链
 
@@ -282,6 +283,15 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 - 仅为 `gpt-5.6-sol` 补缺少的 Max/Ultra，已存在时不重复，Terra 和其他模型不变。
 - Ultra 写入不被默认 target 的旧值覆盖，配置回读不把 Sol Ultra 转为 `null`，模型验证不回退到 Light。
 
+以上旧版 Sol-only 符号仅供定位历史实现。当前 5901 及后续升级以以下补充契约为准：
+
+- 同时覆盖当前可用的 `gpt-5.6-sol`、`gpt-6-astra`；不凭空增加不可用模型，不扩大其他模型。
+- 分别检查原始目录、过滤后目录、reasoning menu、紧凑/展开 slider 的实际输入和消费者。5901 `nZe` 会按 enabled efforts / Ultra 开关过滤，`JNn` 默认预设不含 Max；目录里有档位不能证明滑块里有档位。
+- 复用原生鼠标/键盘/重置、设置 cache/write/readback；两模型 Max 在 Ultra 前且不重复，显式选择后模型 ID 和 effort 不回退。不通过改 `config.toml`、模型目录或全局开关凑 PASS。
+- 测试必须输入被过滤到 xhigh 的模型列表，并执行两个实际 slider 消费入口和持久化调用；删除真实 consumer、放入同名 nested/later/死代码 decoy、旧 marker 不完整，都必须 fail closed。
+- 必须把 `uKn` 消费绑定到真正返回的 JSX 表达式。把真实 consumer 改名后，在 `return` 后追加不可达的同形 JSX，不能满足门禁；仅检查“最后一个引用”或 `Ge` 在前、`uKn` 在后仍会漏检。
+- Main/Power 新 marker 必须各恰好一次，旧 marker 为零；分别测试 mixed old/new 与 duplicate new 的 engine 零写入和 external verifier 拒绝。Sol 的过滤目录测试不能代替 Astra；两者还须覆盖模型缺失时不补档。
+
 开关消费点数量、Power 锚点或作用域不唯一时必须停止，不得用全局字符串替换猜测新结构。
 
 ### 4.7 自定义 provider 的跨模型子 agent
@@ -362,7 +372,7 @@ multi_agent_v2 = true
 | 分组列表 | 两组各 5；单组 +10；15/5 收起；active 额外保留；隐藏数；600px、scroll、sticky |  |  |  |  |  |
 | Metadata 四入口 | 设置标题、设置分组、新建分组、分组内新会话；真实 messenger、host callback、`metadataSaved` |  |  |  |  |  |
 | 标题双消费 | 同 ID 原生 A/本地 B；下拉和 `Bn` 都显示 B；空白/缺失都回退 A；即时双刷新；cleanup；不写原生标题 |  |  |  |  |  |
-| Sol | Power、Reasoning 菜单、写入、回读、校验；其他模型不变 |  |  |  |  |  |
+| Sol/Astra | Max/Ultra 的菜单、紧凑/展开拖拽、键盘、重置、写入/回读；顺序/去重；过滤目录输入与 consumer 负例；不可用及其他模型不变 |  |  |  |  |  |
 | 子 agent | V1/V2 transcript producer；membership producer/export；parent/`Een`/`wen`/`visibleRows`/`xn`/`_Rt`；按用户配置实测 |  |  |  |  |  |
 | 用户配置 | `config.toml` 内容哈希和 mtime 前后不变；不得改 V1/V2、provider 或认证 |  |  |  |  |  |
 | 安装与状态 | VSIX、安装目录、active registry、plan 0、Check Status；无 debug、临时代码或凭证 |  |  |  |  |  |
@@ -401,7 +411,7 @@ npm run plan-patches
 3. 确认 Header 使用的 messenger 和 execution-target Hook 真实导出。
 4. 分别追踪 Header 最近会话下拉的标题覆盖，以及 `/local/:id` lazy conversation 到 `Header Bn({ desktopDeepLinkConversationId, title })` 的打开页标题链路。
 5. 跟踪最近会话原生 query、row 组件和 App Server manager 能力。
-6. 跟踪 Sol Reasoning 菜单生成、设置写入、回读和校验四条链路。
+6. 跟踪 Sol/Astra 原始目录与过滤后目录、Reasoning 菜单、紧凑/展开拖拽条、选择回调、设置写入、回读和校验，不能用菜单测试代替滑块测试。
 7. 跟踪 `App Main Zmt/Xmt/Up -> App Server Cen/Een/wen -> visibleRows -> xn -> _Rt`；不能以 transcript 可见代替 composer 面板验证。
 8. 先补新版 fixture 和失败测试，再修 patch anchor。
 9. 读取新版 app-server 生成的 protocol JSON schema，核对 `thread/list` 的新增参数；用同一真实数据分别跑完整分页，记录页数、唯一 ID、集合差异和总耗时，不能只看单页或 SQLite 查询耗时。
@@ -449,7 +459,7 @@ git diff --check
 - 同一 ID 的原生标题 A、本地非空标题 B：下拉和打开页左上角都显示 B；本地标题缺失或为空时都回退 A。
 - `metadataSaved` 后下拉和当前打开页都立即刷新；打开页刷新监听卸载时会清理。
 - 打开页独立 marker、刷新或标题覆盖缺失时 fail closed；不能只验证下拉 helper 或总 Header marker。
-- Sol Reasoning 菜单 Max/Ultra、Ultra 持久化、其他模型不变。
+- Sol/Astra 菜单与紧凑/展开拖拽条的 Max/Ultra、鼠标/键盘/重置、保存回读；顺序/去重；过滤到 xhigh 的目录输入；其他模型和旧版本不变。
 - V1/V2 transcript 聚合，以及 V1 可交互 membership 经过 `Cen/Een/wen` 进入 `visibleRows`、打开 `xn` 并由 `_Rt` 渲染；删除任一筛选、开关或渲染段时 fail closed。
 - 旧高风险 marker 恢复事务、缺 clean backup 零写入、中途失败回滚。
 

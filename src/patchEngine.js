@@ -163,6 +163,25 @@ function minifiedAnchoredBlock(text, anchor, wanted) {
   return match;
 }
 
+function minifiedFinalReturn(text) {
+  const start = text.lastIndexOf('return ');
+  if (start < 0) return '';
+  let depth = 1, quote = '', regex = false, characterClass = false, previous = '';
+  for (let index = start + 7; index < text.length; index += 1) {
+    const current = text[index];
+    if ((quote || regex) && current === '\\') { index += 1; continue; }
+    if (quote) { if (current === quote) { quote = ''; previous = 'x'; } continue; }
+    if (regex) { if (current === '[') characterClass = true; if (current === ']') characterClass = false; if (current === '/' && !characterClass) { regex = false; previous = 'x'; } continue; }
+    if (current === "'" || current === '"' || current === '`') { quote = current; continue; }
+    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; continue; }
+    if (current === ';' && depth === 1) return text.slice(start, index);
+    if (current === '{') depth += 1;
+    else if (current === '}' && --depth === 0) return text.slice(start, index);
+    if (!/\s/.test(current)) previous = current;
+  }
+  return '';
+}
+
 function minifiedNestedBlock(text, anchors) {
   let block = text;
   for (const [anchor, depth] of anchors) block = minifiedAnchoredBlock(block, anchor, depth);
@@ -2479,12 +2498,25 @@ function codexUi26582551511PostconditionsHold(text) {
 }
 
 function patchCodexUi265901(text, context) {
-  const marker = 'codexLocalGroupsCodexUi265901PatchVersion=1';
+  const marker = 'codexLocalGroupsCodexUi265901PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsCodexUi265901PatchVersion=1';
   const original = 'a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort';
-  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
+  const legacy = 'a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
+  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
   if (text.includes(marker)) {
     const next = patchCodexUi265901DropdownTitle(text, context);
     if (!codexUi265901PostconditionsHold(next)) context.errors.push('Codex UI 26.5901: 补丁标记不完整');
+    return next;
+  }
+  if (text.includes(legacyMarker)) {
+    if (!codexUi265901V1PostconditionsHold(text)) {
+      context.errors.push('Codex UI 26.5901: v1 补丁标记不完整');
+      return text;
+    }
+    let next = replaceOnce(text, legacy, patched, context, 'Codex UI 26.5901 Sol Astra validation migration');
+    next = replaceOnce(next, legacyMarker, marker, context, 'Codex UI 26.5901 marker v2');
+    next = patchCodexUi265901DropdownTitle(next, context);
+    if (!codexUi265901PostconditionsHold(next)) context.errors.push('Codex UI 26.5901: 补丁后置条件不完整');
     return next;
   }
   let next = replaceOnce(text, original, patched, context, 'Codex UI 26.5901 Sol Max Ultra validation');
@@ -2492,6 +2524,15 @@ function patchCodexUi265901(text, context) {
   next = patchCodexUi265901DropdownTitle(next, context);
   if (!codexUi265901PostconditionsHold(next)) context.errors.push('Codex UI 26.5901: 补丁后置条件不完整');
   return next;
+}
+
+function codexUi265901V1PostconditionsHold(text) {
+  const validation = minifiedExactCodeFunctionScopes(text, 'function kQe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
+  const legacy = 'i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)';
+  return countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=1') === 1
+    && countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=2') === 0
+    && validation.length === 1 && validation[0].includes(legacy)
+    && semanticMain265901Holds(text);
 }
 
 function patchCodexUi265901DropdownTitle(text, context) {
@@ -2518,8 +2559,9 @@ function codexUi265901PostconditionsHold(text) {
   const aggregator = minifiedFunctionScope(text, 'Qkn');
   const stores = minifiedExactFunctionScopes(text, 'wAn=xr(Q,(e,{get:t})=>{');
   const exports = text.slice(text.lastIndexOf('export{'));
-  return countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=1') === 1
-    && validation.includes('i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)')
+  return countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=1') === 0
+    && validation.includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
     && read.includes('model_reasoning_effort??null')
     && write.includes('settings.reasoning_effort??null') && write.includes('model_reasoning_effort:t')
     && write.includes('setDefaultModelConfig(e,t,T.profile)')
@@ -2775,34 +2817,99 @@ function codexPower265825PostconditionsHold(text, build) {
     && !text.includes(`${v.filterFn}([...${v.powersArray},${v.ultraObject}].filter`);
 }
 
+const CODEX_POWER_265901_SLIDER_INSERTION = 'if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){let e=He.find(e=>e.model===U),t=e.modelLabel,n=He.filter(e=>e.model!==U||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===U){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${U}:${e}`,model:U,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});He=n}';
+
 function patchCodexPower265901(text, context) {
-  const marker = 'codexLocalGroupsPower265901PatchVersion=1';
+  const marker = 'codexLocalGroupsPower265901PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsPower265901PatchVersion=1';
   const original = 'function i3(e,t){let n=e?.find(e=>e.model===t);return n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort))}';
-  const patched = 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
+  const legacy = 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
+  const patched = 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}';
   if (text.includes(marker)) {
     if (!codexPower265901PostconditionsHold(text)) context.errors.push('Codex power 26.5901: 补丁标记不完整');
     return text;
   }
+  if (text.includes(legacyMarker)) {
+    if (!codexPower265901V1PostconditionsHold(text)) {
+      context.errors.push('Codex power 26.5901: v1 补丁标记不完整');
+      return text;
+    }
+    return migrateCodexPower265901(text, context, legacy, patched, legacyMarker, marker);
+  }
+  if (!codexPower265901NativeContractsHold(text)) {
+    context.errors.push('Codex power 26.5901: 原生消费链不完整');
+    return text;
+  }
   let next = replaceOnce(text, original, patched, context, 'Codex Reasoning menu 26.5901');
+  next = replaceOnce(next, 'let Ue=N0(He,', `${CODEX_POWER_265901_SLIDER_INSERTION}let Ue=N0(He,`, context, 'Codex Power slider 26.5901');
   next = replaceOnce(next, 'function JNn(e,{includeUltraInSlider:', `var ${marker};function JNn(e,{includeUltraInSlider:`, context, 'Codex power 26.5901 marker');
   if (!codexPower265901PostconditionsHold(next)) context.errors.push('Codex power 26.5901: 补丁后置条件不完整');
   return next;
 }
 
-function codexPower265901PostconditionsHold(text) {
-  const menus = minifiedExactCodeFunctionScopes(text, 'function i3(');
+function migrateCodexPower265901(text, context, legacy, patched, legacyMarker, marker) {
+  let next = replaceOnce(text, legacy, patched, context, 'Codex Reasoning menu 26.5901 migration');
+  next = replaceOnce(next, 'let Ue=N0(He,', `${CODEX_POWER_265901_SLIDER_INSERTION}let Ue=N0(He,`, context, 'Codex Power slider 26.5901 migration');
+  next = replaceOnce(next, legacyMarker, marker, context, 'Codex power 26.5901 marker v2');
+  if (!codexPower265901PostconditionsHold(next)) context.errors.push('Codex power 26.5901: 补丁后置条件不完整');
+  return next;
+}
+
+function codexPower265901V1PostconditionsHold(text) {
+  const menus = minifiedExactCodeFunctionScopes(text, 'function i3(e,t){');
   const menu = menus.length === 1 ? menus[0] : '';
-  const slider = minifiedFunctionScope(text, 'JNn');
-  const filter = minifiedFunctionScope(text, '$Nn');
+  return countMatches(text, 'codexLocalGroupsPower265901PatchVersion=1') === 1
+    && countMatches(text, 'codexLocalGroupsPower265901PatchVersion=2') === 0
+    && menu.includes('return t===`gpt-5.6-sol`&&')
+    && codexPower265901NativeSliderConsumerHolds(text, false);
+}
+
+function codexPower265901NativeContractsHold(text) {
+  const menus = minifiedExactCodeFunctionScopes(text, 'function i3(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  return menu === 'function i3(e,t){let n=e?.find(e=>e.model===t);return n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort))}'
+    && codexPower265901NativeSliderConsumerHolds(text, false);
+}
+
+function codexPower265901NativeSliderConsumerHolds(text, patched) {
+  const sliders = minifiedExactCodeFunctionScopes(text, 'function JNn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){');
+  const filters = minifiedExactCodeFunctionScopes(text, 'function $Nn(e,t,n){');
+  const pickers = minifiedExactCodeFunctionScopes(text, 'function CKn(e){');
+  const slider = sliders.length === 1 ? sliders[0] : '';
+  const filter = filters.length === 1 ? filters[0] : '';
+  const picker = pickers.length === 1 ? pickers[0] : '';
+  const direct = minifiedCodeAtDepth(picker, 1);
+  const powerInput = minifiedAnchoredBlock(picker, 'Ge=pIn({', 1);
+  const powerOutput = minifiedAnchoredBlock(picker, 'uKn,{', 2);
+  const finalReturn = minifiedFinalReturn(picker);
+  const powerInputAt = picker.indexOf('Ge=pIn({');
+  const powerOutputAt = picker.indexOf('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{');
+  const insertion = minifiedAnchoredBlock(picker, 'if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){', 1);
+  const expectedInsertion = minifiedBlockScope(CODEX_POWER_265901_SLIDER_INSERTION, CODEX_POWER_265901_SLIDER_INSERTION.indexOf('{'));
+  return filter === 'function $Nn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Um(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}'
+    && slider.includes('$Nn((t?[...nPn,rPn]:nPn).filter') && !slider.includes('gpt-5.6-sol')
+    && direct.includes('He=Be') && direct.includes('let Ue=N0(He,')
+    && powerInput.includes('onReset:e=>ft(e.model,e.reasoningEffort)') && powerInput.includes('powerSelectionsWithXHigh:He')
+    && powerOutput.includes('powerSelections:Ge') && powerOutput.includes('onSelectModel:Vt')
+    && powerOutput.includes('onSelectReasoningEffort:Wt')
+    && picker.split('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{').length === 2
+    && powerInputAt < powerOutputAt
+    && finalReturn.includes('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{')
+    && finalReturn.includes(powerOutput)
+    && countMatches(picker, 'let Ue=N0(He,') === 1
+    && (patched ? insertion === expectedInsertion && picker.includes(`${CODEX_POWER_265901_SLIDER_INSERTION}let Ue=N0(He,`) : insertion === '');
+}
+
+function codexPower265901PostconditionsHold(text) {
+  const menus = minifiedExactCodeFunctionScopes(text, 'function i3(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
   const hook = minifiedFunctionScope(text, 'I7n');
   const composer = minifiedFunctionScope(text, 'Wtr');
   const panel = minifiedFunctionScope(text, 'rWn');
-  const solMenu = 't===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`}))';
-  return countMatches(text, 'codexLocalGroupsPower265901PatchVersion=1') === 1
-    && menu.includes(solMenu)
-    && filter === 'function $Nn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Um(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}'
-    && slider.includes('$Nn((t?[...nPn,rPn]:nPn).filter')
-    && !slider.includes('$Nn([...nPn,rPn].filter')
+  const targetMenu = 'return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r';
+  return countMatches(text, 'codexLocalGroupsPower265901PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsPower265901PatchVersion=1') === 0
+    && menu.includes(targetMenu) && codexPower265901NativeSliderConsumerHolds(text, true)
     && countMatches(text, 'Po as Kd') === 1
     && hook.includes('il(Kd,r?n:null)') && hook.includes('.filter(z7n)') && hook.includes('.filter(L7n)')
     && minifiedFunctionScope(text, 'z7n') === 'function z7n(e){return e.canInteract&&e.displayName.trim().length>0}'

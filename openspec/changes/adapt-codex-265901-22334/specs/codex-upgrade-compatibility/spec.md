@@ -79,17 +79,34 @@ The transcript producer/lazy consumer and the Main membership/Power composer con
 - **And** membership rows reach the top composer panel through `Po as Kd`
 - **And** the native `canInteract` and current-parent-turn filters remain intact
 
-### Requirement: Max and Ultra remain Sol-only without replacing native Power
+### Requirement: Sol and Astra Max and Ultra cover menu and drag sliders
 
-Max and Ultra MUST be accepted and persisted for `gpt-5.6-sol` only. The Power menu MAY add those efforts for Sol, but the native `$Nn/JNn` slider and existing settings read/write/readback chain MUST remain unchanged; non-Sol models MUST keep native behavior.
+Following user approval on 2026-09-05, Max and Ultra MUST be selectable in the reasoning menu and both compact and expanded drag sliders for available `gpt-5.6-sol` and `gpt-6-astra` models, even when the picker input has been filtered down to xhigh. This supersedes the earlier Sol-menu-only restriction. Existing lower choices, native slider interaction and settings read/write/readback MUST be reused. Other models and older supported extension builds MUST keep their existing behavior. Patching MUST NOT change user configuration, persisted preferences, model catalogs or multi-agent settings, or invent an unavailable model.
 
-#### Scenario: Sol efforts use native persistence
+#### Scenario: both target models expose ordered choices through actual consumers
 
-- **Given** Sol and non-Sol model definitions
-- **When** Max or Ultra is selected
-- **Then** Sol validation and menu accept the effort
-- **And** settings cache, default-model write and subsequent model fetch preserve it
-- **And** non-Sol validation/menu and the compact/expanded native slider are not widened
+- **Given** an available Sol or Astra model whose picker efforts end at xhigh
+- **When** the user opens the compact or expanded Power control
+- **Then** its real slider consumer receives Max followed by Ultra without duplicate choices
+- **And** mouse dragging and keyboard selection use the same model ID and effort as the reasoning menu
+- **And** lower choices and the native reset path remain available
+- **And** an already complete input is not duplicated, and absent or unrelated models are not widened
+
+#### Scenario: both target models use native persistence
+
+- **Given** Sol or Astra and filtered picker model definitions
+- **When** the user selects Max or Ultra and settings are read back
+- **Then** the existing settings cache and default-model write receive the selected model and effort
+- **And** validation preserves both values instead of reverting to Light, xhigh or null
+- **And** other models retain native validation behavior
+
+#### Scenario: previous live patch migrates and consumers fail closed
+
+- **Given** official clean 22334 or the previous valid menu-only live patch
+- **When** plan and apply run
+- **Then** all required model-validation, menu and slider changes are applied atomically
+- **And** syntax, external verification and a second zero-change plan pass
+- **And** missing or duplicate declarations, detached/nested/later consumer decoys and incomplete markers are rejected before writes
 
 ### Requirement: watchdog changes only the verified Host chain
 

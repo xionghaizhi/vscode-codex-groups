@@ -19,6 +19,46 @@
 
 - [ ] 两轮修复已用尽：下次升级前必须将项目 row helper 的 decorator consumer 绑定到真实 `u.map` 渲染 callback，并覆盖 row consumer direct/later/nested-use decoy；不得以当前局部 `includes` 当作该条 future-drift 门禁。
 
+## 2026-09-05 Sol/Astra 拖拽档位适配
+
+- [x] 取得用户确认，取代旧“仅 Sol 菜单、原生滑块不扩展”的约束；记录目录过滤与菜单/滑块消费者脱节根因。
+- [x] 补齐当前可用 Sol/Astra 的菜单、紧凑/展开拖拽条、保存值校验，并保留非目标模型和原生交互/持久化链。
+- [x] 执行级回归覆盖过滤目录、两模型 Max/Ultra、顺序/去重、鼠标选择回调边界/键盘/重置、保存回读及缺失模型；同步 verifier 与 consumer 漂移负例。完整 DOM 和鼠标坐标拖动未实测，使用下述实际源码等价验证。
+- [x] 验证 official clean、旧 live 原位迁移、语法、external verifier 和二次 plan 0。
+- [x] 新建独立 review，最多两轮修复；完成最终 compile/lint/full test、strict OpenSpec 和清理。
+- [x] 安装已验证产物，核对 active registry、源码哈希、live plan/verifier 及用户配置哈希/mtime；记录真实 UI 或确定性 runtime 等价验收，不把未测项写成 PASS。
+
+### 本次基线证据
+
+- 修改前 worktree 干净，基准提交 `43370b9683c40a481e813be90eb1fe8ef2d5cc37`；active 为 Codex `26.5901.22334` / Local Groups `0.0.67`。
+- 重新下载官方 linux-x64 VSIX，SHA-256 与上述 `cd9cd06c...5933ff` 一致，ZIP 完整性与 package version 通过。只解压待验证的 `out/`、`webview/` 和 `package.json`；未重新安装 Codex 二进制。
+- 将基准提交应用到官方 clean 副本：plan/apply 5、syntax 6、幂等、external verifier、二次 plan 0 通过；生成的五个 bundle 与当前 live 的 SHA-256 逐个一致。因此旧版迁移测试使用的是可重建的真实 live 基线，不是手造 marker。
+- 所有下载、解压、旧源码、patched/rollback、副本和 probe 日志放在 `with-upgrade-workspace` 管理的本次所有权目录内，命令结束由顶层 finally 清理；最终已验证工作目录不存在，本次临时产物无残留。
+
+### 独立 review 与修复轮次
+
+- 首次 Standards review：P1 混合/重复 marker 未严格拒绝；P2 fixture 缺 Astra 过滤目录 compact/expanded 和缺失目标模型场景。
+- 首次 Spec review：P1 真实 CKn return 后的不可达 `uKn` decoy 能骗过 verifier，旧 v1 迁移也可能误接受。
+- 第 1 轮修复完成：统一收紧 marker 计数和真实 return 消费链，补上述持久回归。Standards 与 Spec 两位独立 reviewer 均复查通过，无剩余阻断；未启动第 2 轮修复。
+
+### 修复后实物验证
+
+- 最终代码重新从 official clean apply：plan/apply 5、syntax 6、幂等、external verifier、二次 plan 0；从旧提交重新生成 v1 后迁移：仅 Main/Power 2 文件、syntax 6、verifier、二次 plan 0，均 PASS。
+- 实际 bundle 负例 6 组：Main/Power mixed marker、duplicate marker，以及真实 CKn return 后追加不可达 consumer 的 v2/v1；external verifier 拒绝，plan/apply 返回错误且被测文件内容与 mtime 不变。
+- 独立运行时 probe 执行真实 `CKn` 的 `He/Ge` 片段、`pIn`、`uKn`、`LPn/XNn`、`i3`、`kQe` 和 `GQe` 保存回调。Sol/Astra 在过滤目录与完整目录下的顺序/去重、compact/expanded 选择、键盘及重置、缺失模型和 Terra 保持不变均 PASS；两模型 × Max/Ultra 四种保存组合的 model/effort、cache、原生写入边界和回读均一致。
+- runtime 边界说明：`iIn/CFn` 为 JSX 捕获边界，`LPn` 复用真实键盘函数和子 slider 的选择回调；配置/API IO 被 stub。未驱动完整 VSCode DOM 或鼠标坐标，不把这项写成人工 UI PASS。默认关闭 xhigh 的上游实验分支也参与验证，未改变其行为。
+- 配置审计：开始时 `config.toml` 为 Sol/xhigh，SHA-256 `b9592a063d23fb328246292729587ce21848f365c02d1019073c000ab3dcf278`；工作期间检测到该文件在 11:18:46 变成 Astra/medium，SHA-256 `d012fefff40eb0ea21e54cd2e2d68d561621c55a63735a3638d5e329e33e330e`。本次命令及 agents 未写该配置，保留发现时的当前内容，未回滚用户设置。不能声称整个工作期间哈希不变；安装前后按当前快照核对。模型目录 SHA-256 始终为 `a14ccfe3e56d2ec1244aef469d4e93611aaeafb5f862a9574a459f27f095024d`。
+
+### v0.0.68 安装与最终验证
+
+- 最终全量 `380 tests`、compile、lint、strict OpenSpec 和 `git diff --check` 均通过；Standards 与 Spec 两位独立 reviewer 在第 1 轮修复后关闭全部阻断问题，没有启动第 2 轮修复。
+- Local Groups VSIX SHA-256：`0280996f3dd480833ba6c3fc6b477edfdd59ac782e814f3ebdcf9d9d2b4a9403`。Remote CLI 安装期间没有即时输出，按手册等待而未重复安装；11:57:12 的 `remoteagent.log` 记录解压、重命名与安装成功，随后 CLI 正常退出。
+- active registry 为 Codex `26.5901.22334` / Local Groups `0.0.68`。安装目录 engine SHA-256 `aa22cd915336d1ae8ad9522ad2cf518c7ef8351d5695116070f30754334e131f`、verifier `8b281170a0de97e4631e163abc49408eaedf26894d431eae3194765056f7a496`、locator 均与仓库一致；从安装目录执行 compile、plan 0、apply 0、二次 plan 0 和 external verifier 通过。
+- live 仅迁移 Main/Power 两个 bundle，apply syntax 6 通过；两文件与最终 official clean patched 副本的 SHA-256 一致。Host、Header、Server 与 Codex `package.json` 的内容哈希和 mtime 均未改变。实际源码 runtime probe 在 live 上再次通过，包括两模型 × Max/Ultra 四种保存回读组合。
+- 安装前后 `config.toml` 与模型目录的 SHA-256、mtime 逐一不变；保留安装前实际配置 Astra/medium，不回滚开始时的旧值。未修改 provider 或 multi-agent 配置。
+- 当前工具不能驱动用户窗口的完整 DOM/鼠标坐标拖动或 Reload；以上是确定性实际源码运行时等价验收，不是人工 UI PASS。当前窗口需要 Reload 才会载入新 bundle。
+- 清理：托管工作区 shell 正常退出、finally 清理成功，原目录不存在；复查 `/tmp` 的 `codex-upgrade-*`、`codex-patch-*`、`clg-*` 无残留。本次下载、VSIX、npm cache、旧源码、probe 和测试临时文件均已删除；未删除既有发布产物或 live 所需备份。
+
 ## Evidence
 
 - Official VSIX SHA-256：`cd9cd06c5bfcc8e18972587d04ac9d08b04152ebf6de426233ddc812b05933ff`。

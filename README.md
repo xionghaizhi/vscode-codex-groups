@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.67-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.68-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -50,6 +50,7 @@ v0.0.36 起，扩展入口统一使用 native-history safe patch：
 - 不用 metadata 合成可点击的伪历史行；metadata 只提供标题和分组信息。
 - Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 最近会话菜单实际高度设为 `600px`，矮窗口继续由 Radix 原生可用高度限制，列表区域独立滚动。其他版本保持原高度，不修改 React compiler cache、认证、插件或网络请求。
 - Codex 26.721/26.727/26.5730/26.5803/26.5810/26.5814/26.5818/26.5825/26.5901 保留或启用原生子 agent 活动面板，并在 5.6 Sol 本地推理档位中保留 `Max`、`Ultra`。
+- Codex `26.5901.22334` 同时为可用的 5.6 Sol / 6 Astra 补齐菜单和紧凑/展开拖拽条的 `Max`、`Ultra`，沿用原生设置保存回读。不会自动选择这些档位或修改你的 Multi-Agent 配置。
 - 若发现旧版高风险补丁，Apply 会先恢复 clean backup；无法恢复则停止，不混合新旧补丁。
 
 ## 安装
@@ -64,13 +65,13 @@ cd vscode-codex-groups
 将扩展目录复制到 VSCode 扩展目录，目录名建议包含版本号：
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.67
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.68
 ```
 
 远程 VSCode Server 场景可复制到远程扩展目录，例如：
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.67
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.68
 ```
 
 然后在 VSCode 中执行：
@@ -97,7 +98,7 @@ npx @vscode/vsce package
 下载或打包 `.vsix` 后安装：
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.67.vsix
+code --install-extension vscode-codex-groups-0.0.68.vsix
 ```
 
 远程 VSCode Server 场景下，建议在远程窗口里安装，并确认扩展运行在 remote/workspace 侧。

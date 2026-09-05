@@ -28,7 +28,9 @@ const {
   verifyOpenedConversationTitle265825,
   verifyOpenedConversationTitle265901,
   verifyPower265825,
+  verifyPower265901,
   verifyProjectHistory265825,
+  verifySolContracts265901,
   verifyWatchdog265825,
 } = require('../scripts/verify-patched-bundles');
 
@@ -407,8 +409,8 @@ module.exports = {
         assert.ok(verify.includes('codexLocalGroupsOpenedTitle265901PatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsProjectHistory265901StorePatchVersion=1'));
         assert.ok(verify.includes('codexLocalGroupsProjectHistory265901HookPatchVersion=1'));
-        assert.ok(verify.includes('codexLocalGroupsCodexUi265901PatchVersion=1'));
-        assert.ok(verify.includes('codexLocalGroupsPower265901PatchVersion=1'));
+        assert.ok(verify.includes('codexLocalGroupsCodexUi265901PatchVersion=2'));
+        assert.ok(verify.includes('codexLocalGroupsPower265901PatchVersion=2'));
         assert.ok(verify.includes('local-conversation-subagents-panel-tab-'));
         assert.ok(verify.includes('timeoutMs:12e4})},12e4)'));
         assert.ok(verify.includes('collabAgentToolCall'));
@@ -809,6 +811,42 @@ module.exports = {
         assert.doesNotThrow(() => verifyPower265825(writeBundle(power265825Bundle, 'power.js')));
         assert.doesNotThrow(() => verifyProjectHistory265825(writeBundle(projectHistory265825Bundle, 'server.js')));
         assert.doesNotThrow(() => verifyComposerSubagentPanel265825(main));
+      },
+    },
+    {
+      name: 'verifies the 26.5901.22334 Sol Astra Power consumer contract',
+      run() {
+        const insertion = 'if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){let e=He.find(e=>e.model===U),t=e.modelLabel,n=He.filter(e=>e.model!==U||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===U){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${U}:${e}`,model:U,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});He=n}';
+        const power = [
+          'function $Nn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Um(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}',
+          'var nPn=[],rPn={};var codexLocalGroupsPower265901PatchVersion=2;function JNn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){return $Nn((t?[...nPn,rPn]:nPn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i)}',
+          'var TKe=[];function av(){return!0}function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}',
+          'function N0(e){return e[0]}function YNn(e,t,n){return e.find(e=>e.model===t&&e.reasoningEffort===n)}function pIn(e){return e.powerSelectionsWithXHigh}function uKn(e){return e}',
+          `function CKn(e){let U=e.model,oe=e.models,Be=e.powerSelections,He=Be;${insertion}let Ue=N0(He,void 0),We=YNn(He,U,e.reasoningEffort),Ge=pIn({onReset:e=>ft(e.model,e.reasoningEffort),powerSelectionsWithXHigh:He}),Vt=(t,n)=>e.select(t,n),Wt=t=>e.select(U,t),tn;return e.cache!==Ge?(tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{powerSelections:Ge,onSelectModel:Vt,onSelectReasoningEffort:Wt})}),e.cache=Ge,e.value=tn):tn=e.value,tn}`,
+        ].join('');
+        assert.doesNotThrow(() => verifyPower265901(writeBundle(power, 'power-5901.js')));
+        const renderStart = power.indexOf('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{');
+        const renderEnd = power.indexOf('}),e.cache=Ge', renderStart) + 2;
+        assert.ok(renderStart >= 0 && renderEnd > renderStart);
+        const render = power.slice(renderStart, renderEnd);
+        const detachedConsumer = power.replace(render, render.replace('uKn,{', 'zKn,{'))
+          .replace(':tn=e.value,tn}', `:tn=e.value,tn;${render}}`);
+        for (const broken of [
+          power.replace(`${insertion}let Ue=N0(He,`, 'let Ue=N0(He,'),
+          detachedConsumer,
+          power + 'function CKn(e){return e}',
+          power + 'var codexLocalGroupsPower265901PatchVersion=1;',
+          power + 'var codexLocalGroupsPower265901PatchVersion=2;',
+        ]) assert.throws(() => verifyPower265901(writeBundle(broken, 'power-5901.js')), /Sol Astra Power slider or menu/);
+      },
+    },
+    {
+      name: 'rejects mixed and duplicate 26.5901.22334 Main markers in the external verifier',
+      run() {
+        const marker = 'codexLocalGroupsCodexUi265901PatchVersion';
+        const main = `var ${marker}=2;function kQe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&(i.includes(t)||(r?.model===\`gpt-5.6-sol\`||r?.model===\`gpt-6-astra\`)&&(t===\`max\`||t===\`ultra\`))?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}function VQe(e){return e?.model_reasoning_effort??null}function GQe(e,t){let P={settings:{reasoning_effort:null}},R=P?.settings.reasoning_effort??null,T={profile:null},a={query:{fetch(){}}},c=\`local\`,b=\`/project\`,o={setQueryData(){}};async function save(){o.setQueryData([],n=>({...n,model_reasoning_effort:t}));await Gu().setDefaultModelConfig(e,t,T.profile);await re(),await a.query.fetch(Oc,{hostId:c,cwd:b})}return{R,save}}`;
+        assert.doesNotThrow(() => verifySolContracts265901(writeBundle(main, 'main-5901.js')));
+        for (const version of [1, 2]) assert.throws(() => verifySolContracts265901(writeBundle(`${main}var ${marker}=${version};`, 'main-5901.js')), /Sol Astra reasoning/);
       },
     },
     {

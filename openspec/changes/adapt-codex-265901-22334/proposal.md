@@ -9,7 +9,7 @@
 - 新增精确 `26.5901.22334` 白名单；未知 build、带后缀版本和未来 minor 继续在恢复或写入前失败。
 - 按新拓扑分别适配 Host、Header、Main、Power 和 Server/History。
 - 修复 5901 行解析器原生标题优先导致下拉标题不即时回显：仅对 Local Groups 标记标题恢复本地非空优先，清空后仍回退原生标题。
-- 保留原生 Multi-Agent、provider/model/reasoning 配置和 Power slider，只为 Sol 菜单及验证补 Max/Ultra。
+- 保留原生 Multi-Agent 和 provider/model/reasoning 用户配置；按 2026-09-05 用户确认，将 Sol/Astra 的 Max/Ultra 同时纳入菜单、紧凑/展开拖拽条和保存回读适配，复用原生滑块交互与持久化链。
 - 同步 external verifier、fixture、runtime、负例和 official clean 门禁。
 
 ## Impact

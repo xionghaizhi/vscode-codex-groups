@@ -192,6 +192,25 @@ function minifiedAnchoredBlock(text, anchor, wanted) {
   return match;
 }
 
+function minifiedFinalReturn(text) {
+  const start = text.lastIndexOf('return ');
+  if (start < 0) return '';
+  let depth = 1, quote = '', regex = false, characterClass = false, previous = '';
+  for (let index = start + 7; index < text.length; index += 1) {
+    const current = text[index];
+    if ((quote || regex) && current === '\\') { index += 1; continue; }
+    if (quote) { if (current === quote) { quote = ''; previous = 'x'; } continue; }
+    if (regex) { if (current === '[') characterClass = true; if (current === ']') characterClass = false; if (current === '/' && !characterClass) { regex = false; previous = 'x'; } continue; }
+    if (current === "'" || current === '"' || current === '`') { quote = current; continue; }
+    if (current === '/' && /[({[,:;=!?&|+*%^~<>-]/.test(previous)) { regex = true; continue; }
+    if (current === ';' && depth === 1) return text.slice(start, index);
+    if (current === '{') depth += 1;
+    else if (current === '}' && --depth === 0) return text.slice(start, index);
+    if (!/\s/.test(current)) previous = current;
+  }
+  return '';
+}
+
 function minifiedNestedBlock(text, anchors) {
   let block = text;
   for (const [anchor, depth] of anchors) block = minifiedAnchoredBlock(block, anchor, depth);
@@ -1445,13 +1464,15 @@ function verifySolContracts265901(appMainPath) {
   const validation = minifiedExactCodeFunctionScopes(text, 'function kQe({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
   const read = minifiedExactCodeFunctionScopes(text, 'function VQe(e){');
   const write = minifiedExactCodeFunctionScopes(text, 'function GQe(e,t){');
-  const valid = validation.length === 1 && validation[0].includes('i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)');
+  const valid = validation.length === 1 && validation[0].includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)');
   const persisted = read.length === 1 && read[0].includes('model_reasoning_effort??null')
     && write.length === 1 && write[0].includes('settings.reasoning_effort??null')
     && write[0].includes('model_reasoning_effort:t') && write[0].includes('setDefaultModelConfig(e,t,T.profile)')
     && write[0].includes('await re(),await a.query.fetch(Oc,{hostId:c,cwd:b})');
-  if (!text.includes('codexLocalGroupsCodexUi265901PatchVersion=1') || !valid || !persisted) {
-    throw new Error(`缺少补丁契约：${appMainPath} 26.5901.22334 Sol reasoning validation/persistence`);
+  const marker = 'codexLocalGroupsCodexUi265901PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsCodexUi265901PatchVersion=1';
+  if (text.split(marker).length !== 2 || text.split(legacyMarker).length !== 1 || !valid || !persisted) {
+    throw new Error(`缺少补丁契约：${appMainPath} 26.5901.22334 Sol Astra reasoning validation/persistence`);
   }
 }
 
@@ -1495,18 +1516,42 @@ function verifyPower265901(powerPath) {
   const text = fs.readFileSync(powerPath, 'utf8');
   const filter = minifiedExactCodeFunctionScopes(text, 'function $Nn(e,t,n){');
   const slider = minifiedExactCodeFunctionScopes(text, 'function JNn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){');
-  const menu = minifiedExactCodeFunctionScopes(text, 'function i3(e,t){');
+  const menus = minifiedExactCodeFunctionScopes(text, 'function i3(e,t){');
+  const pickers = minifiedExactCodeFunctionScopes(text, 'function CKn(e){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  const picker = pickers.length === 1 ? pickers[0] : '';
+  const direct = minifiedCodeAtDepth(picker, 1);
+  const powerInput = minifiedAnchoredBlock(picker, 'Ge=pIn({', 1);
+  const powerOutput = minifiedAnchoredBlock(picker, 'uKn,{', 2);
+  const finalReturn = minifiedFinalReturn(picker);
+  const powerInputAt = picker.indexOf('Ge=pIn({');
+  const powerOutputAt = picker.indexOf('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{');
+  const insertion = minifiedAnchoredBlock(picker, 'if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){', 1);
+  const sliderInsertion = 'if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){let e=He.find(e=>e.model===U),t=e.modelLabel,n=He.filter(e=>e.model!==U||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===U){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${U}:${e}`,model:U,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});He=n}';
+  const expectedInsertion = minifiedBlockScope(sliderInsertion, sliderInsertion.indexOf('{'));
   const nativeFilter = 'function $Nn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Um(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}';
   const nativeSlider = slider.length === 1 && slider[0].includes('$Nn((t?[...nPn,rPn]:nPn).filter')
     && !slider[0].includes('$Nn([...nPn,rPn].filter') && !slider[0].includes('gpt-5.6-sol');
-  const scopedMenu = menu.length === 1 && menu[0].includes('n==null?TKe.map')
-    && menu[0].includes('n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort))')
-    && menu[0].includes('t===`gpt-5.6-sol`&&')
-    && menu[0].includes('reasoningEffort:`max`') && menu[0].includes('reasoningEffort:`ultra`');
-  if (!text.includes('codexLocalGroupsPower265901PatchVersion=1') || filter.length !== 1
-    || filter[0] !== nativeFilter || !nativeSlider || !scopedMenu
-    || text.includes('{id:`gpt-5.6-sol:max`,model:`gpt-5.6-sol`')) {
-    throw new Error(`缺少补丁契约：${powerPath} 26.5901.22334 原生 Power slider 或 Sol menu`);
+  const scopedMenu = menu.includes('n==null?TKe.map')
+    && menu.includes('n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort))')
+    && menu.includes('return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)')
+    && menu.includes('r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)')
+    && menu.includes('r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})');
+  const consumer = direct.includes('He=Be') && direct.includes('let Ue=N0(He,')
+    && powerInput.includes('onReset:e=>ft(e.model,e.reasoningEffort)') && powerInput.includes('powerSelectionsWithXHigh:He')
+    && powerOutput.includes('powerSelections:Ge') && powerOutput.includes('onSelectModel:Vt')
+    && powerOutput.includes('onSelectReasoningEffort:Wt')
+    && picker.split('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{').length === 2
+    && powerInputAt < powerOutputAt
+    && finalReturn.includes('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{')
+    && finalReturn.includes(powerOutput)
+    && picker.split('let Ue=N0(He,').length === 2
+    && insertion === expectedInsertion && picker.includes(`${sliderInsertion}let Ue=N0(He,`);
+  const marker = 'codexLocalGroupsPower265901PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsPower265901PatchVersion=1';
+  if (text.split(marker).length !== 2 || text.split(legacyMarker).length !== 1 || filter.length !== 1
+    || filter[0] !== nativeFilter || !nativeSlider || !scopedMenu || !consumer) {
+    throw new Error(`缺少补丁契约：${powerPath} 26.5901.22334 Sol Astra Power slider or menu`);
   }
 }
 

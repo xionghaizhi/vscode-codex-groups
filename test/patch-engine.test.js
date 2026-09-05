@@ -538,6 +538,8 @@ function configure26590122334Features(target) {
     'function $Nn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Um(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}',
     'var nPn=[],rPn={},aPn=[];function JNn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){return $Nn((t?[...nPn,rPn]:nPn).filter(e=>!n||e.reasoningEffort!==`xhigh`),e,i)}',
     'var TKe=[];function av(){return!0}function i3(e,t){let n=e?.find(e=>e.model===t);return n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort))}',
+    'function N0(e){return e[0]}function YNn(e,t,n){return e.find(e=>e.model===t&&e.reasoningEffort===n)}function pIn(e){return e.menuView===`simple`?e.powerSelectionsWithXHigh.filter(e=>e.reasoningEffort!==`xhigh`):e.powerSelectionsWithXHigh}function uKn(e){return e}',
+    'function CKn(e){let U=e.model,oe=e.models,Be=e.powerSelections,He=Be,m=e.menuView??`simple`;let Ue=N0(He,void 0),We=YNn(He,U,e.reasoningEffort),Ge=pIn({canInitializePowerPickerSurface:!0,fallbackPowerSelection:Ue,menuView:m,onReset:e=>ft(e.model,e.reasoningEffort),powerSelectionsWithXHigh:He,resetContextKey:`test`,selectedPowerSelectionWithXHigh:We,skipExperimentExposure:!1}),Vt=(t,n)=>e.select(`slider`,t,n),Wt=t=>e.select(`menu`,U,t),tn;return e.cache!==Ge?(tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{powerSelections:Ge,onSelectModel:Vt,onSelectReasoningEffort:Wt})}),e.cache=Ge,e.value=tn):tn=e.value,tn}',
     'function z7n(e){return e.canInteract&&e.displayName.trim().length>0}function L7n(e){return e.isCurrentParentTurn}',
     'function I7n(e){let r=e.enabled,n=e.activeConversationId,a=il(Kd,r?n:null),o=a.filter(z7n),s=o.filter(L7n);return{rows:a,visibleRows:s}}',
     'function rWn(e){return e.formatMessage(`composer.backgroundSubagents.summary`)}function Wtr(e){let{rows:t,visibleRows:n}=I7n({activeConversationId:e.id,enabled:!0}),Bn=t.length>0,layout={subagentsPanel:Bn};return Bn?(0,u5.jsx)(rWn,{rows:n}):layout}',
@@ -2085,12 +2087,12 @@ module.exports = {
         assert.ok(bundles[target.headerPath].includes('(0,Ln.useState)(0);(0,Ln.useEffect)'));
         assert.ok(!bundles[target.headerPath].includes('(0,$.useState)(0);(0,$.useEffect)'));
         assert.ok(bundles[target.headerPath].includes('threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265901:`+n.conversation.title:void 0'));
-        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265901PatchVersion=1'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265901PatchVersion=2'));
         assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsDropdownTitle265901PatchVersion=1'));
-        assert.ok(bundles[target.appMainPath].includes('r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)'));
+        assert.ok(bundles[target.appMainPath].includes('(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)'));
         assert.ok(bundles[target.appMainPath].includes('var nativeUserSettings={multi_agent:!0,multi_agent_v2:!0,canInteract:!0,provider:`native`,model:`native`,reasoning:`native`};'));
         assert.ok(bundles[target.appMainPath].includes('function by(e,t,n){let{isBackgroundSubagentsEnabled:l=!0}={}'));
-        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265901PatchVersion=1'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265901PatchVersion=2'));
         assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsProjectHistory265901HookPatchVersion=1'));
         assert.ok(bundles[target.appStatsigPath].includes('$Nn((t?[...nPn,rPn]:nPn).filter'));
         assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265901StorePatchVersion=1'));
@@ -2117,6 +2119,86 @@ module.exports = {
         const powerResult = childProcess.spawnSync(resolveNodePath(), ['-e', powerScript], { encoding: 'utf8' });
         assert.strictEqual(powerResult.status, 0, powerResult.stderr);
         assert.deepStrictEqual(JSON.parse(powerResult.stdout), { native: true, ids: ['root', 'child'], preferred: ['/project'] });
+      },
+    },
+    {
+      name: 'migrates the previous 26.5901.22334 Sol menu patch atomically',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const power = fs.readFileSync(target.appStatsigPath, 'utf8');
+        const sliderStart = power.indexOf('if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)');
+        const sliderEnd = power.indexOf('let Ue=N0(He,');
+        assert.ok(sliderStart >= 0 && sliderEnd > sliderStart);
+        const legacyMain = main
+          .replace('codexLocalGroupsCodexUi265901PatchVersion=2', 'codexLocalGroupsCodexUi265901PatchVersion=1')
+          .replace('a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort', 'a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort')
+          .replace('var codexLocalGroupsDropdownTitle265901PatchVersion=1;function yMt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265901:`))return t.slice(`__codexLocalGroupsTitle265901:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}', 'function yMt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}');
+        const legacyPower = power.replace('codexLocalGroupsPower265901PatchVersion=2', 'codexLocalGroupsPower265901PatchVersion=1')
+          .replace('function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}', 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}')
+          .replace(power.slice(sliderStart, sliderEnd), '');
+        fs.writeFileSync(target.appMainPath, legacyMain);
+        fs.writeFileSync(target.appStatsigPath, legacyPower);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [target.appMainPath, target.appStatsigPath]);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'rejects a detached 26.5901.22334 v1 Power consumer before writes',
+      run() {
+        const target = createTarget();
+        configure26590122334Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const power = fs.readFileSync(target.appStatsigPath, 'utf8');
+        const sliderStart = power.indexOf('if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)');
+        const sliderEnd = power.indexOf('let Ue=N0(He,');
+        const legacy = power.replace('codexLocalGroupsPower265901PatchVersion=2', 'codexLocalGroupsPower265901PatchVersion=1')
+          .replace('function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}', 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}')
+          .replace(power.slice(sliderStart, sliderEnd), '');
+        const renderStart = legacy.indexOf('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{');
+        const renderEnd = legacy.indexOf('}),e.cache=Ge', renderStart) + 2;
+        assert.ok(renderStart >= 0 && renderEnd > renderStart);
+        const render = legacy.slice(renderStart, renderEnd);
+        const broken = legacy.replace(render, render.replace('uKn,{', 'zKn,{'))
+          .replace(':tn=e.value,tn}', `:tn=e.value,tn;${render}}`);
+        fs.writeFileSync(target.appStatsigPath, broken);
+        const before = fs.readFileSync(target.appStatsigPath, 'utf8');
+        const report = engine.apply(target, { version: 1, conversations: {} });
+        assert.ok(report.errors.includes('Codex power 26.5901: v1 补丁标记不完整'));
+        assert.deepStrictEqual(report.changed, []);
+        assert.strictEqual(fs.readFileSync(target.appStatsigPath, 'utf8'), before);
+      },
+    },
+    {
+      name: 'rejects mixed and duplicate 26.5901.22334 v2 markers before writes',
+      run() {
+        const variants = [
+          ['appMainPath', 'codexLocalGroupsCodexUi265901PatchVersion', 'Codex UI 26.5901: 补丁标记不完整'],
+          ['appStatsigPath', 'codexLocalGroupsPower265901PatchVersion', 'Codex power 26.5901: 补丁标记不完整'],
+        ];
+        for (const [property, marker, error] of variants) for (const version of [1, 2]) {
+          const target = createTarget();
+          configure26590122334Features(target);
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+          const file = target[property];
+          const broken = `${fs.readFileSync(file, 'utf8')}var ${marker}=${version};`;
+          fs.writeFileSync(file, broken);
+          const plan = engine.plan(target, { version: 1, conversations: {} });
+          assert.ok(plan.errors.includes(error));
+          assert.deepStrictEqual(plan.changes, []);
+          const report = engine.apply(target, { version: 1, conversations: {} });
+          assert.ok(report.errors.includes(error));
+          assert.deepStrictEqual(report.changed, []);
+          assert.strictEqual(fs.readFileSync(file, 'utf8'), broken);
+        }
       },
     },
     {
@@ -2250,23 +2332,23 @@ module.exports = {
       },
     },
     {
-      name: 'executes 26.5901.22334 Sol-only efforts through native settings and Power slider',
+      name: 'executes 26.5901.22334 Sol and Astra efforts through native settings and Power consumers',
       run() {
         const target = createTarget();
         configure26590122334Features(target);
         const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
         const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
         const settings = main.slice(main.indexOf('function kQe('), main.indexOf('function by('));
-        const settingsScript = `let writes=[],defaults=[],readbacks=[],Oc={},re=()=>Promise.resolve(),Gu=()=>({setDefaultModelConfig:(...e)=>(defaults.push(e),Promise.resolve())});globalThis.writes=writes,globalThis.readbacks=readbacks;${settings};(async()=>{let efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh']),defaultReasoningEffort:'xhigh'},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low']),defaultReasoningEffort:'low'}],sol=e=>kQe({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:e,listModelsData:{models}}).reasoningEffort,terra=kQe({userSavedModelString:'gpt-5.6-terra',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort,setting=GQe('gpt-5.6-sol','ultra');await setting.save();console.log(JSON.stringify({max:sol('max'),ultra:sol('ultra'),terra,read:VQe({model_reasoning_effort:'ultra'}),write:writes[0].model_reasoning_effort,defaults,readbacks:readbacks.length}))})()`;
+        const settingsScript = `let writes=[],defaults=[],readbacks=[],Oc={},re=()=>Promise.resolve(),Gu=()=>({setDefaultModelConfig:(...e)=>(defaults.push(e),Promise.resolve())});globalThis.writes=writes,globalThis.readbacks=readbacks;${settings};(async()=>{let efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['xhigh']),defaultReasoningEffort:'xhigh'},{model:'gpt-6-astra',supportedReasoningEfforts:efforts(['xhigh']),defaultReasoningEffort:'xhigh'},{model:'gpt-5.6-terra',supportedReasoningEfforts:efforts(['low']),defaultReasoningEffort:'low'}],sol=e=>kQe({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:e,listModelsData:{models}}).reasoningEffort,astra=e=>kQe({userSavedModelString:'gpt-6-astra',userSavedReasoningEffort:e,listModelsData:{models}}).reasoningEffort,terra=kQe({userSavedModelString:'gpt-5.6-terra',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort,solSetting=GQe('gpt-5.6-sol','ultra'),astraSetting=GQe('gpt-6-astra','max');await solSetting.save(),await astraSetting.save();console.log(JSON.stringify({solMax:sol('max'),solUltra:sol('ultra'),astraMax:astra('max'),astraUltra:astra('ultra'),terra,read:VQe({model_reasoning_effort:'ultra'}),writes:writes.map(e=>e.model_reasoning_effort),defaults,readbacks:readbacks.length}))})()`;
         const settingsResult = childProcess.spawnSync(resolveNodePath(), ['-e', settingsScript], { encoding: 'utf8' });
         assert.strictEqual(settingsResult.status, 0, settingsResult.stderr);
-        assert.deepStrictEqual(JSON.parse(settingsResult.stdout), { max: 'max', ultra: 'ultra', terra: 'low', read: 'ultra', write: 'ultra', defaults: [['gpt-5.6-sol', 'ultra', null]], readbacks: 1 });
+        assert.deepStrictEqual(JSON.parse(settingsResult.stdout), { solMax: 'max', solUltra: 'ultra', astraMax: 'max', astraUltra: 'ultra', terra: 'low', read: 'ultra', writes: ['ultra', 'max'], defaults: [['gpt-5.6-sol', 'ultra', null], ['gpt-6-astra', 'max', null]], readbacks: 2 });
         const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
         const controls = power.slice(power.indexOf('function $Nn('), power.indexOf('function z7n('));
-        const controlsScript = `let Um=e=>e;${controls};let p=e=>({id:e,model:'gpt-5.6-sol',reasoningEffort:e}),efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),models=[{model:'gpt-5.6-sol',displayName:'Sol',supportedReasoningEfforts:efforts(['low','medium','high','xhigh','ultra'])},{model:'gpt-5.6-terra',displayName:'Terra',supportedReasoningEfforts:efforts(['low'])}];nPn=['low','medium','high','xhigh'].map(p),rPn=p('ultra');console.log(JSON.stringify({compact:JNn(models).map(e=>e.reasoningEffort),expanded:JNn(models,{includeUltraInSlider:true}).map(e=>e.reasoningEffort),sol:i3(models,'gpt-5.6-sol').map(e=>e.reasoningEffort),terra:i3(models,'gpt-5.6-terra').map(e=>e.reasoningEffort)}))`;
+        const controlsScript = `let Um=e=>e,h3={Fragment:{},jsx:(type,props)=>type===h3.Fragment?props.children:props};${controls};let efforts=e=>e.map(reasoningEffort=>({reasoningEffort})),models=[{model:'gpt-5.6-sol',displayName:'Sol',supportedReasoningEfforts:efforts(['low','medium','high','xhigh'])},{model:'gpt-6-astra',displayName:'Astra',supportedReasoningEfforts:efforts(['low','medium','high','xhigh'])},{model:'gpt-5.6-terra',displayName:'Terra',supportedReasoningEfforts:efforts(['low'])}],missingModels=[models[2]],powerSelections=model=>['low','medium','high','xhigh'].map((reasoningEffort,powerSettingIndex)=>({id:\`\${model}:\${reasoningEffort}\`,model,modelLabel:model,reasoningEffort,powerSettingIndex})),selected=[],select=(source,model,reasoningEffort)=>selected.push([source,model,reasoningEffort]),solCompact=CKn({model:'gpt-5.6-sol',models,powerSelections:powerSelections('gpt-5.6-sol'),reasoningEffort:'xhigh',menuView:'simple',select}),solExpanded=CKn({model:'gpt-5.6-sol',models,powerSelections:powerSelections('gpt-5.6-sol'),reasoningEffort:'xhigh',menuView:'advanced',select}),astraCompact=CKn({model:'gpt-6-astra',models,powerSelections:powerSelections('gpt-6-astra'),reasoningEffort:'xhigh',menuView:'simple',select}),astraExpanded=CKn({model:'gpt-6-astra',models,powerSelections:powerSelections('gpt-6-astra'),reasoningEffort:'xhigh',menuView:'advanced',select}),astraComplete=CKn({model:'gpt-6-astra',models,powerSelections:[...powerSelections('gpt-6-astra'),{id:'gpt-6-astra:max',model:'gpt-6-astra',modelLabel:'gpt-6-astra',reasoningEffort:'max',powerSettingIndex:4},{id:'gpt-6-astra:ultra',model:'gpt-6-astra',modelLabel:'gpt-6-astra',reasoningEffort:'ultra',powerSettingIndex:5}],reasoningEffort:'xhigh',menuView:'advanced',select}),missingSol=CKn({model:'gpt-5.6-sol',models:missingModels,powerSelections:powerSelections('gpt-5.6-sol'),reasoningEffort:'xhigh',menuView:'simple',select}),missingAstra=CKn({model:'gpt-6-astra',models:missingModels,powerSelections:powerSelections('gpt-6-astra'),reasoningEffort:'xhigh',menuView:'simple',select}),terra=CKn({model:'gpt-5.6-terra',models,powerSelections:[{id:'gpt-5.6-terra:low',model:'gpt-5.6-terra',modelLabel:'gpt-5.6-terra',reasoningEffort:'low',powerSettingIndex:0}],reasoningEffort:'low',menuView:'advanced',select}),partialMenu=i3([{model:'gpt-5.6-sol',supportedReasoningEfforts:efforts(['low','medium','high','xhigh','ultra'])}],'gpt-5.6-sol').map(e=>e.reasoningEffort);solCompact.onSelectModel('gpt-5.6-sol','ultra'),solExpanded.onSelectModel('gpt-5.6-sol','max'),astraCompact.onSelectModel('gpt-6-astra','ultra'),astraExpanded.onSelectModel('gpt-6-astra','max'),solCompact.onSelectReasoningEffort('ultra');console.log(JSON.stringify({compact:solCompact.powerSelections.map(e=>e.reasoningEffort),expanded:solExpanded.powerSelections.map(e=>e.reasoningEffort),astraCompact:astraCompact.powerSelections.map(e=>e.reasoningEffort),astraExpanded:astraExpanded.powerSelections.map(e=>e.reasoningEffort),astraComplete:astraComplete.powerSelections.map(e=>e.reasoningEffort),missingSol:missingSol.powerSelections.map(e=>e.reasoningEffort),missingAstra:missingAstra.powerSelections.map(e=>e.reasoningEffort),solMenu:i3(models,'gpt-5.6-sol').map(e=>e.reasoningEffort),astraMenu:i3(models,'gpt-6-astra').map(e=>e.reasoningEffort),missingSolMenu:i3(missingModels,'gpt-5.6-sol').map(e=>e.reasoningEffort),missingAstraMenu:i3(missingModels,'gpt-6-astra').map(e=>e.reasoningEffort),partialMenu,terraMenu:i3(models,'gpt-5.6-terra').map(e=>e.reasoningEffort),terra:terra.powerSelections.map(e=>e.reasoningEffort),selected}))`;
         const controlsResult = childProcess.spawnSync(resolveNodePath(), ['-e', controlsScript], { encoding: 'utf8' });
         assert.strictEqual(controlsResult.status, 0, controlsResult.stderr);
-        assert.deepStrictEqual(JSON.parse(controlsResult.stdout), { compact: ['low', 'medium', 'high', 'xhigh'], expanded: ['low', 'medium', 'high', 'xhigh', 'ultra'], sol: ['low', 'medium', 'high', 'xhigh', 'ultra', 'max'], terra: ['low'] });
+        assert.deepStrictEqual(JSON.parse(controlsResult.stdout), { compact: ['low', 'medium', 'high', 'max', 'ultra'], expanded: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'], astraCompact: ['low', 'medium', 'high', 'max', 'ultra'], astraExpanded: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'], astraComplete: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'], missingSol: ['low', 'medium', 'high'], missingAstra: ['low', 'medium', 'high'], solMenu: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'], astraMenu: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'], missingSolMenu: [], missingAstraMenu: [], partialMenu: ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'], terraMenu: ['low'], terra: ['low'], selected: [['slider', 'gpt-5.6-sol', 'ultra'], ['slider', 'gpt-5.6-sol', 'max'], ['slider', 'gpt-6-astra', 'ultra'], ['slider', 'gpt-6-astra', 'max'], ['menu', 'gpt-5.6-sol', 'ultra']] });
       },
     },
     {
