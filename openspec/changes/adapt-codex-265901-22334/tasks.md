@@ -27,6 +27,7 @@
 - [x] 验证 official clean、旧 live 原位迁移、语法、external verifier 和二次 plan 0。
 - [x] 新建独立 review，最多两轮修复；完成最终 compile/lint/full test、strict OpenSpec 和清理。
 - [x] 安装已验证产物，核对 active registry、源码哈希、live plan/verifier 及用户配置哈希/mtime；记录真实 UI 或确定性 runtime 等价验收，不把未测项写成 PASS。
+- [x] 2026-09-05 用户确认本次修复“没问题”，补充验收结论；保留自动化验证的实际边界，不扩写为全部 UI 逐项实测。
 
 ### 本次基线证据
 
@@ -56,8 +57,14 @@
 - active registry 为 Codex `26.5901.22334` / Local Groups `0.0.68`。安装目录 engine SHA-256 `aa22cd915336d1ae8ad9522ad2cf518c7ef8351d5695116070f30754334e131f`、verifier `8b281170a0de97e4631e163abc49408eaedf26894d431eae3194765056f7a496`、locator 均与仓库一致；从安装目录执行 compile、plan 0、apply 0、二次 plan 0 和 external verifier 通过。
 - live 仅迁移 Main/Power 两个 bundle，apply syntax 6 通过；两文件与最终 official clean patched 副本的 SHA-256 一致。Host、Header、Server 与 Codex `package.json` 的内容哈希和 mtime 均未改变。实际源码 runtime probe 在 live 上再次通过，包括两模型 × Max/Ultra 四种保存回读组合。
 - 安装前后 `config.toml` 与模型目录的 SHA-256、mtime 逐一不变；保留安装前实际配置 Astra/medium，不回滚开始时的旧值。未修改 provider 或 multi-agent 配置。
-- 当前工具不能驱动用户窗口的完整 DOM/鼠标坐标拖动或 Reload；以上是确定性实际源码运行时等价验收，不是人工 UI PASS。当前窗口需要 Reload 才会载入新 bundle。
+- 交付时工具不能驱动用户窗口的完整 DOM/鼠标坐标拖动或 Reload；以上是确定性实际源码运行时等价验收，不是主线程人工 UI PASS。窗口需要 Reload 才会载入新 bundle；后续用户确认见下节。
 - 清理：托管工作区 shell 正常退出、finally 清理成功，原目录不存在；复查 `/tmp` 的 `codex-upgrade-*`、`codex-patch-*`、`clg-*` 无残留。本次下载、VSIX、npm cache、旧源码、probe 和测试临时文件均已删除；未删除既有发布产物或 live 所需备份。
+
+### 用户确认与后续升级要求
+
+- 2026-09-05，用户反馈“没问题，记录到openpsec文档中 然后提交推送吧”，确认本次 Sol/Astra 拖拽档位修复可接受。对应实现为 `d8bdcbe` / Local Groups `0.0.68`；本次补记只更新文档，不改运行代码或用户配置。
+- 用户确认与上述 `380 tests`、实际源码 runtime、两位独立 reviewer 的证据分别保留；未新增鼠标坐标、完整 DOM 或冷启动耗时记录，不把确认扩写为全部 UI 矩阵实测通过。
+- 下次升级必须继续执行本 change 的 Sol/Astra 完整契约及升级手册矩阵：菜单、紧凑/展开拖拽、选择回调、保存回读、过滤目录、顺序/去重、不可用模型、marker/真实 consumer 负例、旧版迁移、安装目录验证和临时文件清理，不得再次只修菜单。
 
 ## Evidence
 
