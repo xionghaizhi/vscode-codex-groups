@@ -25,7 +25,7 @@ function patchVersionPreflight(version) {
   const minor = Number(parts[1]);
   const build = parts[2] || '';
   const errors = [];
-  const knownMinor = [727, 5730, 5803, 5810, 5814, 5818, 5825, 5901].includes(minor);
+  const knownMinor = [727, 5730, 5803, 5810, 5814, 5818, 5825, 5901, 5903, 5908, 5917].includes(minor);
   if (version && (major !== 26 || !Number.isInteger(minor) || (minor > 721 && !knownMinor))) {
     errors.push(`不支持的 Codex 扩展版本：${version}`);
   }
@@ -35,8 +35,11 @@ function patchVersionPreflight(version) {
   if (major === 26 && minor === 5818 && (!exactBuild || !CODEX_265818_BUILDS.has(build))) errors.push(`不支持的 Codex 26.5818 build：${version}`);
   if (major === 26 && minor === 5825 && (!exactBuild || !CODEX_265825_BUILDS.has(build))) errors.push(`不支持的 Codex 26.5825 build：${version}`);
   if (major === 26 && minor === 5901 && (!exactBuild || !CODEX_265901_BUILDS.has(build))) errors.push(`不支持的 Codex 26.5901 build：${version}`);
+  if (major === 26 && minor === 5903 && (!exactBuild || !CODEX_265903_BUILDS.has(build))) errors.push(`不支持的 Codex 26.5903 build：${version}`);
+  if (major === 26 && minor === 5908 && (!exactBuild || !CODEX_265908_BUILDS.has(build))) errors.push(`不支持的 Codex 26.5908 build：${version}`);
+  if (major === 26 && minor === 5917 && (!exactBuild || !CODEX_265917_BUILDS.has(build))) errors.push(`不支持的 Codex 26.5917 build：${version}`);
   const unknownMinor = errors.some((error) => error.startsWith('不支持的 Codex 扩展版本：'));
-  return { major, minor, build, errors, stopBeforePlan: unknownMinor || ([5810, 5814, 5818, 5825, 5901].includes(minor) && errors.length > 0) };
+  return { major, minor, build, errors, stopBeforePlan: unknownMinor || ([5810, 5814, 5818, 5825, 5901, 5903, 5908, 5917].includes(minor) && errors.length > 0) };
 }
 
 function minifiedBlockScope(text, open) {
@@ -292,7 +295,25 @@ class CodexPatchEngine {
       }
       planFile(changes, target.extensionJsPath, (text) => patchExtensionSafeHost(text, context));
       planFile(changes, target.headerPath, (text, file) => patchHeader(text, context, file));
-      if (major === 26 && (minor === 721 || minor === 727 || minor === 5730 || minor === 5803 || minor === 5810 || minor === 5814 || minor === 5818 || minor === 5825 || minor === 5901)) {
+      if (major === 26 && (minor === 721 || minor === 727 || minor === 5730 || minor === 5803 || minor === 5810 || minor === 5814 || minor === 5818 || minor === 5825 || minor === 5901 || minor === 5903 || minor === 5908 || minor === 5917)) {
+        if (minor === 5917) {
+          planFile(changes, target.appMainPath, (text) => patchCodexUi265917(text, context));
+          planFile(changes, target.appStatsigPath, (text) => patchProjectHistory265917Hook(patchCodexPower265917(text, context), context));
+          planFile(changes, target.appServerManagerSignalsPath, (text) => patchProjectHistory265917Store(text, context));
+          return { changes, errors: context.errors, unsafeBundles };
+        }
+        if (minor === 5908) {
+          planFile(changes, target.appMainPath, (text) => patchCodexUi265908(text, context));
+          planFile(changes, target.appStatsigPath, (text) => patchProjectHistory265908Hook(patchCodexPower265908(text, context), context));
+          planFile(changes, target.appServerManagerSignalsPath, (text) => patchProjectHistory265908Store(text, context));
+          return { changes, errors: context.errors, unsafeBundles };
+        }
+        if (minor === 5903) {
+          planFile(changes, target.appMainPath, (text) => patchCodexUi265903(text, context));
+          planFile(changes, target.appStatsigPath, (text) => patchProjectHistory265903Hook(patchCodexPower265903(text, context), context));
+          planFile(changes, target.appServerManagerSignalsPath, (text) => patchProjectHistory265903Store(text, context));
+          return { changes, errors: context.errors, unsafeBundles };
+        }
         if (minor === 5901) {
           planFile(changes, target.appMainPath, (text) => patchCodexUi265901(text, context));
           planFile(changes, target.appStatsigPath, (text) => patchProjectHistory265901Hook(patchCodexPower265901(text, context), context));
@@ -627,9 +648,9 @@ function patchExtensionSafeHost(text, context) {
   next = patchExtensionMessageHandler(next, context);
   next = patchExtensionWebviewTimeout(next, context);
   next = patchExtensionResponsesWebsocketFallback(next, context);
-  const metadataParser = context.codexMinor === 5901 ? 'J9' : context.codexMinor === 5825 ? (context.codexBuild === '51511' ? 'NY' : 'DY') : context.codexMinor === 5818 ? (context.codexBuild === '41705' ? 'oY' : 'nY') : 'Q9';
-  const metadataComplete = extensionMetadata265814PostconditionsHold(next, metadataParser);
-  if ((context.codexMinor === 5814 || context.codexMinor === 5818 || context.codexMinor === 5825 || context.codexMinor === 5901) && !metadataComplete) {
+  const metadataParser = context.codexMinor === 5917 ? (host265917(context)?.parser || '') : context.codexMinor === 5908 ? 'W5' : context.codexMinor === 5903 ? 'p5' : context.codexMinor === 5901 ? 'J9' : context.codexMinor === 5825 ? (context.codexBuild === '51511' ? 'NY' : 'DY') : context.codexMinor === 5818 ? (context.codexBuild === '41705' ? 'oY' : 'nY') : 'Q9';
+  const metadataComplete = context.codexMinor === 5917 ? extensionMetadata265917PostconditionsHold(next, context) : extensionMetadata265814PostconditionsHold(next, metadataParser);
+  if ((context.codexMinor === 5814 || context.codexMinor === 5818 || context.codexMinor === 5825 || context.codexMinor === 5901 || context.codexMinor === 5903 || context.codexMinor === 5908 || context.codexMinor === 5917) && !metadataComplete) {
     context.errors.push(`extension metadata ${codex26581xLabel(context)}: 补丁标记不完整`);
   }
   if (context.codexMinor === 5825 && !extensionHost265825PostconditionsHold(next, context.codexBuild)) {
@@ -637,6 +658,15 @@ function patchExtensionSafeHost(text, context) {
   }
   if (context.codexMinor === 5901 && !extensionHost265901PostconditionsHold(next)) {
     context.errors.push('extension host 26.5901: 启动看门狗链不完整');
+  }
+  if (context.codexMinor === 5903 && !extensionHost265903PostconditionsHold(next)) {
+    context.errors.push('extension host 26.5903: 启动看门狗链不完整');
+  }
+  if (context.codexMinor === 5908 && !extensionHost265908PostconditionsHold(next)) {
+    context.errors.push('extension host 26.5908: 启动看门狗链不完整');
+  }
+  if (context.codexMinor === 5917 && !extensionHost265917PostconditionsHold(next, context)) {
+    context.errors.push('extension host 26.5917: 启动看门狗链不完整');
   }
   return next;
 }
@@ -663,6 +693,325 @@ function extensionHost265901PostconditionsHold(text) {
     && start.length === 1 && start[0].includes('timeoutMs:12e4})},12e4)')
     && ready.length === 1 && ready[0] === 'handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}'
     && init.length === 1 && session.length === 1 && appHost.length === 1;
+}
+
+function extensionHost265903PostconditionsHold(text) {
+  const watchdogAnchor = 'var jI=class{';
+  const hostAnchor = 'Nd=class t{';
+  const watchdogIndex = text.indexOf(watchdogAnchor);
+  const hostIndex = text.indexOf(hostAnchor);
+  const watchdogBody = minifiedBlockScope(text, watchdogIndex + watchdogAnchor.length - 1);
+  const hostBody = minifiedBlockScope(text, hostIndex + hostAnchor.length - 1);
+  const watchdog = watchdogBody ? watchdogAnchor + watchdogBody.slice(1) : '';
+  const host = hostBody ? hostAnchor + hostBody.slice(1) : '';
+  const ready = minifiedExactCodeFunctionScopes(watchdog, 'handleStartupPhase(e){', 1);
+  const start = minifiedExactCodeFunctionScopes(watchdog, 'start(){', 1);
+  const init = minifiedExactCodeFunctionScopes(host, 'async initializeWebview(e,r,n,o){', 1)
+    .filter((scope) => minifiedCodeIncludes(scope, 'let s=new jI(') && minifiedCodeIncludes(scope, 'registerClientCoordinationForWebview(e,n,s)'));
+  const session = minifiedExactCodeFunctionScopes(host, 'createClientCoordinationSession(e,r,n){', 1)
+    .filter((scope) => minifiedCodeIncludes(scope, 'registerAppHostSessionForWebview(e,r,o,n)'));
+  const appHost = minifiedExactCodeFunctionScopes(host, 'registerAppHostSessionForWebview(e,r,n,o){', 1)
+    .filter((scope) => minifiedCodeIncludes(minifiedAnchoredBlock(scope, 'new iI({', 2), 'startup:{reach:a=>o.handleStartupPhase(a)}'));
+  return countMatches(text, watchdogAnchor) === 1 && countMatches(text, hostAnchor) === 1
+    && text.includes(watchdog + ';var hPe=require("node:child_process")')
+    && start.length === 1 && start[0].includes('timeoutMs:12e4})},12e4)')
+    && ready.length === 1 && ready[0] === 'handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}'
+    && init.length === 1 && session.length === 1 && appHost.length === 1;
+}
+
+function extensionHost265908PostconditionsHold(text) {
+  const watchdogAnchor = 'var ik=class{';
+  const hostAnchor = 'Hd=class t{';
+  const watchdogIndex = text.indexOf(watchdogAnchor);
+  const hostIndex = text.indexOf(hostAnchor);
+  const watchdogBody = minifiedBlockScope(text, watchdogIndex + watchdogAnchor.length - 1);
+  const hostBody = minifiedBlockScope(text, hostIndex + hostAnchor.length - 1);
+  const watchdog = watchdogBody ? watchdogAnchor + watchdogBody.slice(1) : '';
+  const host = hostBody ? hostAnchor + hostBody.slice(1) : '';
+  const ready = minifiedExactCodeFunctionScopes(watchdog, 'handleStartupPhase(e){', 1);
+  const start = minifiedExactCodeFunctionScopes(watchdog, 'start(){', 1);
+  const init = minifiedExactCodeFunctionScopes(host, 'async initializeWebview(e,r,n,o){', 1)
+    .filter((scope) => minifiedCodeIncludes(scope, 'let s=new ik(') && minifiedCodeIncludes(scope, 'registerClientCoordinationForWebview(e,n,s)'));
+  const session = minifiedExactCodeFunctionScopes(host, 'createClientCoordinationSession(e,r,n){', 1)
+    .filter((scope) => minifiedCodeIncludes(scope, 'registerAppHostSessionForWebview(e,r,o,n)'));
+  const appHost = minifiedExactCodeFunctionScopes(host, 'registerAppHostSessionForWebview(e,r,n,o){', 1)
+    .filter((scope) => minifiedCodeIncludes(minifiedAnchoredBlock(scope, 'new bI({', 2), 'startup:{reach:a=>o.handleStartupPhase(a)}'));
+  return countMatches(text, watchdogAnchor) === 1 && countMatches(text, hostAnchor) === 1
+    && text.includes(watchdog + ';var Mke=require("node:child_process")')
+    && start.length === 1 && start[0].includes('timeoutMs:12e4})},12e4)')
+    && ready.length === 1 && ready[0] === 'handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}'
+    && init.length === 1 && session.length === 1 && appHost.length === 1;
+}
+
+const HEADER_265903_VARIANT = {
+  rows: 'F.map(e=>(0,Z.jsx)(Nn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&b===e.conversation.id,onClose:a,onActiveArchiveStart:p},e.key))',
+  rowsCall: 'codexRecentTaskProjectRows(F,b,a,Nn,p)',
+  historyParent: 's=f(),{authMethod:c}=Qe(),l=h(),u=m(Bn),{data:d}=ut(),p=ne(),',
+  historyParentScoped: 's=f(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:c}=Qe(),l=h(),u=m(Bn),{data:d}=ut(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),p=ne(),',
+  execTarget: 'c=o!==void 0&&o,l=s===void 0||s,u=x(ye),d=f(),p=G(),{authMethod:h}=Qe(),',
+  execTargetScoped: 'c=o!==void 0&&o,l=s===void 0||s,u=x(ye),d=f(),p=G(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,{authMethod:h}=Qe(),',
+  projectFilter: 'let E=r.filter(T),D=yn(n.data,r,ee),',
+  projectFilterScoped: 'let E=codexRecentTaskRootReady?codexRecentConversationFilter(r.filter(T),codexRecentTaskCurrentRoot):[],D=codexRecentTaskRootReady?codexRecentTaskFilter(yn(n.data,r,ee),codexRecentTaskCurrentRoot):[],',
+  rowOriginal: '(0,Z.jsx)(P,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})',
+  rowPatched: '(0,Z.jsx)(P,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})',
+  menuTrigger: 'triggerButton:K',
+  historySourcePost: '{data:d}=ut(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)',
+  conversationFilterPost: 'let E=codexRecentTaskRootReady?codexRecentConversationFilter',
+  taskFilterPost: 'D=codexRecentTaskRootReady?codexRecentTaskFilter',
+  rowsViewPost: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:b,onClose:a,row:Nn,onActiveArchiveStart:p})',
+};
+
+function patchSafeHeader265903(text, context, file) {
+  const variant = HEADER_265903_VARIANT;
+  let next = addExecutionTargetImport(text, context, file);
+  next = replaceOnce(next, variant.rows, variant.rowsCall, context, 'header 26.5903 project rows');
+  next = patchHeaderGroupHelper265903(patchHeaderMetadataLiteral(next), context);
+  next = replaceOnce(next, variant.historyParent, variant.historyParentScoped, context, 'header 26.5903 project history source');
+  next = replaceOnce(next, variant.execTarget, variant.execTargetScoped, context, 'header 26.5903 execution target');
+  next = replaceOnce(next, variant.projectFilter, variant.projectFilterScoped, context, 'header 26.5903 current project filter');
+  next = replaceOnce(next, variant.rowOriginal, variant.rowPatched, context, 'header 26.5903 project history row summary');
+  next = replaceOnce(next, 'className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`', 'className:`flex h-full min-h-0 w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`', context, 'header 26.5903 safe container height');
+  next = replaceOnce(next, 'vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1', 'vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1', context, 'header 26.5903 safe scroll height');
+  next = replaceOnce(next, 'contentClassName:`!pb-0 mt-[9px]`,' + variant.menuTrigger, 'contentClassName:`!pb-0 mt-[9px]`,contentStyle:{height:`600px`,overflow:`hidden`},' + variant.menuTrigger, context, 'header 26.5903 safe menu height');
+  next = replaceOnce(next, variant.rowsCall, variant.rowsViewPost, context, 'header 26.5903 project rows view');
+  next = finishSafeHeader265903(next, context);
+  if (!headerSemanticImports265903Hold(next, file)) context.errors.push('header 26.5903: semantic imports 不完整');
+  return next;
+}
+
+function patchHeaderGroupHelper265903(text, context) {
+  const anchor = 'function En(e){return e.kind===`remote`}function Dn';
+  if (countMatches(text, anchor) !== 1) {
+    context.errors.push('header 26.5903: 找不到唯一分组助手注入点');
+    return text;
+  }
+  const messenger = findVscodeMessengerAlias(text) || 'codexLocalGroupsMessengerImport';
+  const helper = safeHeaderHelper(EMPTY_METADATA, messenger, 'En')
+    .replace(/\(0,Q\.jsx\)/g, '(0,Z.jsx)')
+    .replace(/\(0,Q\.jsxs\)/g, '(0,Z.jsxs)')
+    .replace(/\(0,\$\.useState\)/g, '(0,jn.useState)')
+    .replace(/\(0,\$\.useEffect\)/g, '(0,jn.useEffect)');
+  return replaceOnce(text, anchor, helper + 'function Dn', context, 'header 26.5903 local groups helper');
+}
+
+function finishSafeHeader265903(text, context) {
+  const current = 't[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?';
+  const row = '(c=(0,Z.jsx)(P,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c';
+  const fixed = current.replace('?', '||t[24]!==n.conversation.title?');
+  const nextRow = row.replace('threadSummary:n.conversation,', 'threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265903:`+n.conversation.title:void 0,').replace('t[22]=e,t[23]=c', 't[22]=e,t[24]=n.conversation.title,t[23]=c');
+  let next = replaceOnce(text, current + row, fixed + nextRow, context, 'header 26.5903 local title row');
+  next = replaceOnce(next, 'Nn=(0,jn.memo)(function(e){let t=(0,An.c)(24),', 'Nn=(0,jn.memo)(function(e){let t=(0,An.c)(25),', context, 'header 26.5903 local row cache size');
+  next = next.replace('codexLocalGroupsHeaderSafePatchVersion=6', 'codexLocalGroupsHeaderSafe265903PatchVersion=1');
+  if (!safeHeader265903PostconditionsHold(next)) context.errors.push('header 26.5903: 补丁后置条件不完整');
+  return patchOpenedConversationTitle265903(next, context);
+}
+
+function safeHeader265903PostconditionsHold(text) {
+  const variant = HEADER_265903_VARIANT;
+  const view = 'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,jn.useState)(0);return(0,jn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}';
+  const row = minifiedBlockScope(text, text.indexOf('{', text.indexOf('Nn=(0,jn.memo)(function(e){')));
+  return countMatches(text, 'codexLocalGroupsHeaderSafe265903PatchVersion=1') === 1
+    && text.includes(variant.historySourcePost) && text.includes(variant.conversationFilterPost)
+    && text.includes(variant.taskFilterPost) && text.includes(variant.rowsViewPost)
+    && text.includes(view) && row.includes('(0,An.c)(25)')
+    && row.includes('threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265903:`+n.conversation.title:void 0')
+    && row.includes('t[24]!==n.conversation.title') && row.includes('t[24]=n.conversation.title')
+    && text.includes('contentStyle:{height:`600px`,overflow:`hidden`}')
+    && text.includes('vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1')
+    && text.includes('function codexLocalGroupsGroupLimit') && text.includes('function codexLocalGroupsScopeProjectRoot(e)')
+    && dropdownTitleMetadataProducer265903Holds(text)
+    && headerMetadata265814PostconditionsHold(text) && !text.includes('codex-local-groups-current-root-v1');
+}
+
+function dropdownTitleMetadataProducer265903Holds(text) {
+  const decorators = minifiedExactCodeFunctionScopes(text, 'function codexLocalGroupsDecoratedItem(e){', 0);
+  const rows = minifiedExactCodeFunctionScopes(text, 'function codexRecentTaskProjectRows(', 0);
+  return decorators.length === 1
+    && decorators[0] === 'function codexLocalGroupsDecoratedItem(e){let t=codexLocalGroupsLocalTitle(e);return t?{...e,conversation:{...e.conversation,title:t}}:e}'
+    && rows.length === 1 && rows[0].includes('u.map(e=>{') && rows[0].includes('let o=codexLocalGroupsDecoratedItem(e),p=');
+}
+
+function patchOpenedConversationTitle265903(text, context) {
+  const marker = 'codexLocalGroupsOpenedTitle265903PatchVersion=1';
+  if (text.includes(marker)) {
+    if (!openedConversationTitle265903PostconditionsHold(text)) context.errors.push('header 26.5903 opened title: 补丁标记不完整');
+    return text;
+  }
+  const originalInit = 'var qn,$,Jn,Yn=e((()=>{qn=y(),c(),E(),s(),b(),o(),rt(),gt(),pt(),xt(),Le(),it(),ue(),K(),de(),Se(),L(),wt(),kt(),Rt(),Vn(),wn(),$=S(),';
+  const patchedInit = 'var qn,$,Jn,codexHeaderOpenedReact,Yn=e((()=>{qn=y(),c(),E(),s(),b(),o(),rt(),gt(),pt(),xt(),Le(),it(),ue(),K(),de(),Se(),L(),wt(),kt(),Rt(),Vn(),wn(),codexHeaderOpenedReact=t(T(),1),$=S(),';
+  const original = 'function Hn(e){let t=(0,qn.c)(66),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e,l=';
+  const refresh = 'let[,codexLocalGroupsSetPageTitleRefresh]=(0,codexHeaderOpenedReact.useState)(0);(0,codexHeaderOpenedReact.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o;';
+  const patched = `var ${marker};${original.replace('=e,l=', '=e;')}${refresh}let l=`;
+  let next = replaceOnce(text, originalInit, patchedInit, context, 'header 26.5903 opened title react runtime');
+  next = replaceOnce(next, original, patched, context, 'header 26.5903 opened conversation title');
+  if (!openedConversationTitle265903PostconditionsHold(next)) context.errors.push('header 26.5903 opened conversation title: 补丁后置条件不完整');
+  return next;
+}
+
+function openedConversationTitle265903PostconditionsHold(text) {
+  const scope = minifiedFunctionScope(text, 'Hn');
+  const refresh = '(0,codexHeaderOpenedReact.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[])';
+  return countMatches(text, 'codexLocalGroupsOpenedTitle265903PatchVersion=1') === 1
+    && countMatches(text, 'codexHeaderOpenedReact=t(T(),1),$=S()') === 1
+    && scope.includes('let[,codexLocalGroupsSetPageTitleRefresh]=(0,codexHeaderOpenedReact.useState)(0)')
+    && scope.includes('o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o')
+    && scope.includes(refresh)
+    && !scope.includes('(0,$.useState)') && !scope.includes('(0,$.useEffect)');
+}
+
+function headerSemanticImports265903Hold(text, file) {
+  const imports = matchingAppInitialImports(text, file, semanticMain265903Holds);
+  return imports.length === 1
+    && /(?:^|[,{}])aX as codexUseExecutionTarget(?:,|})/.test(imports[0].importText)
+    && /(?:^|[,{}])grt as codexLocalGroupsMessengerImport(?:,|})/.test(imports[0].importText);
+}
+
+function semanticMain265903Holds(text) {
+  const messengerClasses = minifiedExactFunctionScopes(text, '$d=class e{');
+  const messengerClass = messengerClasses.length === 1 ? messengerClasses[0] : '';
+  const target = minifiedFunctionScope(text, 'sE');
+  const atom = minifiedExactFunctionScopes(text, 'cE=c(Q,(e,{get:t})=>{');
+  const exports = text.slice(text.lastIndexOf('export{'));
+  return messengerClasses.length === 1 && countMatches(text, 'ef=$d.getInstance()') === 1
+    && messengerClass.includes('dispatchMessage(e,t){if(Yd==null)') && messengerClass.includes('Yd.postMessage({...t,type:e})')
+    && messengerClass.includes('dispatchHostMessage(e){this.deliverOrBufferMessage(e)}')
+    && countMatches(text, 'AOe((e,t)=>{ef.dispatchMessage(e,t)})') === 1
+    && target === 'function sE(e){return ce(cE,e===void 0?null:e)}'
+    && atom.length === 1 && atom[0].includes('activeWorkspaceRoot:') && atom[0].includes('isActiveWorkspaceRootLoading:')
+    && /(?:^|[,{}])ef as grt(?:,|})/.test(exports) && /(?:^|[,{}])sE as aX(?:,|})/.test(exports);
+}
+
+const HEADER_265908_VARIANT = {
+  rows: 'I.map(e=>(0,Z.jsx)(jn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:i,onActiveArchiveStart:m},e.key))',
+  rowsCall: 'codexRecentTaskProjectRows(I,y,i,jn,m)',
+  historyParent: 'o=u(),{authMethod:s}=at(),c=E(),l=b(Rn),{data:d}=Ge(),f=ke(),',
+  historyParentScoped: 'o=u(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:s}=at(),c=E(),l=b(Rn),{data:d}=Ge(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),f=ke(),',
+  execTarget: 'c=o!==void 0&&o,d=s===void 0||s,f=l(Pe),p=u(),m=ve(),{authMethod:h}=at(),',
+  execTargetScoped: 'c=o!==void 0&&o,d=s===void 0||s,f=l(Pe),p=u(),m=ve(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,{authMethod:h}=at(),',
+  projectFilter: 'let ee=r.filter(E),D=_n(n.data,r,T),',
+  projectFilterScoped: 'let ee=codexRecentTaskRootReady?codexRecentConversationFilter(r.filter(E),codexRecentTaskCurrentRoot):[],D=codexRecentTaskRootReady?codexRecentTaskFilter(_n(n.data,r,T),codexRecentTaskCurrentRoot):[],',
+  rowOriginal: '(0,Z.jsx)(Te,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})',
+  rowPatched: '(0,Z.jsx)(Te,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a})',
+  menuTrigger: 'triggerButton:q',
+  historySourcePost: '{data:d}=Ge(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)',
+  conversationFilterPost: 'let ee=codexRecentTaskRootReady?codexRecentConversationFilter',
+  taskFilterPost: 'D=codexRecentTaskRootReady?codexRecentTaskFilter',
+  rowsViewPost: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:I,activeId:y,onClose:i,row:jn,onActiveArchiveStart:m})',
+};
+
+function patchSafeHeader265908(text, context, file) {
+  const variant = HEADER_265908_VARIANT;
+  let next = addExecutionTargetImport(text, context, file);
+  next = replaceOnce(next, variant.rows, variant.rowsCall, context, 'header 26.5908 project rows');
+  next = patchHeaderGroupHelper265908(patchHeaderMetadataLiteral(next), context);
+  next = replaceOnce(next, variant.historyParent, variant.historyParentScoped, context, 'header 26.5908 project history source');
+  next = replaceOnce(next, variant.execTarget, variant.execTargetScoped, context, 'header 26.5908 execution target');
+  next = replaceOnce(next, variant.projectFilter, variant.projectFilterScoped, context, 'header 26.5908 current project filter');
+  next = replaceOnce(next, variant.rowOriginal, variant.rowPatched, context, 'header 26.5908 project history row summary');
+  next = replaceOnce(next, 'className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`', 'className:`flex h-full min-h-0 w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`', context, 'header 26.5908 safe container height');
+  next = replaceOnce(next, 'vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1', 'vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1', context, 'header 26.5908 safe scroll height');
+  next = replaceOnce(next, 'contentClassName:`!pb-0 mt-[9px]`,' + variant.menuTrigger, 'contentClassName:`!pb-0 mt-[9px]`,contentStyle:{height:`600px`,overflow:`hidden`},' + variant.menuTrigger, context, 'header 26.5908 safe menu height');
+  next = replaceOnce(next, variant.rowsCall, variant.rowsViewPost, context, 'header 26.5908 project rows view');
+  next = finishSafeHeader265908(next, context);
+  if (!headerSemanticImports265908Hold(next, file)) context.errors.push('header 26.5908: semantic imports 不完整');
+  return next;
+}
+
+function patchHeaderGroupHelper265908(text, context) {
+  const anchor = 'function wn(e){return e.kind===`remote`}function Tn';
+  if (countMatches(text, anchor) !== 1) {
+    context.errors.push('header 26.5908: 找不到唯一分组助手注入点');
+    return text;
+  }
+  const messenger = findVscodeMessengerAlias(text) || 'codexLocalGroupsMessengerImport';
+  const helper = safeHeaderHelper(EMPTY_METADATA, messenger, 'wn')
+    .replace(/\(0,Q\.jsx\)/g, '(0,Z.jsx)')
+    .replace(/\(0,Q\.jsxs\)/g, '(0,Z.jsxs)')
+    .replace(/\(0,\$\.useState\)/g, '(0,kn.useState)')
+    .replace(/\(0,\$\.useEffect\)/g, '(0,kn.useEffect)');
+  return replaceOnce(text, anchor, helper + 'function Tn', context, 'header 26.5908 local groups helper');
+}
+
+function finishSafeHeader265908(text, context) {
+  const current = 't[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?';
+  const row = '(c=(0,Z.jsx)(Te,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c';
+  const fixed = current.replace('?', '||t[24]!==n.conversation.title?');
+  const nextRow = row.replace('threadSummary:n.conversation,', 'threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265908:`+n.conversation.title:void 0,').replace('t[22]=e,t[23]=c', 't[22]=e,t[24]=n.conversation.title,t[23]=c');
+  let next = replaceOnce(text, current + row, fixed + nextRow, context, 'header 26.5908 local title row');
+  next = replaceOnce(next, 'jn=(0,kn.memo)(function(e){let t=(0,On.c)(24),', 'jn=(0,kn.memo)(function(e){let t=(0,On.c)(25),', context, 'header 26.5908 local row cache size');
+  next = next.replace('codexLocalGroupsHeaderSafePatchVersion=6', 'codexLocalGroupsHeaderSafe265908PatchVersion=1');
+  if (!safeHeader265908PostconditionsHold(next)) context.errors.push('header 26.5908: 补丁后置条件不完整');
+  return patchOpenedConversationTitle265908(next, context);
+}
+
+function safeHeader265908PostconditionsHold(text) {
+  const variant = HEADER_265908_VARIANT;
+  const view = 'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,kn.useState)(0);return(0,kn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}';
+  const row = minifiedBlockScope(text, text.indexOf('{', text.indexOf('jn=(0,kn.memo)(function(e){')));
+  return countMatches(text, 'codexLocalGroupsHeaderSafe265908PatchVersion=1') === 1
+    && text.includes(variant.historySourcePost) && text.includes(variant.conversationFilterPost)
+    && text.includes(variant.taskFilterPost) && text.includes(variant.rowsViewPost)
+    && text.includes(view) && row.includes('(0,On.c)(25)')
+    && row.includes('threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265908:`+n.conversation.title:void 0')
+    && row.includes('t[24]!==n.conversation.title') && row.includes('t[24]=n.conversation.title')
+    && text.includes('contentStyle:{height:`600px`,overflow:`hidden`}')
+    && text.includes('vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1')
+    && text.includes('function codexLocalGroupsGroupLimit') && text.includes('function codexLocalGroupsScopeProjectRoot(e)')
+    && dropdownTitleMetadataProducer265908Holds(text)
+    && headerMetadata265814PostconditionsHold(text) && !text.includes('codex-local-groups-current-root-v1');
+}
+
+function dropdownTitleMetadataProducer265908Holds(text) {
+  const decorators = minifiedExactCodeFunctionScopes(text, 'function codexLocalGroupsDecoratedItem(e){', 0);
+  const rows = minifiedExactCodeFunctionScopes(text, 'function codexRecentTaskProjectRows(', 0);
+  return decorators.length === 1
+    && decorators[0] === 'function codexLocalGroupsDecoratedItem(e){let t=codexLocalGroupsLocalTitle(e);return t?{...e,conversation:{...e.conversation,title:t}}:e}'
+    && rows.length === 1 && rows[0].includes('u.map(e=>{') && rows[0].includes('let o=codexLocalGroupsDecoratedItem(e),p=');
+}
+
+function patchOpenedConversationTitle265908(text, context) {
+  const marker = 'codexLocalGroupsOpenedTitle265908PatchVersion=1';
+  if (text.includes(marker)) {
+    if (!openedConversationTitle265908PostconditionsHold(text)) context.errors.push('header 26.5908 opened title: 补丁标记不完整');
+    return text;
+  }
+  const original = 'function Bn(e){let t=(0,Gn.c)(66),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e,l=';
+  const refresh = 'let[,codexLocalGroupsSetPageTitleRefresh]=(0,Ln.useState)(0);(0,Ln.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o;';
+  const patched = `var ${marker};${original.replace('=e,l=', '=e;')}${refresh}let l=`;
+  const next = replaceOnce(text, original, patched, context, 'header 26.5908 opened conversation title');
+  if (!openedConversationTitle265908PostconditionsHold(next)) context.errors.push('header 26.5908 opened conversation title: 补丁后置条件不完整');
+  return next;
+}
+
+function openedConversationTitle265908PostconditionsHold(text) {
+  const scope = minifiedFunctionScope(text, 'Bn');
+  const refresh = '(0,Ln.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[])';
+  return countMatches(text, 'codexLocalGroupsOpenedTitle265908PatchVersion=1') === 1
+    && scope.includes('let[,codexLocalGroupsSetPageTitleRefresh]=(0,Ln.useState)(0)')
+    && scope.includes('o=a==null?o:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:a}})??o')
+    && scope.includes(refresh);
+}
+
+function headerSemanticImports265908Hold(text, file) {
+  const imports = matchingAppInitialImports(text, file, semanticMain265908Holds);
+  return imports.length === 1
+    && /(?:^|[,{}])pQ as codexUseExecutionTarget(?:,|})/.test(imports[0].importText)
+    && /(?:^|[,{}])Zat as codexLocalGroupsMessengerImport(?:,|})/.test(imports[0].importText);
+}
+
+function semanticMain265908Holds(text) {
+  const messengerClasses = minifiedExactFunctionScopes(text, 'rp=class e{');
+  const messengerClass = messengerClasses.length === 1 ? messengerClasses[0] : '';
+  const target = minifiedFunctionScope(text, 'uD');
+  const atom = minifiedExactFunctionScopes(text, 'dD=Rr(Q,(e,{get:t})=>{');
+  const exports = text.slice(text.lastIndexOf('export{'));
+  return messengerClasses.length === 1 && countMatches(text, 'ip=rp.getInstance()') === 1
+    && messengerClass.includes('dispatchMessage(e,t){if(qf==null)') && messengerClass.includes('qf.postMessage({...t,type:e})')
+    && messengerClass.includes('dispatchHostMessage(e){this.deliverOrBufferMessage(e)}')
+    && countMatches(text, 'vMe((e,t)=>{ip.dispatchMessage(e,t)})') === 1
+    && target === 'function uD(e){return da(dD,e===void 0?null:e)}'
+    && atom.length === 1 && atom[0].includes('activeWorkspaceRoot:') && atom[0].includes('isActiveWorkspaceRootLoading:')
+    && /(?:^|[,{}])ip as Zat(?:,|})/.test(exports) && /(?:^|[,{}])uD as pQ(?:,|})/.test(exports);
 }
 
 function extensionHost265825PostconditionsHold(text, build) {
@@ -723,7 +1072,7 @@ function extensionMetadata265814PostconditionsHold(text, parser = 'Q9') {
 }
 
 function patchExtensionWebviewTimeout(text, context) {
-  if (context.codexMinor === 5810 || context.codexMinor === 5814 || context.codexMinor === 5818 || context.codexMinor === 5825 || context.codexMinor === 5901) return patchExtensionWebviewTimeout265810(text, context);
+  if (context.codexMinor === 5810 || context.codexMinor === 5814 || context.codexMinor === 5818 || context.codexMinor === 5825 || context.codexMinor === 5901 || context.codexMinor === 5903 || context.codexMinor === 5908 || context.codexMinor === 5917) return patchExtensionWebviewTimeout265810(text, context);
   if (context.codexMinor !== 5730 && context.codexMinor !== 5803) return text;
   const current = 'this.onTimeout()},3e4))}dispose(){this.disposed=!0';
   const patched = 'this.onTimeout()},12e4))}dispose(){this.disposed=!0';
@@ -732,11 +1081,12 @@ function patchExtensionWebviewTimeout(text, context) {
 }
 
 function patchExtensionWebviewTimeout265810(text, context) {
-  if (!codex265810Build(context) && context.codexMinor !== 5901) return text;
+  if (!codex265810Build(context) && context.codexMinor !== 5901 && context.codexMinor !== 5903 && context.codexMinor !== 5908 && context.codexMinor !== 5917) return text;
   const label = codex26581xLabel(context);
   const current = 'this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)';
   const patched = 'this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:12e4})},12e4)';
-  const watchdogMarker = context.codexMinor === 5901 ? 'var GI=class{' : context.codexMinor === 5825 ? 'var yP=class{' : context.codexMinor === 5818 ? 'var QP=class{' : '';
+  const host5917 = context.codexMinor === 5917 ? host265917(context) : null;
+  const watchdogMarker = host5917 ? `var ${host5917.watchdog}=class{` : context.codexMinor === 5908 ? 'var ik=class{' : context.codexMinor === 5903 ? 'var jI=class{' : context.codexMinor === 5901 ? 'var GI=class{' : context.codexMinor === 5825 ? 'var yP=class{' : context.codexMinor === 5818 ? 'var QP=class{' : '';
   const watchdogStart = watchdogMarker && countMatches(text, watchdogMarker) === 1 ? text.indexOf(watchdogMarker) : -1;
   const watchdog = watchdogMarker ? (watchdogStart < 0 ? '' : minifiedBlockScope(text, text.indexOf('{', watchdogStart))) : text;
   if (watchdog.includes(patched)) {
@@ -746,7 +1096,7 @@ function patchExtensionWebviewTimeout265810(text, context) {
     return text;
   }
   if (countMatches(watchdog, current) !== 1) {
-    const watchdogName = context.codexMinor === 5901 ? 'GI' : context.codexMinor === 5825 ? 'yP' : context.codexMinor === 5818 ? 'QP' : context.codexMinor === 5814 ? 'Webview' : 'jP';
+    const watchdogName = host5917 ? host5917.watchdog : context.codexMinor === 5908 ? 'ik' : context.codexMinor === 5903 ? 'jI' : context.codexMinor === 5901 ? 'GI' : context.codexMinor === 5825 ? 'yP' : context.codexMinor === 5818 ? 'QP' : context.codexMinor === 5814 ? 'Webview' : 'jP';
     context.errors.push(`extension webview startup timeout ${label}: 找不到唯一 ${watchdogName} 看门狗`);
     return text;
   }
@@ -859,6 +1209,24 @@ function patchExtensionMetadataHelper(text, context) {
       return replaceOnce(text, anchor, buildExtensionHostHelper(context, 'NCe', 'typeof D=="function"&&D(),typeof oA=="function"&&oA(),typeof QN=="function"&&QN(),typeof Bt=="function"&&Bt();'), context, 'extension metadata helper 26.5901');
     }
   }
+  if (context.codexMinor === 5903) {
+    const anchor = 'var sAe=require("path");D();lA();oL();Bt();';
+    if (text.includes(anchor)) {
+      return replaceOnce(text, anchor, buildExtensionHostHelper(context, 'sAe', 'typeof D=="function"&&D(),typeof lA=="function"&&lA(),typeof oL=="function"&&oL(),typeof Bt=="function"&&Bt();'), context, 'extension metadata helper 26.5903');
+    }
+  }
+  if (context.codexMinor === 5908) {
+    const anchor = 'var xPe=require("path");D();_A();bL();ZG();$t();';
+    if (text.includes(anchor)) {
+      return replaceOnce(text, anchor, buildExtensionHostHelper(context, 'xPe', 'typeof D=="function"&&D(),typeof _A=="function"&&_A(),typeof bL=="function"&&bL(),typeof ZG=="function"&&ZG(),typeof $t=="function"&&$t();'), context, 'extension metadata helper 26.5908');
+    }
+  }
+  if (context.codexMinor === 5917) {
+    const host = host265917(context);
+    if (host && text.includes(host.metadataAnchor)) {
+      return replaceOnce(text, host.metadataAnchor, buildExtensionHostHelper(context, host.pathAlias, host.metadataInit), context, 'extension metadata helper 26.5917');
+    }
+  }
   if (text.includes('var Xle=require("path");U();Nt();')) {
     return replaceOnce(text, 'var Xle=require("path");U();Nt();', buildExtensionHostHelper(context, 'Xle', 'typeof U=="function"&&U(),typeof Nt=="function"&&Nt();'), context, 'extension metadata helper latest');
   }
@@ -952,7 +1320,14 @@ function patchExtensionMessageHandler(text, context) {
   const capnNew582551511 = 'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=NY(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
   const capnOld5901 = 'e.onDidReceiveMessage(n=>{let o=J9(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
   const capnNew5901 = 'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=J9(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
-  if (!next.includes(capnNewV2) && !next.includes(capnNewV1) && !next.includes(capnNew5810) && !next.includes(capnNew5814) && !next.includes(capnNew5818) && !next.includes(capnNew581841705) && !next.includes(capnNew5825) && !next.includes(capnNew582551511) && !next.includes(capnNew5901)) {
+  const capnOld5903 = 'e.onDidReceiveMessage(n=>{let o=p5(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
+  const capnNew5903 = 'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=p5(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
+  const capnOld5908 = 'e.onDidReceiveMessage(n=>{let o=W5(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
+  const capnNew5908 = 'e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=W5(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})';
+  const host5917 = context.codexMinor === 5917 ? host265917(context) : null;
+  const capnOld5917 = host5917 ? `e.onDidReceiveMessage(n=>{let o=${host5917.parser}(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})` : null;
+  const capnNew5917 = host5917 ? `e.onDidReceiveMessage(n=>{if(codexLocalGroupsHandleWebviewMessage(n))return;let o=${host5917.parser}(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})` : null;
+  if (!next.includes(capnNewV2) && !next.includes(capnNewV1) && !next.includes(capnNew5810) && !next.includes(capnNew5814) && !next.includes(capnNew5818) && !next.includes(capnNew581841705) && !next.includes(capnNew5825) && !next.includes(capnNew582551511) && !next.includes(capnNew5901) && !next.includes(capnNew5903) && !next.includes(capnNew5908) && !(capnNew5917 && next.includes(capnNew5917))) {
     if (next.includes(capnOldV2)) {
       next = replaceOnce(next, capnOldV2, capnNewV2, context, 'extension capn metadata message handler');
     } else if (next.includes(capnOldV1)) {
@@ -971,6 +1346,12 @@ function patchExtensionMessageHandler(text, context) {
       next = replaceOnce(next, capnOld582551511, capnNew582551511, context, 'extension capn metadata message handler 26.5825.51511');
     } else if (next.includes(capnOld5901)) {
       next = replaceOnce(next, capnOld5901, capnNew5901, context, 'extension capn metadata message handler 26.5901');
+    } else if (next.includes(capnOld5903)) {
+      next = replaceOnce(next, capnOld5903, capnNew5903, context, 'extension capn metadata message handler 26.5903');
+    } else if (next.includes(capnOld5908)) {
+      next = replaceOnce(next, capnOld5908, capnNew5908, context, 'extension capn metadata message handler 26.5908');
+    } else if (capnOld5917 && next.includes(capnOld5917)) {
+      next = replaceOnce(next, capnOld5917, capnNew5917, context, 'extension capn metadata message handler 26.5917');
     }
   }
   const webviewOld = 'this.handleMessage(e,a)});';
@@ -990,6 +1371,8 @@ function patchExtensionMessageHandler(text, context) {
   const capnCurrent5825 = context.codexBuild === '51511' ? capnNew582551511 : capnNew5825;
   if (context.codexMinor === 5825 && !next.includes(capnCurrent5825)) context.errors.push('extension capn metadata message handler 26.5825: 补丁后置条件不完整');
   if (context.codexMinor === 5901 && !next.includes(capnNew5901)) context.errors.push('extension capn metadata message handler 26.5901: 补丁后置条件不完整');
+  if (context.codexMinor === 5908 && !next.includes(capnNew5908)) context.errors.push('extension capn metadata message handler 26.5908: 补丁后置条件不完整');
+  if (context.codexMinor === 5917 && capnNew5917 && !next.includes(capnNew5917)) context.errors.push('extension capn metadata message handler 26.5917: 补丁后置条件不完整');
   return next;
 }
 
@@ -1120,8 +1503,41 @@ function patchSidebarProjectGroupSignals(text, context) {
 function patchHeader(text, context, file) {
   const errorCount = context.errors.length;
   if (context.safeMode && (context.codexMinor === 5810 || context.codexMinor === 5814 || context.codexMinor === 5818 || context.codexMinor === 5825 || context.codexMinor === 5901) && !codex265810Build(context)) return text;
+  if (context.safeMode && context.codexMinor === 5903 && !CODEX_265903_BUILDS.has(context.codexBuild)) return text;
+  if (context.safeMode && context.codexMinor === 5908 && !CODEX_265908_BUILDS.has(context.codexBuild)) return text;
+  if (context.safeMode && context.codexMinor === 5917 && !CODEX_265917_BUILDS.has(context.codexBuild)) return text;
   let next = addVscodeMessengerImport(text, context, file);
   if (context.errors.length > errorCount) return text;
+  if (context.safeMode && context.codexMinor === 5917 && next.includes('codexLocalGroupsHeaderSafe265917PatchVersion=1')) {
+    next = addExecutionTargetImport(next, context, file);
+    if (context.errors.length > errorCount) return text;
+    if (!safeHeader265917PostconditionsHold(next)) context.errors.push('header 26.5917: 补丁标记不完整');
+    if (!headerSemanticImports265917Hold(next, file)) context.errors.push('header 26.5917: semantic imports 不完整');
+    return patchOpenedConversationTitle265917(patchHeaderMetadataLiteral(next), context);
+  }
+  if (context.safeMode && context.codexMinor === 5917 && next.includes('function wn(e){return e.kind===`remote`}function Tn')) {
+    return patchSafeHeader265917(next, context, file);
+  }
+  if (context.safeMode && context.codexMinor === 5908 && next.includes('codexLocalGroupsHeaderSafe265908PatchVersion=1')) {
+    next = addExecutionTargetImport(next, context, file);
+    if (context.errors.length > errorCount) return text;
+    if (!safeHeader265908PostconditionsHold(next)) context.errors.push('header 26.5908: 补丁标记不完整');
+    if (!headerSemanticImports265908Hold(next, file)) context.errors.push('header 26.5908: semantic imports 不完整');
+    return patchOpenedConversationTitle265908(patchHeaderMetadataLiteral(next), context);
+  }
+  if (context.safeMode && context.codexMinor === 5908 && next.includes('function wn(e){return e.kind===`remote`}function Tn')) {
+    return patchSafeHeader265908(next, context, file);
+  }
+  if (context.safeMode && context.codexMinor === 5903 && next.includes('codexLocalGroupsHeaderSafe265903PatchVersion=1')) {
+    next = addExecutionTargetImport(next, context, file);
+    if (context.errors.length > errorCount) return text;
+    if (!safeHeader265903PostconditionsHold(next)) context.errors.push('header 26.5903: 补丁标记不完整');
+    if (!headerSemanticImports265903Hold(next, file)) context.errors.push('header 26.5903: semantic imports 不完整');
+    return patchOpenedConversationTitle265903(patchHeaderMetadataLiteral(next), context);
+  }
+  if (context.safeMode && context.codexMinor === 5903 && next.includes('function En(e){return e.kind===`remote`}function Dn')) {
+    return patchSafeHeader265903(next, context, file);
+  }
   if (context.safeMode && context.codexMinor === 5901 && next.includes('codexLocalGroupsHeaderSafe265901PatchVersion=1')) {
     next = addExecutionTargetImport(next, context, file);
     if (context.errors.length > errorCount) return text;
@@ -1503,6 +1919,25 @@ const CODEX_265814_BUILDS = new Set(['41407']);
 const CODEX_265818_BUILDS = new Set(['31338', '41705']);
 const CODEX_265825_BUILDS = new Set(['32147', '51511']);
 const CODEX_265901_BUILDS = new Set(['22334']);
+const CODEX_265903_BUILDS = new Set(['61454']);
+const CODEX_265908_BUILDS = new Set(['31748']);
+const CODEX_265917_BUILDS = new Set(['61114', '62051']);
+const HOST_265917 = {
+  61114: {
+    watchdog: 'uD', childProcess: 'cLe', host: 'pm', appHost: 'xM', parser: 'ute', pathAlias: 'e1e',
+    metadataAnchor: 'var e1e=require("path");O();vP();_B();hH();Zt();',
+    metadataInit: 'typeof O=="function"&&O(),typeof vP=="function"&&vP(),typeof _B=="function"&&_B(),typeof hH=="function"&&hH(),typeof Zt=="function"&&Zt();',
+  },
+  62051: {
+    watchdog: 'aD', childProcess: 'oLe', host: 'dm', appHost: 'SM', parser: 'ate', pathAlias: 'Z2e',
+    metadataAnchor: 'var Z2e=require("path");O();gT();xB();yG();Zt();',
+    metadataInit: 'typeof O=="function"&&O(),typeof gT=="function"&&gT(),typeof xB=="function"&&xB(),typeof yG=="function"&&yG(),typeof Zt=="function"&&Zt();',
+  },
+};
+
+function host265917(context) {
+  return HOST_265917[context && context.codexBuild] || null;
+}
 const HEADER_265810_VARIANTS = {
   41047: {
     rows: 'F.map(e=>(0,Z.jsx)(An,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:i,onActiveArchiveStart:u},e.key))',
@@ -1687,6 +2122,9 @@ function codex265810Build(context) {
 }
 
 function codex26581xLabel(context) {
+  if (context.codexMinor === 5917) return '26.5917';
+  if (context.codexMinor === 5908) return '26.5908';
+  if (context.codexMinor === 5903) return '26.5903';
   if (context.codexMinor === 5901) return '26.5901';
   if (context.codexMinor === 5825) return '26.5825';
   if (context.codexMinor === 5818) return '26.5818';
@@ -2497,15 +2935,429 @@ function codexUi26582551511PostconditionsHold(text) {
     && !text.includes('1221508807');
 }
 
+function patchCodexUi265908(text, context) {
+  const marker = 'codexLocalGroupsCodexUi265908PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsCodexUi265908PatchVersion=1';
+  const original = 'a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort';
+  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
+  if (text.includes(marker)) {
+    const next = patchCodexUi265908DropdownTitle(text, context);
+    if (!codexUi265908PostconditionsHold(next)) context.errors.push('Codex UI 26.5908: 补丁标记不完整');
+    return next;
+  }
+  if (text.includes(legacyMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, legacyMarker, marker, context, 'Codex UI 26.5908 marker v2');
+    next = patchCodexUi265908DropdownTitle(next, context);
+    if (!codexUi265908PostconditionsHold(next)) context.errors.push('Codex UI 26.5908: 补丁后置条件不完整');
+    return next;
+  }
+  let next = replaceOnce(text, original, patched, context, 'Codex UI 26.5908 Sol Max Ultra validation');
+  next = replaceOnce(next, 'function Z7e({userSavedModelString:', `var ${marker};function Z7e({userSavedModelString:`, context, 'Codex UI 26.5908 marker');
+  next = patchCodexUi265908DropdownTitle(next, context);
+  if (!codexUi265908PostconditionsHold(next)) context.errors.push('Codex UI 26.5908: 补丁后置条件不完整');
+  return next;
+}
+
+function patchCodexUi265908DropdownTitle(text, context) {
+  const marker = 'codexLocalGroupsDropdownTitle265908PatchVersion=1';
+  const original = 'function mWt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+  const patched = `var ${marker};function mWt({title:e,titleOverride:t}){if(typeof t===\`string\`&&t.startsWith(\`__codexLocalGroupsTitle265908:\`))return t.slice(\`__codexLocalGroupsTitle265908:\`.length);if(e!=null)return e;let n=t?.trim()??\`\`;return n.length>0?n:null}`;
+  if (text.includes(marker)) return text;
+  return replaceOnce(text, original, patched, context, 'Codex UI 26.5908 dropdown title resolver');
+}
+
+function codexUi265908DropdownTitlePostconditionsHold(text) {
+  const resolver = minifiedFunctionScope(text, 'mWt');
+  const expected = 'function mWt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265908:`))return t.slice(`__codexLocalGroupsTitle265908:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+  return countMatches(text, 'codexLocalGroupsDropdownTitle265908PatchVersion=1') === 1
+    && countMatches(text, 'function mWt({title:e,titleOverride:t}){') === 1
+    && resolver === expected;
+}
+
+function codexUi265908PostconditionsHold(text) {
+  const validation = minifiedExactCodeFunctionScopes(text, 'function Z7e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
+  return countMatches(text, 'codexLocalGroupsCodexUi265908PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsCodexUi265908PatchVersion=1') === 0
+    && validation.length === 1
+    && validation[0].includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
+    && text.includes('model_reasoning_effort??null')
+    && text.includes('settings.reasoning_effort??null')
+    && text.includes('setDefaultModelConfig')
+    && text.includes('isBackgroundSubagentsEnabled:l=!0')
+    && text.includes('type:`multi-agent-action`') && text.includes('type:`subagent-activity`')
+    && text.includes('e.type===`subAgentActivity`') && text.includes('e.tool!==`spawnAgent`')
+    && semanticMain265908Holds(text)
+    && codexUi265908DropdownTitlePostconditionsHold(text);
+}
+
+const CODEX_POWER_265908_SLIDER_INSERTION = 'if((xe===`gpt-5.6-sol`||xe===`gpt-6-sol`||xe===`gpt-6-astra`)&&Se?.some(e=>e.model===xe)&&it.some(e=>e.model===xe)){let e=it.find(e=>e.model===xe),t=e.modelLabel,n=it.filter(e=>e.model!==xe||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===xe){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${xe}:${e}`,model:xe,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});it=n}';
+const CODEX_POWER_265908_SLIDER_ANCHOR = 'let at=Bw(it,tt==null?void 0:`${tt.model}:${tt.defaultReasoningEffort}`)';
+const CODEX_POWER_265908_NATIVE_MENU = 'function p3(e,t){let n=e?.find(e=>e.model===t);return n==null?ki.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>fd(e.reasoningEffort))}';
+const CODEX_POWER_265908_PATCHED_MENU = 'function p3(e,t){let n=e?.find(e=>e.model===t),r=n==null?ki.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>fd(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}';
+const CODEX_POWER_265908_NATIVE_FILTER = 'function Dlt(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Fg(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}';
+const CODEX_POWER_265908_NATIVE_SLIDER = 'function Slt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){if(r!=null){let a=Tlt(e,{stripGptPrefix:i});for(let o of r.presets){let r=(0,Olt.default)(Dlt(o.filter(({reasoning_effort:e})=>(t||e!==`ultra`)&&(!n||e!==`xhigh`)).flatMap(({model:e,reasoning_effort:t})=>{let n=a.find(n=>n.model===e&&n.reasoningEffort===t);return n==null?[]:[n]}),e,i),({id:e})=>e);if(r.length>=3)return r}}let a=Dlt((t?[...Alt,jlt]:Alt).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);if(a.length>=3)return a;let o=Dlt(Mlt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);return o.length>=3?o:[]}';
+
+function patchCodexPower265908(text, context) {
+  const marker = 'codexLocalGroupsPower265908PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsPower265908PatchVersion=1';
+  if (text.includes(marker)) {
+    if (!codexPower265908PostconditionsHold(text)) context.errors.push('Codex power 26.5908: 补丁标记不完整');
+    return text;
+  }
+  if (text.includes(legacyMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, legacyMarker, marker, context, 'Codex power 26.5908 marker v2');
+    if (!codexPower265908PostconditionsHold(next)) context.errors.push('Codex power 26.5908: 补丁后置条件不完整');
+    return next;
+  }
+  if (!codexPower265908NativeContractsHold(text)) {
+    context.errors.push('Codex power 26.5908: 原生消费链不完整');
+    return text;
+  }
+  let next = replaceOnce(text, CODEX_POWER_265908_NATIVE_MENU, CODEX_POWER_265908_PATCHED_MENU, context, 'Codex Reasoning menu 26.5908');
+  next = replaceOnce(next, CODEX_POWER_265908_SLIDER_ANCHOR, `${CODEX_POWER_265908_SLIDER_INSERTION}${CODEX_POWER_265908_SLIDER_ANCHOR}`, context, 'Codex Power slider 26.5908');
+  next = replaceOnce(next, 'function Slt(e,{includeUltraInSlider:', `var ${marker};function Slt(e,{includeUltraInSlider:`, context, 'Codex power 26.5908 marker');
+  if (!codexPower265908PostconditionsHold(next)) context.errors.push('Codex power 26.5908: 补丁后置条件不完整');
+  return next;
+}
+
+function codexPower265908NativeContractsHold(text) {
+  const menus = minifiedExactCodeFunctionScopes(text, 'function p3(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  return menu === CODEX_POWER_265908_NATIVE_MENU && codexPower265908NativeSliderConsumerHolds(text, false);
+}
+
+function codexPower265908NativeSliderConsumerHolds(text, patched) {
+  const sliders = minifiedExactCodeFunctionScopes(text, 'function Slt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){');
+  const filters = minifiedExactCodeFunctionScopes(text, 'function Dlt(e,t,n){');
+  const pickers = minifiedExactCodeFunctionScopes(text, 'function Ncr(e){');
+  const slider = sliders.length === 1 ? sliders[0] : '';
+  const filter = filters.length === 1 ? filters[0] : '';
+  const picker = pickers.length === 1 ? pickers[0] : '';
+  const insertion = minifiedAnchoredBlock(picker, 'if((xe===`gpt-5.6-sol`||xe===`gpt-6-sol`||xe===`gpt-6-astra`)&&Se?.some(e=>e.model===xe)&&it.some(e=>e.model===xe)){', 1);
+  const expectedInsertion = minifiedBlockScope(CODEX_POWER_265908_SLIDER_INSERTION, CODEX_POWER_265908_SLIDER_INSERTION.indexOf('{'));
+  return filter === CODEX_POWER_265908_NATIVE_FILTER
+    && slider === CODEX_POWER_265908_NATIVE_SLIDER
+    && picker.includes('nt=Slt(Ye,{includeUltraInSlider:x,sliderModelsConfig:we,stripGptPrefix:!p})')
+    && picker.includes('powerSelectionsWithXHigh:it')
+    && countMatches(picker, CODEX_POWER_265908_SLIDER_ANCHOR) === 1
+    && (patched
+      ? insertion === expectedInsertion && picker.includes(`${CODEX_POWER_265908_SLIDER_INSERTION}${CODEX_POWER_265908_SLIDER_ANCHOR}`)
+      : insertion === '' && !picker.includes('gpt-5.6-sol'));
+}
+
+function codexPower265908PostconditionsHold(text) {
+  const menus = minifiedExactCodeFunctionScopes(text, 'function p3(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  return countMatches(text, 'codexLocalGroupsPower265908PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsPower265908PatchVersion=1') === 0
+    && menu === CODEX_POWER_265908_PATCHED_MENU
+    && codexPower265908NativeSliderConsumerHolds(text, true);
+}
+
+const PROJECT_HISTORY_265908_NATIVE_RECENT = 'async listRecentThreads({originators:e,cursor:t,limit:n,background:r=!1}){let i={limit:n,cursor:t,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,originators:e,sourceKinds:XU,useStateDbOnly:this.params.hostId!==QH},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...a,data:a.data.filter(Uqt)}}';
+const PROJECT_HISTORY_265908_SCOPED_RECENT = 'async listRecentThreads({originators:e,cursor:t,limit:n,background:r=!1,useStateDbOnly:o=this.params.hostId!==QH}){let i={limit:n,cursor:t,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,originators:e,sourceKinds:XU,useStateDbOnly:o},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...a,data:a.data.filter(Uqt)}}';
+
+function patchProjectHistory265908Store(text, context) {
+  const marker = 'codexLocalGroupsProjectHistory265908StorePatchVersion=1';
+  if (text.includes(marker)) {
+    if (!projectHistory265908StorePostconditionsHold(text)) context.errors.push('26.5908 project history store: 补丁标记不完整');
+    return text;
+  }
+  const store = 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return WYt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),useStateDbOnly:this.params.hostId!==QH},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads()';
+  const manager = 'async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads()';
+  const helperAnchor = 'var $Z=t((()=>{}));function BYt';
+  const storeStart = text.indexOf('lXt=class{');
+  const managerStart = text.indexOf('M9t=class extends cJ{');
+  const storeScope = minifiedBlockScope(text, text.indexOf('{', storeStart));
+  const managerScope = minifiedBlockScope(text, text.indexOf('{', managerStart));
+  if (countMatches(text, 'lXt=class{') !== 1 || countMatches(text, 'M9t=class extends cJ{') !== 1
+    || countMatches(storeScope, store) !== 1 || countMatches(managerScope, manager) !== 1
+    || countMatches(storeScope, PROJECT_HISTORY_265908_NATIVE_RECENT) !== 1 || countMatches(text, helperAnchor) !== 1) {
+    context.errors.push('26.5908 project history store: 找不到唯一原生注入点');
+    return text;
+  }
+  const helper = 'var codexLocalGroupsProjectHistory265908StorePatchVersion=1;function codexLocalGroupsProjectHistoryPath265908(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265908(e,t){let n=codexLocalGroupsProjectHistoryPath265908(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265908(e,t){t=codexLocalGroupsProjectHistoryPath265908(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({originators:void 0,cursor:i,limit:100,background:!0,useStateDbOnly:!0}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&YZ(i).updatedAt>YZ(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265908(s.cwd,t)&&n.push(BYt({thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn}))}o!=null&&r.add(o),i=o}while(i!=null);return n}';
+  let next = text.replace(helperAnchor, 'var $Z=t((()=>{}));' + helper + 'function BYt');
+  next = next.replace(store, store.replace('async listArchivedThreads()', 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265908(this,e)}async listArchivedThreads()'));
+  next = next.replace(manager, manager.replace('async listArchivedThreads()', 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}async listArchivedThreads()'));
+  next = next.replace(PROJECT_HISTORY_265908_NATIVE_RECENT, PROJECT_HISTORY_265908_SCOPED_RECENT);
+  if (!projectHistory265908StorePostconditionsHold(next)) context.errors.push('26.5908 project history store: 补丁后置条件不完整');
+  return next;
+}
+
+function projectHistory265908StorePostconditionsHold(text) {
+  const load = minifiedExactFunctionScopes(text, 'async function codexLocalGroupsLoadProjectConversations265908(e,t){');
+  const storeStart = text.indexOf('lXt=class{');
+  const managerStart = text.indexOf('M9t=class extends cJ{');
+  const store = minifiedBlockScope(text, text.indexOf('{', storeStart));
+  const manager = minifiedBlockScope(text, text.indexOf('{', managerStart));
+  return countMatches(text, 'codexLocalGroupsProjectHistory265908StorePatchVersion=1') === 1
+    && countMatches(text, 'lXt=class{') === 1 && countMatches(text, 'M9t=class extends cJ{') === 1
+    && countMatches(store, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265908(this,e)}') === 1
+    && countMatches(manager, 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}') === 1
+    && countMatches(store, PROJECT_HISTORY_265908_SCOPED_RECENT) === 1 && countMatches(text, PROJECT_HISTORY_265908_NATIVE_RECENT) === 0
+    && load.length === 1 && load[0].includes('originators:void 0,cursor:i,limit:100,background:!0,useStateDbOnly:!0')
+    && load[0].includes('o!=null&&r.has(o)') && load[0].includes('codexLocalGroupsProjectHistoryMatch265908(s.cwd,t)')
+    && load[0].includes('n.push(BYt({thread:a,hostId:s.hostId,conversationId:s.conversationId')
+    && countMatches(text, 'function BYt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){') === 1
+    && countMatches(text, 'function Uqt(e){return e.ephemeral!==!0&&e.threadSource!==`ambient_suggestions`}') === 1
+    && !text.includes('Number.MAX_SAFE_INTEGER');
+}
+
+function patchProjectHistory265908Hook(text, context) {
+  const marker = 'codexLocalGroupsProjectHistory265908HookPatchVersion=1';
+  if (text.includes(marker)) {
+    if (!projectHistory265908HookPostconditionsHold(text)) context.errors.push('26.5908 project history hook: 补丁标记不完整');
+    return text;
+  }
+  const original = 'function sEt(){return lEt(`recent-conversations`)}';
+  if (countMatches(text, original) !== 1) {
+    context.errors.push('26.5908 project history hook: 找不到唯一原生注入点');
+    return text;
+  }
+  const helper = 'var codexLocalGroupsProjectHistory265908HookPatchVersion=1;function codexLocalGroupsProjectHistoryHookPath265908(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryHookMatch265908(e,t){let n=codexLocalGroupsProjectHistoryHookPath265908(e);return!!n&&(n===t||n.startsWith(t+`/`))}function codexLocalGroupsProjectHistorySummary265908(e,t){let n=Number(e.createdAt??0)*1e3,r=Number(e.updatedAt??e.createdAt??0)*1e3,i=String(e.name??``).trim()||String(e.preview??``).trim()||null;return{id:String(e.id),sessionId:e.sessionId,hostId:t,turns:[],requests:[],createdAt:Number.isFinite(n)?n:0,updatedAt:Number.isFinite(r)?r:0,recencyAt:Number.isFinite(r)?r:0,title:i,source:e.source,agentNickname:e.agentNickname,threadSource:e.threadSource,historyMode:e.historyMode,parentThreadId:e.parentThreadId??null,mode:e.mode,threadStartKind:e.threadStartKind,modelProvider:e.modelProvider,latestModel:``,latestReasoningEffort:null,previousTurnModel:null,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},hasUnreadTurn:e.hasUnreadTurn??!1,threadRuntimeStatus:e.status,rolloutPath:e.path??``,gitInfo:e.gitInfo,resumeState:`needs_resume`,latestTokenUsageInfo:null,workspaceKind:e.workspaceKind??`project`,cwd:e.cwd}}function codexLocalGroupsMergeProjectConversations265908(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryHookMatch265908(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function sEt(e,t,n){let r=arguments.length>0,i=lEt(`recent-conversations`),a=tA(),o=codexLocalGroupsProjectHistoryHookPath265908(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=S({enabled:s,queryKey:[`codex-local-groups-project-history-265908-v1`,c,o],staleTime:3e4,queryFn:async()=>{let e=a.getForHostId(c);if(e==null)return[];if(typeof e.listProjectConversations===`function`)return e.listProjectConversations(o);if(typeof e.listAllThreads!==`function`)return[];let t=new Map;for(let n of typeof e.getRecentConversations===`function`?e.getRecentConversations():[])t.set(n.id,n);let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!codexLocalGroupsProjectHistoryHookMatch265908(r.cwd,o))continue;let i=String(r.id),a=t.get(i);n.push(a??codexLocalGroupsProjectHistorySummary265908(r,c))}return n}}),u=l.refetch;(0,iA.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=tEt({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?eEt([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265908(l.data,i.data,o)}:{...l,data:[]}:i}';
+  const next = replaceOnce(text, original, helper, context, '26.5908 project history hook');
+  if (!projectHistory265908HookPostconditionsHold(next)) context.errors.push('26.5908 project history hook: 补丁后置条件不完整');
+  return next;
+}
+
+function projectHistory265908HookPostconditionsHold(text) {
+  const hook = minifiedExactCodeFunctionScopes(text, 'function sEt(e,t,n){');
+  return countMatches(text, 'codexLocalGroupsProjectHistory265908HookPatchVersion=1') === 1
+    && countMatches(text, 'function sEt(){return lEt(`recent-conversations`)}') === 0
+    && hook.length === 1
+    && hook[0].includes('i=lEt(`recent-conversations`)')
+    && hook[0].includes('typeof e.listProjectConversations===`function`')
+    && hook[0].includes('typeof e.listAllThreads!==`function`')
+    && hook[0].includes('e.listAllThreads({modelProviders:null})')
+    && hook[0].includes('codexLocalGroupsProjectHistoryHookMatch265908(r.cwd,o)')
+    && hook[0].includes('codexLocalGroupsMergeProjectConversations265908(l.data,i.data,o)')
+    && hook[0].includes('tEt({appServerRegistry:a,onStoreChange:t,subscribeToManager:')
+    && hook[0].includes('eEt([typeof e.addAnyConversationMetaCallback===`function`');
+}
+
+function patchCodexUi265903(text, context) {
+  const marker = 'codexLocalGroupsCodexUi265903PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsCodexUi265903PatchVersion=1';
+  const original = 'a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort';
+  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
+  if (text.includes(marker)) {
+    const next = patchCodexUi265903DropdownTitle(text, context);
+    if (!codexUi265903PostconditionsHold(next)) context.errors.push('Codex UI 26.5903: 补丁标记不完整');
+    return next;
+  }
+  if (text.includes(legacyMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, legacyMarker, marker, context, 'Codex UI 26.5903 marker v2');
+    next = patchCodexUi265903DropdownTitle(next, context);
+    if (!codexUi265903PostconditionsHold(next)) context.errors.push('Codex UI 26.5903: 补丁后置条件不完整');
+    return next;
+  }
+  let next = replaceOnce(text, original, patched, context, 'Codex UI 26.5903 Sol Max Ultra validation');
+  next = replaceOnce(next, 'function t0e({userSavedModelString:', `var ${marker};function t0e({userSavedModelString:`, context, 'Codex UI 26.5903 marker');
+  next = patchCodexUi265903DropdownTitle(next, context);
+  if (!codexUi265903PostconditionsHold(next)) context.errors.push('Codex UI 26.5903: 补丁后置条件不完整');
+  return next;
+}
+
+function patchCodexUi265903DropdownTitle(text, context) {
+  const marker = 'codexLocalGroupsDropdownTitle265903PatchVersion=1';
+  const original = 'function YFt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+  const patched = `var ${marker};function YFt({title:e,titleOverride:t}){if(typeof t===\`string\`&&t.startsWith(\`__codexLocalGroupsTitle265903:\`))return t.slice(\`__codexLocalGroupsTitle265903:\`.length);if(e!=null)return e;let n=t?.trim()??\`\`;return n.length>0?n:null}`;
+  if (text.includes(marker)) return text;
+  return replaceOnce(text, original, patched, context, 'Codex UI 26.5903 dropdown title resolver');
+}
+
+function codexUi265903DropdownTitlePostconditionsHold(text) {
+  const resolver = minifiedFunctionScope(text, 'YFt');
+  const expected = 'function YFt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265903:`))return t.slice(`__codexLocalGroupsTitle265903:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+  return countMatches(text, 'codexLocalGroupsDropdownTitle265903PatchVersion=1') === 1
+    && countMatches(text, 'function YFt({title:e,titleOverride:t}){') === 1
+    && resolver === expected;
+}
+
+function codexUi265903PostconditionsHold(text) {
+  const validation = minifiedExactCodeFunctionScopes(text, 'function t0e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
+  return countMatches(text, 'codexLocalGroupsCodexUi265903PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsCodexUi265903PatchVersion=1') === 0
+    && validation.length === 1
+    && validation[0].includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
+    && text.includes('model_reasoning_effort??null')
+    && text.includes('settings.reasoning_effort??null')
+    && text.includes('setDefaultModelConfig')
+    && text.includes('isBackgroundSubagentsEnabled:l=!0')
+    && text.includes('type:`multi-agent-action`') && text.includes('type:`subagent-activity`')
+    && text.includes('e.type===`subAgentActivity`') && text.includes('e.tool!==`spawnAgent`')
+    && semanticMain265903Holds(text)
+    && codexUi265903DropdownTitlePostconditionsHold(text);
+}
+
+const CODEX_POWER_265903_SLIDER_INSERTION = 'if((U===`gpt-5.6-sol`||U===`gpt-6-sol`||U===`gpt-6-astra`)&&se?.some(e=>e.model===U)&&qe.some(e=>e.model===U)){let e=qe.find(e=>e.model===U),t=e.modelLabel,n=qe.filter(e=>e.model!==U||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===U){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${U}:${e}`,model:U,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});qe=n}';
+const CODEX_POWER_265903_SLIDER_ANCHOR = 'let Je=xD(qe,We==null?void 0:`${We.model}:${We.defaultReasoningEffort}`)';
+const CODEX_POWER_265903_NATIVE_MENU = 'function U4(e,t){let n=e?.find(e=>e.model===t);return n==null?bYe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>fv(e.reasoningEffort))}';
+const CODEX_POWER_265903_PATCHED_MENU = 'function U4(e,t){let n=e?.find(e=>e.model===t),r=n==null?bYe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>fv(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}';
+const CODEX_POWER_265903_NATIVE_FILTER = 'function Flt(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:mg(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}';
+const CODEX_POWER_265903_NATIVE_SLIDER = 'function Alt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){if(r!=null){let a=Nlt(e,{stripGptPrefix:i});for(let o of r.presets){let r=(0,Ilt.default)(Flt(o.filter(({reasoning_effort:e})=>(t||e!==`ultra`)&&(!n||e!==`xhigh`)).flatMap(({model:e,reasoning_effort:t})=>{let n=a.find(n=>n.model===e&&n.reasoningEffort===t);return n==null?[]:[n]}),e,i),({id:e})=>e);if(r.length>=3)return r}}let a=Flt((t?[...Rlt,zlt]:Rlt).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);if(a.length>=3)return a;let o=Flt(Blt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);return o.length>=3?o:[]}';
+
+function patchCodexPower265903(text, context) {
+  const marker = 'codexLocalGroupsPower265903PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsPower265903PatchVersion=1';
+  if (text.includes(marker)) {
+    if (!codexPower265903PostconditionsHold(text)) context.errors.push('Codex power 26.5903: 补丁标记不完整');
+    return text;
+  }
+  if (text.includes(legacyMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, legacyMarker, marker, context, 'Codex power 26.5903 marker v2');
+    if (!codexPower265903PostconditionsHold(next)) context.errors.push('Codex power 26.5903: 补丁后置条件不完整');
+    return next;
+  }
+  if (!codexPower265903NativeContractsHold(text)) {
+    context.errors.push('Codex power 26.5903: 原生消费链不完整');
+    return text;
+  }
+  let next = replaceOnce(text, CODEX_POWER_265903_NATIVE_MENU, CODEX_POWER_265903_PATCHED_MENU, context, 'Codex Reasoning menu 26.5903');
+  next = replaceOnce(next, CODEX_POWER_265903_SLIDER_ANCHOR, `${CODEX_POWER_265903_SLIDER_INSERTION}${CODEX_POWER_265903_SLIDER_ANCHOR}`, context, 'Codex Power slider 26.5903');
+  next = replaceOnce(next, 'function Alt(e,{includeUltraInSlider:', `var ${marker};function Alt(e,{includeUltraInSlider:`, context, 'Codex power 26.5903 marker');
+  if (!codexPower265903PostconditionsHold(next)) context.errors.push('Codex power 26.5903: 补丁后置条件不完整');
+  return next;
+}
+
+function codexPower265903NativeContractsHold(text) {
+  const menus = minifiedExactCodeFunctionScopes(text, 'function U4(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  return menu === CODEX_POWER_265903_NATIVE_MENU && codexPower265903NativeSliderConsumerHolds(text, false);
+}
+
+function codexPower265903NativeSliderConsumerHolds(text, patched) {
+  const sliders = minifiedExactCodeFunctionScopes(text, 'function Alt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){');
+  const filters = minifiedExactCodeFunctionScopes(text, 'function Flt(e,t,n){');
+  const pickers = minifiedExactCodeFunctionScopes(text, 'function S0n(e){');
+  const slider = sliders.length === 1 ? sliders[0] : '';
+  const filter = filters.length === 1 ? filters[0] : '';
+  const picker = pickers.length === 1 ? pickers[0] : '';
+  const insertion = minifiedAnchoredBlock(picker, 'if((U===`gpt-5.6-sol`||U===`gpt-6-sol`||U===`gpt-6-astra`)&&se?.some(e=>e.model===U)&&qe.some(e=>e.model===U)){', 1);
+  const expectedInsertion = minifiedBlockScope(CODEX_POWER_265903_SLIDER_INSERTION, CODEX_POWER_265903_SLIDER_INSERTION.indexOf('{'));
+  return filter === CODEX_POWER_265903_NATIVE_FILTER
+    && slider === CODEX_POWER_265903_NATIVE_SLIDER
+    && picker.includes('Ge=Alt(Le,{includeUltraInSlider:y,sliderModelsConfig:fe,stripGptPrefix:!d})')
+    && picker.includes('powerSelectionsWithXHigh:qe')
+    && countMatches(picker, CODEX_POWER_265903_SLIDER_ANCHOR) === 1
+    && (patched
+      ? insertion === expectedInsertion && picker.includes(`${CODEX_POWER_265903_SLIDER_INSERTION}${CODEX_POWER_265903_SLIDER_ANCHOR}`)
+      : insertion === '' && !picker.includes('gpt-5.6-sol'));
+}
+
+function codexPower265903PostconditionsHold(text) {
+  const menus = minifiedExactCodeFunctionScopes(text, 'function U4(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  return countMatches(text, 'codexLocalGroupsPower265903PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsPower265903PatchVersion=1') === 0
+    && menu === CODEX_POWER_265903_PATCHED_MENU
+    && codexPower265903NativeSliderConsumerHolds(text, true);
+}
+
+const PROJECT_HISTORY_265903_NATIVE_RECENT = 'async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:KR,useStateDbOnly:this.params.hostId!==QL},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(rHt)}}';
+const PROJECT_HISTORY_265903_SCOPED_RECENT = 'async listRecentThreads({cursor:e,limit:t,background:n=!1,useStateDbOnly:a=this.params.hostId!==QL}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:KR,useStateDbOnly:a},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(rHt)}}';
+
+function patchProjectHistory265903Store(text, context) {
+  const marker = 'codexLocalGroupsProjectHistory265903StorePatchVersion=1';
+  if (text.includes(marker)) {
+    if (!projectHistory265903StorePostconditionsHold(text)) context.errors.push('26.5903 project history store: 补丁标记不完整');
+    return text;
+  }
+  const store = 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return nWt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),useStateDbOnly:this.params.hostId!==QL},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads()';
+  const manager = 'async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads()';
+  const helperAnchor = 'var CG=t((()=>{}));function QUt';
+  const storeStart = text.indexOf('pWt=class{');
+  const managerStart = text.indexOf('M2t=class extends SH{');
+  const storeScope = minifiedBlockScope(text, text.indexOf('{', storeStart));
+  const managerScope = minifiedBlockScope(text, text.indexOf('{', managerStart));
+  if (countMatches(text, 'pWt=class{') !== 1 || countMatches(text, 'M2t=class extends SH{') !== 1
+    || countMatches(storeScope, store) !== 1 || countMatches(managerScope, manager) !== 1
+    || countMatches(storeScope, PROJECT_HISTORY_265903_NATIVE_RECENT) !== 1 || countMatches(text, helperAnchor) !== 1) {
+    context.errors.push('26.5903 project history store: 找不到唯一原生注入点');
+    return text;
+  }
+  const helper = 'var codexLocalGroupsProjectHistory265903StorePatchVersion=1;function codexLocalGroupsProjectHistoryPath265903(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265903(e,t){let n=codexLocalGroupsProjectHistoryPath265903(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265903(e,t){t=codexLocalGroupsProjectHistoryPath265903(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({cursor:i,limit:100,background:!0,useStateDbOnly:!0}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&xG(i).updatedAt>xG(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265903(s.cwd,t)&&n.push(QUt({thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn}))}o!=null&&r.add(o),i=o}while(i!=null);return n}';
+  let next = text.replace(helperAnchor, 'var CG=t((()=>{}));' + helper + 'function QUt');
+  next = next.replace(store, store.replace('async listArchivedThreads()', 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265903(this,e)}async listArchivedThreads()'));
+  next = next.replace(manager, manager.replace('async listArchivedThreads()', 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}async listArchivedThreads()'));
+  next = next.replace(PROJECT_HISTORY_265903_NATIVE_RECENT, PROJECT_HISTORY_265903_SCOPED_RECENT);
+  if (!projectHistory265903StorePostconditionsHold(next)) context.errors.push('26.5903 project history store: 补丁后置条件不完整');
+  return next;
+}
+
+function projectHistory265903StorePostconditionsHold(text) {
+  const load = minifiedExactFunctionScopes(text, 'async function codexLocalGroupsLoadProjectConversations265903(e,t){');
+  const storeStart = text.indexOf('pWt=class{');
+  const managerStart = text.indexOf('M2t=class extends SH{');
+  const store = minifiedBlockScope(text, text.indexOf('{', storeStart));
+  const manager = minifiedBlockScope(text, text.indexOf('{', managerStart));
+  return countMatches(text, 'codexLocalGroupsProjectHistory265903StorePatchVersion=1') === 1
+    && countMatches(text, 'pWt=class{') === 1 && countMatches(text, 'M2t=class extends SH{') === 1
+    && countMatches(store, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265903(this,e)}') === 1
+    && countMatches(manager, 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}') === 1
+    && countMatches(store, PROJECT_HISTORY_265903_SCOPED_RECENT) === 1 && countMatches(text, PROJECT_HISTORY_265903_NATIVE_RECENT) === 0
+    && load.length === 1 && load[0].includes('cursor:i,limit:100,background:!0,useStateDbOnly:!0')
+    && load[0].includes('o!=null&&r.has(o)') && load[0].includes('codexLocalGroupsProjectHistoryMatch265903(s.cwd,t)')
+    && load[0].includes('n.push(QUt({thread:a,hostId:s.hostId,conversationId:s.conversationId')
+    && countMatches(text, 'function QUt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){') === 1
+    && countMatches(text, 'function rHt(e){return e.ephemeral!==!0&&e.threadSource!==`ambient_suggestions`}') === 1
+    && !text.includes('Number.MAX_SAFE_INTEGER');
+}
+
+function patchProjectHistory265903Hook(text, context) {
+  const marker = 'codexLocalGroupsProjectHistory265903HookPatchVersion=1';
+  if (text.includes(marker)) {
+    if (!projectHistory265903HookPostconditionsHold(text)) context.errors.push('26.5903 project history hook: 补丁标记不完整');
+    return text;
+  }
+  const original = 'function qct(){return Jct(`recent-conversations`)}';
+  if (countMatches(text, original) !== 1) {
+    context.errors.push('26.5903 project history hook: 找不到唯一原生注入点');
+    return text;
+  }
+  const helper = 'var codexLocalGroupsProjectHistory265903HookPatchVersion=1;function codexLocalGroupsProjectHistoryHookPath265903(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryHookMatch265903(e,t){let n=codexLocalGroupsProjectHistoryHookPath265903(e);return!!n&&(n===t||n.startsWith(t+`/`))}function codexLocalGroupsProjectHistorySummary265903(e,t){let n=Number(e.createdAt??0)*1e3,r=Number(e.updatedAt??e.createdAt??0)*1e3,i=String(e.name??``).trim()||String(e.preview??``).trim()||null;return{id:String(e.id),sessionId:e.sessionId,hostId:t,turns:[],requests:[],createdAt:Number.isFinite(n)?n:0,updatedAt:Number.isFinite(r)?r:0,recencyAt:Number.isFinite(r)?r:0,title:i,source:e.source,agentNickname:e.agentNickname,threadSource:e.threadSource,historyMode:e.historyMode,parentThreadId:e.parentThreadId??null,mode:e.mode,threadStartKind:e.threadStartKind,modelProvider:e.modelProvider,latestModel:``,latestReasoningEffort:null,previousTurnModel:null,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},hasUnreadTurn:e.hasUnreadTurn??!1,threadRuntimeStatus:e.status,rolloutPath:e.path??``,gitInfo:e.gitInfo,resumeState:`needs_resume`,latestTokenUsageInfo:null,workspaceKind:e.workspaceKind??`project`,cwd:e.cwd}}function codexLocalGroupsMergeProjectConversations265903(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryHookMatch265903(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function qct(e,t,n){let r=arguments.length>0,i=Jct(`recent-conversations`),a=QE(),o=codexLocalGroupsProjectHistoryHookPath265903(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=ac({enabled:s,queryKey:[`codex-local-groups-project-history-265903-v1`,c,o],staleTime:3e4,queryFn:async()=>{let e=a.getForHostId(c);if(e==null)return[];if(typeof e.listProjectConversations===`function`)return e.listProjectConversations(o);if(typeof e.listAllThreads!==`function`)return[];let t=new Map;for(let n of typeof e.getRecentConversations===`function`?e.getRecentConversations():[])t.set(n.id,n);let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!codexLocalGroupsProjectHistoryHookMatch265903(r.cwd,o))continue;let i=String(r.id),a=t.get(i);n.push(a??codexLocalGroupsProjectHistorySummary265903(r,c))}return n}}),u=l.refetch;(0,rD.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=Bct({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?zct([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265903(l.data,i.data,o)}:{...l,data:[]}:i}';
+  const next = replaceOnce(text, original, helper, context, '26.5903 project history hook');
+  if (!projectHistory265903HookPostconditionsHold(next)) context.errors.push('26.5903 project history hook: 补丁后置条件不完整');
+  return next;
+}
+
+function projectHistory265903HookPostconditionsHold(text) {
+  const hook = minifiedExactCodeFunctionScopes(text, 'function qct(e,t,n){');
+  return countMatches(text, 'codexLocalGroupsProjectHistory265903HookPatchVersion=1') === 1
+    && countMatches(text, 'function qct(){return Jct(`recent-conversations`)}') === 0
+    && hook.length === 1
+    && hook[0].includes('i=Jct(`recent-conversations`)')
+    && hook[0].includes('typeof e.listProjectConversations===`function`')
+    && hook[0].includes('typeof e.listAllThreads!==`function`')
+    && hook[0].includes('e.listAllThreads({modelProviders:null})')
+    && hook[0].includes('codexLocalGroupsProjectHistoryHookMatch265903(r.cwd,o)')
+    && hook[0].includes('codexLocalGroupsMergeProjectConversations265903(l.data,i.data,o)')
+    && hook[0].includes('Bct({appServerRegistry:a,onStoreChange:t,subscribeToManager:')
+    && hook[0].includes('zct([typeof e.addAnyConversationMetaCallback===`function`');
+}
+
 function patchCodexUi265901(text, context) {
-  const marker = 'codexLocalGroupsCodexUi265901PatchVersion=2';
+  const marker = 'codexLocalGroupsCodexUi265901PatchVersion=3';
+  const previousMarker = 'codexLocalGroupsCodexUi265901PatchVersion=2';
   const legacyMarker = 'codexLocalGroupsCodexUi265901PatchVersion=1';
   const original = 'a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort';
   const legacy = 'a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
-  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
+  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
   if (text.includes(marker)) {
     const next = patchCodexUi265901DropdownTitle(text, context);
     if (!codexUi265901PostconditionsHold(next)) context.errors.push('Codex UI 26.5901: 补丁标记不完整');
+    return next;
+  }
+  if (text.includes(previousMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, previousMarker, marker, context, 'Codex UI 26.5901 marker v3');
+    next = patchCodexUi265901DropdownTitle(next, context);
+    if (!codexUi265901PostconditionsHold(next)) context.errors.push('Codex UI 26.5901: 补丁后置条件不完整');
     return next;
   }
   if (text.includes(legacyMarker)) {
@@ -2531,6 +3383,7 @@ function codexUi265901V1PostconditionsHold(text) {
   const legacy = 'i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`)';
   return countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=1') === 1
     && countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=2') === 0
+    && countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=3') === 0
     && validation.length === 1 && validation[0].includes(legacy)
     && semanticMain265901Holds(text);
 }
@@ -2559,9 +3412,10 @@ function codexUi265901PostconditionsHold(text) {
   const aggregator = minifiedFunctionScope(text, 'Qkn');
   const stores = minifiedExactFunctionScopes(text, 'wAn=xr(Q,(e,{get:t})=>{');
   const exports = text.slice(text.lastIndexOf('export{'));
-  return countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=2') === 1
+  return countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=3') === 1
+    && countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=2') === 0
     && countMatches(text, 'codexLocalGroupsCodexUi265901PatchVersion=1') === 0
-    && validation.includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
+    && validation.includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
     && read.includes('model_reasoning_effort??null')
     && write.includes('settings.reasoning_effort??null') && write.includes('model_reasoning_effort:t')
     && write.includes('setDefaultModelConfig(e,t,T.profile)')
@@ -2817,17 +3671,24 @@ function codexPower265825PostconditionsHold(text, build) {
     && !text.includes(`${v.filterFn}([...${v.powersArray},${v.ultraObject}].filter`);
 }
 
-const CODEX_POWER_265901_SLIDER_INSERTION = 'if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){let e=He.find(e=>e.model===U),t=e.modelLabel,n=He.filter(e=>e.model!==U||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===U){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${U}:${e}`,model:U,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});He=n}';
+const CODEX_POWER_265901_SLIDER_INSERTION = 'if((U===`gpt-5.6-sol`||U===`gpt-6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){let e=He.find(e=>e.model===U),t=e.modelLabel,n=He.filter(e=>e.model!==U||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===U){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${U}:${e}`,model:U,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});He=n}';
 
 function patchCodexPower265901(text, context) {
-  const marker = 'codexLocalGroupsPower265901PatchVersion=2';
+  const marker = 'codexLocalGroupsPower265901PatchVersion=3';
+  const previousMarker = 'codexLocalGroupsPower265901PatchVersion=2';
   const legacyMarker = 'codexLocalGroupsPower265901PatchVersion=1';
   const original = 'function i3(e,t){let n=e?.find(e=>e.model===t);return n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort))}';
   const legacy = 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}';
-  const patched = 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}';
+  const patched = 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}';
   if (text.includes(marker)) {
     if (!codexPower265901PostconditionsHold(text)) context.errors.push('Codex power 26.5901: 补丁标记不完整');
     return text;
+  }
+  if (text.includes(previousMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, previousMarker, marker, context, 'Codex power 26.5901 marker v3');
+    if (!codexPower265901PostconditionsHold(next)) context.errors.push('Codex power 26.5901: 补丁后置条件不完整');
+    return next;
   }
   if (text.includes(legacyMarker)) {
     if (!codexPower265901V1PostconditionsHold(text)) {
@@ -2860,6 +3721,7 @@ function codexPower265901V1PostconditionsHold(text) {
   const menu = menus.length === 1 ? menus[0] : '';
   return countMatches(text, 'codexLocalGroupsPower265901PatchVersion=1') === 1
     && countMatches(text, 'codexLocalGroupsPower265901PatchVersion=2') === 0
+    && countMatches(text, 'codexLocalGroupsPower265901PatchVersion=3') === 0
     && menu.includes('return t===`gpt-5.6-sol`&&')
     && codexPower265901NativeSliderConsumerHolds(text, false);
 }
@@ -2884,7 +3746,7 @@ function codexPower265901NativeSliderConsumerHolds(text, patched) {
   const finalReturn = minifiedFinalReturn(picker);
   const powerInputAt = picker.indexOf('Ge=pIn({');
   const powerOutputAt = picker.indexOf('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{');
-  const insertion = minifiedAnchoredBlock(picker, 'if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){', 1);
+  const insertion = minifiedAnchoredBlock(picker, 'if((U===`gpt-5.6-sol`||U===`gpt-6-sol`||U===`gpt-6-astra`)&&oe?.some(e=>e.model===U)&&He.some(e=>e.model===U)){', 1);
   const expectedInsertion = minifiedBlockScope(CODEX_POWER_265901_SLIDER_INSERTION, CODEX_POWER_265901_SLIDER_INSERTION.indexOf('{'));
   return filter === 'function $Nn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Um(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}'
     && slider.includes('$Nn((t?[...nPn,rPn]:nPn).filter') && !slider.includes('gpt-5.6-sol')
@@ -2906,8 +3768,9 @@ function codexPower265901PostconditionsHold(text) {
   const hook = minifiedFunctionScope(text, 'I7n');
   const composer = minifiedFunctionScope(text, 'Wtr');
   const panel = minifiedFunctionScope(text, 'rWn');
-  const targetMenu = 'return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r';
-  return countMatches(text, 'codexLocalGroupsPower265901PatchVersion=2') === 1
+  const targetMenu = 'return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r';
+  return countMatches(text, 'codexLocalGroupsPower265901PatchVersion=3') === 1
+    && countMatches(text, 'codexLocalGroupsPower265901PatchVersion=2') === 0
     && countMatches(text, 'codexLocalGroupsPower265901PatchVersion=1') === 0
     && menu.includes(targetMenu) && codexPower265901NativeSliderConsumerHolds(text, true)
     && countMatches(text, 'Po as Kd') === 1
@@ -3530,6 +4393,21 @@ function findExecutionTargetExports(text) {
   const hooks = new Set();
   const pattern = /function ([A-Za-z_$][\w$]*)\([A-Za-z_$][\w$]*\)\{(?:(?!function )[\s\S]){0,1800}?isActiveWorkspaceRootLoading:/g;
   for (const hook of text.matchAll(pattern)) hooks.add(hook[1]);
+  if (hooks.size === 0) {
+    const thin = /function ([A-Za-z_$][\w$]*)\(([A-Za-z_$][\w$]*)\)\{return [A-Za-z_$][\w$]*\(([A-Za-z_$][\w$]*),\2===void 0\?null:\2\)\}/g;
+    for (const match of text.matchAll(thin)) {
+      const atom = match[3];
+      const needle = atom + '=';
+      let start = 0;
+      let found = -1;
+      while ((start = text.indexOf(needle, start)) >= 0) {
+        const prev = start === 0 ? '' : text[start - 1];
+        if (!/[A-Za-z0-9_$]/.test(prev)) { found = start; break; }
+        start += needle.length;
+      }
+      if (found >= 0 && text.slice(found, found + 2000).includes('isActiveWorkspaceRootLoading:')) hooks.add(match[1]);
+    }
+  }
   if (hooks.size === 0) return [];
   const exportStart = text.indexOf('export{');
   if (exportStart < 0) return [];
@@ -4579,6 +5457,11 @@ function countMatches(text, value) {
   return value ? text.split(value).length - 1 : 0;
 }
 
+function widenMaxUltraModelGuard(text) {
+  return text.replace(/===`gpt-5\.6-sol`\|\|([A-Za-z0-9_?.]+===)`gpt-6-astra`/g, '===`gpt-5.6-sol`||$1`gpt-6-sol`||$1`gpt-6-astra`');
+}
+
+
 function countRegexMatches(text, regex) {
   const flags = regex.flags.includes('g') ? regex.flags : `${regex.flags}g`;
   const matcher = new RegExp(regex.source, flags);
@@ -4753,5 +5636,394 @@ function headerHelper(metadata, messenger, kindFnName) {
   const metadataRow = metadataRowSnippet(messenger);
   return `function ${fnName}(e){return e.kind===\`remote\`}var codexLocalGroupsInitialMeta=${metadataLiteral(metadata)};var codexLocalGroupsHeaderPatchVersion=39;var codexLocalGroupsMessenger=${messenger};${metadataMergeSnippet()}function codexLocalGroupsReadMeta(){let e=codexLocalGroupsInitialMeta;try{let t=JSON.parse(localStorage.getItem(\`codex-local-groups-meta-v1\`)??\`null\`);t&&typeof t==\`object\`&&!Array.isArray(t)&&(e=codexLocalGroupsMergeMeta(e,t))}catch{}return e&&typeof e==\`object\`?e:{version:1,conversations:{}}}function codexLocalGroupsStoreMeta(e,t){try{e.updatedAtMs=Date.now(),localStorage.setItem(\`codex-local-groups-meta-v1\`,JSON.stringify(e)),t||window.dispatchEvent(new Event(\`codex-local-groups-refresh\`))}catch{}}function codexLocalGroupsStoreCurrentRoot(e){try{e&&localStorage.setItem(\`codex-local-groups-current-root-v1\`,e)}catch{}}function codexLocalGroupsConversationProjectRoot(e,t){let n=codexRecentTaskNormalizePath(t);if(n)return n;let r=codexLocalGroupsReadMeta().conversations?.[String(e)]?.projectRoot;return codexRecentTaskNormalizePath(r)}function codexLocalGroupsProjectRoot(e){return e.kind===\`local\`?codexLocalGroupsConversationProjectRoot(e.conversation.id,e.conversation.cwd):e.kind===\`pending-worktree\`?e.pendingWorktree.sourceWorkspaceRoot??e.pendingWorktree.worktreeWorkspaceRoot??e.pendingWorktree.worktreeGitRoot:\`\`}function codexLocalGroupsProjectLabel(e){let t=codexLocalGroupsProjectRoot(e);return e.kind===\`remote\`?e.task.task_status_display?.environment_label?.trim()||\`Cloud\`:codexRecentTaskBasename(t)||\`No project\`}function codexLocalGroupsProjectKey(e){let t=codexRecentTaskNormalizePath(codexLocalGroupsProjectRoot(e));return t||\`${'${e.kind}'}:${'${codexLocalGroupsProjectLabel(e)}'}\`}function codexLocalGroupsConversationId(e){return e.kind===\`local\`?e.conversation.id:e.kind===\`remote\`?e.task.id:e.pendingWorktree.id}function codexLocalGroupsLocalTitle(e){if(e.kind!==\`local\`)return null;let t=codexLocalGroupsReadMeta().conversations?.[String(e.conversation.id)]?.title;return typeof t===\`string\`&&t.trim()?t.trim():null}function codexLocalGroupsDecoratedItem(e){let t=codexLocalGroupsLocalTitle(e);return t?{...e,conversation:{...e.conversation,title:t}}:e}function codexLocalGroupsProjectMatches(e,t){let n=codexRecentTaskNormalizePath(e),r=codexRecentTaskNormalizePath(t);return!!n&&!!r&&(n===r||n.startsWith(r+\`/\`)||r.startsWith(n+\`/\`))}function codexLocalGroupsUuidTime(e){let t=String(e??\`\`).replace(/-/g,\`\`).slice(0,12),n=parseInt(t,16);return Number.isFinite(n)&&n>0?n:0}function codexLocalGroupsItemCreatedAt(e){if(e.kind!==\`local\`)return 0;let t=Number(e.conversation.createdAt??0);if(Number.isFinite(t)&&t>0)return t<1e12?t*1e3:t;return codexLocalGroupsUuidTime(e.conversation.id)}function codexLocalGroupsCanUsePendingGroup(e,t){let n=Number(t.startedAtMs);if(!Number.isFinite(n)||e.kind!==\`local\`)return!1;let r=Number(codexLocalGroupsItemCreatedAt(e));return Number.isFinite(r)&&r>=n-30000&&r<=n+600000&&Date.now()-n<600000}function codexLocalGroupsNormalizeGroupName(e){let t=String(e??\`\`);try{t=t.normalize(\`NFC\`)}catch{}return t.replace(/[\\s\\u3000]+/g,\` \`).trim()}function codexLocalGroupsArchivedGroupKey(e,t){return JSON.stringify([codexRecentTaskNormalizePath(e),codexLocalGroupsNormalizeGroupName(t)])}function codexLocalGroupsGroupArchived(e,t,n){return!!n.archivedGroups?.[codexLocalGroupsArchivedGroupKey(e,t)]}function codexLocalGroupsGroupLabel(e){if(e.kind!==\`local\`)return\`未分组\`;let t=codexLocalGroupsReadMeta(),n=codexLocalGroupsConversationId(e),r=codexLocalGroupsProjectRoot(e),i=t.conversations?.[String(n)];if(i?.group){let a=codexLocalGroupsNormalizeGroupName(i.group);if(a&&!codexLocalGroupsGroupArchived(r,a,t))return a}let a=t.pendingGroup,o=codexLocalGroupsNormalizeGroupName(a?.group);let s=codexRecentTaskNormalizePath(a?.projectRoot);if(o&&!codexLocalGroupsGroupArchived(s,o,t)&&codexLocalGroupsCanUsePendingGroup(e,a)&&(codexLocalGroupsProjectMatches(r,s)||!r&&s)){codexLocalGroupsSaveConversationGroup(n,o,r||s,t);return o}return\`未分组\`}function codexLocalGroupsSaveConversationGroup(e,t,n,r){t=codexLocalGroupsNormalizeGroupName(t);if(!t)return;r.conversations||(r.conversations={}),r.conversations[String(e)]={...(r.conversations[String(e)]??{}),group:t,projectRoot:n,updatedAtMs:Date.now()},delete r.pendingGroup,codexLocalGroupsStoreMeta(r,!0);try{codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`saveConversationMeta\`,conversationId:String(e),group:t,projectRoot:n});codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`resetPendingGroup\`})}catch{}}function codexLocalGroupsStartConversationInGroup(e,t){t=codexLocalGroupsNormalizeGroupName(t);if(!t)return;let n=codexLocalGroupsReadMeta();n.pendingGroup={projectRoot:e,group:t,startedAtMs:Date.now()},codexLocalGroupsStoreMeta(n);try{codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`setPendingGroup\`,projectRoot:e,group:t,startedAtMs:n.pendingGroup.startedAtMs}),codexLocalGroupsMessenger.dispatchHostMessage({type:\`new-chat\`})}catch{}}function codexLocalGroupsSaveConversationMeta(e,t,n,r){let i=codexLocalGroupsReadMeta();i.conversations||(i.conversations={});let a=i.conversations[String(e)]??{};t!=null&&(t.trim()?a.title=t.trim():delete a.title),n!=null&&(n=codexLocalGroupsNormalizeGroupName(n),n?a.group=n:delete a.group),r&&r.trim()&&(a.projectRoot=r.trim()),a.updatedAtMs=Date.now(),i.conversations[String(e)]=a,codexLocalGroupsStoreMeta(i);try{codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`saveConversationMeta\`,conversationId:String(e),title:a.title??\`\`,group:a.group??\`\`,projectRoot:a.projectRoot??\`\`})}catch{}}function codexLocalGroupsArchiveConversation(e){let t=String(e??\`\`);if(!t)return;let n=codexLocalGroupsReadMeta();n.archivedConversations||(n.archivedConversations={}),n.archivedConversations[t]={archivedAtMs:Date.now()},n.conversations&&delete n.conversations[t],codexLocalGroupsStoreMeta(n);try{codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`archiveConversationMeta\`,conversationId:t})}catch{}}function codexLocalGroupsSetBusy(e,t){try{let n=e.currentTarget,r=String(n.textContent||\`\`);n.textContent=t,setTimeout(()=>{n.textContent===t&&(n.textContent=r)},1200)}catch{}}function codexLocalGroupsPromptTitle(e,t,n){try{codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`promptConversationTitle\`,conversationId:String(e),title:t??\`\`,projectRoot:n??\`\`})}catch{}}function codexLocalGroupsPromptGroup(e,t){try{codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`promptConversationGroup\`,conversationId:String(e),projectRoot:t??\`\`})}catch{}}function codexLocalGroupsPromptNewGroup(e){try{codexLocalGroupsMessenger.dispatchMessage(\`codex-local-groups\`,{action:\`promptNewGroup\`,projectRoot:e})}catch{}}${webviewMetadataSync(messenger)}function codexLocalGroupsGroupKey(e,t){return codexRecentTaskNormalizePath(e)+\`::\`+String(t??\`\`)}function codexLocalGroupsReadJsonState(e){try{let t=JSON.parse(localStorage.getItem(e)??\`{}\`);return t&&typeof t===\`object\`&&!Array.isArray(t)?t:{}}catch{return{}}}function codexLocalGroupsWriteJsonState(e,t){try{localStorage.setItem(e,JSON.stringify(t)),window.dispatchEvent(new Event(\`codex-local-groups-refresh\`))}catch{}}function codexLocalGroupsItemIsActive(e,t){return e.kind===\`local\`&&t===e.conversation.id}function codexLocalGroupsGroupHasActive(e,t){return e.items.some(e=>codexLocalGroupsItemIsActive(e,t))}function codexLocalGroupsGroupExpanded(e,t,n,r){if(codexLocalGroupsGroupHasActive(n,r))return!0;let i=codexLocalGroupsReadJsonState(\`codex-local-groups-collapsed-v1\`),a=codexLocalGroupsGroupKey(e,t);return Object.prototype.hasOwnProperty.call(i,a)?!i[a]:!1}function codexLocalGroupsToggleGroup(e,t,n){let r=codexLocalGroupsReadJsonState(\`codex-local-groups-collapsed-v1\`);r[codexLocalGroupsGroupKey(e,t)]=n,codexLocalGroupsWriteJsonState(\`codex-local-groups-collapsed-v1\`,r)}function codexLocalGroupsGroupShowAll(e,t){let n=codexLocalGroupsReadJsonState(\`codex-local-groups-expanded-all-v1\`);return n[codexLocalGroupsGroupKey(e,t)]===!0}function codexLocalGroupsSetGroupShowAll(e,t,n){let r=codexLocalGroupsReadJsonState(\`codex-local-groups-expanded-all-v1\`);r[codexLocalGroupsGroupKey(e,t)]=n,codexLocalGroupsWriteJsonState(\`codex-local-groups-expanded-all-v1\`,r)}function codexLocalGroupsVisibleItems(e,t,n,r){if(codexLocalGroupsGroupShowAll(t,n))return e;let i=e.slice(0,5),a=e.find(e=>codexLocalGroupsItemIsActive(e,r));return a&&!i.includes(a)&&i.push(a),i}function codexLocalGroupsMetadataItems(e){let t=codexLocalGroupsReadMeta().conversations??{},n=new Set(e.filter(e=>e?.kind===\`local\`).map(e=>String(e.conversation?.id??\`\`))),r=e.slice();for(let[i,a]of Object.entries(t)){if(n.has(String(i))||codexLocalGroupsReadMeta().archivedConversations?.[String(i)])continue;let o=codexRecentTaskNormalizePath(a?.projectRoot);if(!o)continue;let s=typeof a.title===\`string\`&&a.title.trim()?a.title.trim():String(i),d=Number(a.updatedAtMs??0);r.push({kind:\`local\`,key:String(i),codexLocalGroupsMetadataOnly:!0,conversation:{id:String(i),title:s,cwd:o,createdAt:d,updatedAt:d}})}return r}${metadataRow}function codexRecentTaskProjectRows(e,t,n,codexLocalGroupsRow,codexLocalGroupsArchiveStart){let r=[],i=new Map;for(let a of e){let o=codexLocalGroupsProjectKey(a),s=codexLocalGroupsProjectLabel(a),d=codexRecentTaskNormalizePath(codexLocalGroupsProjectRoot(a)),c=i.get(o);c||(c={label:s,projectRoot:d,groups:[],groupMap:new Map},i.set(o,c),r.push(c));let l=codexLocalGroupsGroupLabel(a),u=c.groupMap.get(l);u||(u={label:l,items:[]},c.groupMap.set(l,u),c.groups.push(u)),u.items.push(a)}let m=codexLocalGroupsReadMeta(),f=m.pendingGroup;if(f?.group&&f?.projectRoot)for(let e of r)codexLocalGroupsProjectMatches(e.projectRoot,f.projectRoot)&&!codexLocalGroupsGroupArchived(e.projectRoot,f.group,m)&&!e.groupMap.has(f.group)&&(e.groupMap.set(f.group,{label:f.group,items:[]}),e.groups.push(e.groupMap.get(f.group)));for(let e of r)e.groups.sort((e,t)=>e.label===\`未分组\`?1:t.label===\`未分组\`?-1:e.label.localeCompare(t.label));return r.flatMap((e,r)=>[(0,Q.jsx)(\`div\`,{className:\`px-[var(--padding-row-x)] pt-2 pb-1 text-xs font-semibold text-token-foreground\`,children:e.label},\`project-\`+r+\`-\`+e.label),e.projectRoot?(0,Q.jsx)(\`button\`,{type:\`button\`,className:\`mx-[var(--padding-row-x)] mb-1 rounded-md border border-token-border-light px-3 py-1.5 text-left text-xs font-medium text-token-foreground hover:bg-token-list-hover-background\`,title:\`新建分组并开始会话\`,onClick:t=>{t.preventDefault(),t.stopPropagation(),codexLocalGroupsPromptNewGroup(e.projectRoot)},children:\`+ 新建分组并开始会话\`},\`project-new-group-\`+r+\`-\`+e.label):null,...e.groups.flatMap((i,a)=>{let s=codexLocalGroupsGroupExpanded(e.projectRoot,i.label,i,t),d=codexLocalGroupsGroupShowAll(e.projectRoot,i.label),u=s?codexLocalGroupsVisibleItems(i.items,e.projectRoot,i.label,t):[],c=i.items.length-u.length,l=i.items.length>5,h=d?l:c>0;return[(0,Q.jsxs)(\`div\`,{className:\`mx-[var(--padding-row-x)] mt-2 mb-1 flex items-center justify-between gap-2 rounded-md border-l-4 border-token-border-light bg-token-list-hover-background px-3 py-1.5 text-sm font-semibold\`,style:{borderLeftColor:i.label===\`未分组\`?\`rgba(148,163,184,.65)\`:\`rgba(96,165,250,.95)\`,background:i.label===\`未分组\`?\`rgba(148,163,184,.08)\`:\`rgba(96,165,250,.12)\`,color:i.label===\`未分组\`?\`#9ca3af\`:\`#93c5fd\`},role:\`button\`,tabIndex:0,onClick:t=>{t.preventDefault(),t.stopPropagation(),codexLocalGroupsToggleGroup(e.projectRoot,i.label,s)},onKeyDown:t=>{(t.key===\`Enter\`||t.key===\` \`)&&(t.preventDefault(),t.stopPropagation(),codexLocalGroupsToggleGroup(e.projectRoot,i.label,s))},children:[(0,Q.jsx)(\`button\`,{type:\`button\`,className:\`min-w-0 flex-1 truncate text-left\`,title:s?\`折叠分组\`:\`展开分组\`,"aria-expanded":s,onClick:t=>{t.preventDefault(),t.stopPropagation(),codexLocalGroupsToggleGroup(e.projectRoot,i.label,s)},children:(s?\`▾\`:\`▸\`)+\` \`+i.label}),(0,Q.jsx)(\`span\`,{className:\`shrink-0 rounded-full border border-token-border-light px-2 py-0.5 text-xs\`,children:i.items.length}),e.projectRoot?(0,Q.jsx)(\`button\`,{type:\`button\`,className:\`shrink-0 rounded-md border border-token-border-light px-2.5 py-1 text-xs font-medium text-token-foreground hover:bg-token-list-hover-background\`,title:\`在此分组新建会话\`,onClick:t=>{t.preventDefault(),t.stopPropagation(),codexLocalGroupsStartConversationInGroup(e.projectRoot,i.label)},children:\`+ 在此分组新建会话\`}):null]},\`group-\`+r+\`-\`+a+\`-\`+i.label),...(s?u.map(e=>{if(e.codexLocalGroupsMetadataOnly)return codexLocalGroupsMetadataRow(e,t,n);let o=codexLocalGroupsDecoratedItem(e),p=(0,Q.jsx)(codexLocalGroupsRow,{item:o,isActive:o.kind===\`local\`&&t===o.conversation.id,onClose:n,onActiveArchiveStart:codexLocalGroupsArchiveStart},o.key);return o.kind!==\`local\`?p:(0,Q.jsxs)(\`div\`,{className:\`codex-local-groups-conversation-row relative\`,style:{paddingRight:\`240px\`},children:[p,(0,Q.jsxs)(\`div\`,{className:\`codex-local-groups-inline-actions absolute top-1 z-20 flex shrink-0 gap-1 text-xs text-token-input-placeholder-foreground\`,style:{right:\`var(--padding-row-x)\`},children:[(0,Q.jsx)(\`button\`,{type:\`button\`,className:\`rounded px-2 py-0.5 hover:bg-token-list-hover-background hover:text-token-foreground\`,title:\`设置本地标题\`,onClick:t=>{t.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,\`打开中…\`),codexLocalGroupsPromptTitle(o.conversation.id,codexLocalGroupsLocalTitle(o)??o.conversation.title??\`\`,codexLocalGroupsProjectRoot(o)??\`\`)},children:\`设置标题\`}),(0,Q.jsx)(\`button\`,{type:\`button\`,className:\`rounded px-2 py-0.5 hover:bg-token-list-hover-background hover:text-token-foreground\`,title:\`设置需求分组\`,onClick:t=>{t.preventDefault(),t.stopPropagation(),codexLocalGroupsSetBusy(t,\`打开中…\`),codexLocalGroupsPromptGroup(o.conversation.id,codexLocalGroupsProjectRoot(o)??\`\`)},children:\`设置分组\`})]})]},\`conversation-actions-\`+o.key)}):[]),s&&h?(0,Q.jsx)(\`button\`,{type:\`button\`,className:\`mx-[var(--padding-row-x)] mb-1 rounded-md px-3 py-1 text-left text-xs text-token-input-placeholder-foreground hover:bg-token-list-hover-background hover:text-token-foreground\`,onClick:t=>{t.preventDefault(),t.stopPropagation(),codexLocalGroupsSetGroupShowAll(e.projectRoot,i.label,!d)},children:d?\`收起到最近 5 条\`:\`还有 \`+c+\` 条，展开全部\`},\`group-more-\`+r+\`-\`+a+\`-\`+i.label):null].filter(Boolean)})])}function codexRecentTaskProjectLabel(e){return codexLocalGroupsProjectLabel(e)}function codexRecentTaskFilter(e,t){e=codexLocalGroupsMetadataItems(e);let n=codexRecentTaskNormalizePath(t);codexLocalGroupsStoreCurrentRoot(n);if(!n)return e;return e.filter(e=>{let t=codexLocalGroupsProjectRoot(e),r=codexRecentTaskNormalizePath(t);return r===n||r.startsWith(n+\`/\`)})}function codexRecentConversationFilter(e,t){let n=codexRecentTaskNormalizePath(t);codexLocalGroupsStoreCurrentRoot(n);if(!n)return e;return e.filter(e=>{let t=codexLocalGroupsConversationProjectRoot(e.id,e.cwd);return t===n||t.startsWith(n+\`/\`)})}function codexRecentTaskNormalizePath(e){if(typeof e!==\`string\`)return\`\`;return e.replace(/\\\\/g,\`/\`).replace(/\\/+$/,\`\`)}function codexRecentTaskBasename(e){let t=codexRecentTaskNormalizePath(e);if(!t)return\`\`;let n=t.split(\`/\`).filter(Boolean);return n[n.length-1]??\`\`}function codexRecentTaskDateLabel(e){if(!Number.isFinite(e.getTime()))return\`\`;let t=new Date,n=String(e.getHours()).padStart(2,\`0\`),r=String(e.getMinutes()).padStart(2,\`0\`);if(e.getFullYear()===t.getFullYear()&&e.getMonth()===t.getMonth()&&e.getDate()===t.getDate())return\`${'${n}'}:${'${r}'}\`;let i=String(e.getMonth()+1).padStart(2,\`0\`),a=String(e.getDate()).padStart(2,\`0\`);return\`${'${e.getFullYear()}'}-${'${i}'}-${'${a}'} ${'${n}'}:${'${r}'}\`}`;
 }
+
+function extensionMetadata265917PostconditionsHold(text, context) {
+  const parser = host265917(context)?.parser;
+  if (!parser) return false;
+  const conversation = minifiedFunctionScope(text, 'codexLocalGroupsPromptConversation');
+  const groupSave = minifiedFunctionScope(text, 'codexLocalGroupsSavePromptGroup');
+  const newGroup = minifiedFunctionScope(text, 'codexLocalGroupsPromptNewGroup');
+  const message = minifiedFunctionScope(text, 'codexLocalGroupsHandleWebviewMessage');
+  const conversationDirect = minifiedCodeAtDepth(conversation, 1);
+  const messageDirect = minifiedCodeAtDepth(minifiedAnchoredBlock(message, 'try{', 1), 1);
+  const rpcAnchor = 'onDidReceiveMessage(n=>{';
+  const rpc = minifiedBlockScope(text, text.indexOf(rpcAnchor) + rpcAnchor.length - 1);
+  const webviewAnchor = 'onDidReceiveMessage(u=>{';
+  const webview = minifiedBlockScope(text, text.indexOf(webviewAnchor) + webviewAnchor.length - 1);
+  return conversationDirect.includes('e.action==="promptConversationTitle"')
+    && minifiedCodeAtDepth(minifiedAnchoredBlock(conversation, 'if(!o){', 1), 1).includes('codexLocalGroupsPromptGroupPick(r,')
+    && minifiedCodeAtDepth(minifiedNestedBlock(conversation, [['codexLocalGroupsInputBox("设置本地标题",i,(i,a)=>{', 1], ['try{', 1], ['t?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:s')
+    && minifiedCodeAtDepth(minifiedNestedBlock(groupSave, [['try{', 1], ['n?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:i')
+    && minifiedCodeAtDepth(minifiedNestedBlock(newGroup, [['codexLocalGroupsInputBox("新建需求分组","",(n,o)=>{', 1], ['try{', 1], ['t?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:s')
+    && messageDirect.includes('e.action==="promptConversationTitle"||e.action==="promptConversationGroup"')
+    && messageDirect.includes('e.action==="promptNewGroup"')
+    && messageDirect.includes('e.action==="setPendingGroup"||e.action==="newConversationInGroup"')
+    && minifiedCodeAtDepth(minifiedNestedBlock(message, [['try{', 1], ['if(e.action==="getMetadata"){', 1], ['try{', 1], ['t?.postMessage?.({', 1]]), 1).includes('action:"metadataSaved",metadata:r')
+    && minifiedCodeAtDepth(rpc, 1).includes(`if(codexLocalGroupsHandleWebviewMessage(n))return;let o=${parser}(n)`)
+    && minifiedCodeAtDepth(webview, 1).includes('if(codexLocalGroupsHandleWebviewMessage(u,e))return;this.handleMessage(e,u)');
+}
+
+function extensionHost265917PostconditionsHold(text, context) {
+  const aliases = host265917(context);
+  if (!aliases) return false;
+  const watchdogAnchor = `var ${aliases.watchdog}=class{`;
+  const hostAnchor = `${aliases.host}=class t{`;
+  const watchdogIndex = text.indexOf(watchdogAnchor);
+  const hostIndex = text.indexOf(hostAnchor);
+  const watchdogBody = minifiedBlockScope(text, watchdogIndex + watchdogAnchor.length - 1);
+  const hostBody = minifiedBlockScope(text, hostIndex + hostAnchor.length - 1);
+  const watchdog = watchdogBody ? watchdogAnchor + watchdogBody.slice(1) : '';
+  const host = hostBody ? hostAnchor + hostBody.slice(1) : '';
+  const ready = minifiedExactCodeFunctionScopes(watchdog, 'handleStartupPhase(e){', 1);
+  const start = minifiedExactCodeFunctionScopes(watchdog, 'start(){', 1);
+  const init = minifiedExactCodeFunctionScopes(host, 'async initializeWebview(e,r,n,o){', 1)
+    .filter((scope) => minifiedCodeIncludes(scope, `let s=new ${aliases.watchdog}(`) && minifiedCodeIncludes(scope, 'registerClientCoordinationForWebview(e,n,s)'));
+  const session = minifiedExactCodeFunctionScopes(host, 'createClientCoordinationSession(e,r,n){', 1)
+    .filter((scope) => minifiedCodeIncludes(scope, 'registerAppHostSessionForWebview(e,r,o,n)'));
+  const appHost = minifiedExactCodeFunctionScopes(host, 'registerAppHostSessionForWebview(e,r,n,o){', 1)
+    .filter((scope) => minifiedCodeIncludes(minifiedAnchoredBlock(scope, `new ${aliases.appHost}({`, 2), 'startup:{reach:a=>o.handleStartupPhase(a)}'));
+  return countMatches(text, watchdogAnchor) === 1 && countMatches(text, hostAnchor) === 1
+    && text.includes(`${watchdog};var ${aliases.childProcess}=require("node:child_process")`)
+    && start.length === 1 && start[0].includes('timeoutMs:12e4})},12e4)')
+    && ready.length === 1 && ready[0] === 'handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}'
+    && init.length === 1 && session.length === 1 && appHost.length === 1;
+}
+
+const HEADER_265917_VARIANT = {
+  rows: 'F.map(e=>(0,Z.jsx)(jn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&b===e.conversation.id,onClose:o,onActiveArchiveStart:p},e.key))',
+  rowsCall: 'codexRecentTaskProjectRows(F,b,o,jn,p)',
+  historyParent: 'c=v(),{authMethod:u}=ie(),d=l(),f=n(Rn),{data:p}=I(),m=ct(),',
+  historyParentScoped: 'c=v(),codexRecentHistoryTarget=codexUseExecutionTarget(),codexRecentHistoryRoot=codexRecentHistoryTarget.activeWorkspaceRoot??null,codexRecentHistoryRootReady=!codexRecentHistoryTarget.isActiveWorkspaceRootLoading,{authMethod:u}=ie(),d=l(),f=n(Rn),{data:p}=I(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady),m=ct(),',
+  execTarget: 'd=i(Qe),f=v(),p=Je(),{authMethod:m}=ie(),',
+  execTargetScoped: 'd=i(Qe),f=v(),p=Je(),codexRecentTaskTarget=codexUseExecutionTarget(),codexRecentTaskCurrentRoot=codexRecentTaskTarget.activeWorkspaceRoot??null,codexRecentTaskRootReady=!codexRecentTaskTarget.isActiveWorkspaceRootLoading,{authMethod:m}=ie(),',
+  projectFilter: 'let E=a.filter(T),D=_n(r.data,a,ee),',
+  projectFilterScoped: 'let E=codexRecentTaskRootReady?codexRecentConversationFilter(a.filter(T),codexRecentTaskCurrentRoot):[],D=codexRecentTaskRootReady?codexRecentTaskFilter(_n(r.data,a,ee),codexRecentTaskCurrentRoot):[],',
+  rowOriginal: '(0,Z.jsx)(tt,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:a,onActiveArchiveStart:o})',
+  rowPatched: '(0,Z.jsx)(tt,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:a,onActiveArchiveStart:o})',
+  menuTrigger: 'triggerButton:K',
+  historySourcePost: '{data:p}=I(codexRecentHistoryRoot,void 0,codexRecentHistoryRootReady)',
+  conversationFilterPost: 'let E=codexRecentTaskRootReady?codexRecentConversationFilter',
+  taskFilterPost: 'D=codexRecentTaskRootReady?codexRecentTaskFilter',
+  rowsViewPost: '(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:b,onClose:o,row:jn,onActiveArchiveStart:p})',
+};
+
+function patchSafeHeader265917(text, context, file) {
+  const variant = HEADER_265917_VARIANT;
+  let next = addExecutionTargetImport(text, context, file);
+  next = replaceOnce(next, variant.rows, variant.rowsCall, context, 'header 26.5917 project rows');
+  next = patchHeaderGroupHelper265917(patchHeaderMetadataLiteral(next), context);
+  next = replaceOnce(next, variant.historyParent, variant.historyParentScoped, context, 'header 26.5917 project history source');
+  next = replaceOnce(next, variant.execTarget, variant.execTargetScoped, context, 'header 26.5917 execution target');
+  next = replaceOnce(next, variant.projectFilter, variant.projectFilterScoped, context, 'header 26.5917 current project filter');
+  next = replaceOnce(next, variant.rowOriginal, variant.rowPatched, context, 'header 26.5917 project history row summary');
+  next = replaceOnce(next, 'className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`', 'className:`flex h-full min-h-0 w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`', context, 'header 26.5917 safe container height');
+  next = replaceOnce(next, 'vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1', 'vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1', context, 'header 26.5917 safe scroll height');
+  next = replaceOnce(next, 'contentClassName:`!pb-0 mt-[9px]`,' + variant.menuTrigger, 'contentClassName:`!pb-0 mt-[9px]`,contentStyle:{height:`600px`,overflow:`hidden`},' + variant.menuTrigger, context, 'header 26.5917 safe menu height');
+  next = replaceOnce(next, variant.rowsCall, variant.rowsViewPost, context, 'header 26.5917 project rows view');
+  next = finishSafeHeader265917(next, context);
+  if (!headerSemanticImports265917Hold(next, file)) context.errors.push('header 26.5917: semantic imports 不完整');
+  return next;
+}
+
+function patchHeaderGroupHelper265917(text, context) {
+  const anchor = 'function wn(e){return e.kind===`remote`}function Tn';
+  if (countMatches(text, anchor) !== 1) {
+    context.errors.push('header 26.5917: 找不到唯一分组助手注入点');
+    return text;
+  }
+  const messenger = findVscodeMessengerAlias(text) || 'codexLocalGroupsMessengerImport';
+  const helper = safeHeaderHelper(EMPTY_METADATA, messenger, 'wn')
+    .replace(/\(0,Q\.jsx\)/g, '(0,Z.jsx)')
+    .replace(/\(0,Q\.jsxs\)/g, '(0,Z.jsxs)')
+    .replace(/\(0,\$\.useState\)/g, '(0,kn.useState)')
+    .replace(/\(0,\$\.useEffect\)/g, '(0,kn.useEffect)');
+  return replaceOnce(text, anchor, helper + 'function Tn', context, 'header 26.5917 local groups helper');
+}
+
+function finishSafeHeader265917(text, context) {
+  const current = 't[21]!==r||t[22]!==n.conversation.hostId||t[23]!==n.conversation.id||t[24]!==o||t[25]!==a||t[26]!==e?';
+  const row = '(i=(0,Z.jsx)(tt,{conversationId:n.conversation.id,hostId:n.conversation.hostId,threadSummary:n.conversation,isActive:r,metaContent:e,onClick:a,onActiveArchiveStart:o}),t[21]=r,t[22]=n.conversation.hostId,t[23]=n.conversation.id,t[24]=o,t[25]=a,t[26]=e,t[27]=i):i=t[27],i';
+  const fixed = current.replace('?', '||t[28]!==n.conversation.title?');
+  const nextRow = row.replace('threadSummary:n.conversation,', 'threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265917:`+n.conversation.title:void 0,').replace('t[26]=e,t[27]=i', 't[26]=e,t[28]=n.conversation.title,t[27]=i');
+  let next = replaceOnce(text, current + row, fixed + nextRow, context, 'header 26.5917 local title row');
+  next = replaceOnce(next, 'jn=(0,kn.memo)(function(e){let t=(0,On.c)(28),', 'jn=(0,kn.memo)(function(e){let t=(0,On.c)(29),', context, 'header 26.5917 local row cache size');
+  next = next.replace('codexLocalGroupsHeaderSafePatchVersion=6', 'codexLocalGroupsHeaderSafe265917PatchVersion=1');
+  if (!safeHeader265917PostconditionsHold(next)) context.errors.push('header 26.5917: 补丁后置条件不完整');
+  return patchOpenedConversationTitle265917(next, context);
+}
+
+function safeHeader265917PostconditionsHold(text) {
+  const variant = HEADER_265917_VARIANT;
+  const view = 'function codexLocalGroupsProjectRowsView({items:e,activeId:t,onClose:n,row:r,onActiveArchiveStart:i}){let[,a]=(0,kn.useState)(0);return(0,kn.useEffect)(()=>{let e=()=>a(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),codexRecentTaskProjectRows(e,t,n,r,i)}';
+  const row = minifiedBlockScope(text, text.indexOf('{', text.indexOf('jn=(0,kn.memo)(function(e){')));
+  return countMatches(text, 'codexLocalGroupsHeaderSafe265917PatchVersion=1') === 1
+    && text.includes(variant.historySourcePost) && text.includes(variant.conversationFilterPost)
+    && text.includes(variant.taskFilterPost) && text.includes(variant.rowsViewPost)
+    && text.includes(view) && row.includes('(0,On.c)(29)')
+    && row.includes('threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265917:`+n.conversation.title:void 0')
+    && row.includes('t[28]!==n.conversation.title') && row.includes('t[28]=n.conversation.title')
+    && text.includes('contentStyle:{height:`600px`,overflow:`hidden`}')
+    && text.includes('vertical-scroll-fade-mask flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto pb-1')
+    && text.includes('function codexLocalGroupsGroupLimit') && text.includes('function codexLocalGroupsScopeProjectRoot(e)')
+    && dropdownTitleMetadataProducer265917Holds(text)
+    && headerMetadata265814PostconditionsHold(text) && !text.includes('codex-local-groups-current-root-v1');
+}
+
+function dropdownTitleMetadataProducer265917Holds(text) {
+  const decorators = minifiedExactCodeFunctionScopes(text, 'function codexLocalGroupsDecoratedItem(e){', 0);
+  const rows = minifiedExactCodeFunctionScopes(text, 'function codexRecentTaskProjectRows(', 0);
+  return decorators.length === 1
+    && decorators[0] === 'function codexLocalGroupsDecoratedItem(e){let t=codexLocalGroupsLocalTitle(e);return t?{...e,conversation:{...e.conversation,title:t}}:e}'
+    && rows.length === 1 && rows[0].includes('u.map(e=>{') && rows[0].includes('let o=codexLocalGroupsDecoratedItem(e),p=');
+}
+
+function patchOpenedConversationTitle265917(text, context) {
+  const marker = 'codexLocalGroupsOpenedTitle265917PatchVersion=1';
+  if (text.includes(marker)) {
+    if (!openedConversationTitle265917PostconditionsHold(text)) context.errors.push('header 26.5917 opened title: 补丁标记不完整');
+    return text;
+  }
+  const original = 'function Bn(e){let t=(0,Gn.c)(66),{allowInitialRouteBack:n,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:u}=e,d=';
+  const refresh = 'let[,codexLocalGroupsSetPageTitleRefresh]=(0,Ln.useState)(0);(0,Ln.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[]),s=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s;';
+  const patched = `var ${marker};${original.replace('=e,d=', '=e;')}${refresh}let d=`;
+  const next = replaceOnce(text, original, patched, context, 'header 26.5917 opened conversation title');
+  if (!openedConversationTitle265917PostconditionsHold(next)) context.errors.push('header 26.5917 opened conversation title: 补丁后置条件不完整');
+  return next;
+}
+
+function openedConversationTitle265917PostconditionsHold(text) {
+  const scope = minifiedFunctionScope(text, 'Bn');
+  const refresh = '(0,Ln.useEffect)(()=>{let e=()=>codexLocalGroupsSetPageTitleRefresh(e=>e+1);return window.addEventListener(`codex-local-groups-refresh`,e),()=>window.removeEventListener(`codex-local-groups-refresh`,e)},[])';
+  return countMatches(text, 'codexLocalGroupsOpenedTitle265917PatchVersion=1') === 1
+    && scope.includes('let[,codexLocalGroupsSetPageTitleRefresh]=(0,Ln.useState)(0)')
+    && scope.includes('s=o==null?s:codexLocalGroupsLocalTitle({kind:`local`,conversation:{id:o}})??s')
+    && scope.includes(refresh);
+}
+
+function headerSemanticImports265917Hold(text, file) {
+  const imports = matchingAppInitialImports(text, file, semanticMain265917Holds);
+  return imports.length === 1
+    && /(?:^|[,{}])i7 as codexUseExecutionTarget(?:,|})/.test(imports[0].importText)
+    && /(?:^|[,{}])__t as codexLocalGroupsMessengerImport(?:,|})/.test(imports[0].importText);
+}
+
+function semanticMain265917Holds(text) {
+  const messengerClasses = minifiedExactFunctionScopes(text, 'Ep=class e{');
+  const messengerClass = messengerClasses.length === 1 ? messengerClasses[0] : '';
+  const target = minifiedFunctionScope(text, 'yit');
+  const atom = minifiedExactFunctionScopes(text, 'OE=ua(Q,(e,{get:t})=>{');
+  const exports = text.slice(text.lastIndexOf('export{'));
+  return messengerClasses.length === 1 && countMatches(text, 'Dp=Ep.getInstance()') === 1
+    && messengerClass.includes('dispatchMessage(e,t){if(hp==null)') && messengerClass.includes('hp.postMessage({...t,type:e})')
+    && messengerClass.includes('dispatchHostMessage(e){this.deliverOrBufferMessage(e)}')
+    && countMatches(text, 'HLe((e,t)=>{Dp.dispatchMessage(e,t)})') === 1
+    && target === 'function yit(e){return mi(OE,e===void 0?null:e)}'
+    && atom.length === 1 && atom[0].includes('activeWorkspaceRoot:') && atom[0].includes('isActiveWorkspaceRootLoading:')
+    && /(?:^|[,{}])Dp as __t(?:,|})/.test(exports) && /(?:^|[,{}])yit as i7(?:,|})/.test(exports);
+}
+
+function patchCodexUi265917(text, context) {
+  const marker = 'codexLocalGroupsCodexUi265917PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsCodexUi265917PatchVersion=1';
+  const original = 'a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort';
+  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
+  if (text.includes(marker)) {
+    const next = patchCodexUi265917DropdownTitle(text, context);
+    if (!codexUi265917PostconditionsHold(next)) context.errors.push('Codex UI 26.5917: 补丁标记不完整');
+    return next;
+  }
+  if (text.includes(legacyMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, legacyMarker, marker, context, 'Codex UI 26.5917 marker v2');
+    next = patchCodexUi265917DropdownTitle(next, context);
+    if (!codexUi265917PostconditionsHold(next)) context.errors.push('Codex UI 26.5917: 补丁后置条件不完整');
+    return next;
+  }
+  let next = replaceOnce(text, original, patched, context, 'Codex UI 26.5917 Sol Max Ultra validation');
+  next = replaceOnce(next, 'function qvt({userSavedModelString:', `var ${marker};function qvt({userSavedModelString:`, context, 'Codex UI 26.5917 marker');
+  next = patchCodexUi265917DropdownTitle(next, context);
+  if (!codexUi265917PostconditionsHold(next)) context.errors.push('Codex UI 26.5917: 补丁后置条件不完整');
+  return next;
+}
+
+function patchCodexUi265917DropdownTitle(text, context) {
+  const marker = 'codexLocalGroupsDropdownTitle265917PatchVersion=1';
+  const original = 'function lPn({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+  const patched = `var ${marker};function lPn({title:e,titleOverride:t}){if(typeof t===\`string\`&&t.startsWith(\`__codexLocalGroupsTitle265917:\`))return t.slice(\`__codexLocalGroupsTitle265917:\`.length);if(e!=null)return e;let n=t?.trim()??\`\`;return n.length>0?n:null}`;
+  if (text.includes(marker)) return text;
+  return replaceOnce(text, original, patched, context, 'Codex UI 26.5917 dropdown title resolver');
+}
+
+function codexUi265917DropdownTitlePostconditionsHold(text) {
+  const resolver = minifiedFunctionScope(text, 'lPn');
+  const expected = 'function lPn({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265917:`))return t.slice(`__codexLocalGroupsTitle265917:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+  return countMatches(text, 'codexLocalGroupsDropdownTitle265917PatchVersion=1') === 1
+    && countMatches(text, 'function lPn({title:e,titleOverride:t}){') === 1
+    && resolver === expected;
+}
+
+function codexUi265917PostconditionsHold(text) {
+  const validation = minifiedExactCodeFunctionScopes(text, 'function qvt({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
+  return countMatches(text, 'codexLocalGroupsCodexUi265917PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsCodexUi265917PatchVersion=1') === 0
+    && validation.length === 1
+    && validation[0].includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
+    && text.includes('model_reasoning_effort??null')
+    && text.includes('settings.reasoning_effort??null')
+    && text.includes('setDefaultModelConfig')
+    && text.includes('isBackgroundSubagentsEnabled:l=!0')
+    && text.includes('type:`multi-agent-action`') && text.includes('type:`subagent-activity`')
+    && text.includes('e.type===`subAgentActivity`') && text.includes('e.tool===`spawnAgent`')
+    && semanticMain265917Holds(text)
+    && codexUi265917DropdownTitlePostconditionsHold(text);
+}
+
+const CODEX_POWER_265917_SLIDER_INSERTION = 'if((De===`gpt-5.6-sol`||De===`gpt-6-sol`||De===`gpt-6-astra`)&&Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){let e=ut.find(e=>e.model===De),t=e.modelLabel,n=ut.filter(e=>e.model!==De||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===De){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${De}:${e}`,model:De,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});ut=n}';
+const CODEX_POWER_265917_SLIDER_ANCHOR = 'let dt=Kz(ut,st==null?void 0:`${st.model}:${st.defaultReasoningEffort}`)';
+const CODEX_POWER_265917_NATIVE_MENU = 'function L$(e,t){let n=e?.find(e=>e.model===t);return n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort)&&e.reasoningEffort!==`persistent`)}';
+const CODEX_POWER_265917_PATCHED_MENU = 'function L$(e,t){let n=e?.find(e=>e.model===t),r=n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort)&&e.reasoningEffort!==`persistent`);return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}';
+const CODEX_POWER_265917_NATIVE_FILTER = 'function lkn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Nf(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}';
+const CODEX_POWER_265917_NATIVE_SLIDER = 'function ikn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){if(r!=null){let a=skn(e,{stripGptPrefix:i});for(let o of r.presets){let r=o.filter(({reasoning_effort:e})=>(t||e!==`ultra`)&&(!n||e!==`xhigh`)).flatMap(({model:e,reasoning_effort:t})=>{let n=a.find(n=>n.model===e&&n.reasoningEffort===t);return n==null?[]:[n]}),s=(0,ukn.default)(lkn(r,e,i),({id:e})=>e);if(s.length>=3)return s}}let a=lkn((t?[...fkn,pkn]:fkn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);if(a.length>=3)return a;let o=lkn(mkn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);return o.length>=3?o:[]}';
+
+function patchCodexPower265917(text, context) {
+  const marker = 'codexLocalGroupsPower265917PatchVersion=2';
+  const legacyMarker = 'codexLocalGroupsPower265917PatchVersion=1';
+  if (text.includes(marker)) {
+    if (!codexPower265917PostconditionsHold(text)) context.errors.push('Codex power 26.5917: 补丁标记不完整');
+    return text;
+  }
+  if (text.includes(legacyMarker)) {
+    let next = widenMaxUltraModelGuard(text);
+    next = replaceOnce(next, legacyMarker, marker, context, 'Codex power 26.5917 marker v2');
+    if (!codexPower265917PostconditionsHold(next)) context.errors.push('Codex power 26.5917: 补丁后置条件不完整');
+    return next;
+  }
+  if (!codexPower265917NativeContractsHold(text)) {
+    context.errors.push('Codex power 26.5917: 原生消费链不完整');
+    return text;
+  }
+  let next = replaceOnce(text, CODEX_POWER_265917_NATIVE_MENU, CODEX_POWER_265917_PATCHED_MENU, context, 'Codex Reasoning menu 26.5917');
+  next = replaceOnce(next, CODEX_POWER_265917_SLIDER_ANCHOR, `${CODEX_POWER_265917_SLIDER_INSERTION}${CODEX_POWER_265917_SLIDER_ANCHOR}`, context, 'Codex Power slider 26.5917');
+  next = replaceOnce(next, 'function ikn(e,{includeUltraInSlider:', `var ${marker};function ikn(e,{includeUltraInSlider:`, context, 'Codex power 26.5917 marker');
+  if (!codexPower265917PostconditionsHold(next)) context.errors.push('Codex power 26.5917: 补丁后置条件不完整');
+  return next;
+}
+
+function codexPower265917NativeContractsHold(text) {
+  const menus = minifiedExactFunctionScopes(text, 'function L$(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  return menu === CODEX_POWER_265917_NATIVE_MENU && codexPower265917NativeSliderConsumerHolds(text, false);
+}
+
+function codexPower265917NativeSliderConsumerHolds(text, patched) {
+  const sliders = minifiedExactFunctionScopes(text, 'function ikn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){');
+  const filters = minifiedExactFunctionScopes(text, 'function lkn(e,t,n){');
+  const pickers = minifiedExactFunctionScopes(text, 'function ndi(e){');
+  const slider = sliders.length === 1 ? sliders[0] : '';
+  const filter = filters.length === 1 ? filters[0] : '';
+  const picker = pickers.length === 1 ? pickers[0] : '';
+  const insertion = minifiedAnchoredBlock(picker, 'if((De===`gpt-5.6-sol`||De===`gpt-6-sol`||De===`gpt-6-astra`)&&Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){', 1);
+  const expectedInsertion = minifiedBlockScope(CODEX_POWER_265917_SLIDER_INSERTION, CODEX_POWER_265917_SLIDER_INSERTION.indexOf('{'));
+  return filter === CODEX_POWER_265917_NATIVE_FILTER
+    && slider === CODEX_POWER_265917_NATIVE_SLIDER
+    && picker.includes('ct=ikn(tt,{includeUltraInSlider:b,sliderModelsConfig:Ae,stripGptPrefix:!f})')
+    && picker.includes('powerSelectionsWithXHigh:ut')
+    && countMatches(picker, CODEX_POWER_265917_SLIDER_ANCHOR) === 1
+    && (patched
+      ? insertion === expectedInsertion && picker.includes(`${CODEX_POWER_265917_SLIDER_INSERTION}${CODEX_POWER_265917_SLIDER_ANCHOR}`)
+      : insertion === '' && !picker.includes('gpt-5.6-sol'));
+}
+
+function codexPower265917PostconditionsHold(text) {
+  const menus = minifiedExactFunctionScopes(text, 'function L$(e,t){');
+  const menu = menus.length === 1 ? menus[0] : '';
+  return countMatches(text, 'codexLocalGroupsPower265917PatchVersion=2') === 1
+    && countMatches(text, 'codexLocalGroupsPower265917PatchVersion=1') === 0
+    && menu === CODEX_POWER_265917_PATCHED_MENU
+    && codexPower265917NativeSliderConsumerHolds(text, true);
+}
+
+const PROJECT_HISTORY_265917_NATIVE_RECENT = 'async listRecentThreads({originators:e,cursor:t,limit:n,background:r=!1}){let i={limit:n,cursor:t,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,originators:e,sourceKinds:at,useStateDbOnly:this.params.hostId!==tn},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...a,data:a.data.filter($Yt)}}';
+const PROJECT_HISTORY_265917_SCOPED_RECENT = 'async listRecentThreads({originators:e,cursor:t,limit:n,background:r=!1,useStateDbOnly:o=this.params.hostId!==tn}){let i={limit:n,cursor:t,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,originators:e,sourceKinds:at,useStateDbOnly:o},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...a,data:a.data.filter($Yt)}}';
+
+function patchProjectHistory265917Store(text, context) {
+  const marker = 'codexLocalGroupsProjectHistory265917StorePatchVersion=1';
+  if (text.includes(marker)) {
+    if (!projectHistory265917StorePostconditionsHold(text)) context.errors.push('26.5917 project history store: 补丁标记不完整');
+    return text;
+  }
+  const store = 'async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return kZt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),useStateDbOnly:this.params.hostId!==tn},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads()';
+  const manager = 'async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads()';
+  const helperAnchor = 'nullish()})})))()}function EZt';
+  const storeStart = text.indexOf('XZt=class{');
+  const managerStart = text.indexOf('s8t=class extends FG{');
+  const storeScope = minifiedBlockScope(text, text.indexOf('{', storeStart));
+  const managerScope = minifiedBlockScope(text, text.indexOf('{', managerStart));
+  if (countMatches(text, 'XZt=class{') !== 1 || countMatches(text, 's8t=class extends FG{') !== 1
+    || countMatches(storeScope, store) !== 1 || countMatches(managerScope, manager) !== 1
+    || countMatches(storeScope, PROJECT_HISTORY_265917_NATIVE_RECENT) !== 1 || countMatches(text, helperAnchor) !== 1) {
+    context.errors.push('26.5917 project history store: 找不到唯一原生注入点');
+    return text;
+  }
+  const helper = 'var codexLocalGroupsProjectHistory265917StorePatchVersion=1;function codexLocalGroupsProjectHistoryPath265917(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryMatch265917(e,t){let n=codexLocalGroupsProjectHistoryPath265917(e);return!!n&&(n===t||n.startsWith(t+`/`))}async function codexLocalGroupsLoadProjectConversations265917(e,t){t=codexLocalGroupsProjectHistoryPath265917(t);let n=[],r=new Set,i=null;do{let a=await e.listRecentThreads({originators:void 0,cursor:i,limit:100,background:!0,useStateDbOnly:!0}),o=a.nextCursor;if(o!=null&&r.has(o))throw Error(`App Server repeated a thread list cursor`);for(let r of a.data){let i=e.threadsById.get(r.id),a=i!=null&&b$(i).updatedAt>b$(r).updatedAt?i:r,s=e.getThreadSummaryFromThread(a);e.shouldSurfaceThreadSummary(s)&&codexLocalGroupsProjectHistoryMatch265917(s.cwd,t)&&n.push(EZt({thread:a,hostId:s.hostId,conversationId:s.conversationId,turns:[],threadTitle:s.title,resumeState:`needs_resume`,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},workspaceKind:s.workspaceKind,hasUnreadTurn:s.hasUnreadTurn}))}o!=null&&r.add(o),i=o}while(i!=null);return n}';
+  let next = text.replace(helperAnchor, 'nullish()})})))()}' + helper + 'function EZt');
+  next = next.replace(store, store.replace('async listArchivedThreads()', 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265917(this,e)}async listArchivedThreads()'));
+  next = next.replace(manager, manager.replace('async listArchivedThreads()', 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}async listArchivedThreads()'));
+  next = next.replace(PROJECT_HISTORY_265917_NATIVE_RECENT, PROJECT_HISTORY_265917_SCOPED_RECENT);
+  if (!projectHistory265917StorePostconditionsHold(next)) context.errors.push('26.5917 project history store: 补丁后置条件不完整');
+  return next;
+}
+
+function projectHistory265917StorePostconditionsHold(text) {
+  const load = minifiedExactFunctionScopes(text, 'async function codexLocalGroupsLoadProjectConversations265917(e,t){');
+  const storeStart = text.indexOf('XZt=class{');
+  const managerStart = text.indexOf('s8t=class extends FG{');
+  const store = minifiedBlockScope(text, text.indexOf('{', storeStart));
+  const manager = minifiedBlockScope(text, text.indexOf('{', managerStart));
+  return countMatches(text, 'codexLocalGroupsProjectHistory265917StorePatchVersion=1') === 1
+    && countMatches(text, 'XZt=class{') === 1 && countMatches(text, 's8t=class extends FG{') === 1
+    && countMatches(store, 'async listProjectConversations(e){await this.loadThreadHydrationState();return codexLocalGroupsLoadProjectConversations265917(this,e)}') === 1
+    && countMatches(manager, 'async listProjectConversations(e){return this.threadStore.listProjectConversations(e)}') === 1
+    && countMatches(store, PROJECT_HISTORY_265917_SCOPED_RECENT) === 1 && countMatches(text, PROJECT_HISTORY_265917_NATIVE_RECENT) === 0
+    && load.length === 1 && load[0].includes('originators:void 0,cursor:i,limit:100,background:!0,useStateDbOnly:!0')
+    && load[0].includes('o!=null&&r.has(o)') && load[0].includes('codexLocalGroupsProjectHistoryMatch265917(s.cwd,t)')
+    && load[0].includes('n.push(EZt({thread:a,hostId:s.hostId,conversationId:s.conversationId')
+    && countMatches(text, 'function EZt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){') === 1
+    && countMatches(text, 'function $Yt(e){return e.ephemeral!==!0&&e.threadSource!==`ambient_suggestions`}') === 1
+    && !text.includes('Number.MAX_SAFE_INTEGER');
+}
+
+function patchProjectHistory265917Hook(text, context) {
+  const marker = 'codexLocalGroupsProjectHistory265917HookPatchVersion=1';
+  if (text.includes(marker)) {
+    if (!projectHistory265917HookPostconditionsHold(text)) context.errors.push('26.5917 project history hook: 补丁标记不完整');
+    return text;
+  }
+  const original = 'function mFn(){return gFn(`recent-conversations`)}';
+  if (countMatches(text, original) !== 1) {
+    context.errors.push('26.5917 project history hook: 找不到唯一原生注入点');
+    return text;
+  }
+  const helper = 'var codexLocalGroupsProjectHistory265917HookPatchVersion=1;function codexLocalGroupsProjectHistoryHookPath265917(e){return typeof e==`string`?e.replace(/\\\\/g,`/`).replace(/\\/+$/,``):``}function codexLocalGroupsProjectHistoryHookMatch265917(e,t){let n=codexLocalGroupsProjectHistoryHookPath265917(e);return!!n&&(n===t||n.startsWith(t+`/`))}function codexLocalGroupsProjectHistorySummary265917(e,t){let n=Number(e.createdAt??0)*1e3,r=Number(e.updatedAt??e.createdAt??0)*1e3,i=String(e.name??``).trim()||String(e.preview??``).trim()||null;return{id:String(e.id),sessionId:e.sessionId,hostId:t,turns:[],requests:[],createdAt:Number.isFinite(n)?n:0,updatedAt:Number.isFinite(r)?r:0,recencyAt:Number.isFinite(r)?r:0,title:i,source:e.source,agentNickname:e.agentNickname,threadSource:e.threadSource,historyMode:e.historyMode,parentThreadId:e.parentThreadId??null,mode:e.mode,threadStartKind:e.threadStartKind,modelProvider:e.modelProvider,latestModel:``,latestReasoningEffort:null,previousTurnModel:null,latestCollaborationMode:{mode:`default`,settings:{reasoning_effort:null,model:``,developer_instructions:null}},hasUnreadTurn:e.hasUnreadTurn??!1,threadRuntimeStatus:e.status,rolloutPath:e.path??``,gitInfo:e.gitInfo,resumeState:`needs_resume`,latestTokenUsageInfo:null,workspaceKind:e.workspaceKind??`project`,cwd:e.cwd}}function codexLocalGroupsMergeProjectConversations265917(e,t,n){let r=new Map;for(let t of e??[])r.set(t.id,t);for(let e of t??[])codexLocalGroupsProjectHistoryHookMatch265917(e?.cwd,n)&&r.set(e.id,e);return Array.from(r.values()).sort((e,t)=>(t.recencyAt??t.updatedAt??0)-(e.recencyAt??e.updatedAt??0))}function mFn(e,t,n){let r=arguments.length>0,i=gFn(`recent-conversations`),a=$V(),o=codexLocalGroupsProjectHistoryHookPath265917(e),s=n===!0&&!!o,c=t??a.getDefault()?.getHostId()??`local`,l=ae({enabled:s,queryKey:[`codex-local-groups-project-history-265917-v1`,c,o],staleTime:3e4,queryFn:async()=>{let e=a.getForHostId(c);if(e==null)return[];if(typeof e.listProjectConversations===`function`)return e.listProjectConversations(o);if(typeof e.listAllThreads!==`function`)return[];let t=new Map;for(let n of typeof e.getRecentConversations===`function`?e.getRecentConversations():[])t.set(n.id,n);let n=[];for(let r of await e.listAllThreads({modelProviders:null})){if(!codexLocalGroupsProjectHistoryHookMatch265917(r.cwd,o))continue;let i=String(r.id),a=t.get(i);n.push(a??codexLocalGroupsProjectHistorySummary265917(r,c))}return n}}),u=l.refetch;(0,nH.useEffect)(()=>{if(!s)return;let e=null,t=()=>{e!=null&&clearTimeout(e),e=setTimeout(()=>{u()},100)},n=cFn({appServerRegistry:a,onStoreChange:t,subscribeToManager:(e,n)=>e.getHostId()===c?sFn([typeof e.addAnyConversationMetaCallback===`function`?e.addAnyConversationMetaCallback(n):()=>{},typeof e.addThreadArchivedListener===`function`?e.addThreadArchivedListener(n):()=>{},typeof e.addThreadUnarchivedListener===`function`?e.addThreadUnarchivedListener(n):()=>{},typeof e.addThreadDeletedListener===`function`?e.addThreadDeletedListener(n):()=>{}]):()=>{}});return()=>{e!=null&&clearTimeout(e),n()}},[a,c,o,s,u]);return r?s?{...l,data:l.isError&&l.data==null?[]:codexLocalGroupsMergeProjectConversations265917(l.data,i.data,o)}:{...l,data:[]}:i}';
+  const next = replaceOnce(text, original, helper, context, '26.5917 project history hook');
+  if (!projectHistory265917HookPostconditionsHold(next)) context.errors.push('26.5917 project history hook: 补丁后置条件不完整');
+  return next;
+}
+
+function projectHistory265917HookPostconditionsHold(text) {
+  const hook = minifiedExactCodeFunctionScopes(text, 'function mFn(e,t,n){');
+  return countMatches(text, 'codexLocalGroupsProjectHistory265917HookPatchVersion=1') === 1
+    && countMatches(text, 'function mFn(){return gFn(`recent-conversations`)}') === 0
+    && hook.length === 1
+    && hook[0].includes('i=gFn(`recent-conversations`)')
+    && hook[0].includes('typeof e.listProjectConversations===`function`')
+    && hook[0].includes('typeof e.listAllThreads!==`function`')
+    && hook[0].includes('e.listAllThreads({modelProviders:null})')
+    && hook[0].includes('codexLocalGroupsProjectHistoryHookMatch265917(r.cwd,o)')
+    && hook[0].includes('codexLocalGroupsMergeProjectConversations265917(l.data,i.data,o)')
+    && hook[0].includes('cFn({appServerRegistry:a,onStoreChange:t,subscribeToManager:')
+    && hook[0].includes('sFn([typeof e.addAnyConversationMetaCallback===`function`');
+}
+
 
 module.exports = { CodexPatchEngine };

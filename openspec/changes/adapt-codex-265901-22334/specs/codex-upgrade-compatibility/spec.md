@@ -81,7 +81,7 @@ The transcript producer/lazy consumer and the Main membership/Power composer con
 
 ### Requirement: Sol and Astra Max and Ultra cover menu and drag sliders
 
-Following user approval on 2026-09-05, Max and Ultra MUST be selectable in the reasoning menu and both compact and expanded drag sliders for available `gpt-5.6-sol` and `gpt-6-astra` models, even when the picker input has been filtered down to xhigh. This supersedes the earlier Sol-menu-only restriction. Existing lower choices, native slider interaction and settings read/write/readback MUST be reused. Other models and older supported extension builds MUST keep their existing behavior. Patching MUST NOT change user configuration, persisted preferences, model catalogs or multi-agent settings, or invent an unavailable model.
+Following user approval on 2026-09-05, Max and Ultra MUST be selectable in the reasoning menu and both compact and expanded drag sliders for available `gpt-5.6-sol` and `gpt-6-astra` models, even when the picker input has been filtered down to xhigh. Following the 2026-09-23 catalog/UI mismatch, `gpt-6-sol` MUST be included in the same guard whenever this variant is still patched. This supersedes the earlier Sol-menu-only restriction. Existing lower choices, native slider interaction and settings read/write/readback MUST be reused. Other models and older supported extension builds MUST keep their existing behavior. Patching MUST NOT change user configuration, persisted preferences, model catalogs or multi-agent settings, or invent an unavailable model.
 
 #### Scenario: both target models expose ordered choices through actual consumers
 

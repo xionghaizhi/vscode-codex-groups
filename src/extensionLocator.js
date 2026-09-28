@@ -13,16 +13,20 @@ class CodexExtensionLocator {
     const extensionDir = this.latestExtensionDir();
     const version = packageVersion(extensionDir);
     const assetsDir = path.join(extensionDir, 'webview/assets');
-    const appMainPath = findOptionalBundle(assetsDir, 'app-main-*.js', isAppMainBundle) ||
-      findBundle(assetsDir, 'app-initial-*.js', isAppMainBundle);
-    const appServerManagerSignalsPath = findOptionalBundle(assetsDir, 'app-server-manager-signals-*.js', isAppServerManagerSignalsBundle) ||
-      findBundle(assetsDir, 'app-initial-*.js', isAppServerManagerSignalsBundle);
+    const codex265917 = version === '26.5917.61114' || version === '26.5917.62051';
+    const appMainPredicate = codex265917 ? isAppMainBundle265917 : isAppMainBundle;
+    const statsigPredicate = codex265917 ? isStatsigConfigBundle265917 : isStatsigConfigBundle;
+    const serverPredicate = codex265917 ? isAppServerManagerSignalsBundle265917 : isAppServerManagerSignalsBundle;
+    const appMainPath = findOptionalBundle(assetsDir, 'app-main-*.js', appMainPredicate) ||
+      findBundle(assetsDir, 'app-initial-*.js', appMainPredicate);
+    const appServerManagerSignalsPath = findOptionalBundle(assetsDir, 'app-server-manager-signals-*.js', serverPredicate) ||
+      findBundle(assetsDir, 'app-initial-*.js', serverPredicate);
     const requestPath = findOptionalBundle(assetsDir, 'request-*.js', isRequestBundle) ||
       findBundle(assetsDir, 'app-initial-*.js', isRequestBundle);
     const localTitlePath = findOptionalBundle(assetsDir, 'local-conversation-title-signals-*.js', () => true) ||
       findOptionalBundle(assetsDir, 'app-initial-*.js', isLocalTitleBundle);
-    const appStatsigPath = findOptionalBundle(assetsDir, 'app-main-*.js', isStatsigConfigBundle) ||
-      findOptionalBundle(assetsDir, 'app-initial-*.js', isStatsigConfigBundle) ||
+    const appStatsigPath = findOptionalBundle(assetsDir, 'app-main-*.js', statsigPredicate) ||
+      findOptionalBundle(assetsDir, 'app-initial-*.js', statsigPredicate) ||
       appMainPath;
     return {
       extensionDir,
@@ -153,12 +157,27 @@ function isAppMainBundle(text) {
       (text.includes('supportedReasoningEfforts') && text.includes('defaultReasoningEffort')));
 }
 
+function isAppMainBundle265917(text) {
+  return text.includes('function qvt({userSavedModelString:') &&
+    text.includes('function lPn({title:e,titleOverride:t})') &&
+    text.includes('postMessage({...t,type:e})');
+}
+
+function isStatsigConfigBundle265917(text) {
+  return text.includes('networkConfig:{api:') && text.includes('sdkExceptionUrl:') &&
+    text.includes('function ikn(e,{includeUltraInSlider:');
+}
+
 function isStatsigConfigBundle(text) {
   return text.includes('networkConfig:{api:') && text.includes('sdkExceptionUrl:');
 }
 
 function isAppServerManagerSignalsBundle(text) {
   return text.includes('recentConversationsSortKey') && text.includes('thread/list');
+}
+
+function isAppServerManagerSignalsBundle265917(text) {
+  return text.includes('recentConversationsSortKey') && text.includes('listRecentThreads({originators:');
 }
 
 function isRequestBundle(text) {

@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.0.73 - 2026-09-28
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5917.62051`。页面仍是 61114 的 Header/UI/Power/Server 拆包，Host 看门狗、metadata 注入点和消息解析器改为 `aD/dm/SM/ate/Z2e`。
+- `26.5917.61114` 继续可用。未知 5917 build、带后缀版本和未来 minor 在恢复或写入前 fail closed。
+- OpenSpec 与升级手册记录 Remote-SSH 下 Codex Audio 未安装/被禁用：安装匹配的 `openai.codex-audio@26.917.62051`，并把 `remote.extensionKind` 设为 `workspace` 后再 Reload。不改 `config.toml`。
+- 不修改用户 `config.toml` 或 Multi-Agent 配置。
+
+
+## v0.0.72 - 2026-09-23
+
+- 将 Sol/Astra Max/Ultra 守卫从 `gpt-5.6-sol` / `gpt-6-astra` 扩展到当前目录里同样声明了 `max`/`ultra` 的 `gpt-6-sol`。
+- 紧凑/展开拖拽条、Reasoning 菜单和保存回读一起放行；已安装的 26.5908/26.5903/26.5901/26.5917 补丁可从旧 marker 原地迁移。
+- 升级手册与 OpenSpec 把 `gpt-6-sol` 写入后续版本必查清单，避免只按 5.6 Sol 验收而漏掉 6 Sol。
+
+## v0.0.71 - 2026-09-23
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5917.61114` 的 Host/Header/UI/Power/Server 拆包拓扑；未知 5917 build、带后缀版本和未来 minor 在恢复或写入前 fail closed。
+- 保持标题即时回显、设置分组、分组中新建会话、当前项目历史分页、顶部子 agent 既有展示链，以及 Sol/Astra 的 Max/Ultra 菜单和拖拽条；不修改用户 Multi-Agent 配置。
+- 将 `ute/uD/pm/xM` 看门狗与 metadata 链、`lPn` 标题解析器、`L$/ikn/ndi` 最终滑块消费点、`originators` 项目历史分页和测试临时目录清理纳入强制回归。
+
+
+## v0.0.70 - 2026-09-15
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5908.31748` 五 bundle 拓扑；未知 5908 build、带后缀版本和未来 minor 在任何恢复或写入前 fail closed。
+- 恢复标题即时回显、设置分组、分组中新建会话、当前项目历史分页、顶部子 agent 既有展示链，以及 Sol/Astra 的 Max/Ultra 菜单和拖拽条；不修改用户 Multi-Agent 配置。
+- 将新增 `originators` 请求契约、最终 `it` 滑块消费点、`ik/Hd/bI` 看门狗链和临时目录清理纳入强制回归。
+
+## v0.0.69 - 2026-09-09
+
+- 精确适配官方 linux-x64 `openai.chatgpt@26.5903.61454` 五 bundle 拓扑；未知 5903 build、带后缀版本和未来 minor 在 plan/恢复/写入前继续 fail closed。
+- Host 看门狗改为 exact `jI/Nd/iI/p5/hPe` 链的 120 秒；Header/Main 用 `__codexLocalGroupsTitle265903:` marker 与 `YFt` 解析器保持下拉/打开页双标题；Power `U4/S0n` 与 Main `t0e` 为 Sol/Astra 补齐 Max/Ultra 菜单、拖拽条和保存回读。
+- 项目历史继续拆为 Server `pWt/listRecentThreads` 与 Power `qct` fallback。不修改 `~/.codex/config.toml` 或 Multi-Agent 配置。5901 既有契约保持不变。
+
+
 ## v0.0.68 - 2026-09-05
 
 - 将 Codex `26.5901.22334` 的 Sol/Astra Max/Ultra 适配范围从菜单扩展到紧凑/展开拖拽条及保存回读，解决目录已有档位但滑块停在 Extra High 的遗漏。

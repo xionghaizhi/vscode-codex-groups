@@ -567,6 +567,193 @@ function configure26590122334Features(target) {
 
 
 
+function configure26590361454Features(target) {
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5903.61454';
+  target.headerPath = path.join(assets, 'header-31d7d84f9363.js');
+  target.appMainPath = path.join(assets, 'app-initial-1338e8d6a2c6.js');
+  target.appStatsigPath = path.join(assets, 'app-initial-651b098e975e.js');
+  target.appServerManagerSignalsPath = path.join(assets, 'app-initial-3ec16fef3ca9.js');
+  target.requestPath = target.appMainPath;
+  target.localTitlePath = null;
+  const header = [
+    'import{n as x}from"./app-initial-1338e8d6a2c6.js";',
+    'function Fn(){let s=f(),{authMethod:c}=Qe(),l=h(),u=m(Bn),{data:d}=ut(),p=ne(),y=0;return d}',
+    'function Tn(e){let c=o!==void 0&&o,l=s===void 0||s,u=x(ye),d=f(),p=G(),{authMethod:h}=Qe(),r=e.r,n=e.n,ee=null,T=e=>e;let E=r.filter(T),D=yn(n.data,r,ee),F=D,b=null,a=null;return F.map(e=>(0,Z.jsx)(Nn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&b===e.conversation.id,onClose:a,onActiveArchiveStart:p},e.key))}',
+    'function Nt(e){return e.key}function Pt(e){if(e.kind===`remote`){return e}return e}function En(e){return e.kind===`remote`}function Dn(e,t){return e}',
+    'Nn=(0,jn.memo)(function(e){let t=(0,An.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(P,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
+    'const menu=(0,Q.jsx)(ze,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:K,open:!0});',
+    'const outer={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
+    'const scroll={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`};',
+    'function Hn(e){let t=(0,qn.c)(66),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e,l=n!==void 0&&n;return o}',
+    'var qn,$,Jn,Yn=e((()=>{qn=y(),c(),E(),s(),b(),o(),rt(),gt(),pt(),xt(),Le(),it(),ue(),K(),de(),Se(),L(),wt(),kt(),Rt(),Vn(),wn(),$=S(),Jn={}});',
+  ].join('');
+  const main = [
+    'var Yd={postMessage(){}},$d,ef;$d=class e{static getInstance(){return new e}dispatchMessage(e,t){if(Yd==null)return;Yd.postMessage({...t,type:e})}deliverOrBufferMessage(){}dispatchHostMessage(e){this.deliverOrBufferMessage(e)}};ef=$d.getInstance(),AOe((e,t)=>{ef.dispatchMessage(e,t)});ef.dispatchHostMessage({type:`native`});',
+    'function sE(e){return ce(cE,e===void 0?null:e)}cE=c(Q,(e,{get:t})=>{let n=e;return{activeWorkspaceRoot:n,isActiveWorkspaceRootLoading:!1,hostConfig:null}});',
+    'function t0e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+    'function readEffort(e){return e?.model_reasoning_effort??null}',
+    'function writeEffort(e,t){let P={settings:{reasoning_effort:null}},R=P?.settings.reasoning_effort??null;async function save(){await Gu().setDefaultModelConfig(e,t,null)}return{R,save}}',
+    'function YFt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}',
+    'function by(e,t,n){let{isBackgroundSubagentsEnabled:l=!0}={};return l?[{type:`multi-agent-action`},{type:`subagent-activity`}]:[]}',
+    'function eAn(e,t,n,r){let i=[];for(let e of r??[])if(e.type===`subAgentActivity`)i.push({parentConversationId:t});else if(!(e.tool!==`spawnAgent`))i.push({parentConversationId:t});return i}',
+    'export{ef as grt,sE as aX};',
+  ].join('');
+  const power = [
+    'function Flt(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:mg(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}',
+    'function Alt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){if(r!=null){let a=Nlt(e,{stripGptPrefix:i});for(let o of r.presets){let r=(0,Ilt.default)(Flt(o.filter(({reasoning_effort:e})=>(t||e!==`ultra`)&&(!n||e!==`xhigh`)).flatMap(({model:e,reasoning_effort:t})=>{let n=a.find(n=>n.model===e&&n.reasoningEffort===t);return n==null?[]:[n]}),e,i),({id:e})=>e);if(r.length>=3)return r}}let a=Flt((t?[...Rlt,zlt]:Rlt).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);if(a.length>=3)return a;let o=Flt(Blt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);return o.length>=3?o:[]}',
+    'var bYe=[];function fv(){return!0}function U4(e,t){let n=e?.find(e=>e.model===t);return n==null?bYe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>fv(e.reasoningEffort))}',
+    'function rGn(e){return e.powerSelectionsWithXHigh}function S0n(e){let U=e.model,se=e.models,Le=e.power,y=!1,fe=null,d=!0,S=!1,Ie=null,H=e.host,p=`default`,m=`simple`,He=!0,Ne=!1,Se=!0,x={hostId:`local`,cwd:`/`},r=`c`,ze=`xhigh`;let We=se?.find(e=>e.model===U),Ge=Alt(Le,{includeUltraInSlider:y,sliderModelsConfig:fe,stripGptPrefix:!d}),Ke=jlt(Ge,U,ze)==null?`model`:p??`default`,qe=Ge;if(S)qe=Re.map(D0n);else if(se!=null&&Ie==null){qe=Fe.map(e=>e)}else if(Ke===`model`||H?.isModelLocked===!0){qe=Re.filter(e=>e.model===U)}let Je=xD(qe,We==null?void 0:`${We.model}:${We.defaultReasoningEffort}`),Ye=jlt(qe,U,ze),Xe=rGn({canRenderPowerPickerSurface:He&&(!Ne||Se),fallbackPowerSelection:Je,isModelSettingsLoading:Ne,menuView:m,onReset:e=>_t(e.model,e.reasoningEffort),powerSelectionsWithXHigh:qe,resetContextKey:JSON.stringify([r,x.hostId,x.cwd]),selectedPowerSelectionWithXHigh:Ye,skipExperimentExposure:S||Ke===`model`||y||b});return Xe}',
+    'function qct(){return Jct(`recent-conversations`)}',
+  ].join('');
+  const server = [
+    'var QL=`local`,KR=[];function xG(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function rHt(e){return e.ephemeral!==!0&&e.threadSource!==`ambient_suggestions`}',
+    'var CG=t((()=>{}));function QUt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=xG(e);return{id:n,hostId:t,title:i,cwd:e.cwd}}',
+    'async function nWt(e,t){return[]}',
+    'var SH=class{},pWt=class{async loadThreadHydrationState(){}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return nWt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),useStateDbOnly:this.params.hostId!==QL},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({cursor:e,limit:t,background:n=!1}){let r={limit:t,cursor:e,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,sourceKinds:KR,useStateDbOnly:this.params.hostId!==QL},i=await this.params.requestClient.sendRequest(`thread/list`,r,n?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...i,data:i.data.filter(rHt)}}};',
+    'var M2t=class extends SH{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}};',
+  ].join('');
+  const watchdog = 'var jI=class{constructor(e){this.onTimeout=e}start(){let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){}};var hPe=require("node:child_process");';
+  const host = 'Nd=class t{async initializeWebview(e,r,n,o){let s=new jI(()=>{});this.registerClientCoordinationForWebview(e,n,s)}createClientCoordinationSession(e,r,n){let o={};return this.registerAppHostSessionForWebview(e,r,o,n)}registerAppHostSessionForWebview(e,r,n,o){return{appView:new iI({startup:{reach:a=>o.handleStartupPhase(a)}})}}};';
+  fs.writeFileSync(target.extensionJsPath, extensionText
+    .replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=p5(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})')
+    .replace('e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)})', 'e.onDidReceiveMessage(c=>{if(c.type==="ready"){o?.()}this.handleMessage(e,c)})') + watchdog + host);
+  fs.writeFileSync(target.headerPath, header);
+  fs.writeFileSync(target.appMainPath, main);
+  fs.writeFileSync(target.appStatsigPath, power);
+  fs.writeFileSync(target.appServerManagerSignalsPath, server);
+}
+
+function configure26590831748Features(target) {
+  configure26590361454Features(target);
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5908.31748';
+  target.headerPath = path.join(assets, 'header-8aa6e5b9570e.js');
+  target.appMainPath = path.join(assets, 'app-initial-972655adec02.js');
+  target.appStatsigPath = path.join(assets, 'app-initial-84c784f5e305.js');
+  target.appServerManagerSignalsPath = path.join(assets, 'app-initial-c027c57a4b11.js');
+  target.requestPath = target.appMainPath;
+  const header = [
+    'import{Zat,pQ}from"./app-initial-972655adec02.js";',
+    'function Cn(){let o=u(),{authMethod:s}=at(),c=E(),l=b(Rn),{data:d}=Ge(),f=ke(),y=0;return d}',
+    'function Tn(e){let c=o!==void 0&&o,d=s===void 0||s,f=l(Pe),p=u(),m=ve(),{authMethod:h}=at(),r=e.r,n=e.n,T=null,E=e=>e;let ee=r.filter(E),D=_n(n.data,r,T),F=D,I=ee,y=null,i=null;return I.map(e=>(0,Z.jsx)(jn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&y===e.conversation.id,onClose:i,onActiveArchiveStart:m},e.key))}',
+    'function Nt(e){return e.key}function Pt(e){return e}function wn(e){return e.kind===`remote`}function Tn2(e){return e}',
+    'jn=(0,kn.memo)(function(e){let t=(0,On.c)(24),{item:n,isActive:r,onClose:i,onActiveArchiveStart:a}=e;switch(n.kind){case`local`:{let e,c;return t[17]!==r||t[18]!==n.conversation.hostId||t[19]!==n.conversation.id||t[20]!==a||t[21]!==i||t[22]!==e?(c=(0,Z.jsx)(Te,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:i,onActiveArchiveStart:a}),t[17]=r,t[18]=n.conversation.hostId,t[19]=n.conversation.id,t[20]=a,t[21]=i,t[22]=e,t[23]=c):c=t[23],c}}});',
+    'const menu=(0,Z.jsx)(ze,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:q,open:!0});',
+    'const outer={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
+    'const scroll={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`};',
+    'function Bn(e){let t=(0,Gn.c)(66),{allowInitialRouteBack:n,className:r,centerContent:i,desktopDeepLinkConversationId:a,title:o,onBack:s,trailing:c}=e,l=n!==void 0&&n;return o}',
+    'var Gn,Ln,Yn=e((()=>{Gn=y(),Ln=kn,c(),E(),s(),b(),o(),rt(),gt(),pt(),xt(),Le(),it(),ue(),K(),de(),Se(),L(),wt(),kt(),Rt(),Vn()}));',
+  ].join('');
+  const main = [
+    'var qf={postMessage(){}},rp,ip;rp=class e{static getInstance(){return new e}dispatchMessage(e,t){if(qf==null)return;qf.postMessage({...t,type:e})}deliverOrBufferMessage(){}dispatchHostMessage(e){this.deliverOrBufferMessage(e)}};ip=rp.getInstance(),vMe((e,t)=>{ip.dispatchMessage(e,t)});ip.dispatchHostMessage({type:`native`});',
+    'function uD(e){return da(dD,e===void 0?null:e)}dD=Rr(Q,(e,{get:t})=>{let n=e;return{activeWorkspaceRoot:n,isActiveWorkspaceRootLoading:!1,hostConfig:null}});',
+    'function Z7e({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+    'function readEffort(e){return e?.model_reasoning_effort??null}',
+    'function writeEffort(e,t){let P={settings:{reasoning_effort:null}},R=P?.settings.reasoning_effort??null;async function save(){await Gu().setDefaultModelConfig(e,t,null)}return{R,save}}',
+    'function mWt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}',
+    'function by(e,t,n){let{isBackgroundSubagentsEnabled:l=!0}={};return l?[{type:`multi-agent-action`},{type:`subagent-activity`}]:[]}',
+    'function eAn(e,t,n,r){let i=[];for(let e of r??[])if(e.type===`subAgentActivity`)i.push({parentConversationId:t});else if(!(e.tool!==`spawnAgent`))i.push({parentConversationId:t});return i}',
+    'export{ip as Zat,uD as pQ};',
+  ].join('');
+  const power = [
+    'function Dlt(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Fg(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}',
+    'function Slt(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){if(r!=null){let a=Tlt(e,{stripGptPrefix:i});for(let o of r.presets){let r=(0,Olt.default)(Dlt(o.filter(({reasoning_effort:e})=>(t||e!==`ultra`)&&(!n||e!==`xhigh`)).flatMap(({model:e,reasoning_effort:t})=>{let n=a.find(n=>n.model===e&&n.reasoningEffort===t);return n==null?[]:[n]}),e,i),({id:e})=>e);if(r.length>=3)return r}}let a=Dlt((t?[...Alt,jlt]:Alt).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);if(a.length>=3)return a;let o=Dlt(Mlt.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);return o.length>=3?o:[]}',
+    'var ki=[];function fd(){return!0}function p3(e,t){let n=e?.find(e=>e.model===t);return n==null?ki.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>fd(e.reasoningEffort))}',
+    'function Ncr(e){let xe=e.model,Se=e.models,Ye=e.power,x=!1,we=null,p=!0,tt=Se?.find(e=>e.model===xe),nt=Slt(Ye,{includeUltraInSlider:x,sliderModelsConfig:we,stripGptPrefix:!p}),it=nt;if(e.mode)it=it.filter(e=>e.model===xe);let at=Bw(it,tt==null?void 0:`${tt.model}:${tt.defaultReasoningEffort}`),ct=Clt(it,xe);return I8n({powerSelectionsWithXHigh:it,fallbackPowerSelection:at,selectedPowerSelectionWithXHigh:ct})}',
+    'function sEt(){return lEt(`recent-conversations`)}var tA=()=>({}),S=()=>({data:[]}),iA={useEffect(){}},tEt=()=>()=>{},eEt=e=>()=>e;',
+  ].join('');
+  const server = [
+    'var QH=`local`,XU=[];function YZ(e){return{createdAt:e.createdAt??0,updatedAt:e.updatedAt??0,recencyAt:e.recencyAt??null}}function Uqt(e){return e.ephemeral!==!0&&e.threadSource!==`ambient_suggestions`}',
+    'var $Z=t((()=>{}));function BYt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){let{createdAt:d,updatedAt:f,recencyAt:p}=YZ(e);return{id:n,hostId:t,title:i,cwd:e.cwd}}',
+    'async function WYt(e,t){return[]}',
+    'var cJ=class{},lXt=class{async loadThreadHydrationState(){}getThreadSummaryFromThread(e){return e}shouldSurfaceThreadSummary(){return!0}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return WYt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),useStateDbOnly:this.params.hostId!==QH},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({originators:e,cursor:t,limit:n,background:r=!1}){let i={limit:n,cursor:t,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,originators:e,sourceKinds:XU,useStateDbOnly:this.params.hostId!==QH},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...a,data:a.data.filter(Uqt)}}};',
+    'var M9t=class extends cJ{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}};',
+  ].join('');
+  let host = fs.readFileSync(target.extensionJsPath, 'utf8')
+    .replaceAll('p5', 'W5').replaceAll('jI', 'ik').replaceAll('hPe', 'Mke')
+    .replaceAll('Nd=class t{', 'Hd=class t{').replaceAll('new iI({', 'new bI({')
+    .replace('var Dle=require("path");W();$t();', 'var xPe=require("path");D();_A();bL();ZG();$t();');
+  fs.writeFileSync(target.extensionJsPath, host);
+  fs.writeFileSync(target.headerPath, header);
+  fs.writeFileSync(target.appMainPath, main);
+  fs.writeFileSync(target.appStatsigPath, power);
+  fs.writeFileSync(target.appServerManagerSignalsPath, server);
+}
+
+function configure26591761114Features(target) {
+  configure26590831748Features(target);
+  const assets = path.dirname(target.headerPath);
+  target.version = '26.5917.61114';
+  target.headerPath = path.join(assets, 'header-3c3e1bf81eb2.js');
+  target.appMainPath = path.join(assets, 'app-initial-f191f228bf6e.js');
+  target.appStatsigPath = path.join(assets, 'app-initial-c21e521188d8.js');
+  target.appServerManagerSignalsPath = path.join(assets, 'app-initial-875cab2118dd.js');
+  target.requestPath = target.appMainPath;
+  const header = [
+    'import{__t,i7}from"./app-initial-f191f228bf6e.js";',
+    'function Nn(){let c=v(),{authMethod:u}=ie(),d=l(),f=n(Rn),{data:p}=I(),m=ct(),y=0;return p}',
+    'function Cn(e){let d=i(Qe),f=v(),p=Je(),{authMethod:m}=ie(),a=e.a,r=e.r,ee=null,T=e=>e;let E=a.filter(T),D=_n(r.data,a,ee),F=D,b=null,o=null;return F.map(e=>(0,Z.jsx)(jn,{item:e,isActive:e.kind===`local`&&e.conversation!=null&&b===e.conversation.id,onClose:o,onActiveArchiveStart:p},e.key))}',
+    'function Nt(e){return e.key}function Pt(e){return e}function wn(e){return e.kind===`remote`}function Tn2(e){return e}',
+    'jn=(0,kn.memo)(function(e){let t=(0,On.c)(28),{item:n,isActive:r,onClose:a,onActiveArchiveStart:o}=e;switch(n.kind){case`local`:{let e,i;return t[21]!==r||t[22]!==n.conversation.hostId||t[23]!==n.conversation.id||t[24]!==o||t[25]!==a||t[26]!==e?(i=(0,Z.jsx)(tt,{conversationId:n.conversation.id,hostId:n.conversation.hostId,isActive:r,metaContent:e,onClick:a,onActiveArchiveStart:o}),t[21]=r,t[22]=n.conversation.hostId,t[23]=n.conversation.id,t[24]=o,t[25]=a,t[26]=e,t[27]=i):i=t[27],i}}});',
+    'const menu=(0,Q.jsx)(ze,{contentClassName:`!pb-0 mt-[9px]`,triggerButton:K,open:!0});',
+    'const outer={className:`flex max-h-[300px] w-[calc(var(--radix-popper-available-width)_-_var(--padding-panel))] flex-col gap-1`};',
+    'const scroll={className:`vertical-scroll-fade-mask flex max-h-[60vh] flex-col gap-0 overflow-y-auto pb-1`};',
+    'function Bn(e){let t=(0,Gn.c)(66),{allowInitialRouteBack:n,className:i,centerContent:a,desktopDeepLinkConversationId:o,title:s,onBack:c,trailing:u}=e,d=n!==void 0&&n;return s}',
+    'var Gn,Ln,Yn=e((()=>{Gn=y(),Ln=kn,c(),E(),s(),b(),o(),rt(),gt(),pt(),xt(),Le(),it(),ue(),K(),de(),Se(),L(),wt(),kt(),Rt(),Vn()}));',
+  ].join('');
+  const main = [
+    'var hp={postMessage(){}},Ep,Dp;Ep=class e{static getInstance(){return new e}dispatchMessage(e,t){if(hp==null)return;hp.postMessage({...t,type:e})}deliverOrBufferMessage(){}dispatchHostMessage(e){this.deliverOrBufferMessage(e)}};Dp=Ep.getInstance(),HLe((e,t)=>{Dp.dispatchMessage(e,t)});Dp.dispatchHostMessage({type:`native`});',
+    'function yit(e){return mi(OE,e===void 0?null:e)}OE=ua(Q,(e,{get:t})=>{let n=e;return{activeWorkspaceRoot:n,isActiveWorkspaceRootLoading:!1,hostConfig:null}});',
+    'function qvt({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+    'function readEffort(e){return e?.model_reasoning_effort??null}',
+    'function writeEffort(e,t){let P={settings:{reasoning_effort:null}},R=P?.settings.reasoning_effort??null;async function save(){await Gu().setDefaultModelConfig(e,t,null)}return{R,save}}',
+    'function lPn({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}',
+    'function by(e,t,n){let{isBackgroundSubagentsEnabled:l=!0}={};return l?[{type:`multi-agent-action`},{type:`subagent-activity`}]:[]}',
+    'function eAn(e,t,n,r){let i=[];for(let e of r??[])if(e.type===`subAgentActivity`)i.push({parentConversationId:t});else if(e.tool===`spawnAgent`)i.push({parentConversationId:t});return i}',
+    'export{Dp as __t,yit as i7};',
+  ].join('');
+  const power = [
+    'function lkn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Nf(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}',
+    'function ikn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){if(r!=null){let a=skn(e,{stripGptPrefix:i});for(let o of r.presets){let r=o.filter(({reasoning_effort:e})=>(t||e!==`ultra`)&&(!n||e!==`xhigh`)).flatMap(({model:e,reasoning_effort:t})=>{let n=a.find(n=>n.model===e&&n.reasoningEffort===t);return n==null?[]:[n]}),s=(0,ukn.default)(lkn(r,e,i),({id:e})=>e);if(s.length>=3)return s}}let a=lkn((t?[...fkn,pkn]:fkn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);if(a.length>=3)return a;let o=lkn(mkn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);return o.length>=3?o:[]}',
+    'var imt=[];function $x(){return!0}function L$(e,t){let n=e?.find(e=>e.model===t);return n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort)&&e.reasoningEffort!==`persistent`)}',
+    'function ndi(e){let tt=[],b=!1,Ae=null,f=!0,De=`gpt-6-astra`,Oe=[{model:`gpt-6-astra`}],ut=[],st=null,ct=ikn(tt,{includeUltraInSlider:b,sliderModelsConfig:Ae,stripGptPrefix:!f}),lt=`default`;let dt=Kz(ut,st==null?void 0:`${st.model}:${st.defaultReasoningEffort}`);return T8r({powerSelectionsWithXHigh:ut,fallback:dt})}',
+    'function onSelectReasoningEffort(){return!0}',
+    'function ae(e){return e}function gFn(e){return{data:[]}}function $V(){return{getDefault(){return{getHostId(){return`local`}}},getForHostId(){return null}}}function cFn(){return()=>{}}function sFn(e){return()=>{for(let t of e)t()}}var nH={useEffect(){},useState(){return[0,()=>{}]}};',
+    'function mFn(){return gFn(`recent-conversations`)}',
+  ].join('');
+  const server = [
+    'function $Yt(e){return e.ephemeral!==!0&&e.threadSource!==`ambient_suggestions`}function b$(e){return{updatedAt:Number(e.updatedAt??0)}}nullish()})})))()}function EZt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i,resumeState:a,latestCollaborationMode:o,workspaceKind:s=`project`,workspaceBrowserRoot:c,projectlessOutputDirectory:l,hasUnreadTurn:u}){return{id:n,hostId:t,cwd:e.cwd,title:i}}',
+    'var FG=class{},XZt=class{async loadThreadHydrationState(){}getThreadSummaryFromThread(e){return e}shouldSurfaceThreadSummary(){return!0}async listAllThreads({modelProviders:e,archived:t=!1,sourceKinds:n}){return kZt({sendRequest:this.params.requestClient.sendRequest.bind(this.params.requestClient),recentConversationsSortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),useStateDbOnly:this.params.hostId!==tn},{modelProviders:e,archived:t,sourceKinds:n})}async listArchivedThreads(){return[]}async listRecentThreads({originators:e,cursor:t,limit:n,background:r=!1}){let i={limit:n,cursor:t,sortKey:this.params.requestClient.getCompatibleThreadSortKey(this.recentConversationSortKey),modelProviders:null,archived:!1,originators:e,sourceKinds:at,useStateDbOnly:this.params.hostId!==tn},a=await this.params.requestClient.sendRequest(`thread/list`,i,r?{priority:`background`,source:`recent_threads`}:{source:`recent_threads`});return{...a,data:a.data.filter($Yt)}}};',
+    'var s8t=class extends FG{async listAllThreads({modelProviders:e,archived:t=!1}){return this.threadStore.listAllThreads({modelProviders:e,archived:t})}async listArchivedThreads(){return[]}};',
+  ].join('');
+  const watchdog = 'var uD=class{constructor(e){this.onTimeout=e}start(){let e=Date.now();this.timeout=setTimeout(()=>{this.timeout=void 0,this.onTimeout({elapsedMs:Date.now()-e,receivedWebviewMessage:this.receivedWebviewMessage,timeoutMs:3e4})},3e4)}handleStartupPhase(e){e==="renderer_ready"&&this.dispose()}dispose(){}};var cLe=require("node:child_process");';
+  const host = 'pm=class t{async initializeWebview(e,r,n,o){let s=new uD(()=>{});this.registerClientCoordinationForWebview(e,n,s);let a=e.onDidReceiveMessage(u=>{if(u.type==="ready"){o?.()}this.handleMessage(e,u)});this.subscriptions.push(a)}createClientCoordinationSession(e,r,n){let o={};return this.registerAppHostSessionForWebview(e,r,o,n)}registerAppHostSessionForWebview(e,r,n,o){return{appView:new xM({startup:{reach:a=>o.handleStartupPhase(a)}})}}};';
+  fs.writeFileSync(target.extensionJsPath, extensionText
+    .replace('var Dle=require("path");W();$t();', 'var e1e=require("path");O();vP();_B();hH();Zt();')
+    .replace('e.onDidReceiveMessage(n=>{let o=a2(n);o!=null&&this.#a(o.message)})', 'e.onDidReceiveMessage(n=>{let o=ute(n);o==null||o.sessionId!==this.#r||this.#a(o.message)})')
+    .replace('var Ll=class{async initializeWebview(e,r,n,o){let s=e.onDidReceiveMessage(a=>{if(a.type==="ready"){o?.()}this.handleMessage(e,a)});this.subscriptions.push(s)}};', '') + watchdog + host);
+  fs.writeFileSync(target.headerPath, header);
+  fs.writeFileSync(target.appMainPath, main);
+  fs.writeFileSync(target.appStatsigPath, power);
+  fs.writeFileSync(target.appServerManagerSignalsPath, server);
+}
+
+
+function configure26591762051Features(target) {
+  configure26591761114Features(target);
+  target.version = '26.5917.62051';
+  const extension = fs.readFileSync(target.extensionJsPath, 'utf8')
+    .replaceAll('var uD=class{', 'var aD=class{')
+    .replaceAll('new uD(', 'new aD(')
+    .replaceAll('var cLe=require("node:child_process")', 'var oLe=require("node:child_process")')
+    .replaceAll('pm=class t{', 'dm=class t{')
+    .replaceAll('new xM({', 'new SM({')
+    .replaceAll('var e1e=require("path");O();vP();_B();hH();Zt();', 'var Z2e=require("path");O();gT();xB();yG();Zt();')
+    .replaceAll('let o=ute(n)', 'let o=ate(n)');
+  fs.writeFileSync(target.extensionJsPath, extension);
+}
+
 function restoreSafe26721Layout(text) {
   return text
     .replace('(0,Z.jsx)(codexLocalGroupsProjectRowsView,{items:F,activeId:b,onClose:i,row:Jn,onActiveArchiveStart:p})', 'codexRecentTaskProjectRows(F,b,i,Jn,p)')
@@ -2064,6 +2251,357 @@ module.exports = {
       },
     },
     {
+      name: 'writes nothing before rejecting unknown or suffixed Codex 26.5908 builds',
+      run() {
+        for (const version of ['26.5908.99999', '26.5908.31748.1', '26.5908.31748-insider', '26.5909.1']) {
+          const target = createTarget();
+          configure26590831748Features(target);
+          target.version = version;
+          const before = fs.readFileSync(target.headerPath, 'utf8');
+          const mtime = fs.statSync(target.headerPath).mtimeMs;
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+          assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), before);
+          assert.strictEqual(fs.statSync(target.headerPath).mtimeMs, mtime);
+        }
+      },
+    },
+    {
+      name: 'adapts the exact Codex 26.5908.31748 split topology and remains idempotent',
+      run() {
+        const target = createTarget();
+        configure26590831748Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 5);
+        const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        assert.ok(bundles[target.extensionJsPath].includes('timeoutMs:12e4})},12e4)'));
+        assert.ok(bundles[target.extensionJsPath].includes('if(codexLocalGroupsHandleWebviewMessage(n))return;let o=W5(n)'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265908PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsOpenedTitle265908PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('__codexLocalGroupsTitle265908:'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265908PatchVersion=2'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsDropdownTitle265908PatchVersion=1'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265908PatchVersion=2'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsProjectHistory265908HookPatchVersion=1'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265908StorePatchVersion=1'));
+        for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        const again = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(again.errors, []);
+        assert.strictEqual(again.changes.length, 0);
+      },
+    },
+    {
+      name: 'executes 26.5908.31748 project history, dropdown titles, and model efforts',
+      run() {
+        const target = createTarget();
+        configure26590831748Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        const serverScript = `const t=e=>e();${server};(async()=>{let pages={first:{data:[{id:'root',cwd:'/project',title:'Root',updatedAt:3},{id:'other',cwd:'/other',title:'Other',updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',title:'Child',updatedAt:1}],nextCursor:null}},requests=[],store={threadsById:new Map,listRecentThreads:e=>(requests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:e=>({conversationId:e.id,hostId:'local',title:e.title,cwd:e.cwd,workspaceKind:'project',hasUnreadTurn:false}),shouldSurfaceThreadSummary:()=>true},rows=await codexLocalGroupsLoadProjectConversations265908(store,'/project');console.log(JSON.stringify({ids:rows.map(e=>e.id),state:requests.map(e=>e.useStateDbOnly),originators:requests.map(e=>String(e.originators))}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { ids: ['root', 'child'], state: [true, true], originators: ['undefined', 'undefined'] });
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const resolver = main.slice(main.indexOf('function mWt('), main.indexOf('function by('));
+        const resolverResult = childProcess.spawnSync(resolveNodePath(), ['-e', `${resolver};console.log(mWt({title:'Native',titleOverride:'__codexLocalGroupsTitle265908:Local'}))`], { encoding: 'utf8' });
+        assert.strictEqual(resolverResult.stdout.trim(), 'Local');
+        const validation = main.slice(main.indexOf('function Z7e('), main.indexOf('function readEffort'));
+        const validationScript = `${validation};let models=[{model:'gpt-6-sol',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'},{model:'gpt-6-astra',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'}];console.log(JSON.stringify({sol:Z7e({userSavedModelString:'gpt-6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,astra:Z7e({userSavedModelString:'gpt-6-astra',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort}))`;
+        const validationResult = childProcess.spawnSync(resolveNodePath(), ['-e', validationScript], { encoding: 'utf8' });
+        assert.deepStrictEqual(JSON.parse(validationResult.stdout), { sol: 'max', astra: 'ultra' });
+        const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
+        assert.ok(power.includes('xe===`gpt-6-sol`'));
+        assert.ok(power.includes('for(let e of[`max`,`ultra`])'));
+        assert.ok(power.indexOf('for(let e of[`max`,`ultra`]') < power.indexOf('let at=Bw(it,'));
+      },
+    },
+    {
+      name: 'migrates 26.5908.31748 Sol/Astra Max Ultra v1 patches to include gpt-6-sol',
+      run() {
+        const target = createTarget();
+        configure26590831748Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8')
+          .replace('codexLocalGroupsCodexUi265908PatchVersion=2', 'codexLocalGroupsCodexUi265908PatchVersion=1')
+          .replace('(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)', '(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)');
+        const power = fs.readFileSync(target.appStatsigPath, 'utf8')
+          .replace('codexLocalGroupsPower265908PatchVersion=2', 'codexLocalGroupsPower265908PatchVersion=1')
+          .replaceAll('(xe===`gpt-5.6-sol`||xe===`gpt-6-sol`||xe===`gpt-6-astra`)', '(xe===`gpt-5.6-sol`||xe===`gpt-6-astra`)')
+          .replaceAll('(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)', '(t===`gpt-5.6-sol`||t===`gpt-6-astra`)');
+        fs.writeFileSync(target.appMainPath, main);
+        fs.writeFileSync(target.appStatsigPath, power);
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.deepStrictEqual(plan.changes.map((change) => change.path), [target.appMainPath, target.appStatsigPath]);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const nextMain = fs.readFileSync(target.appMainPath, 'utf8');
+        const nextPower = fs.readFileSync(target.appStatsigPath, 'utf8');
+        assert.ok(nextMain.includes('codexLocalGroupsCodexUi265908PatchVersion=2'));
+        assert.ok(nextMain.includes('r?.model===`gpt-6-sol`'));
+        assert.ok(nextPower.includes('codexLocalGroupsPower265908PatchVersion=2'));
+        assert.ok(nextPower.includes('xe===`gpt-6-sol`'));
+        assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+      },
+    },
+    {
+      name: 'fails closed when a 26.5908.31748 title contract is removed',
+      run() {
+        const target = createTarget();
+        configure26590831748Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const patched = 'function mWt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265908:`))return t.slice(`__codexLocalGroupsTitle265908:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+        fs.writeFileSync(target.appMainPath, main.replace(patched, 'function mWt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}'));
+        const before = fs.readFileSync(target.appMainPath, 'utf8');
+        const result = engine.apply(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(result.changed, []);
+        assert.ok(result.errors.includes('Codex UI 26.5908: 补丁标记不完整'));
+        assert.strictEqual(fs.readFileSync(target.appMainPath, 'utf8'), before);
+      },
+    },
+    {
+      name: 'writes nothing before rejecting unknown or suffixed Codex 26.5917 builds',
+      run() {
+        for (const version of ['26.5917.99999', '26.5917.61114.1', '26.5917.61114-insider', '26.5918.1']) {
+          const target = createTarget();
+          configure26591761114Features(target);
+          target.version = version;
+          const before = fs.readFileSync(target.headerPath, 'utf8');
+          const mtime = fs.statSync(target.headerPath).mtimeMs;
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+          assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), before);
+          assert.strictEqual(fs.statSync(target.headerPath).mtimeMs, mtime);
+        }
+      },
+    },
+    {
+      name: 'adapts the exact Codex 26.5917.61114 split topology and remains idempotent',
+      run() {
+        const target = createTarget();
+        configure26591761114Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 5);
+        const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        assert.ok(bundles[target.extensionJsPath].includes('timeoutMs:12e4})},12e4)'));
+        assert.ok(bundles[target.extensionJsPath].includes('if(codexLocalGroupsHandleWebviewMessage(n))return;let o=ute(n)'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265917PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsOpenedTitle265917PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('__codexLocalGroupsTitle265917:'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265917PatchVersion=2'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsDropdownTitle265917PatchVersion=1'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265917PatchVersion=2'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsProjectHistory265917HookPatchVersion=1'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265917StorePatchVersion=1'));
+        for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        const again = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(again.errors, []);
+        assert.strictEqual(again.changes.length, 0);
+      },
+    },
+    {
+      name: 'executes 26.5917.61114 project history, dropdown titles, and model efforts',
+      run() {
+        const target = createTarget();
+        configure26591761114Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        const load = server.slice(server.indexOf('function codexLocalGroupsProjectHistoryPath265917'), server.indexOf('function EZt('));
+        const serverScript = `${load}function b$(e){return{updatedAt:Number(e.updatedAt??0)}}function EZt({thread:e,hostId:t,conversationId:n,turns:r,threadTitle:i}){return{id:n,hostId:t,cwd:e.cwd,title:i}};(async()=>{let pages={first:{data:[{id:'root',cwd:'/project',title:'Root',updatedAt:3},{id:'other',cwd:'/other',title:'Other',updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',title:'Child',updatedAt:1}],nextCursor:null}},requests=[],store={threadsById:new Map,listRecentThreads:e=>(requests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:e=>({conversationId:e.id,hostId:'local',title:e.title,cwd:e.cwd,workspaceKind:'project',hasUnreadTurn:false}),shouldSurfaceThreadSummary:()=>true},rows=await codexLocalGroupsLoadProjectConversations265917(store,'/project');console.log(JSON.stringify({ids:rows.map(e=>e.id),state:requests.map(e=>e.useStateDbOnly),originators:requests.map(e=>String(e.originators))}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { ids: ['root', 'child'], state: [true, true], originators: ['undefined', 'undefined'] });
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const resolver = main.slice(main.indexOf('function lPn('), main.indexOf('function by('));
+        const resolverResult = childProcess.spawnSync(resolveNodePath(), ['-e', `${resolver};console.log(lPn({title:'Native',titleOverride:'__codexLocalGroupsTitle265917:Local'}))`], { encoding: 'utf8' });
+        assert.strictEqual(resolverResult.stdout.trim(), 'Local');
+        const validation = main.slice(main.indexOf('function qvt('), main.indexOf('function readEffort'));
+        const validationScript = `${validation};let models=[{model:'gpt-6-sol',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'},{model:'gpt-6-astra',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'}];console.log(JSON.stringify({sol:qvt({userSavedModelString:'gpt-6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,astra:qvt({userSavedModelString:'gpt-6-astra',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort}))`;
+        const validationResult = childProcess.spawnSync(resolveNodePath(), ['-e', validationScript], { encoding: 'utf8' });
+        assert.deepStrictEqual(JSON.parse(validationResult.stdout), { sol: 'max', astra: 'ultra' });
+        const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
+        assert.ok(power.includes('De===`gpt-6-sol`'));
+        assert.ok(power.includes('for(let e of[`max`,`ultra`])'));
+        assert.ok(power.indexOf('for(let e of[`max`,`ultra`]') < power.indexOf('let dt=Kz(ut,'));
+      },
+    },
+    {
+      name: 'fails closed when a 26.5917.61114 title contract is removed',
+      run() {
+        const target = createTarget();
+        configure26591761114Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const patched = 'function lPn({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265917:`))return t.slice(`__codexLocalGroupsTitle265917:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+        fs.writeFileSync(target.appMainPath, main.replace(patched, 'function lPn({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}'));
+        const before = fs.readFileSync(target.appMainPath, 'utf8');
+        const result = engine.apply(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(result.changed, []);
+        assert.ok(result.errors.includes('Codex UI 26.5917: 补丁标记不完整'));
+        assert.strictEqual(fs.readFileSync(target.appMainPath, 'utf8'), before);
+      },
+    },
+    {
+      name: 'adapts Codex 26.5917.62051 host aliases and stays idempotent',
+      run() {
+        const target = createTarget();
+        configure26591762051Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 5);
+        const extension = plan.changes.find((change) => change.path === target.extensionJsPath).nextText;
+        assert.ok(extension.includes('var aD=class{'));
+        assert.ok(extension.includes('timeoutMs:12e4})},12e4)'));
+        assert.ok(!extension.includes('timeoutMs:3e4})},3e4)'));
+        assert.ok(extension.includes('if(codexLocalGroupsHandleWebviewMessage(n))return;let o=ate(n)'));
+        assert.ok(!extension.includes('let o=ute(n)'));
+        assert.ok(extension.includes('let s=new aD('));
+        assert.ok(extension.includes('new SM({startup:{reach:a=>o.handleStartupPhase(a)}}'));
+        for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        const again = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(again.errors, []);
+        assert.strictEqual(again.changes.length, 0);
+      },
+    },
+    {
+      name: 'does not write when 26.5917.62051 still has 61114 host anchors',
+      run() {
+        const target = createTarget();
+        configure26591761114Features(target);
+        target.version = '26.5917.62051';
+        const before = fs.readFileSync(target.extensionJsPath, 'utf8');
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.length > 0);
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+        assert.strictEqual(fs.readFileSync(target.extensionJsPath, 'utf8'), before);
+      },
+    },
+    {
+      name: 'writes nothing before rejecting unknown or suffixed Codex 26.5903 builds',
+      run() {
+        for (const version of ['26.5903.99999', '26.5903.61454.1', '26.5903.61454-insider', '26.5904.1']) {
+          const target = createTarget();
+          configure26590361454Features(target);
+          target.version = version;
+          const before = fs.readFileSync(target.headerPath, 'utf8');
+          const mtime = fs.statSync(target.headerPath).mtimeMs;
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          assert.deepStrictEqual(engine.plan(target, { version: 1, conversations: {} }).changes, []);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+          assert.strictEqual(fs.readFileSync(target.headerPath, 'utf8'), before);
+          assert.strictEqual(fs.statSync(target.headerPath).mtimeMs, mtime);
+        }
+      },
+    },
+    {
+      name: 'adapts the exact Codex 26.5903.61454 split topology without widening native contracts',
+      run() {
+        const target = createTarget();
+        configure26590361454Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        assert.strictEqual(plan.changes.length, 5);
+        const bundles = Object.fromEntries(plan.changes.map((change) => [change.path, change.nextText]));
+        assert.ok(bundles[target.extensionJsPath].includes('timeoutMs:12e4})},12e4)'));
+        assert.ok(!bundles[target.extensionJsPath].includes('timeoutMs:3e4})},3e4)'));
+        assert.ok(bundles[target.extensionJsPath].includes('if(codexLocalGroupsHandleWebviewMessage(n))return;let o=p5(n)'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265903PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('codexLocalGroupsOpenedTitle265903PatchVersion=1'));
+        assert.ok(bundles[target.headerPath].includes('(0,codexHeaderOpenedReact.useState)'));
+        assert.ok(!bundles[target.headerPath].includes('(0,$.useState)'));
+        assert.ok(bundles[target.headerPath].includes('threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265903:`+n.conversation.title:void 0'));
+        assert.ok(bundles[target.headerPath].includes('u.map(e=>{'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265903PatchVersion=2'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsDropdownTitle265903PatchVersion=1'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265903PatchVersion=2'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsProjectHistory265903HookPatchVersion=1'));
+        assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265903StorePatchVersion=1'));
+        for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
+        const again = engine.plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(again.errors, []);
+        assert.strictEqual(again.changes.length, 0);
+      },
+    },
+    {
+      name: 'executes 26.5903.61454 paged project history and manager fallback independently',
+      run() {
+        const target = createTarget();
+        configure26590361454Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const server = plan.changes.find((change) => change.path === target.appServerManagerSignalsPath).nextText;
+        const serverScript = `const t=e=>e();${server};(async()=>{let pages={first:{data:[{id:'root',cwd:'/project',name:'Root',updatedAt:3},{id:'other',cwd:'/other',name:'Other',updatedAt:2}],nextCursor:'next'},next:{data:[{id:'child',cwd:'/project/sub',name:'Child',updatedAt:1}],nextCursor:null}},requests=[],store={threadsById:new Map,listRecentThreads:e=>(requests.push(e),Promise.resolve(e.cursor==null?pages.first:pages.next)),getThreadSummaryFromThread:e=>({conversationId:e.id,hostId:'local',title:e.name,cwd:e.cwd,workspaceKind:'project',hasUnreadTurn:false}),shouldSurfaceThreadSummary:()=>true},rows=await codexLocalGroupsLoadProjectConversations265903(store,'/project');let repeated={...store,listRecentThreads:()=>Promise.resolve({data:[],nextCursor:'same'})},repeat='';try{await codexLocalGroupsLoadProjectConversations265903(repeated,'/project')}catch(e){repeat=e.message}console.log(JSON.stringify({ids:rows.map(e=>e.id),flags:requests.map(e=>e.useStateDbOnly),repeat}))})()`;
+        const serverResult = childProcess.spawnSync(resolveNodePath(), ['-e', serverScript], { encoding: 'utf8' });
+        assert.strictEqual(serverResult.status, 0, serverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(serverResult.stdout), { ids: ['root', 'child'], flags: [true, true], repeat: 'App Server repeated a thread list cursor' });
+        const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
+        const hook = power.slice(power.indexOf('var codexLocalGroupsProjectHistory265903HookPatchVersion=1'));
+        const powerScript = `let manager={listAllThreads:()=>Promise.resolve([{id:'root',cwd:'/project',name:'Root',updatedAt:3},{id:'child',cwd:'/project/sub',name:'Child',updatedAt:2},{id:'other',cwd:'/other',name:'Other',updatedAt:1}]),getRecentConversations:()=>[]};function Jct(){return{data:[{id:'native'}],native:true}}function QE(){return{getDefault:()=>({getHostId:()=>\`local\`}),getForHostId:()=>manager}}function ac(e){return{...e,data:[],isError:false,refetch(){}}}let rD={useEffect(){}},Bct=()=>()=>{},zct=()=>()=>{};${hook};(async()=>{let native=qct(),fallback=await qct('/project','local',true).queryFn();manager={listProjectConversations:e=>Promise.resolve([{id:e,cwd:e}])};let preferred=await qct('/project','local',true).queryFn();console.log(JSON.stringify({native:native.native,ids:fallback.map(e=>e.id),preferred:preferred.map(e=>e.id)}))})()`;
+        const powerResult = childProcess.spawnSync(resolveNodePath(), ['-e', powerScript], { encoding: 'utf8' });
+        assert.strictEqual(powerResult.status, 0, powerResult.stderr);
+        assert.deepStrictEqual(JSON.parse(powerResult.stdout), { native: true, ids: ['root', 'child'], preferred: ['/project'] });
+      },
+    },
+    {
+      name: 'executes 26.5903.61454 dropdown titles and Sol Astra menu efforts',
+      run() {
+        const target = createTarget();
+        configure26590361454Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const main = plan.changes.find((change) => change.path === target.appMainPath).nextText;
+        const resolver = main.slice(main.indexOf('function YFt({title:e,titleOverride:t}){'), main.indexOf('function by('));
+        const resolverScript = `${resolver};console.log(JSON.stringify([YFt({title:'Native local',titleOverride:'__codexLocalGroupsTitle265903:Local title'}),YFt({title:'Native blank',titleOverride:void 0}),YFt({title:'Native local',titleOverride:'Native fallback'}),YFt({title:null,titleOverride:'Native fallback'})]));`;
+        const resolverResult = childProcess.spawnSync(resolveNodePath(), ['-e', resolverScript], { encoding: 'utf8' });
+        assert.strictEqual(resolverResult.status, 0, resolverResult.stderr);
+        assert.deepStrictEqual(JSON.parse(resolverResult.stdout), ['Local title', 'Native blank', 'Native local', 'Native fallback']);
+        const validation = main.slice(main.indexOf('function t0e({userSavedModelString:'), main.indexOf('function readEffort'));
+        const validationScript = `${validation};let models=[{model:'gpt-5.6-sol',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'},{model:'gpt-6-sol',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'},{model:'gpt-6-astra',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'},{model:'other',supportedReasoningEfforts:[{reasoningEffort:'low'}],defaultReasoningEffort:'low'}];console.log(JSON.stringify({sol:t0e({userSavedModelString:'gpt-5.6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,sol6:t0e({userSavedModelString:'gpt-6-sol',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort,astra:t0e({userSavedModelString:'gpt-6-astra',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort,other:t0e({userSavedModelString:'other',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort}))`;
+        const validationResult = childProcess.spawnSync(resolveNodePath(), ['-e', validationScript], { encoding: 'utf8' });
+        assert.strictEqual(validationResult.status, 0, validationResult.stderr);
+        assert.deepStrictEqual(JSON.parse(validationResult.stdout), { sol: 'max', sol6: 'ultra', astra: 'ultra', other: 'low' });
+        const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
+        const menu = power.slice(power.indexOf('function U4(e,t){'), power.indexOf('function rGn('));
+        const menuScript = `var bYe=[];function fv(){return!0};${menu};console.log(JSON.stringify({sol:U4([{model:'gpt-5.6-sol',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}]}],'gpt-5.6-sol').map(e=>e.reasoningEffort),other:U4([{model:'other',supportedReasoningEfforts:[{reasoningEffort:'low'}]}],'other').map(e=>e.reasoningEffort)}))`;
+        const menuResult = childProcess.spawnSync(resolveNodePath(), ['-e', menuScript], { encoding: 'utf8' });
+        assert.strictEqual(menuResult.status, 0, menuResult.stderr);
+        assert.deepStrictEqual(JSON.parse(menuResult.stdout), { sol: ['xhigh', 'max', 'ultra'], other: ['low'] });
+      },
+    },
+    {
+      name: 'fails closed when the 26.5903.61454 dropdown resolver is removed',
+      run() {
+        const target = createTarget();
+        configure26590361454Features(target);
+        const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+        const main = fs.readFileSync(target.appMainPath, 'utf8');
+        const resolver = 'function YFt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265903:`))return t.slice(`__codexLocalGroupsTitle265903:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}';
+        fs.writeFileSync(target.appMainPath, main.replace(resolver, 'function YFt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}'));
+        const before = fs.readFileSync(target.appMainPath, 'utf8');
+        const mtime = fs.statSync(target.appMainPath).mtimeMs;
+        const plan = engine.plan(target, { version: 1, conversations: {} });
+        assert.ok(plan.errors.includes('Codex UI 26.5903: 补丁标记不完整'));
+        assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+        assert.strictEqual(fs.readFileSync(target.appMainPath, 'utf8'), before);
+        assert.strictEqual(fs.statSync(target.appMainPath).mtimeMs, mtime);
+      },
+    },
+    {
       name: 'adapts the exact Codex 26.5901.22334 split topology without widening native contracts',
       run() {
         const target = createTarget();
@@ -2087,12 +2625,12 @@ module.exports = {
         assert.ok(bundles[target.headerPath].includes('(0,Ln.useState)(0);(0,Ln.useEffect)'));
         assert.ok(!bundles[target.headerPath].includes('(0,$.useState)(0);(0,$.useEffect)'));
         assert.ok(bundles[target.headerPath].includes('threadSummary:n.conversation,titleOverride:codexLocalGroupsLocalTitle(n)?`__codexLocalGroupsTitle265901:`+n.conversation.title:void 0'));
-        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265901PatchVersion=2'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265901PatchVersion=3'));
         assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsDropdownTitle265901PatchVersion=1'));
-        assert.ok(bundles[target.appMainPath].includes('(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)'));
+        assert.ok(bundles[target.appMainPath].includes('(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)'));
         assert.ok(bundles[target.appMainPath].includes('var nativeUserSettings={multi_agent:!0,multi_agent_v2:!0,canInteract:!0,provider:`native`,model:`native`,reasoning:`native`};'));
         assert.ok(bundles[target.appMainPath].includes('function by(e,t,n){let{isBackgroundSubagentsEnabled:l=!0}={}'));
-        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265901PatchVersion=2'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265901PatchVersion=3'));
         assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsProjectHistory265901HookPatchVersion=1'));
         assert.ok(bundles[target.appStatsigPath].includes('$Nn((t?[...nPn,rPn]:nPn).filter'));
         assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265901StorePatchVersion=1'));
@@ -2130,15 +2668,15 @@ module.exports = {
         assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
         const main = fs.readFileSync(target.appMainPath, 'utf8');
         const power = fs.readFileSync(target.appStatsigPath, 'utf8');
-        const sliderStart = power.indexOf('if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)');
+        const sliderStart = power.indexOf('if((U===`gpt-5.6-sol`||U===`gpt-6-sol`||U===`gpt-6-astra`)');
         const sliderEnd = power.indexOf('let Ue=N0(He,');
         assert.ok(sliderStart >= 0 && sliderEnd > sliderStart);
         const legacyMain = main
-          .replace('codexLocalGroupsCodexUi265901PatchVersion=2', 'codexLocalGroupsCodexUi265901PatchVersion=1')
-          .replace('a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort', 'a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort')
+          .replace('codexLocalGroupsCodexUi265901PatchVersion=3', 'codexLocalGroupsCodexUi265901PatchVersion=1')
+          .replace('a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort', 'a=t!=null&&i!=null&&(i.includes(t)||r?.model===`gpt-5.6-sol`&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort')
           .replace('var codexLocalGroupsDropdownTitle265901PatchVersion=1;function yMt({title:e,titleOverride:t}){if(typeof t===`string`&&t.startsWith(`__codexLocalGroupsTitle265901:`))return t.slice(`__codexLocalGroupsTitle265901:`.length);if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}', 'function yMt({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}');
-        const legacyPower = power.replace('codexLocalGroupsPower265901PatchVersion=2', 'codexLocalGroupsPower265901PatchVersion=1')
-          .replace('function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}', 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}')
+        const legacyPower = power.replace('codexLocalGroupsPower265901PatchVersion=3', 'codexLocalGroupsPower265901PatchVersion=1')
+          .replace('function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}', 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}')
           .replace(power.slice(sliderStart, sliderEnd), '');
         fs.writeFileSync(target.appMainPath, legacyMain);
         fs.writeFileSync(target.appStatsigPath, legacyPower);
@@ -2157,10 +2695,10 @@ module.exports = {
         const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
         assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
         const power = fs.readFileSync(target.appStatsigPath, 'utf8');
-        const sliderStart = power.indexOf('if((U===`gpt-5.6-sol`||U===`gpt-6-astra`)');
+        const sliderStart = power.indexOf('if((U===`gpt-5.6-sol`||U===`gpt-6-sol`||U===`gpt-6-astra`)');
         const sliderEnd = power.indexOf('let Ue=N0(He,');
-        const legacy = power.replace('codexLocalGroupsPower265901PatchVersion=2', 'codexLocalGroupsPower265901PatchVersion=1')
-          .replace('function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}', 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}')
+        const legacy = power.replace('codexLocalGroupsPower265901PatchVersion=3', 'codexLocalGroupsPower265901PatchVersion=1')
+          .replace('function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}', 'function i3(e,t){let n=e?.find(e=>e.model===t),r=n==null?TKe.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>av(e.reasoningEffort));return t===`gpt-5.6-sol`&&(r.some(e=>e.reasoningEffort===`max`)||r.push({description:``,reasoningEffort:`max`}),r.some(e=>e.reasoningEffort===`ultra`)||r.push({description:``,reasoningEffort:`ultra`})),r}')
           .replace(power.slice(sliderStart, sliderEnd), '');
         const renderStart = legacy.indexOf('tn=(0,h3.jsx)(h3.Fragment,{children:(0,h3.jsx)(uKn,{');
         const renderEnd = legacy.indexOf('}),e.cache=Ge', renderStart) + 2;
@@ -2177,13 +2715,13 @@ module.exports = {
       },
     },
     {
-      name: 'rejects mixed and duplicate 26.5901.22334 v2 markers before writes',
+      name: 'rejects mixed and duplicate 26.5901.22334 v3 markers before writes',
       run() {
         const variants = [
           ['appMainPath', 'codexLocalGroupsCodexUi265901PatchVersion', 'Codex UI 26.5901: 补丁标记不完整'],
           ['appStatsigPath', 'codexLocalGroupsPower265901PatchVersion', 'Codex power 26.5901: 补丁标记不完整'],
         ];
-        for (const [property, marker, error] of variants) for (const version of [1, 2]) {
+        for (const [property, marker, error] of variants) for (const version of [1, 2, 3]) {
           const target = createTarget();
           configure26590122334Features(target);
           const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });

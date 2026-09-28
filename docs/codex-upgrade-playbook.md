@@ -1,9 +1,10 @@
 # OpenAI Codex 升级适配手册
 
-> 基线日期：2026-09-05
-> 适配目标 Codex：`openai.chatgpt@26.5901.22334`
-> 当前 active Codex：`openai.chatgpt@26.5901.22334`
-> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.68`
+> 基线日期：2026-09-15
+> 适配目标 Codex：`openai.chatgpt@26.5917.62051`
+> 当前 active Codex：`openai.chatgpt@26.5917.62051`
+> 仍保留 exact build：`26.5917.61114`
+> 当前仓库 Local Groups：`xinghezhiyuan.vscode-codex-groups@0.0.73`
 
 本文档是下一次 OpenAI Codex VSCode 扩展升级时的执行基线。目标不是复制旧 bundle 的压缩变量名，而是恢复下文明确的功能契约、安全边界和验证门禁。
 
@@ -27,7 +28,7 @@ Codex 升级后，应该恢复成以下状态：
 14. `26.721.41059` 的自定义 provider 使用 HTTP fallback，避免恢复压缩历史时 WS 请求丢失原生工具；不写 `config.toml`。
 15. Webview 错误页不能单独证明资源缺失；必须对时 root render、route mount、ready 和 timeout。`61,906ms` 是旧版真实 route mount 耗时，不是 120 秒补丁引入的等待；`26.5803.41515` clean 基线为 `34,566ms`，当前 `26.5803.61601` patched 实测为 `66,081ms`，后续每个 build 仍须独立测量。`26.5730` / `26.5803` / `26.5810` / `26.5814` / `26.5818` / `26.5825` 使用版本限定的 `120s` 看门狗。`26.5810` 必须改 `jP`，`26.5814` 必须改 `YI`，`26.5818` 必须改唯一真实 `QP`，`26.5825` 必须改唯一真实 `yP` 并绑定 `Cd.registerAppHostSessionForWebview -> new kI({startup}) -> renderer_ready`；不能退回旧锚点，也不能用字符串、不可达对象或 nested decoy 冒充真实看门狗。
 16. 每次升级必须先读相关 OpenSpec change 和本手册，严格按全量矩阵调研、实现、验证和留证。主线程负责常规 Reload/UI/性能验收，不把检查清单交给用户；发现遗漏先补 requirement、失败测试和 verifier 负例，再改实现并重跑全部适用项。
-17. 自 2026-09-05 用户确认起，`26.5901.22334` 的 Sol/Astra Max/Ultra 必须覆盖菜单、紧凑与展开拖拽条、选中回调和保存回读；仅菜单有文字不算适配。旧版本 Sol-only 行为保留，但后续升级必须继承 Sol/Astra 的完整验收范围，不再沿用旧“滑块不扩展”约束。不修改用户默认模型、推理档位、全局偏好或 multi-agent 配置。
+17. 自 2026-09-05 用户确认起，`26.5901.22334` 及后续版本的 Sol/Astra Max/Ultra 必须覆盖菜单、紧凑与展开拖拽条、选中回调和保存回读；仅菜单有文字不算适配。2026-09-23 起当前模型集为 `gpt-5.6-sol`、`gpt-6-sol`、`gpt-6-astra`。旧版本 Sol-only 行为保留，但后续升级必须继承完整验收范围，不得只测 5.6 Sol。不修改用户默认模型、推理档位、全局偏好或 multi-agent 配置。
 
 ## 2. 当前调用链
 
@@ -285,7 +286,8 @@ Header 是升级最容易漂移的部分。新版必须通过语义重新确认�
 
 以上旧版 Sol-only 符号仅供定位历史实现。当前 5901 及后续升级以以下补充契约为准：
 
-- 同时覆盖当前可用的 `gpt-5.6-sol`、`gpt-6-astra`；不凭空增加不可用模型，不扩大其他模型。
+- 同时覆盖当前目录里声明了 `max`/`ultra` 的 Sol/Astra 模型：`gpt-5.6-sol`、`gpt-6-sol`、`gpt-6-astra`。新出现的 Sol slug（例如未来的 `gpt-7-sol`）必须先对照 `models_cache_bundled.json` / `model/list` 的 `supported_reasoning_levels`，确认有 `max`/`ultra` 后再加入同一守卫；不凭空增加不可用模型，不扩大 Terra/Luna 或其他模型。
+- 2026-09-23：`gpt-6-sol` 目录已有六档，但原生滑块和旧守卫仍停在 Extra High/`xhigh`。只验收 5.6 Sol 或 Astra 不能代替 6 Sol。菜单、紧凑/展开拖拽条、保存回读必须三个模型一起过。
 - 分别检查原始目录、过滤后目录、reasoning menu、紧凑/展开 slider 的实际输入和消费者。5901 `nZe` 会按 enabled efforts / Ultra 开关过滤，`JNn` 默认预设不含 Max；目录里有档位不能证明滑块里有档位。
 - 复用原生鼠标/键盘/重置、设置 cache/write/readback；两模型 Max 在 Ultra 前且不重复，显式选择后模型 ID 和 effort 不回退。不通过改 `config.toml`、模型目录或全局开关凑 PASS。
 - 测试必须输入被过滤到 xhigh 的模型列表，并执行两个实际 slider 消费入口和持久化调用；删除真实 consumer、放入同名 nested/later/死代码 decoy、旧 marker 不完整，都必须 fail closed。
@@ -372,7 +374,7 @@ multi_agent_v2 = true
 | 分组列表 | 两组各 5；单组 +10；15/5 收起；active 额外保留；隐藏数；600px、scroll、sticky |  |  |  |  |  |
 | Metadata 四入口 | 设置标题、设置分组、新建分组、分组内新会话；真实 messenger、host callback、`metadataSaved` |  |  |  |  |  |
 | 标题双消费 | 同 ID 原生 A/本地 B；下拉和 `Bn` 都显示 B；空白/缺失都回退 A；即时双刷新；cleanup；不写原生标题 |  |  |  |  |  |
-| Sol/Astra | Max/Ultra 的菜单、紧凑/展开拖拽、键盘、重置、写入/回读；顺序/去重；过滤目录输入与 consumer 负例；不可用及其他模型不变 |  |  |  |  |  |
+| Sol/Astra | Max/Ultra 的菜单、紧凑/展开拖拽、键盘、重置、写入/回读；模型集 `gpt-5.6-sol` / `gpt-6-sol` / `gpt-6-astra`；顺序/去重；过滤目录输入与 consumer 负例；不可用及其他模型不变 |  |  |  |  |  |
 | 子 agent | V1/V2 transcript producer；membership producer/export；parent/`Een`/`wen`/`visibleRows`/`xn`/`_Rt`；按用户配置实测 |  |  |  |  |  |
 | 用户配置 | `config.toml` 内容哈希和 mtime 前后不变；不得改 V1/V2、provider 或认证 |  |  |  |  |  |
 | 安装与状态 | VSIX、安装目录、active registry、plan 0、Check Status；无 debug、临时代码或凭证 |  |  |  |  |  |
@@ -513,6 +515,7 @@ code --install-extension ./vscode-codex-groups-<version>.vsix --force
 6. 从已安装目录再跑 compile / plan / verifier，确认安装产物与仓库源码一致。
 7. 生成契约或 marker 变更时，必须逐一比对仓库与 active 安装目录的 `patchEngine.js` 和 `verify-patched-bundles.js` 哈希。仅在仓库运行成功、或仅用仓库引擎修改 Codex live bundle，不得标记完成。
 8. 安装后必须 Reload 启动新的 Extension Host，检查 `Codex Local Groups` 输出不含“版本不兼容”或“补丁未应用”，并实际执行本次受影响的 UI 入口。安装目录 plan 0/verifier 不得代替 Reload 后检查。
+9. 读取新 Codex `package.json.extensionDependencies`。若包含 `openai.codex-audio`：安装匹配 build 的 Codex Audio；若其 `extensionKind` 为 `ui`，Remote-SSH 上仅拷贝到 `~/.vscode-server/extensions` 会被自动禁用，必须同时设置 `remote.extensionKind["openai.codex-audio"]=["workspace"]`，或改为在本地 UI 侧安装。不要用「安装并重新加载」对话框覆盖已有正确副本。Reload 后 Codex 必须能激活。
 
 ### 步骤 8：Reload 后主线程验收
 
@@ -1165,3 +1168,101 @@ Review 还暴露了 V1/V2 门禁的假阳性：独立 `includes` 与有界正则
 - fresh official clean：plan 5、apply 5、语法 6、external verifier、幂等与二次 plan 0 通过；unknown/suffix 零写入、标题双消费、真实分页 History、两条子 agent 消费链、Sol-only Power 与 native slider 均覆盖。
 - live：官方 Codex VSIX 已安装并对 5 bundle 执行 Repair；active Local Groups `0.0.66` 的 engine/verifier 与仓库一致，安装目录 compile、plan 0、verifier 通过。`config.toml` 的 SHA-256/mtime 未变化；所有本次归属的 `.codex-upgrade` 与 `/tmp/codex-*`/`clg-*` 临时产物已清理。
 - Reload：首次 host 的 `$` hooks error 已作为失败证据保留；修复后 live Header 为 `Ln` hooks、`$` 不含 hooks，并有执行级 runtime 等价验证。当前 remote CLI 无法向既有用户窗口发送 `Developer: Reload Window`，因此真实 UI Reload 结果保持 pending，不得写为 PASS。
+
+## 22. Codex 26.5903.61454 适配记录
+
+### 获取、拓扑与精确映射
+
+- 官方 linux-x64 为 `openai.chatgpt@26.5903.61454`，VSIX SHA-256 为 `3b38f21c65e0a2f35e5f47efc0ace8405a46ea2bc90abbb0b10f995c292a0d8c`。
+- 现有 locator 仍唯一命中五 bundle：Host `out/extension.js`，Header `header-31d7d84f9363.js`，Main `app-initial-1338e8d6a2c6.js`，Power `app-initial-651b098e975e.js`，Server `app-initial-3ec16fef3ca9.js`。
+- Host 为 `jI/Nd/iI/p5/hPe`；Header 为 `Fn/Tn/Nn/P/Hn`，opened-title React 为 Yn 模块 `Ln`；Main 为 `ef -> grt`、`sE -> aX`、`YFt`、`t0e`；Power 为 `U4/Alt/Flt/S0n/qct`；Server 为 `pWt/M2t/QUt/rHt/xG/nWt`。
+- exact-build 白名单只放行 `26.5903.61454`。未知 build、带后缀和未来 minor 在恢复 backup 或写入前 fail closed。不得把 5903 塞进 5901 change。
+
+### 根因与防复发
+
+1. 5901 Host 锚点 `heartbeatTimer` / `GI/Dd/tI/J9` 在 5903 全部失效；必须绑定 `jI` 的 `3e4 -> 12e4` 与 `Nd -> new iI({startup}) -> renderer_ready`。
+2. Header 下拉不再传 `titleOverride`；真实解析器是 Main `YFt` 且原生 title 优先。必须使用 `__codexLocalGroupsTitle265903:` marker，并让 decorator 进入 `u.map`。
+3. 打开页 `Hn` 的 JSX 是 `$`，hooks 必须来自同一 Yn 模块的 `Ln=t(T(),1)`。
+4. Power 滑块消费不再是 `CKn/uKn`，而是 `S0n` 把 `qe` 交给 `rGn({powerSelectionsWithXHigh:qe})`。菜单是 `U4`。
+5. 项目历史 hook 入口从 `Sat` 变为无参 `qct()`；补丁后无参仍走原生 `Jct`，带 root 才走项目过滤。
+
+## 23. Codex 26.5908.31748 适配记录
+
+### 获取、拓扑与精确映射
+
+- 官方 linux-x64 为 `openai.chatgpt@26.5908.31748`，VSIX SHA-256 为 `7a359b93b200e4406eb19858a48fa7e2da6ed557d3579ad8ec6b63ee4d354b45`。
+- 五 bundle 为 Host `out/extension.js`、Header `header-8aa6e5b9570e.js`、Main `app-initial-972655adec02.js`、Power `app-initial-84c784f5e305.js`、Server `app-initial-c027c57a4b11.js`。
+- exact-build 白名单只放行 `26.5908.31748`。未知 build、带后缀版本和未来 minor 必须在恢复 backup 或写入前 fail closed。
+
+### 本次变化、根因与固定方案
+
+1. Host aliases 变为 `ik/Hd/bI/W5/Mke`，metadata helper 锚点变为 `xPe` 初始化链。120 秒仅修改 `ik`，并验证 `Hd -> bI startup -> renderer_ready -> dispose`。
+2. Header aliases 变为 `Cn/Nn/jn/Te/Bn`；打开页 hooks 必须使用本 bundle 已存在的 React `Ln`。标题通过 `__codexLocalGroupsTitle265908:` 传给 Main 唯一解析器 `mWt`，保存/清除后两处都监听既有 refresh 事件即时回显。
+3. Server `listRecentThreads` 新增 `originators`。项目历史必须显式传 `originators:void 0`、`useStateDbOnly:true`，遍历全部 cursor，并在重复 cursor 时失败，禁止退回共享最近会话或伪造 metadata 行。
+4. Power 的真实消费者是 `Ncr` 最终数组 `it`。Max/Ultra 必须在所有原生变换结束后、`Bw/Clt/I8n` 消费前插入；同时保持 Main `Z7e` 与菜单 `p3` 一致，仅影响可用的 Sol/Astra。
+5. 不修改 `~/.codex/config.toml`、Multi-Agent V1/V2 或其他用户配置。子 agent 展示只验证并保留上游既有链，不借升级适配改变用户选择。
+
+### 强制回归与清理
+
+- locator、exact/unknown/suffix、五 bundle 幂等、标题双消费、分组桥、真实项目分页、`originators`、state DB、重复 cursor、Max/Ultra 最终消费点、看门狗 ready 链、external verifier 都必须通过。
+- official clean 必须完成 plan 5、apply 5、Host/Header/Main/Power/Server/request 语法、external verifier、二次 plan 0。
+- 成功或失败都必须删除本次 VSIX、解压目录、patch backup 和测试临时目录；报告前再次检查不存在任务归属的 `/tmp/codex-upgrade-*`、`codex-patch-*` 等残留。
+
+## 24. Codex 26.5917.61114 适配记录
+
+### 获取、拓扑与精确映射
+
+- 官方 linux-x64 为 `openai.chatgpt@26.5917.61114`。
+- 拆包拓扑为 Host `out/extension.js`、Header `header-3c3e1bf81eb2.js`、UI `app-initial-f191f228bf6e.js`、Power `app-initial-c21e521188d8.js`、Server `app-initial-875cab2118dd.js`。
+- Host 为 `uD/pm/xM/ute/cLe`；Header 为 `Cn/Nn/jn/tt/Bn`，打开页 hooks 使用本 bundle `Ln`；UI 为 `Dp -> __t`、`yit -> i7`、`lPn`、`qvt`；Power 为 `L$/ikn/lkn/ndi/mFn`；Server 为 `XZt/s8t/EZt/$Yt/at/tn`。
+- exact-build 白名单只放行 `26.5917.61114`。未知 build、带后缀版本和未来 minor 必须在恢复 backup 或写入前 fail closed。不得把 5917 塞进 5908 change。
+
+### 本次变化、根因与固定方案
+
+1. 26.5908 的合包别名全部失效。Host 看门狗改为 `uD` 的 `3e4 -> 12e4`，并验证 `pm -> new xM({startup}) -> renderer_ready -> dispose`；metadata 解析器改为 `ute`，webview 消息参数改为 `u`。
+2. Header 下拉仍用 `titleOverride` 字符串 marker，但解析器迁到 UI `lPn`。必须使用 `__codexLocalGroupsTitle265917:`，decorator 进入 `u.map`，打开页 `Bn` 的 title 参数是 `s`、会话 ID 是 `o`。
+3. Power 真实滑块消费者是 `ndi` 最终数组 `ut`。Max/Ultra 必须在原生变换结束后、`Kz(ut,st...)` 之前插入；菜单是 `L$`，且原生会过滤 `persistent`。
+4. Server `listRecentThreads` 继续带 `originators`。项目历史必须显式传 `originators:void 0`、`useStateDbOnly:true`，遍历全部 cursor，重复 cursor 失败。hook 入口从 `sEt` 变为 `mFn`，fallback 仍走 `gFn('recent-conversations')`。
+5. 不修改 `~/.codex/config.toml`、Multi-Agent V1/V2 或其他用户配置。子 agent 展示只验证并保留上游既有链。
+6. 下次升级必须先按本手册和 OpenSpec 做 exact-build、五/六 bundle 拓扑、独立 verifier 和完整回归，不得漏项后再靠人工发现。
+
+### 强制回归与清理
+
+- locator、exact/unknown/suffix 零写入、五 bundle 幂等、标题双消费、分组桥、真实项目分页、`originators`、state DB、重复 cursor、Max/Ultra 最终消费点、看门狗 ready 链、external verifier 都必须通过。
+- official clean 必须完成 plan 5、apply 5、Host/Header/UI/Power/Server 语法、external verifier、二次 plan 0。
+- 成功或失败都必须删除本次 VSIX、解压目录、patch backup 和测试临时目录。
+
+## 25. Codex 26.5917.62051 适配记录
+
+### 获取、拓扑与精确映射
+
+- 官方 linux-x64 为 `openai.chatgpt@26.5917.62051`。压缩包 SHA-256 为 `a84e1ed2d2a7b72758743d74bbfb3f00dca28aba245b783cbc2b4935d76046c3`，解压后 VSIX SHA-256 为 `fa1dbd62788feb7bac15bc86e165aa1e6f0b56be7e364b1754310ef1d576e60c`。
+- Header `header-285c8768a8fe.js`、UI `app-initial-23be8abe8439.js`、Power `app-initial-e1095a48091e.js`、Server `app-initial-4a1ac6d05078.js` 的 61114 语义锚点仍唯一命中。
+- Host 不能复用 61114。看门狗由 `uD` 改为 `aD`，宿主类由 `pm` 改为 `dm`，startup 对象由 `new xM({` 改为 `new SM({`，metadata 锚点为 `var Z2e=require("path");O();gT();xB();yG();Zt();`，capn 解析器由 `ute` 改为 `ate`。
+- exact-build 白名单同时放行 `26.5917.61114` 与 `26.5917.62051`。未知 build、带后缀版本和未来 minor 必须在恢复或写入前 fail closed。不得用 61114 Host 符号去补 62051。
+
+### 本次变化、根因与固定方案
+
+1. 62051 只重压缩/重命名 Host。若把 build 直接加入 61114 白名单，会命中另一个 `var uD=class{`，看门狗不会延长到 120 秒，metadata 桥也不会注入。
+2. Header、标题双消费、Power Max/Ultra、项目历史 `originators` 与子 agent 展示链保持 61114 契约。
+3. 不修改 `~/.codex/config.toml`、Multi-Agent V1/V2 或其他用户配置。
+
+### 强制回归与清理
+
+- 61114 fixture 保持通过；62051 必须验证 `aD/ate/SM`，并且 62051 版本配 61114 Host 锚点时零写入。
+- official clean 必须完成 plan、apply、语法、external verifier、二次 plan 0。
+- 成功或失败都必须删除本次下载的 VSIX、解压目录和测试临时目录。安装目录的补丁备份保留用于回滚。
+
+### Codex Audio 依赖：本次现象与处理
+
+`26.5917.62051` 的 `package.json` 新增 `extensionDependencies: ["openai.codex-audio"]`。对应市场包是 `openai.codex-audio@26.917.62051`（同一 build `62051`，版本字符串没有中间的 `5`）。Codex Audio 自己的 `extensionKind` 是 `["ui"]`。
+
+| 现象 | 原因 | 处理 |
+| --- | --- | --- |
+| 无法激活 Codex，提示 Codex Audio **未安装**，对话框「是否要安装扩展并重新加载窗口」 | 新 Codex 声明了依赖，本机/远端都没有 `openai.codex-audio` | 安装与 Codex 同一次构建的 `openai.codex-audio@26.917.62051`。Remote-SSH 下不要只点对话框「安装并重新加载」，以免再装一份。 |
+| 无法激活 Codex，提示依赖于**被禁用的** Codex Audio | 把 UI 扩展拷进 `~/.vscode-server/extensions` 后，VS Code 在远端自动禁用 `extensionKind: ui` | 保留远端安装目录，在远端 Machine 设置增加 `remote.extensionKind["openai.codex-audio"] = ["workspace"]`，然后 **Reload Window**。不要再点安装。 |
+| Failed to set up dynamic port forwarding connection over SSH | Remote-SSH 客户端动态转发失败，与 Local Groups 补丁无关 | 本机 `sshd` 对当前用户 `AllowTcpForwarding yes`，仅 `Match User sftpuser` 禁止。用户 Reload 后 Codex 已可激活；若该提示复现，查客户端 Remote-SSH 日志，不改 `config.toml`。 |
+
+远端 Machine 设置路径：`~/.vscode-server/data/Machine/settings.json`。本次备份为 `settings.json.before-codex-audio-kind-20260928185826.bak`。该设置只改 VS Code 扩展运行位置，不改 Codex `config.toml` 或 Multi-Agent。口述会走 Linux 主机；没有声卡时口述可能不可用，但不得再挡住 Codex 激活。
+
+下次升级若 `openai.chatgpt` 仍声明 `openai.codex-audio`：先看官方 `package.json.extensionDependencies` 和依赖包的 `extensionKind`；UI 依赖不能只当远端 workspace 扩展安装完就结束。Reload 后若仍提示禁用，再确认 `remote.extensionKind` 仍指向 `workspace`。
