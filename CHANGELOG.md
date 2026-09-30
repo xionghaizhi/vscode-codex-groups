@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.74 - 2026-09-30
+
+- 在已验证的 Codex 26.5917.61114 / 62051 中，Max/Ultra 按模型目录声明开放，不再限制 Sol/Astra 模型名称。
+- 保留目录声明档位，联动 Reasoning 菜单、滑块和保存回读；不为未声明的模型强制添加档位。
+- 旧 UI/Power v1/v2 补丁迁移到 v3，拒绝混合标记；不改用户配置或 Multi-Agent 设置。
+
+
 ## v0.0.73 - 2026-09-28
 
 - 精确适配官方 linux-x64 `openai.chatgpt@26.5917.62051`。页面仍是 61114 的 Header/UI/Power/Server 拆包，Host 看门狗、metadata 注入点和消息解析器改为 `aD/dm/SM/ate/Z2e`。

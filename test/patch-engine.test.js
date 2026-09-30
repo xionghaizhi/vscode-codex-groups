@@ -706,6 +706,7 @@ function configure26591761114Features(target) {
     'var hp={postMessage(){}},Ep,Dp;Ep=class e{static getInstance(){return new e}dispatchMessage(e,t){if(hp==null)return;hp.postMessage({...t,type:e})}deliverOrBufferMessage(){}dispatchHostMessage(e){this.deliverOrBufferMessage(e)}};Dp=Ep.getInstance(),HLe((e,t)=>{Dp.dispatchMessage(e,t)});Dp.dispatchHostMessage({type:`native`});',
     'function yit(e){return mi(OE,e===void 0?null:e)}OE=ua(Q,(e,{get:t})=>{let n=e;return{activeWorkspaceRoot:n,isActiveWorkspaceRootLoading:!1,hostConfig:null}});',
     'function qvt({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){let r=n?.models?.find(n=>n.model===e),i=r?.supportedReasoningEfforts?.map(e=>e.reasoningEffort),a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort;return{model:r?.model,reasoningEffort:a}}',
+    'function catalog(r,f,n,m,a){return DFe({enabledReasoningEfforts:f,hasConfiguredModelCatalog:n,includeUltraReasoningEffort:m,isCustomModelProvider:a,models:r})}',
     'function readEffort(e){return e?.model_reasoning_effort??null}',
     'function writeEffort(e,t){let P={settings:{reasoning_effort:null}},R=P?.settings.reasoning_effort??null;async function save(){await Gu().setDefaultModelConfig(e,t,null)}return{R,save}}',
     'function lPn({title:e,titleOverride:t}){if(e!=null)return e;let n=t?.trim()??``;return n.length>0?n:null}',
@@ -2383,6 +2384,76 @@ module.exports = {
       },
     },
     {
+      name: 'rejects mixed 26.5917 effort markers in engine and external verifier',
+      run() {
+        const verifier = require('../scripts/verify-patched-bundles');
+        for (const [key, marker, check] of [['appMainPath', 'CodexUi', verifier.verifySolContracts265917], ['appStatsigPath', 'Power', verifier.verifyPower265917]]) {
+          for (const version of [1, 2, 3]) {
+            const target = createTarget();
+            configure26591762051Features(target);
+            const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+            assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+            fs.appendFileSync(target[key], `;var codexLocalGroups${marker}265917PatchVersion=${version};`);
+            assert.throws(() => check(target[key]), /缺少补丁契约/);
+            assert.ok(engine.plan(target, { version: 1, conversations: {} }).errors.length > 0);
+            assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+          }
+        }
+      },
+    },
+    {
+      name: 'migrates 26.5917 v1 and v2 effort guards and rejects detached catalog contracts',
+      run() {
+        for (const version of [1, 2]) {
+          const target = createTarget();
+          configure26591762051Features(target);
+          const engine = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true });
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+          const main = fs.readFileSync(target.appMainPath, 'utf8').replace('CodexUi265917PatchVersion=3', `CodexUi265917PatchVersion=${version}`).replace('a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort', 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort').replace('enabledReasoningEfforts:new Set([...f,`max`,`ultra`]),hasConfiguredModelCatalog:n,includeUltraReasoningEffort:!0,isCustomModelProvider:a,models:r', 'enabledReasoningEfforts:f,hasConfiguredModelCatalog:n,includeUltraReasoningEffort:m,isCustomModelProvider:a,models:r');
+          let power = fs.readFileSync(target.appStatsigPath, 'utf8').replace('Power265917PatchVersion=3', `Power265917PatchVersion=${version}`);
+          const menuStart = power.indexOf('function L$('), menuEnd = power.indexOf('function ndi(');
+          power = power.slice(0, menuStart) + 'function L$(e,t){let n=e?.find(e=>e.model===t),r=n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort)&&e.reasoningEffort!==`persistent`);return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}' + power.slice(menuEnd);
+          const sliderStart = power.indexOf('if(Oe?.some('), sliderEnd = power.indexOf('let dt=Kz(ut,');
+          power = power.slice(0, sliderStart) + 'if((De===`gpt-5.6-sol`||De===`gpt-6-sol`||De===`gpt-6-astra`)&&Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){let e=ut.find(e=>e.model===De),t=e.modelLabel,n=ut.filter(e=>e.model!==De||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===De){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${De}:${e}`,model:De,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});ut=n}' + power.slice(sliderEnd);
+          if (version === 1) power = power.replaceAll('||De===`gpt-6-sol`', '').replaceAll('||t===`gpt-6-sol`', '');
+          fs.writeFileSync(target.appMainPath, version === 1 ? main.replaceAll('||r?.model===`gpt-6-sol`', '') : main);
+          fs.writeFileSync(target.appStatsigPath, power);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).errors, []);
+          assert.strictEqual(engine.plan(target, { version: 1, conversations: {} }).changes.length, 0);
+          fs.writeFileSync(target.appMainPath, fs.readFileSync(target.appMainPath, 'utf8').replace('enabledReasoningEfforts:new Set([...f,`max`,`ultra`])', 'enabledReasoningEfforts:f'));
+          const rejected = engine.plan(target, { version: 1, conversations: {} });
+          assert.ok(rejected.errors.length > 0);
+          assert.deepStrictEqual(engine.apply(target, { version: 1, conversations: {} }).changed, []);
+        }
+      },
+    },
+    {
+      name: 'uses declared 26.5917 efforts for arbitrary models in menu slider and saved settings',
+      run() {
+        const target = createTarget();
+        configure26591762051Features(target);
+        const plan = new CodexPatchEngine({ nodePath: resolveNodePath(), skipSyntaxCheck: true, safeMode: true }).plan(target, { version: 1, conversations: {} });
+        assert.deepStrictEqual(plan.errors, []);
+        const main = plan.changes.find(change => change.path === target.appMainPath).nextText;
+        const power = plan.changes.find(change => change.path === target.appStatsigPath).nextText;
+        const validation = main.slice(main.indexOf('function qvt('), main.indexOf('function catalog('));
+        const menu = power.slice(power.indexOf('var imt='), power.indexOf('function ndi('));
+        const picker = power.slice(power.indexOf('function ndi('), power.indexOf('function onSelectReasoningEffort')).replace('De=`gpt-6-astra`,Oe=[{model:`gpt-6-astra`}],ut=[]', 'De=e.model,Oe=e.models,ut=e.selections');
+        const runtime = require('vm').runInNewContext(`${validation}${menu}${picker};({qvt,menu:L$,picker:ndi})`, { ikn: () => [], Kz: () => null, T8r: value => value });
+        for (const model of ['gpt-6.1-sol', 'custom-model', 'gpt-6-astra']) {
+          for (const extra of [[], ['max'], ['ultra'], ['max', 'ultra']]) {
+            const efforts = ['low', 'xhigh', ...extra], models = [{ model, supportedReasoningEfforts: efforts.map(reasoningEffort => ({ reasoningEffort })), defaultReasoningEffort: 'low' }];
+            const selections = ['low', 'xhigh', 'max', 'ultra'].map(reasoningEffort => ({ model, modelLabel: model, reasoningEffort, id: `${model}:${reasoningEffort}` }));
+            assert.deepStrictEqual(Array.from(runtime.menu(models, model), e => e.reasoningEffort), efforts);
+            const slider = runtime.picker({ model, models, selections }).powerSelectionsWithXHigh;
+            assert.deepStrictEqual(Array.from(slider, e => e.reasoningEffort), efforts);
+            for (const effort of ['max', 'ultra']) assert.strictEqual(runtime.qvt({ userSavedModelString: model, userSavedReasoningEffort: effort, listModelsData: { models } }).reasoningEffort, extra.includes(effort) ? effort : 'low');
+          }
+        }
+        assert.strictEqual(runtime.picker({ model: 'missing', models: [], selections: [] }).powerSelectionsWithXHigh.length, 0);
+      },
+    },
+    {
       name: 'adapts the exact Codex 26.5917.61114 split topology and remains idempotent',
       run() {
         const target = createTarget();
@@ -2397,9 +2468,9 @@ module.exports = {
         assert.ok(bundles[target.headerPath].includes('codexLocalGroupsHeaderSafe265917PatchVersion=1'));
         assert.ok(bundles[target.headerPath].includes('codexLocalGroupsOpenedTitle265917PatchVersion=1'));
         assert.ok(bundles[target.headerPath].includes('__codexLocalGroupsTitle265917:'));
-        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265917PatchVersion=2'));
+        assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsCodexUi265917PatchVersion=3'));
         assert.ok(bundles[target.appMainPath].includes('codexLocalGroupsDropdownTitle265917PatchVersion=1'));
-        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265917PatchVersion=2'));
+        assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsPower265917PatchVersion=3'));
         assert.ok(bundles[target.appStatsigPath].includes('codexLocalGroupsProjectHistory265917HookPatchVersion=1'));
         assert.ok(bundles[target.appServerManagerSignalsPath].includes('codexLocalGroupsProjectHistory265917StorePatchVersion=1'));
         for (const change of plan.changes) fs.writeFileSync(change.path, change.nextText);
@@ -2428,11 +2499,11 @@ module.exports = {
         const validation = main.slice(main.indexOf('function qvt('), main.indexOf('function readEffort'));
         const validationScript = `${validation};let models=[{model:'gpt-6-sol',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'},{model:'gpt-6-astra',supportedReasoningEfforts:[{reasoningEffort:'xhigh'}],defaultReasoningEffort:'xhigh'}];console.log(JSON.stringify({sol:qvt({userSavedModelString:'gpt-6-sol',userSavedReasoningEffort:'max',listModelsData:{models}}).reasoningEffort,astra:qvt({userSavedModelString:'gpt-6-astra',userSavedReasoningEffort:'ultra',listModelsData:{models}}).reasoningEffort}))`;
         const validationResult = childProcess.spawnSync(resolveNodePath(), ['-e', validationScript], { encoding: 'utf8' });
-        assert.deepStrictEqual(JSON.parse(validationResult.stdout), { sol: 'max', astra: 'ultra' });
+        assert.deepStrictEqual(JSON.parse(validationResult.stdout), { sol: 'xhigh', astra: 'xhigh' });
         const power = plan.changes.find((change) => change.path === target.appStatsigPath).nextText;
-        assert.ok(power.includes('De===`gpt-6-sol`'));
-        assert.ok(power.includes('for(let e of[`max`,`ultra`])'));
-        assert.ok(power.indexOf('for(let e of[`max`,`ultra`]') < power.indexOf('let dt=Kz(ut,'));
+        assert.ok(!power.includes('De===`gpt-6-sol`'));
+        assert.ok(power.includes('for(let e of Oe.find(e=>e.model===De).supportedReasoningEfforts.filter('));
+        assert.ok(power.indexOf('for(let e of Oe.find(') < power.indexOf('let dt=Kz(ut,'));
       },
     },
     {

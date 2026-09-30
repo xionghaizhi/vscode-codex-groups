@@ -2094,9 +2094,11 @@ function verifyWatchdog265917(extensionPath, variant) {
 function verifySolContracts265917(appMainPath) {
   const text = fs.readFileSync(appMainPath, 'utf8');
   const validation = minifiedExactCodeFunctionScopes(text, 'function qvt({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
-  if (text.split('codexLocalGroupsCodexUi265917PatchVersion=2').length !== 2
+  if (text.split('codexLocalGroupsCodexUi265917PatchVersion=3').length !== 2
+    || /codexLocalGroupsCodexUi265917PatchVersion=[12]/.test(text)
+    || text.split('enabledReasoningEfforts:new Set([...f,`max`,`ultra`]),hasConfiguredModelCatalog:n,includeUltraReasoningEffort:!0,isCustomModelProvider:a,models:r').length !== 2
     || validation.length !== 1
-    || !validation[0].includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
+    || !validation[0].includes('a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort')
     || !text.includes('model_reasoning_effort??null')
     || !text.includes('setDefaultModelConfig')) {
     throw new Error(`缺少补丁契约：${appMainPath} 26.5917 Sol Astra validation`);
@@ -2123,11 +2125,12 @@ function verifyPower265917(powerPath) {
   const pickers = minifiedExactFunctionScopes(text, 'function ndi(e){');
   const menu = menus.length === 1 ? menus[0] : '';
   const picker = pickers.length === 1 ? pickers[0] : '';
-  const insertion = 'if((De===`gpt-5.6-sol`||De===`gpt-6-sol`||De===`gpt-6-astra`)&&Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){let e=ut.find(e=>e.model===De),t=e.modelLabel,n=ut.filter(e=>e.model!==De||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===De){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${De}:${e}`,model:De,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});ut=n}';
+  const insertion = 'if(Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){let e=ut.find(e=>e.model===De),t=e.modelLabel,n=ut.filter(e=>e.model!==De||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===De){r=e+1;break}for(let e of Oe.find(e=>e.model===De).supportedReasoningEfforts.filter(e=>e.reasoningEffort===`max`||e.reasoningEffort===`ultra`))n.splice(r,0,{id:`${De}:${e.reasoningEffort}`,model:De,modelLabel:t,reasoningEffort:e.reasoningEffort,powerSettingIndex:r++});ut=n}';
   const anchor = 'let dt=Kz(ut,st==null?void 0:`${st.model}:${st.defaultReasoningEffort}`)';
-  if (text.split('codexLocalGroupsPower265917PatchVersion=2').length !== 2
+  if (text.split('codexLocalGroupsPower265917PatchVersion=3').length !== 2
+    || /codexLocalGroupsPower265917PatchVersion=[12]/.test(text)
     || sliders.length !== 1
-    || !menu.includes('t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`')
+    || menu !== 'function L$(e,t){let n=e?.find(e=>e.model===t);return n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`||$x(e.reasoningEffort))&&e.reasoningEffort!==`persistent`)}'
     || !picker.includes('powerSelectionsWithXHigh:ut')
     || !picker.includes(`${insertion}${anchor}`)) {
     throw new Error(`缺少补丁契约：${powerPath} 26.5917 Sol Astra Power slider or menu`);

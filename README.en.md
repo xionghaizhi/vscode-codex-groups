@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="release" src="https://img.shields.io/badge/release-v0.0.73-blue">
+  <img alt="release" src="https://img.shields.io/badge/release-v0.0.74-blue">
   <img alt="VSCode" src="https://img.shields.io/badge/VSCode-%5E1.96.2-007ACC">
   <img alt="Codex" src="https://img.shields.io/badge/Codex-local_groups-10a37f">
 </p>
@@ -65,13 +65,13 @@ cd vscode-codex-groups
 Copy the extension directory into a VSCode extensions directory. A versioned directory name is recommended:
 
 ```bash
-cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.73
+cp -r . ~/.vscode/extensions/vscode-codex-groups-0.0.74
 ```
 
 For Remote VSCode Server, copy it into the remote extensions directory, for example:
 
 ```bash
-cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.73
+cp -r . ~/.vscode-server/extensions/vscode-codex-groups-0.0.74
 ```
 
 Then in VSCode:
@@ -98,7 +98,7 @@ npx @vscode/vsce package
 Install the downloaded or packaged VSIX:
 
 ```bash
-code --install-extension vscode-codex-groups-0.0.73.vsix
+code --install-extension vscode-codex-groups-0.0.74.vsix
 ```
 
 For Remote VSCode Server, install it in the remote window and make sure it runs on the remote/workspace side.

@@ -30,3 +30,11 @@ Do not put this setting in `~/.codex/config.toml`.
 
 - Fixture plan/apply for both exact builds, zero-write negative case, locator uniqueness, official clean plan/apply/verifier/second plan, and no `config.toml` change.
 - After live install: Codex activates, Local Groups status is compatible, Reload Window is required.
+
+## 2026-09-30: Max/Ultra follows the model catalog
+
+The prior UI/Power v2 patches explicitly named 5.6 Sol, 6 Sol and 6 Astra. Consequently, a new `gpt-6.1-sol` slug was omitted even when its catalog declared Max/Ultra. Removing that guard alone is insufficient: Main `yj` passes the enabled-effort set and Ultra feature gate into `DFe` (Power export `Mkn`), which filters `model/list` capabilities before `ndi` receives `Oe`.
+
+UI v3 adds Max/Ultra only to the transformation's allowed-effort set and enables its Ultra pass-through. The transformation still intersects those values with the actual model declarations and preserves native visibility/provider filtering. `qvt` returns to native declaration-based validation. Power v3 displays declared Max/Ultra in `L$` and rebuilds only the selected model's extended slider entries from `Oe.supportedReasoningEfforts`; it never supplements absent capabilities. Native `ikn`, slider interactions, disabled state and persistence remain unchanged.
+
+Both v1 and v2 installed patches migrate in place to v3 with exact replacement and postcondition checks. Unknown builds still fail closed. This change applies to the two verified 26.5917 builds; older adapters remain untouched. Future build adaptations must preserve the catalog-driven rule instead of copying model-name guards. Tests cover arbitrary slugs, both/one/neither capability, unsupported saved values, empty models, migration and idempotence. Source changes do not imply installation or live UI acceptance.

@@ -5823,23 +5823,26 @@ function semanticMain265917Holds(text) {
 }
 
 function patchCodexUi265917(text, context) {
-  const marker = 'codexLocalGroupsCodexUi265917PatchVersion=2';
+  const marker = 'codexLocalGroupsCodexUi265917PatchVersion=3';
   const legacyMarker = 'codexLocalGroupsCodexUi265917PatchVersion=1';
   const original = 'a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort';
-  const patched = 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort';
+  const catalog = 'enabledReasoningEfforts:f,hasConfiguredModelCatalog:n,includeUltraReasoningEffort:m,isCustomModelProvider:a,models:r';
+  const declared = 'enabledReasoningEfforts:new Set([...f,`max`,`ultra`]),hasConfiguredModelCatalog:n,includeUltraReasoningEffort:!0,isCustomModelProvider:a,models:r';
   if (text.includes(marker)) {
     const next = patchCodexUi265917DropdownTitle(text, context);
     if (!codexUi265917PostconditionsHold(next)) context.errors.push('Codex UI 26.5917: 补丁标记不完整');
     return next;
   }
-  if (text.includes(legacyMarker)) {
+  if (text.includes(legacyMarker) || text.includes('codexLocalGroupsCodexUi265917PatchVersion=2')) {
     let next = widenMaxUltraModelGuard(text);
-    next = replaceOnce(next, legacyMarker, marker, context, 'Codex UI 26.5917 marker v2');
+    next = replaceOnce(next, 'a=t!=null&&i!=null&&(i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`))?t:r?.defaultReasoningEffort', original, context, 'Codex UI 26.5917 catalog validation');
+    next = replaceOnce(next, text.includes(legacyMarker) ? legacyMarker : 'codexLocalGroupsCodexUi265917PatchVersion=2', marker, context, 'Codex UI 26.5917 marker v3');
+    next = replaceOnce(next, catalog, declared, context, 'Codex UI 26.5917 declared efforts');
     next = patchCodexUi265917DropdownTitle(next, context);
     if (!codexUi265917PostconditionsHold(next)) context.errors.push('Codex UI 26.5917: 补丁后置条件不完整');
     return next;
   }
-  let next = replaceOnce(text, original, patched, context, 'Codex UI 26.5917 Sol Max Ultra validation');
+  let next = replaceOnce(text, catalog, declared, context, 'Codex UI 26.5917 declared efforts');
   next = replaceOnce(next, 'function qvt({userSavedModelString:', `var ${marker};function qvt({userSavedModelString:`, context, 'Codex UI 26.5917 marker');
   next = patchCodexUi265917DropdownTitle(next, context);
   if (!codexUi265917PostconditionsHold(next)) context.errors.push('Codex UI 26.5917: 补丁后置条件不完整');
@@ -5864,10 +5867,12 @@ function codexUi265917DropdownTitlePostconditionsHold(text) {
 
 function codexUi265917PostconditionsHold(text) {
   const validation = minifiedExactCodeFunctionScopes(text, 'function qvt({userSavedModelString:e,userSavedReasoningEffort:t,listModelsData:n}){');
-  return countMatches(text, 'codexLocalGroupsCodexUi265917PatchVersion=2') === 1
+  return countMatches(text, 'codexLocalGroupsCodexUi265917PatchVersion=3') === 1
     && countMatches(text, 'codexLocalGroupsCodexUi265917PatchVersion=1') === 0
+    && countMatches(text, 'codexLocalGroupsCodexUi265917PatchVersion=2') === 0
+    && countMatches(text, 'enabledReasoningEfforts:new Set([...f,`max`,`ultra`]),hasConfiguredModelCatalog:n,includeUltraReasoningEffort:!0,isCustomModelProvider:a,models:r') === 1
     && validation.length === 1
-    && validation[0].includes('i.includes(t)||(r?.model===`gpt-5.6-sol`||r?.model===`gpt-6-sol`||r?.model===`gpt-6-astra`)&&(t===`max`||t===`ultra`)')
+    && validation[0].includes('a=t!=null&&i!=null&&i.includes(t)?t:r?.defaultReasoningEffort')
     && text.includes('model_reasoning_effort??null')
     && text.includes('settings.reasoning_effort??null')
     && text.includes('setDefaultModelConfig')
@@ -5878,23 +5883,25 @@ function codexUi265917PostconditionsHold(text) {
     && codexUi265917DropdownTitlePostconditionsHold(text);
 }
 
-const CODEX_POWER_265917_SLIDER_INSERTION = 'if((De===`gpt-5.6-sol`||De===`gpt-6-sol`||De===`gpt-6-astra`)&&Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){let e=ut.find(e=>e.model===De),t=e.modelLabel,n=ut.filter(e=>e.model!==De||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===De){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${De}:${e}`,model:De,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});ut=n}';
+const CODEX_POWER_265917_SLIDER_INSERTION = 'if(Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){let e=ut.find(e=>e.model===De),t=e.modelLabel,n=ut.filter(e=>e.model!==De||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===De){r=e+1;break}for(let e of Oe.find(e=>e.model===De).supportedReasoningEfforts.filter(e=>e.reasoningEffort===`max`||e.reasoningEffort===`ultra`))n.splice(r,0,{id:`${De}:${e.reasoningEffort}`,model:De,modelLabel:t,reasoningEffort:e.reasoningEffort,powerSettingIndex:r++});ut=n}';
 const CODEX_POWER_265917_SLIDER_ANCHOR = 'let dt=Kz(ut,st==null?void 0:`${st.model}:${st.defaultReasoningEffort}`)';
 const CODEX_POWER_265917_NATIVE_MENU = 'function L$(e,t){let n=e?.find(e=>e.model===t);return n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort)&&e.reasoningEffort!==`persistent`)}';
-const CODEX_POWER_265917_PATCHED_MENU = 'function L$(e,t){let n=e?.find(e=>e.model===t),r=n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort)&&e.reasoningEffort!==`persistent`);return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}';
+const CODEX_POWER_265917_PATCHED_MENU = 'function L$(e,t){let n=e?.find(e=>e.model===t);return n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>(e.reasoningEffort===`max`||e.reasoningEffort===`ultra`||$x(e.reasoningEffort))&&e.reasoningEffort!==`persistent`)}';
 const CODEX_POWER_265917_NATIVE_FILTER = 'function lkn(e,t,n){return e.flatMap((e,r)=>{let i=t?.find(t=>t.model===e.model&&t.supportedReasoningEfforts.some(({reasoningEffort:t})=>t===e.reasoningEffort));return i==null?[]:[{...e,modelLabel:Nf(i.displayName,{stripGptPrefix:n}),powerSettingIndex:r}]})}';
 const CODEX_POWER_265917_NATIVE_SLIDER = 'function ikn(e,{includeUltraInSlider:t=!1,removeXHigh:n=!1,sliderModelsConfig:r,stripGptPrefix:i=!0}={}){if(r!=null){let a=skn(e,{stripGptPrefix:i});for(let o of r.presets){let r=o.filter(({reasoning_effort:e})=>(t||e!==`ultra`)&&(!n||e!==`xhigh`)).flatMap(({model:e,reasoning_effort:t})=>{let n=a.find(n=>n.model===e&&n.reasoningEffort===t);return n==null?[]:[n]}),s=(0,ukn.default)(lkn(r,e,i),({id:e})=>e);if(s.length>=3)return s}}let a=lkn((t?[...fkn,pkn]:fkn).filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);if(a.length>=3)return a;let o=lkn(mkn.filter(({reasoningEffort:e})=>!n||e!==`xhigh`),e,i);return o.length>=3?o:[]}';
 
 function patchCodexPower265917(text, context) {
-  const marker = 'codexLocalGroupsPower265917PatchVersion=2';
+  const marker = 'codexLocalGroupsPower265917PatchVersion=3';
   const legacyMarker = 'codexLocalGroupsPower265917PatchVersion=1';
   if (text.includes(marker)) {
     if (!codexPower265917PostconditionsHold(text)) context.errors.push('Codex power 26.5917: 补丁标记不完整');
     return text;
   }
-  if (text.includes(legacyMarker)) {
+  if (text.includes(legacyMarker) || text.includes('codexLocalGroupsPower265917PatchVersion=2')) {
     let next = widenMaxUltraModelGuard(text);
-    next = replaceOnce(next, legacyMarker, marker, context, 'Codex power 26.5917 marker v2');
+    next = replaceOnce(next, 'function L$(e,t){let n=e?.find(e=>e.model===t),r=n==null?imt.map(e=>({description:``,reasoningEffort:e})):n.supportedReasoningEfforts.filter(e=>$x(e.reasoningEffort)&&e.reasoningEffort!==`persistent`);return n!=null&&(t===`gpt-5.6-sol`||t===`gpt-6-sol`||t===`gpt-6-astra`)&&(r=r.filter(e=>e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`),r.push({description:``,reasoningEffort:`max`},{description:``,reasoningEffort:`ultra`})),r}', CODEX_POWER_265917_PATCHED_MENU, context, 'Codex power 26.5917 catalog menu');
+    next = replaceOnce(next, 'if((De===`gpt-5.6-sol`||De===`gpt-6-sol`||De===`gpt-6-astra`)&&Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){let e=ut.find(e=>e.model===De),t=e.modelLabel,n=ut.filter(e=>e.model!==De||(e.reasoningEffort!==`max`&&e.reasoningEffort!==`ultra`)),r=n.length;for(let e=n.length-1;e>=0;e--)if(n[e].model===De){r=e+1;break}for(let e of[`max`,`ultra`])n.splice(r,0,{id:`${De}:${e}`,model:De,modelLabel:t,reasoningEffort:e,powerSettingIndex:r++});ut=n}', CODEX_POWER_265917_SLIDER_INSERTION, context, 'Codex power 26.5917 catalog slider');
+    next = replaceOnce(next, text.includes(legacyMarker) ? legacyMarker : 'codexLocalGroupsPower265917PatchVersion=2', marker, context, 'Codex power 26.5917 marker v3');
     if (!codexPower265917PostconditionsHold(next)) context.errors.push('Codex power 26.5917: 补丁后置条件不完整');
     return next;
   }
@@ -5922,7 +5929,7 @@ function codexPower265917NativeSliderConsumerHolds(text, patched) {
   const slider = sliders.length === 1 ? sliders[0] : '';
   const filter = filters.length === 1 ? filters[0] : '';
   const picker = pickers.length === 1 ? pickers[0] : '';
-  const insertion = minifiedAnchoredBlock(picker, 'if((De===`gpt-5.6-sol`||De===`gpt-6-sol`||De===`gpt-6-astra`)&&Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){', 1);
+  const insertion = minifiedAnchoredBlock(picker, 'if(Oe?.some(e=>e.model===De)&&ut.some(e=>e.model===De)){', 1);
   const expectedInsertion = minifiedBlockScope(CODEX_POWER_265917_SLIDER_INSERTION, CODEX_POWER_265917_SLIDER_INSERTION.indexOf('{'));
   return filter === CODEX_POWER_265917_NATIVE_FILTER
     && slider === CODEX_POWER_265917_NATIVE_SLIDER
@@ -5937,8 +5944,9 @@ function codexPower265917NativeSliderConsumerHolds(text, patched) {
 function codexPower265917PostconditionsHold(text) {
   const menus = minifiedExactFunctionScopes(text, 'function L$(e,t){');
   const menu = menus.length === 1 ? menus[0] : '';
-  return countMatches(text, 'codexLocalGroupsPower265917PatchVersion=2') === 1
+  return countMatches(text, 'codexLocalGroupsPower265917PatchVersion=3') === 1
     && countMatches(text, 'codexLocalGroupsPower265917PatchVersion=1') === 0
+    && countMatches(text, 'codexLocalGroupsPower265917PatchVersion=2') === 0
     && menu === CODEX_POWER_265917_PATCHED_MENU
     && codexPower265917NativeSliderConsumerHolds(text, true);
 }
